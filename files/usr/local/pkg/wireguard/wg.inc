@@ -162,7 +162,7 @@ function wg_ifgroup_install() {
 	// Don't add the interface group if it already exists
 	$found = false;
 	foreach ($a_ifgroups as $ifg) {
-		if ($ifg == $wgifgroup) {
+		if ($ifg['ifname'] == $wgifgroup) {
 			$found = true;
 		}
 	}

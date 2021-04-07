@@ -62,8 +62,12 @@ if ($_POST['save']) {
 	if (!$input_errors) {
 		// Create the new WG config files
 		wg_create_config_files();
-
+		
+		// Write out RC file
 		wg_write_rcfile();
+
+		// Create interface group
+		wg_ifgroup_install();
 
 		// Setup and start the new WG tunnel
 		if (isset($pconfig['enabled']) &&
