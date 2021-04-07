@@ -1,22 +1,5 @@
 <?php
 
-require_once("globals.inc");
-require_once("config.inc");
-require_once("pfsense-utils.inc");
-require_once("system.inc");
-require_once("service-utils.inc");
-require_once("util.inc");
-
-# Rather than the traditional "wg0" name, we prefix with "tun" so that pfSense
-# doesn't freak out about non-existant interfaces on boot and instead just ignores
-# it. Technically wireguard interfaces are tun anyway, so we aren't lying.
-global $ifname;
-$ifname = "tunwg0";
-
-
-
-
-
 
 
 function wireguard_resync() {
