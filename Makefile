@@ -8,7 +8,7 @@ MASTER_SITES=	# empty
 DISTFILES=		# empty
 EXTRACT_ONLY=	# empty
 
-MAINTAINER=		# empty
+MAINTAINER=		rcmcdonald91@gmail.com
 COMMENT=		pfSense package WireGuard
 
 LICENSE=		APACHE20
