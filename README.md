@@ -24,6 +24,8 @@ Look for latest package links of `wireguard-tools` and `wireguard-kmod` in [Free
 
 NOTE: As of **4/6/2021**, `wireguard-kmod` is not being actively built by FreshPorts. You will probably have to build these packages manually.
 
+You can find pre-compiled binaries and packages [here](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/releases).
+
 ## Configuration
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
