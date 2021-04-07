@@ -31,7 +31,7 @@ require_once('wg_api.inc');
 require_once('wg_validate.inc');
 
 global $wgifgroup;
-$wgifgroup = 'pkg_wg';
+$wgifgroup = 'WireGuard';
 
 // Setup all WireGuard tunnels
 function wg_configure() {
@@ -143,31 +143,32 @@ function deleteTunnel($tunidx) {
 }
 
 function wg_ifgroup_install() {
-	global $g, $config;
+	global $g, $config, $wgifgroup;
 
 	if (!is_array($config['ifgroups'])) {
 		$config['ifgroups'] = array();
 	}
 
-	/* Create Interface Group */
+	// Create interface group
 	if (!is_array($config['ifgroups']['ifgroupentry'])) {
 		$config['ifgroups']['ifgroupentry'] = array();
 	}
 
 	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
 
-	/* Don't add the interface group if it already exists */
+	// Don't add the interface group if it already exists
 	$found = false;
 	foreach ($a_ifgroups as $ifg) {
-		if ($ifg == "wg") {
+		if ($ifg == $wgifgroup) {
 			$found = true;
 		}
 	}
+
 	if (!$found) {
 		$ifgroupentry = array();
 		$ifgroupentry['members'] = '';
 		$ifgroupentry['descr'] = 'WireGuard interface group';
-		$ifgroupentry['ifname'] = 'wg';
+		$ifgroupentry['ifname'] = $wgifgroup;
 		$a_ifgroups[] = $ifgroupentry;
 	}
 
