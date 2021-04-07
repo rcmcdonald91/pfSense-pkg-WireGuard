@@ -148,9 +148,6 @@ function deleteTunnel($tunidx) {
 function wg_ifgroup_install() {
 	global $g, $config, $wgifgroup;
 
-	// Reload config.xml to get any recent changes
-	$config = parse_config(true);
-
 	if (!is_array($config['ifgroups'])) {
 		$config['ifgroups'] = array();
 	}
@@ -173,12 +170,13 @@ function wg_ifgroup_install() {
 	if (!$found) {
 		$ifgroupentry = array();
 		$ifgroupentry['members'] = '';
-		$ifgroupentry['descr'] = 'WireGuard interface group (DO NOT REMOVE)';
+		$ifgroupentry['descr'] = 'WireGuard (DO NOT REMOVE)';
 		$ifgroupentry['hide'] = 'yes';
 		$ifgroupentry['ifname'] = $wgifgroup;
 		$a_ifgroups[] = $ifgroupentry;
 	}
 
+	write_config("WireGuard interface group updated.");
 
 	unlink_if_exists("{$g['tmp_path']}/config.cache");
 
