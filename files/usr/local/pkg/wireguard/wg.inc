@@ -171,6 +171,7 @@ function wg_ifgroup_install() {
 		$ifgroupentry = array();
 		$ifgroupentry['members'] = '';
 		$ifgroupentry['descr'] = 'WireGuard interface group (DO NOT REMOVE)';
+		$ifgroupentry['hide'] = 'yes';
 		$ifgroupentry['ifname'] = $wgifgroup;
 		$a_ifgroups[] = $ifgroupentry;
 	}
