@@ -148,6 +148,9 @@ function deleteTunnel($tunidx) {
 function wg_ifgroup_install() {
 	global $g, $config, $wgifgroup;
 
+	// Reload config.xml to get any recent changes
+	$config = parse_config(true);
+
 	if (!is_array($config['ifgroups'])) {
 		$config['ifgroups'] = array();
 	}
