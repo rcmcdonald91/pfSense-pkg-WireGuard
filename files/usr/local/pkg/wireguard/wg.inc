@@ -30,6 +30,9 @@ require_once('util.inc');
 require_once('wg_api.inc');
 require_once('wg_validate.inc');
 
+global $wgifgroup;
+$wgifgroup = 'pkg_wg';
+
 // Setup all WireGuard tunnels
 function wg_configure() {
 	global $config;
@@ -54,7 +57,7 @@ function wg_configure() {
 }
 
 function wg_write_rcfile() {
-	global $wgconfpath, $wgquickpath, $config;
+	global $config, $wgconfpath, $wgquickpath, $wgifgroup; 
 
 	$wgconfigs = glob("{$wgconfpath}/*.conf");
 
@@ -68,7 +71,7 @@ function wg_write_rcfile() {
 
 	foreach ($wgconfigs as $wgconfig) {
 		$wg_ifname = basename($wgconfig, '.conf');
-		array_push($start, "{$wgquickpath} up {$wg_ifname} && /etc/rc.filter_configure");
+		array_push($start, "{$wgquickpath} up {$wg_ifname} && ifconfig {$wg_ifname} group {$wgifgroup} && /etc/rc.filter_configure");
 		array_push($stop, "{$wgquickpath} down {$wg_ifname}");
 	}
 
@@ -87,8 +90,9 @@ function wg_write_rcfile() {
 
 // Setup WireGuard tunnel
 function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
-	global $config, $wgconfpath, $wgquickpath;
+	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
 
+	// Usually want to destroy the interface first
 	if ($destroyfirst) {
 
 		wg_destroy_if($wg_ifname);
@@ -97,9 +101,11 @@ function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
 
 	}
 
+	// Bring up interface using wg-quick(8)
 	exec("{$wgquickpath} up {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
-	log_error("[wireguard] {$wg_ifname}");
+	// Add the interface to interface group (i.e. pkg_wg)
+	exec("ifconfig {$wg_ifname} group {$wgifgroup}")
 
 }
 
@@ -135,6 +141,41 @@ function deleteTunnel($tunidx) {
 		wg_destroy_if($ifname);
 	}
 }
+
+function wg_ifgroup_install() {
+	global $g, $config;
+
+	if (!is_array($config['ifgroups'])) {
+		$config['ifgroups'] = array();
+	}
+
+	/* Create Interface Group */
+	if (!is_array($config['ifgroups']['ifgroupentry'])) {
+		$config['ifgroups']['ifgroupentry'] = array();
+	}
+
+	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
+
+	/* Don't add the interface group if it already exists */
+	$found = false;
+	foreach ($a_ifgroups as $ifg) {
+		if ($ifg == "wg") {
+			$found = true;
+		}
+	}
+	if (!$found) {
+		$ifgroupentry = array();
+		$ifgroupentry['members'] = '';
+		$ifgroupentry['descr'] = 'WireGuard interface group';
+		$ifgroupentry['ifname'] = 'wg';
+		$a_ifgroups[] = $ifgroupentry;
+	}
+
+
+	unlink_if_exists("{$g['tmp_path']}/config.cache");
+
+}
+
 
 function wg_earlyshellcmd_deinstall() {
 	global $config;
