@@ -97,7 +97,7 @@ if ($_POST['save']) {
 
 $shortcut_section = "wireguard";
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnel"));
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext($pconfig['name']));
 $pglinks = array("", "/wg/vpn_wg.php", "/wg/vpn_wg.php", "@self");
 
 include("head.inc");
