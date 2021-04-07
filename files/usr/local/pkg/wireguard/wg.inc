@@ -137,7 +137,7 @@ function deleteTunnel($tunidx) {
 }
 
 function wg_earlyshellcmd_deinstall() {
-	globa $config;
+	global $config;
 
 	# TODO
 
