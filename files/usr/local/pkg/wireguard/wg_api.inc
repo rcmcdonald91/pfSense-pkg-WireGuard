@@ -25,7 +25,7 @@ $wgquickpath = '/usr/local/bin/wg-quick';
 $wgconfpath = '/etc/wireguard';
 
 global $wgifprefix;
-$wgifprefix = 'grewg';
+$wgifprefix = 'tunwg';
 
 // Get WireGuard status
 function wg_status() {
