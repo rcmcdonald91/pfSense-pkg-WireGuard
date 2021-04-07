@@ -364,7 +364,7 @@ function wg_find_tunnel_gw($tunnel, $addr) {
 }
 
 function wg_write_rcfile() {
-	global $wgconfpath, $wgquickpath;
+	global $wgconfpath, $wgquickpath, $config;
 
 	$configs = glob("{$wgconfpath}/*.conf");
 
