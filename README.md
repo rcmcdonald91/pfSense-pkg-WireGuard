@@ -4,6 +4,9 @@ This is an attempt to port the original WireGuard UI bits as implemented by [Net
 
 XML configuration bits have been moved from `wireguard/tunnel` to `installedpackages/wireguard/tunnel`
 
+## Developed on pfSense 2.6.0-DEVLOPMENT snapshots.
+## DO NOT INSTALL ON >2.5.0-STABLE
+
 ## Build
 The build process is similar to that of other FreeBSD and pfSense packages. You will need to set up a FreeBSD build environment and install or build `wireguard` and `wireguard-kmod` on it. Please check the [pfSense package development documentation](https://docs.netgate.com/pfsense/en/latest/development/developing-packages.html#testing-building-individual-packages) for more information.
 
