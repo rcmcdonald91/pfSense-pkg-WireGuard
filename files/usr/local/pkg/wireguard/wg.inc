@@ -107,6 +107,9 @@ function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
 	// Add the interface to interface group (i.e. pkg_wg)
 	exec("ifconfig {$wg_ifname} group {$wgifgroup}");
 
+	// Regenerate interface group in pfSense (just in case)
+	wg_ifgroup_install();
+
 }
 
 
