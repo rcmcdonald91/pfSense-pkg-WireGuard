@@ -85,7 +85,7 @@ function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
 
 	if ($destroyfirst) {
 
-		wg_destroy_if();
+		wg_destroy_if($wg_ifname);
 
 		exec("{$wgquickpath} down {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
