@@ -104,7 +104,7 @@ function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
 	// Bring up interface using wg-quick(8)
 	exec("{$wgquickpath} up {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
-	// Add the interface to interface group (i.e. pkg_wg)
+	// Add the interface to interface group (i.e. WireGuard)
 	exec("ifconfig {$wg_ifname} group {$wgifgroup}");
 
 	// Regenerate interface group in pfSense (just in case)
@@ -170,7 +170,7 @@ function wg_ifgroup_install() {
 	if (!$found) {
 		$ifgroupentry = array();
 		$ifgroupentry['members'] = '';
-		$ifgroupentry['descr'] = 'WireGuard interface group';
+		$ifgroupentry['descr'] = 'WireGuard interface group (DO NOT REMOVE)';
 		$ifgroupentry['ifname'] = $wgifgroup;
 		$a_ifgroups[] = $ifgroupentry;
 	}
