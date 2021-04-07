@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE packagegui SYSTEM "../schema/packages.dtd">
+<?xml-stylesheet type="text/xsl" href="../xsl/package.xsl"?>
+<packagegui>
+	<name>wireguard</name>
+	<version>%%PKGVERSION%%</version>
+	<title>VPN/WireGuard</title>
+	<include_file>/usr/local/pkg/wireguard/wg.inc</include_file>
+	<menu>
+		<name>WireGuard</name>
+		<section>VPN</section>
+		<url>/wg/vpn_wg.php</url>
+	</menu>
+	<menu>
+		<name>WireGuard Status</name>
+		<section>Status</section>
+		<url>/wg/status_wireguard.php</url>
+	</menu>
+	<custom_php_install_command>
+		wg_configure();
+	</custom_php_install_command>
+	<custom_php_pre_deinstall_command>
+	</custom_php_pre_deinstall_command>
+	<custom_php_validation_command>
+	</custom_php_validation_command>
+	<custom_php_resync_config_command>
+		wg_resync();
+	</custom_php_resync_config_command>
+</packagegui>

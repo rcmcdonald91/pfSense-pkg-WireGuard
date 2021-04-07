@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<pfsensepkgs>
+	<package>
+		<name>WireGuard</name>
+		<descr><![CDATA[pfSense integration for WireGuard.]]></descr>
+		<version>%%PKGVERSION%%</version>
+		<configurationfile>wireguard.xml</configurationfile>
+	</package>
+</pfsensepkgs>
