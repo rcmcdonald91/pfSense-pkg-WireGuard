@@ -368,7 +368,7 @@ function wg_write_rcfile() {
 
 	$configs = glob("{$wgconfpath}/*.conf");
 
-	$start = stop = [];
+	$start = $stop = [];
 
 	foreach ($configs as $config) {
 		$wg_ifname = basename($config, '.conf');
@@ -381,7 +381,7 @@ function wg_write_rcfile() {
 	$rcfile['stop'] = implode("\n\t", $stop);
 
 	write_rcfile($rcfile);
-	
+
 }
 
 ?>
