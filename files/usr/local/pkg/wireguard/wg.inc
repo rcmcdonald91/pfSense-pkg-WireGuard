@@ -60,6 +60,29 @@ function wg_configure() {
 	}
 }
 
+function wg_write_rcfile() {
+	global $wgconfpath, $wgquickpath, $config;
+
+	$configs = glob("{$wgconfpath}/*.conf");
+
+	$start = $stop = [];
+
+	foreach ($configs as $config) {
+		$wg_ifname = basename($config, '.conf');
+		$start[] = "{$wgquickpath} up {$wg_ifname} && /etc/rc.filter_configure";
+		$stop[] = "{$wgquickpath} down {$wg_ifname}";
+	}
+
+	$rcfile['file'] = 'wireguard.sh';
+	$rcfile['start'] = implode("\n\t", $start);
+	$rcfile['stop'] = implode("\n\t", $stop);
+
+	write_rcfile($rcfile);
+
+	unlink_if_exists("/usr/local/etc/rc.d/wireguard");
+
+}
+
 // Setup WireGuard tunnel
 function wg_configure_if($wg_ifname, $verbose = false) {
 	global $config, $wgconfpath, $wgquickpath;
@@ -362,28 +385,3 @@ function wg_find_tunnel_gw($tunnel, $addr) {
 	/* If no viable candidate is found, return the tunnel address */
 	return $ip;
 }
-
-function wg_write_rcfile() {
-	global $wgconfpath, $wgquickpath, $config;
-
-	$configs = glob("{$wgconfpath}/*.conf");
-
-	$start = $stop = [];
-
-	foreach ($configs as $config) {
-		$wg_ifname = basename($config, '.conf');
-		$start[] = "{$wgquickpath} up {$wg_ifname} && /etc/rc.filter_configure";
-		$stop[] = "{$wgquickpath} down {$wg_ifname}";
-	}
-
-	$rcfile['file'] = 'wireguard.sh';
-	$rcfile['start'] = implode("\n\t", $start);
-	$rcfile['stop'] = implode("\n\t", $stop);
-
-	write_rcfile($rcfile);
-
-	unlink_if_exists("/usr/local/etc/rc.d/wireguard");
-
-}
-
-?>
