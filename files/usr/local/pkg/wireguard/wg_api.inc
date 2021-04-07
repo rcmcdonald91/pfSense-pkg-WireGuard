@@ -24,6 +24,9 @@ $wgbinpath = '/usr/local/bin/wg';
 $wgquickpath = '/usr/local/bin/wg-quick';
 $wgconfpath = '/etc/wireguard';
 
+global $wgifprefix;
+$wgifprefix = 'tunwg';
+
 // Get WireGuard status
 function wg_status() {
 	global $wgbinpath;
@@ -107,7 +110,7 @@ function next_wg_port() {
 
 // Return the next available WireGuard interface
 function next_wg_if() {
-	global $config;
+	global $config, $wgifprefix;
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
@@ -117,7 +120,7 @@ function next_wg_if() {
 	}
 
 	for ($ifnum = 0; $ifnum < 32768; $ifnum++) {
-		$want_if = "wg{$ifnum}";
+		$want_if = "{$wgifprefix}{$ifnum}";
 		if (!in_array($want_if, $used_ifs)) {
 			return $want_if;
 		}
