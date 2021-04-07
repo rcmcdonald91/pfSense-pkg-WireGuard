@@ -382,6 +382,8 @@ function wg_write_rcfile() {
 
 	write_rcfile($rcfile);
 
+	unlink_if_exists("/usr/local/etc/rc.d/wireguard");
+
 }
 
 ?>
