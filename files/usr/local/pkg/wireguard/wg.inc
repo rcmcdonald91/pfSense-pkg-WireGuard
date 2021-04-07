@@ -80,8 +80,16 @@ function wg_write_rcfile() {
 }
 
 // Setup WireGuard tunnel
-function wg_configure_if($wg_ifname, $verbose = false) {
+function wg_configure_if($wg_ifname, $destroy = true, $verbose = false,) {
 	global $config, $wgconfpath, $wgquickpath;
+
+	if ($destroy) {
+
+		wg_destroy_if();
+
+		exec("{$wgquickpath} down {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
+
+	}
 
 	exec("{$wgquickpath} up {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
