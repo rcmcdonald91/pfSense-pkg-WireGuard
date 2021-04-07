@@ -58,9 +58,12 @@ function wg_write_rcfile() {
 
 	$wgconfigs = glob("{$wgconfpath}/*.conf");
 
-	unlink_if_exists('/usr/local/etc/rc.d/wireguard');
+	$rcfilepath = '/usr/local/etc/rc.d/wireguard';
 
-	//this ensures that write_rcfile will always create the file
+	// Probably not necessary
+	unlink_if_exists('$rcfilepath');
+
+	// This ensures that write_rcfile will always create the file
 	$start = $stop = ['# DO NOT REMOVE'];
 
 	foreach ($wgconfigs as $wgconfig) {
@@ -76,6 +79,9 @@ function wg_write_rcfile() {
 	$rcfile['stop'] = implode("\n\t", $stop);
 
 	write_rcfile($rcfile);
+
+	// for good measure
+	chmod($rcfilepath, 0755);
 
 }
 
@@ -128,6 +134,28 @@ function deleteTunnel($tunidx) {
 		// Destroy the deleted tunnel
 		wg_destroy_if($ifname);
 	}
+}
+
+function wg_earlyshellcmd_deinstall() {
+	globa $config;
+
+	# TODO
+
+}
+
+function wg_earlyshellcmd_install() {
+	global $config;
+
+	# TODO
+
+}
+
+function wg_install() {
+
+	wg_earlyshellcmd_install();
+
+	wg_configure();
+
 }
 
 // Write new tunnel values to the configuration system
