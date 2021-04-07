@@ -16,10 +16,10 @@
 		<section>Status</section>
 		<url>/wg/status_wireguard.php</url>
 	</menu>
-		<service>
+	<service>
 		<name>wireguard</name>
 		<rcfile>wireguard.sh</rcfile>
-		<<executable></executable>
+		<executable></executable>
 		<description>WireGuard</description>
 	</service>
 	<custom_php_install_command>
