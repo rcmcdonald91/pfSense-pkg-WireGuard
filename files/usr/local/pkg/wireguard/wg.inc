@@ -105,7 +105,7 @@ function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
 	exec("{$wgquickpath} up {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
 	// Add the interface to interface group (i.e. pkg_wg)
-	exec("ifconfig {$wg_ifname} group {$wgifgroup}")
+	exec("ifconfig {$wg_ifname} group {$wgifgroup}");
 
 }
 
