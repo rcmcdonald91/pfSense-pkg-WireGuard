@@ -54,11 +54,11 @@ function wg_configure() {
 }
 
 function wg_write_rcfile() {
-	global $wgconfpath, $wgquickpath;
+	global $wgconfpath, $wgquickpath, $config;
 
 	$wgconfigs = glob("{$wgconfpath}/*.conf");
 
-	unlink_if_exists('/usr/local/etc/rc.d/wireguard.sh');
+	unlink_if_exists('/usr/local/etc/rc.d/wireguard');
 
 	//this ensures that write_rcfile will always create the file
 	$start = $stop = ['# DO NOT REMOVE'];
@@ -71,7 +71,7 @@ function wg_write_rcfile() {
 
 	$rcfile = [];
 
-	$rcfile['file'] = 'wireguard.sh';
+	$rcfile['file'] = 'wireguard';
 	$rcfile['start'] = implode("\n\t", $start);
 	$rcfile['stop'] = implode("\n\t", $stop);
 
