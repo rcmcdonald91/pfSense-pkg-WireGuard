@@ -3,8 +3,8 @@
  * status_wireguard.php
  *
  * part of pfSense (https://www.pfsense.org)
- * Copyright (c) 2020 Ascrod, https://github.com/Ascrod/pfSense-pkg-wireguard
- * Copyright (c) 2021 R. Christian McDonald, rcmcdonald91@gmail.com
+ * Copyright (c) 2021 R. Christian McDonald
+ * Copyright (c) 2020 Ascrod
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
