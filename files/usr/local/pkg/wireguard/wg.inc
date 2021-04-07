@@ -38,10 +38,6 @@ function wg_configure() {
 		return;
 	}
 
-	if (platform_booting()) {
-		echo gettext("Configuring WireGuard Tunnels... ");
-	}
-
 	wg_create_config_files();
 
 	$tunnel =[];
@@ -55,23 +51,20 @@ function wg_configure() {
 
 	wg_write_rcfile();
 
-	if (platform_booting()) {
-		echo gettext("done.") . "\n";
-	}
 }
 
 function wg_write_rcfile() {
-	global $wgconfpath, $wgquickpath, $config;
+	global $wgconfpath, $wgquickpath;
 
-	$configs = glob("{$wgconfpath}/*.conf");
+	$wgconfigs = glob("{$wgconfpath}/*.conf");
 
 	unlink_if_exists("/usr/local/etc/rc.d/wireguard.sh");
 
 	$start = $stop = [];
 	$rcfile = [];
 
-	foreach ($configs as $config) {
-		$wg_ifname = basename($config, '.conf');
+	foreach ($wgconfigs as $wgconfig) {
+		$wg_ifname = basename($wgconfig, '.conf');
 		$start[] = "{$wgquickpath} up {$wg_ifname} && /etc/rc.filter_configure";
 		$stop[] = "{$wgquickpath} down {$wg_ifname}";
 	}
