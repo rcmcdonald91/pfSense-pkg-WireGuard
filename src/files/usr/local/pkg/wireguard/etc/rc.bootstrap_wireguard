@@ -1,0 +1,75 @@
+#!/usr/local/bin/php-cgi -f
+<?php
+/*
+ * 10-bootstrap_wireguard.sh
+ *
+ * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2021 R. Christian McDonald
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// pfSense includes
+require_once('globals.inc');
+require_once('config.inc');
+
+// This is a hack to get text onto the console during booting
+function print_message($message) {
+
+	$message = gettext($message);
+
+    $message = escapeshellarg($message);
+
+	exec("printf {$message} >&2");
+
+}
+
+// Nice to have some output when running manually after system startup for testing purposes
+$run_verbose = true;
+
+if (platform_booting()) {
+
+	$run_verbose = false;
+
+	print_message("Bootstrapping WireGuard interfaces...\n");
+
+}
+
+// Iterate through each assigned interface looking for "wg" interfaces to bootstrap
+$a_interfaces = $config['interfaces'];
+
+if (is_array($a_interfaces)) {
+
+    foreach ($a_interfaces as $interface) {
+
+        $ifname = $interface['if'];
+        
+        if (substr($ifname, 0, 2) == "wg") {
+
+            // Create a wgX interface using lo driver.
+            exec("ifconfig lo create name {$ifname}" . ($run_verbose ? "" : " > /dev/null 2>&1"));
+
+        }
+
+    }
+
+}
+
+if (platform_booting()) {
+
+	print_message("Finished bootstrapping WireGuard interfaces.\n");
+
+}
+
+?>
