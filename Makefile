@@ -1,19 +1,20 @@
 # $FreeBSD$
 
 PORTNAME=		pfSense-pkg-WireGuard
-PORTVERSION=	2.0.1
+PORTVERSION=	0.0.1
 PORREVISION=	0
 CATEGORIES=		net
 MASTER_SITES=	# empty
 DISTFILES=		# empty
 EXTRACT_ONLY=	# empty
 
-MAINTAINER=		rcmcdonald91@gmail.com
+MAINTAINER=		# empty
 COMMENT=		pfSense package WireGuard
 
 LICENSE=		APACHE20
 
-RUN_DEPENDS=	wg-quick:net/wireguard-tools \
+RUN_DEPENDS=	wg:net/wireguard-tools \
+				wg-quick:net/wireguard-tools \
 				${KMODDIR}/if_wg.ko:net/wireguard-kmod
 
 NO_BUILD=		yes
