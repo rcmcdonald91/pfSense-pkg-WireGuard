@@ -58,6 +58,8 @@ function wg_write_rcfile() {
 
 	$wgconfigs = glob("{$wgconfpath}/*.conf");
 
+	unlink_if_exists('/usr/local/rc.d/wireguard.sh')
+
 	$start = $stop = [];
 	$rcfile = [];
 
