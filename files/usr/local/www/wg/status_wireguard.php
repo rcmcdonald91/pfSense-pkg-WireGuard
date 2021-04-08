@@ -50,6 +50,17 @@ include("head.inc");
 
 <div class="panel panel-default">
 	<div class="panel-heading">
+		<h2 class="panel-title">Interface Status</h2>
+	</div>
+	<div class="panel-body">
+		<dl class="dl-horizontal">
+			<pre><?php echo wg_interface_status(); ?></pre>
+		</dl>
+    </div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
 		<h2 class="panel-title">WireGuard Version</h2>
 	</div>
 	<div class="panel-body">

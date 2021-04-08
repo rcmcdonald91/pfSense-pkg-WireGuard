@@ -48,6 +48,16 @@ function wg_status() {
 	return $output;
 }
 
+// Get WireGuard interface status
+function wg_interface_status($ifgroup = "wg") {
+
+	$status = array();
+	exec("/sbin/ifconfig -a -g {$ifgroup}", $status);
+
+	$output = implode("\n", $status);
+	return $output;
+}
+
 // Get WireGuard kmod status
 function wg_kmod_status() {
 	
