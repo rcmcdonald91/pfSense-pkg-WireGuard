@@ -181,10 +181,7 @@ $form->add($section);
 // ============ Interface edit modal ==================================
 $section1 = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
-// We want all configured interfaces, including disabled ones
-$iflist = get_configured_interface_list_by_realif(true);
-
-if (empty($iflist[$pconfig['name']])) {
+if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section1->addInput(new Form_StaticText(
 		'Notice',

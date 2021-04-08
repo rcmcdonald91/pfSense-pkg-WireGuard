@@ -35,12 +35,7 @@ $wgpeerdefaultroute = array();
 function wg_validate_post($pconfig) {
 	$input_errors = array();
 
-	$iflist = get_configured_interface_list_by_realif();
-
-	// Check if interface is assigned, if so we can ignore most of this checking
-	$ifassigned = array_key_exists($pconfig['name'], $iflist);
-
-	if (!($ifassigned)) {
+	if (!is_wg_tunnel_assigned($pconfig)) {
 
 		// Check the addresses
 		$addrs = explode(",", $pconfig['interface']['address']);
@@ -48,7 +43,7 @@ function wg_validate_post($pconfig) {
 		foreach ($addrs as $addr) {
 			$addr = trim($addr);
 
-			// Interface address is not technically required
+			// Interface address is not technically required anymore
 			if (!empty($addr) && !is_subnet($addr)) {
 				$input_errors[] = sprintf(gettext(
 					'%1$s is not a valid CIDR address'), $addr);
@@ -71,7 +66,7 @@ function wg_validate_post($pconfig) {
 	
 	}
 
-	if ($ifassigned && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
+	if (is_wg_tunnel_assigned($pconfig) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
 
 		$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
 
@@ -171,6 +166,31 @@ function wg_defaultroute_check($peer) {
 			}
 		}
 	}
+	return false;
+}
+
+function is_wg_tunnel_assigned($tunnel, $disabled = true) {
+
+	$iflist = get_configured_interface_list_by_realif($disabled);
+
+	$ifassigned = array_key_exists($tunnel['name'], $iflist);
+
+	return $ifassigned;
+}
+
+// Check if at least one tunnel is enabled
+function is_wg_enabled() {
+	global $config;
+
+	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+
+	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
+		if (empty($tunnel['enabled'])) {
+			continue;
+		}
+		return true;
+	}
+
 	return false;
 }
 

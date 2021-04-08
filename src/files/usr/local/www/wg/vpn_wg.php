@@ -101,13 +101,7 @@ if ($input_errors) {
 				$tunnel['peers']['wgpeer'] = array();
 			}
 
-			// We want all configured interfaces, including disabled ones
-			$iflist = get_configured_interface_list_by_realif(true);
-
-			// Check if interface is assigned
-			$ifassigned = array_key_exists($tunnel['name'], $iflist);
-
-			if ($ifassigned) {
+			if (is_wg_tunnel_assigned($tunnel)) {
 
 				// We want all configured interfaces, including disabled ones
 				$ifdescr = get_configured_interface_with_descr(true);
