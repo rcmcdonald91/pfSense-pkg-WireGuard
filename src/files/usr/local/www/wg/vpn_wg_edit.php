@@ -186,6 +186,11 @@ $iflist = get_configured_interface_list_by_realif(true);
 
 if (empty($iflist[$pconfig['name']])) {
 
+	$section1->addInput(new Form_StaticText(
+		'Notice',
+		"Leave these fields blank to use pfSense interface assignment and configuration."
+	));
+
 	$section1->addInput(new Form_Input(
 		'address',
 		'Address',
