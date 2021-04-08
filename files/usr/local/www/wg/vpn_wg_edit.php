@@ -133,22 +133,27 @@ $section->addInput(new Form_Input(
 	$pconfig['descr']
 ))->setHelp('Tunnel description for administrative reference (not parsed)');
 
-/*
-$section->addInput(new Form_Input(
-	'address',
-	'*Address',
-	'text',
-	$pconfig['interface']['address']
-))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
+$iflist = get_configured_interface_list_by_realif();
 
-$section->addInput(new Form_Input(
-	'mtu',
-	'MTU',
-	'text',
-	$pconfig['interface']['mtu'],
-	['placeholder' => wg_default_mtu()]
-))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
-*/
+if (!empty($iflist[$pconfig['name']])) {
+
+	$section->addInput(new Form_Input(
+		'address',
+		'*Address',
+		'text',
+		$pconfig['interface']['address']
+	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
+
+	$section->addInput(new Form_Input(
+		'mtu',
+		'MTU',
+		'text',
+		$pconfig['interface']['mtu'],
+		['placeholder' => wg_default_mtu()]
+	))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
+
+
+}
 
 $section->addInput(new Form_Input(
 	'listenport',
