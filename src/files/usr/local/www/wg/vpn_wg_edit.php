@@ -78,16 +78,6 @@ if ($_POST['save']) {
 			wg_destroy_if($pconfig['name']);
 		}
 
-		if (is_wg_interface_assigned($pconfig['name'])) {
-
-			$iflist = get_configured_interface_list_by_realif(true);
-
-			interface_bring_down($iflist[$pconfig['name']], false);
-
-			interface_configure($iflist[$pconfig['name']], true);
-
-		}
-
 		// Go back to the tunnel table
 		header("Location: /wg/vpn_wg.php");
 	}
