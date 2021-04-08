@@ -133,7 +133,7 @@ $section->addInput(new Form_Input(
 	$pconfig['descr']
 ))->setHelp('Tunnel description for administrative reference (not parsed)');
 
-
+/*
 $section->addInput(new Form_Input(
 	'address',
 	'*Address',
@@ -148,6 +148,7 @@ $section->addInput(new Form_Input(
 	$pconfig['interface']['mtu'],
 	['placeholder' => wg_default_mtu()]
 ))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
+*/
 
 $section->addInput(new Form_Input(
 	'listenport',

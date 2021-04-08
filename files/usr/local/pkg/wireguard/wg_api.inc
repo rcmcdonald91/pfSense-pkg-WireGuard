@@ -20,6 +20,14 @@
  * limitations under the License.
  */
 
+require_once('globals.inc');
+require_once('config.inc');
+require_once('pfsense-utils.inc');
+require_once('system.inc');
+require_once('pkg-utils.inc');
+require_once('service-utils.inc');
+require_once('util.inc');
+
 global $wgbinpath, $wgquickpath, $wgconfpath;
 $wgbinpath = '/usr/local/bin/wg';
 $wgquickpath = '/usr/local/bin/wg-quick';
