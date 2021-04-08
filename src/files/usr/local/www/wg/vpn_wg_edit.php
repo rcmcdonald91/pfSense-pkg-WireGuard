@@ -188,7 +188,7 @@ if (empty($iflist[$pconfig['name']])) {
 
 	$section1->addInput(new Form_StaticText(
 		'Notice',
-		"Leave these fields blank to use pfSense interface assignment and configuration."
+		"Leave these fields blank to use Interfaces / <a href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section1->addInput(new Form_Input(
