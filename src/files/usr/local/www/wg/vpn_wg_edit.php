@@ -280,7 +280,8 @@ $group2->add(new Form_Input(
 $group2->add(new Form_Button(
 	'genpsk',
 	'Generate PSK',
-	null
+	null,
+	'fa-key'
 ))->addClass('btn btn-xs success');
 
 $section2->add($group2);
