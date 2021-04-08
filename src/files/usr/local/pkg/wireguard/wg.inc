@@ -345,7 +345,7 @@ function make_wg_conf($tunnel) {
 		$txt .= "MTU = {$tunnel['interface']['mtu']}\n";
 	}
 
-	# We want to handle routes manually
+	// We want to let pfSense handling routing.
 	$txt .= "Table = off\n";
 
 	$txt .= "\n";
@@ -398,23 +398,7 @@ function delete_wg_configs() {
 
 }
 
-/* Check if at least one tunnel is enabled */
-function is_wg_enabled() {
-	global $config;
-
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-
-	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
-		if (empty($tunnel['enabled'])) {
-			continue;
-		}
-		return true;
-	}
-
-	return false;
-}
-
-/* Return WireGuard tunnel networks for a given address family */
+// Return WireGuard tunnel networks for a given address family
 function wg_get_tunnel_networks($family = 'both') {
 	global $config;
 	$wg_tunnel_networks = array();
@@ -439,36 +423,36 @@ function wg_get_tunnel_networks($family = 'both') {
 	return $wg_tunnel_networks;
 }
 
-/* Locate a viable remote gateway address for a WireGuard tunnel
- * Fall back to using the tunnel address itself.
- * https://redmine.pfsense.org/issues/11300 */
+// Locate a viable remote gateway address for a WireGuard tunnel
+// Fall back to using the tunnel address itself.
+// https://redmine.pfsense.org/issues/11300
 function wg_find_tunnel_gw($tunnel, $addr) {
 	list($ip, $mask) = explode("/", trim($addr));
-	/* Loop through peers looking for a viable remote gateway address */
+	// Loop through peers looking for a viable remote gateway address
 	if (is_array($tunnel['peers']) &&
 	    is_array($tunnel['peers']['wgpeer']) &&
 	    count($tunnel['peers']['wgpeer']) > 0) {
 		foreach ($tunnel['peers']['wgpeer'] as $peer) {
-			/* If this peer has no configured Peer WireGuard Address, skip it. */
+			// If this peer has no configured Peer WireGuard Address, skip it.
 			if (empty($peer['peerwgaddr'])) {
 				continue;
 			}
-			/* Check each Peer WireGuard Address entry */
+			// Check each Peer WireGuard Address entry
 			foreach (explode(',', $peer['peerwgaddr']) as $pwga) {
-				/* Ensure the address family of this entry matches the one we're seeking */
+				// Ensure the address family of this entry matches the one we're seeking
 				if (is_v4($ip) !== is_v4($pwga)) {
 					continue;
 				}
-				/* If there is a subnet mask, ditch it. */
+				// If there is a subnet mask, ditch it.
 				list($pip, $pmask) = explode('/', trim($pwga));
-				/* Check that this address is in the desired subnet */
+				// Check that this address is in the desired subnet
 				if (ip_in_subnet($pip, trim($addr))) {
-					/* We found a good candidate, return it */
+					// We found a good candidate, return it
 					return $pip;
 				}
 			}
 		}
 	}
-	/* If no viable candidate is found, return the tunnel address */
+	// If no viable candidate is found, return the tunnel address
 	return $ip;
 }
