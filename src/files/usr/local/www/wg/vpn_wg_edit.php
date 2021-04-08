@@ -180,7 +180,7 @@ if (empty($iflist[$pconfig['name']])) {
 
 	$section1->addInput(new Form_Input(
 		'address',
-		'*Address',
+		'Address',
 		'text',
 		$pconfig['interface']['address']
 	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');

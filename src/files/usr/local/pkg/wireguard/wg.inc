@@ -204,8 +204,10 @@ function wg_earlyshellcmd_install() {
 
 function wg_install() {
 
+	// Install the earlyshellcmd
 	wg_earlyshellcmd_install();
 
+	// Configure existing interfaces
 	wg_configure();
 
 }

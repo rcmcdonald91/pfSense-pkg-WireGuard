@@ -28,10 +28,15 @@ require_once('pkg-utils.inc');
 require_once('service-utils.inc');
 require_once('util.inc');
 
+// Various paths to WireGuard bits
 global $wgbinpath, $wgquickpath, $wgconfpath;
 $wgbinpath = '/usr/local/bin/wg';
 $wgquickpath = '/usr/local/bin/wg-quick';
 $wgconfpath = '/etc/wireguard';
+
+global $ifconfigpath, $kldstatpath;
+$ifconfigpath = '/sbin/ifconfig';
+$kldstatpath = '/sbin/kldstat';
 
 // Experimenting with different prefixes, need to consult with Netgate
 global $wgifprefix;
@@ -50,21 +55,23 @@ function wg_status() {
 
 // Get WireGuard interface status
 function wg_interface_status($ifgroup = "wg") {
+	global $ifconfigpath;
 
 	$status = array();
-	exec("ifconfig -a -g {$ifgroup}", $status);
+	exec("{$ifconfigpath} -a -g {$ifgroup}", $status);
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
+
 }
 
 // Get WireGuard kmod status
 function wg_kmod_status() {
+	global $kldstatpath;
 
-	$output = exec("kldstat | grep if_wg.ko");
+	$output = exec("{$kldstatpath} | grep if_wg.ko");
 	
 	return htmlspecialchars($output);
-
 }
 
 // Get wg and tools version
@@ -74,9 +81,7 @@ function wg_version() {
 	exec("pkg info | grep wireguard", $packages);
 
 	$output = implode("\n", $packages);
-
 	return htmlspecialchars($output);
-
 }
 
 // Generate private key
@@ -150,9 +155,6 @@ function next_wg_if() {
 	return -1;
 }
 
-function wg_default_mtu() {
+function wg_default_mtu() { return 1420; }
 
-	return 1420;
-
-}
 ?>

@@ -48,7 +48,8 @@ function wg_validate_post($pconfig) {
 		foreach ($addrs as $addr) {
 			$addr = trim($addr);
 
-			if (!is_subnet($addr)) {
+			// Interface address is not technically required
+			if (!empty($addr) && !is_subnet($addr)) {
 				$input_errors[] = sprintf(gettext(
 					'%1$s is not a valid CIDR address'), $addr);
 			}
