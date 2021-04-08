@@ -3,6 +3,8 @@ This is an attempt to port the original WireGuard UI bits as implemented by [Net
 
 XML configuration bits have been moved from `wireguard/tunnel` to `installedpackages/wireguard/tunnel`
 
+Note: I'm currently developing directly in the main branch. I know this is bad practice. Please ignore the mess.
+
 **Developed on pfSense 2.6.0-DEVLOPMENT snapshots.**
 
 **DO NOT INSTALL ON >2.5.0-STABLE**
