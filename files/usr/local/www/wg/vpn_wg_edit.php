@@ -197,8 +197,8 @@ if (empty($iflist[$pconfig['name']])) {
 } else {
 
 	$section1->addInput(new Form_StaticText(
-		'IPv4/IPv6 Configuration',
-		"This interface type does not support manual address configuration on this page."
+		'Address',
+		"This interface is assigned to {$iflist[$pconfig['name']}."
 	));
 
 }
