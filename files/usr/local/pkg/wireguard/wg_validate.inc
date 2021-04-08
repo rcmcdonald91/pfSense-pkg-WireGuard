@@ -40,7 +40,7 @@ function wg_validate_post($pconfig) {
 	// Check if interface is assigned, if so we can ignore most of this checking
 	$ifassigned = array_key_exists($pconfig['name'], $iflist);
 
-	if (!($ifassigned))) {
+	if (!($ifassigned)) {
 
 		// Check the addresses
 		$addrs = explode(",", $pconfig['interface']['address']);
