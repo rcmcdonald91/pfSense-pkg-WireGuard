@@ -282,7 +282,7 @@ $group2->add(new Form_Button(
 	'Generate PSK',
 	null,
 	'fa-key'
-))->addClass('btn btn-xs success');
+))->setWidth(1)->addClass('btn-primary btn-xs')->setHelp('New PSK');
 
 $section2->add($group2);
 
