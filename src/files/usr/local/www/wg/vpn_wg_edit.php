@@ -199,9 +199,11 @@ if (empty($iflist[$pconfig['name']])) {
 	// We want all configured interfaces, including disabled ones
 	$ifdescr = get_configured_interface_with_descr(true);
 
+	$iffriendly = $ifdescr[$iflist[$pconfig['name']]]
+
 	$section1->addInput(new Form_StaticText(
 		'Notice',
-		"This interface is assigned to {$ifdescr[$iflist[$pconfig['name']]]} ({$pconfig['name']})."
+		"This interface is assigned to {$iffriendly} ({$pconfig['name']}). (<a href='../../interface.php?if={$iflist[$pconfig['name']]}'>Configuration</a>"
 	));
 
 }
