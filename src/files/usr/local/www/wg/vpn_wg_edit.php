@@ -197,7 +197,7 @@ if (empty($iflist[$pconfig['name']])) {
 } else {
 
 	// We want all configured interfaces, including disabled ones
-	$ifdescr = get_configured_interface_with_descr(true)
+	$ifdescr = get_configured_interface_with_descr(true);
 
 	$section1->addInput(new Form_StaticText(
 		'Notice',
