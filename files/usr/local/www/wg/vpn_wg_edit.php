@@ -169,6 +169,8 @@ $form->add($section);
 
 print($form);
 
+$form = new Form(false);
+
 // ============ Interface edit modal ==================================
 $section1 = new Form_Section("Interface Configuration ({$pconfig['name']}");
 
@@ -176,14 +178,14 @@ $iflist = get_configured_interface_list_by_realif();
 
 if (empty($iflist[$pconfig['name']])) {
 
-	$section->addInput(new Form_Input(
+	$section1->addInput(new Form_Input(
 		'address',
 		'*Address',
 		'text',
 		$pconfig['interface']['address']
 	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
 
-	$section->addInput(new Form_Input(
+	$section1->addInput(new Form_Input(
 		'mtu',
 		'MTU',
 		'text',
@@ -194,7 +196,7 @@ if (empty($iflist[$pconfig['name']])) {
 
 } else {
 
-	$section->addInput(new Form_StaticText(
+	$section1->addInput(new Form_StaticText(
 		'IPv4/IPv6 Configuration',
 		"This interface type does not support manual address configuration on this page."
 	));
