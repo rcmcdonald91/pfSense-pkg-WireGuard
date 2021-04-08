@@ -198,7 +198,7 @@ if (empty($iflist[$pconfig['name']])) {
 
 	$section1->addInput(new Form_StaticText(
 		'Address',
-		"This interface is assigned to {$iflist[$pconfig['name']}."
+		"This interface is assigned to {$iflist[$pconfig['name']]}."
 	));
 
 }
