@@ -263,10 +263,9 @@ $section2->addInput(new Form_Input(
 
 $section2->addInput(new Form_Input(
 	'peerwgaddr',
-	'Peer WireGuard Address',
+	'Peer Address',
 	'text'
-))->setHelp('IPv4/IPv6 WireGuard tunnel interface addresses (comma separated) of the peer since it can differ from Allowed IPs.%1$s ' .
-		'When the WireGuard interface is assigned, this value may be automatically selected as a gateway.', '<br/>');
+))->setHelp('Peer IPv4/IPv6 tunnel interface addresses (comma separated) since they can differ from Allowed IPs.', '<br/>');
 
 $group2 = new Form_Group('Pre-shared key');
 
@@ -394,7 +393,7 @@ events.push(function() {
 	});
 
 	// Eliminate ghost lines in modal
-	$('.form-group').css({"border-bottom-width" : "0"});
+	//$('.form-group').css({"border-bottom-width" : "0"});
 
 	// Return text from peer table cell
 	function tabletext (row, col) {
