@@ -104,6 +104,7 @@ if ($input_errors) {
 			if (is_wg_tunnel_assigned($tunnel)) {
 
 				// We want all configured interfaces, including disabled ones
+				$iflist = get_configured_interface_list_by_realif(true);
 				$ifdescr = get_configured_interface_with_descr(true);
 
 				$iffriendly = $ifdescr[$iflist[$tunnel['name']]];
