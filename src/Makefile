@@ -17,8 +17,6 @@ RUN_DEPENDS=	wg:net/wireguard-tools \
 				wg-quick:net/wireguard-tools \
 				${KMODDIR}/if_wg.ko:net/wireguard-kmod
 
-USES=			php
-
 NO_BUILD=		yes
 NO_MTREE=		yes
 
