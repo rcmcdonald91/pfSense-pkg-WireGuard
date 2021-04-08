@@ -110,7 +110,7 @@ if ($input_errors) {
 $form = new Form(false);
 
 // ============ Tunnel edit modal ==================================
-$section = new Form_Section("Tunnel Configuration ({$pconfig['name']}");
+$section = new Form_Section("Tunnel Configuration ({$pconfig['name']})");
 
 $section->addInput(new Form_Input(
 	'index',
@@ -172,7 +172,7 @@ print($form);
 $form = new Form(false);
 
 // ============ Interface edit modal ==================================
-$section1 = new Form_Section("Interface Configuration ({$pconfig['name']}");
+$section1 = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
 $iflist = get_configured_interface_list_by_realif();
 
