@@ -279,10 +279,10 @@ $group2->add(new Form_Input(
 
 $group2->add(new Form_Button(
 	'genpsk',
-	'Generate PSK',
+	'Generate',
 	null,
 	'fa-key'
-))->setWidth(1)->addClass('btn-primary btn-xs')->setHelp('New PSK');
+))->addClass('btn-primary btn-xs')->setHelp('New PSK');
 
 $section2->add($group2);
 
