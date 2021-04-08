@@ -167,10 +167,6 @@ $group->add(new Form_Button(
 $section->add($group);
 $form->add($section);
 
-print($form);
-
-$form = new Form(false);
-
 // ============ Interface edit modal ==================================
 $section1 = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
