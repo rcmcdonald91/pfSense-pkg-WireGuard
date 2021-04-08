@@ -1,11 +1,11 @@
 # pfSense-pkg-WireGuard
-
 This is an attempt to port the original WireGuard UI bits as implemented by [Netgate](https://www.netgate.com/) in [pfSense 2.5.0](https://github.com/pfsense/pfsense/tree/RELENG_2_5_0) to a package suitable for sideloading and more frequent updating on future releases of pfSense.
 
 XML configuration bits have been moved from `wireguard/tunnel` to `installedpackages/wireguard/tunnel`
 
-## Developed on pfSense 2.6.0-DEVLOPMENT snapshots.
-## DO NOT INSTALL ON >2.5.0-STABLE
+**Developed on pfSense 2.6.0-DEVLOPMENT snapshots.**
+
+**DO NOT INSTALL ON >2.5.0-STABLE**
 
 ## Build
 The build process is similar to that of other FreeBSD and pfSense packages. You will need to set up a FreeBSD build environment and install or build `wireguard` and `wireguard-kmod` on it. Please check the [pfSense package development documentation](https://docs.netgate.com/pfsense/en/latest/development/developing-packages.html#testing-building-individual-packages) for more information.
@@ -32,3 +32,9 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 ## Configuration
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
+
+## Screenshots
+
+![shot1](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/images/shot1.PNG)
+
+![shot2](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/images/shot2.PNG)
