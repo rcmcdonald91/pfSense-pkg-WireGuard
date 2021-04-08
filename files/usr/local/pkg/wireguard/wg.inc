@@ -230,7 +230,9 @@ function wg_do_post($post, $json = false) {
 	$pconfig['interface']['listenport'] = $post['listenport'];
 	$pconfig['interface']['privatekey'] = $post['privatekey'];
 	$pconfig['interface']['publickey'] = genPubKey($post['privatekey']);
+	
 	$pconfig['interface']['mtu'] = $post['mtu'];
+	$pconfig['interface']['assigned'] = $post['assigned'];
 
 	if (isset($post['endpoint0'])) {
 		// Peers section
