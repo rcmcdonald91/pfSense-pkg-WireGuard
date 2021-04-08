@@ -27,12 +27,13 @@
 ##|*MATCH=status_wireguard.php*
 ##|-PRIV
 
+$shortcut_section = "wireguard";
+$pgtitle = array(gettext("Status"), "WireGuard");
+
 require_once("guiconfig.inc");
 require_once("functions.inc");
+require_once("shortcuts.inc");
 require_once("/usr/local/pkg/wireguard/wg.inc");
-
-$shortcut_section = "WireGuard";
-$pgtitle = array(gettext("Status"), "WireGuard");
 
 include("head.inc");
 
