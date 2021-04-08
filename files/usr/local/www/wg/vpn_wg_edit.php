@@ -78,11 +78,7 @@ if ($_POST['save']) {
 			wg_destroy_if($pconfig['name']);
 		}
 
-		if (isset($pconfig['assigned'])) {
-
-			exec("/etc/rc.reload_interfaces");
-
-		}
+		exec("/etc/rc.reload_interfaces");
 
 		// Go back to the tunnel table
 		header("Location: /wg/vpn_wg.php");
