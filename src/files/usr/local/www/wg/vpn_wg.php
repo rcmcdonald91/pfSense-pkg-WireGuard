@@ -45,7 +45,7 @@ if (array_key_exists('delidx', $_POST) &&
     ($tunnels[$_POST['delidx']])) {
 	$iflist = get_configured_interface_list_by_realif();
 	if (!empty($iflist[$tunnels[$_POST['delidx']]['name']])) {
-		$input_errors[] = gettext('Cannot delete a WireGuard instance while it is assigned as an interface.');
+		$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
 	} else {
 		deleteTunnel($_POST['delidx']);
 		header("Location: /wg/vpn_wg.php");
@@ -72,7 +72,7 @@ if ($input_errors) {
 						<th class="peer-entries"></th>
 						<th><?=gettext("Name")?></th>
 						<th><?=gettext("Description")?></th>
-						<th><?=gettext("Address")?></th>
+						<th><?=gettext("Address / Interface")?></th>
 						<th><?=gettext("Port")?></th>
 						<th><?=gettext("# Peers")?></th>
 						<th><?=gettext("Actions")?></th>
@@ -90,6 +90,24 @@ if ($input_errors) {
 			if (!$tunnel['peers']['wgpeer'] || !is_array($tunnel['peers']['wgpeer'])) {
 				$tunnel['peers']['wgpeer'] = array();
 			}
+
+			// We want all configured interfaces, including disabled ones
+			$iflist = get_configured_interface_list_by_realif(true);
+
+			// Check if interface is assigned
+			$ifassigned = array_key_exists($tunnel['name'], $iflist);
+
+			if ($ifassigned) {
+
+				// We want all configured interfaces, including disabled ones
+				$ifdescr = get_configured_interface_with_descr(true);
+
+				$iffriendly = $ifdescr[$iflist[$tunnel['name']];];
+
+				$tunnel['interface']['address'] = $iffriendly;
+
+			}
+
 ?>
 					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?= $entryStatus ?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
