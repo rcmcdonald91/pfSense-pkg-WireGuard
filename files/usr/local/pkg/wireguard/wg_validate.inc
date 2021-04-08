@@ -35,10 +35,10 @@ $wgpeerdefaultroute = array();
 function wg_validate_post($pconfig) {
 	$input_errors = array();
 
-	// Check the addresses
-	$addrs = explode(",", $pconfig['interface']['address']);
+	if (!isset($pconfig['interface']['assigned'])) {
 
-	if (!($pconfig['interface']['assigned'])) {
+		// Check the addresses
+		$addrs = explode(",", $pconfig['interface']['address']);
 
 		foreach ($addrs as $addr) {
 			$addr = trim($addr);
@@ -46,17 +46,6 @@ function wg_validate_post($pconfig) {
 			if (!is_subnet($addr)) {
 				$input_errors[] = sprintf(gettext(
 					'%1$s is not a valid CIDR address'), $addr);
-			}
-
-			$iflist = get_configured_interface_list_by_realif();
-
-			$skip = '';
-			if (!empty($iflist[$pconfig['name']])) {
-				if (!isset($pconfig['enabled']) ||
-					($pconfig['enabled'] != 'yes')) {
-					$input_errors[] = gettext('Cannot disable a WireGuard instance while it is assigned as an interface.');
-				}
-				$skip = $iflist[$pconfig['name']];
 			}
 
 			$a = explode("/", $addr);
@@ -74,6 +63,10 @@ function wg_validate_post($pconfig) {
 			}
 		}
 	
+	}
+
+	if (isset($pconfig['interface']['assigned']) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
+		$input_errors[] = gettext('Cannot disable a WireGuard instance while it is assigned as an interface.');
 	}
 
 	// Check listen port

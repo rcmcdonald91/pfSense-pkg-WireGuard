@@ -196,7 +196,7 @@ if (empty($iflist[$pconfig['name']])) {
 		'assigned',
 		'',
 		'hidden',
-		false
+		true
 	));
 
 	$section1->addInput(new Form_StaticText(
