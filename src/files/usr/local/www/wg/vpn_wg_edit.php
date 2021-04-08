@@ -267,7 +267,7 @@ $section2->addInput(new Form_Input(
 	'text'
 ))->setHelp('Peer IPv4/IPv6 tunnel interface addresses (comma separated) since they can differ from Allowed IPs.', '<br/>');
 
-$group2 = new Form_Group('Pre-shared key');
+$group2 = new Form_Group('Pre-shared Key');
 
 $group2->add(new Form_Input(
 	'presharedkey',

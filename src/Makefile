@@ -1,7 +1,7 @@
 # $FreeBSD$
 
 PORTNAME=		pfSense-pkg-WireGuard
-PORTVERSION=	0.0.1
+PORTVERSION=	0.0.2
 PORREVISION=	0
 CATEGORIES=		net
 MASTER_SITES=	# empty
