@@ -56,9 +56,6 @@ function wg_configure() {
 
 	wg_write_rcfile();
 
-	// reload configured interfaces
-	#exec("/etc/rc.reload_interfaces");
-
 }
 
 function wg_write_rcfile() {
@@ -108,6 +105,8 @@ function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
 
 	// Bring up interface using wg-quick(8)
 	exec("{$wgquickpath} up {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
+
+	// We need to bounce assigned interfaces here so wg-quick doesn't nuke addresses
 
 	// Add the interface to interface group (i.e. WireGuard)
 	exec("ifconfig {$wg_ifname} group {$wgifgroup}");
