@@ -102,7 +102,7 @@ if ($input_errors) {
 				// We want all configured interfaces, including disabled ones
 				$ifdescr = get_configured_interface_with_descr(true);
 
-				$iffriendly = $ifdescr[$iflist[$tunnel['name']];];
+				$iffriendly = $ifdescr[$iflist[$tunnel['name']]];
 
 				$tunnel['interface']['address'] = $iffriendly;
 
