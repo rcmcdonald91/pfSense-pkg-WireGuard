@@ -109,8 +109,8 @@ if ($input_errors) {
 
 $form = new Form(false);
 
-// First row
-$section = new Form_Section('Interface ' . $pconfig['name']);
+// ============ Tunnel edit modal ==================================
+$section = new Form_Section("Tunnel Configuration ({$pconfig['name']}");
 
 $section->addInput(new Form_Input(
 	'index',
@@ -132,28 +132,6 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['descr']
 ))->setHelp('Tunnel description for administrative reference (not parsed)');
-
-$iflist = get_configured_interface_list_by_realif();
-
-if (!empty($iflist[$pconfig['name']])) {
-
-	$section->addInput(new Form_Input(
-		'address',
-		'*Address',
-		'text',
-		$pconfig['interface']['address']
-	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
-
-	$section->addInput(new Form_Input(
-		'mtu',
-		'MTU',
-		'text',
-		$pconfig['interface']['mtu'],
-		['placeholder' => wg_default_mtu()]
-	))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
-
-
-}
 
 $section->addInput(new Form_Input(
 	'listenport',
@@ -188,6 +166,42 @@ $group->add(new Form_Button(
 
 $section->add($group);
 $form->add($section);
+
+print($form);
+
+// ============ Interface edit modal ==================================
+$section1 = new Form_Section("Interface Configuration ({$pconfig['name']}");
+
+$iflist = get_configured_interface_list_by_realif();
+
+if (empty($iflist[$pconfig['name']])) {
+
+	$section->addInput(new Form_Input(
+		'address',
+		'*Address',
+		'text',
+		$pconfig['interface']['address']
+	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
+
+	$section->addInput(new Form_Input(
+		'mtu',
+		'MTU',
+		'text',
+		$pconfig['interface']['mtu'],
+		['placeholder' => wg_default_mtu()]
+	))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
+
+
+} else {
+
+	$section->addInput(new Form_StaticText(
+		'IPv4/IPv6 Configuration',
+		"This interface type does not support manual address configuration on this page."
+	));
+
+}
+
+$form->add($section1);
 
 print($form);
 
