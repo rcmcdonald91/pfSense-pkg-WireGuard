@@ -387,10 +387,6 @@ events.push(function() {
 
 	// Eliminate ghost lines in modal
 	$('.form-group').css({"border-bottom-width" : "0"});
-	
-	// Blur private key unless has focus
-	$('#privatekey:not(:focus)').css ({"color" : "transparent"});
-	$('#privatekey:not(:focus)').css ({"text-shadow" : "0 0 5px rgba(0,0,0,0.5)"});
 
 	// Return text from peer table cell
 	function tabletext (row, col) {
