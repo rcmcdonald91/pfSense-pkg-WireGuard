@@ -271,9 +271,9 @@ $group2 = new Form_Group('Pre-shared key');
 
 $group2->add(new Form_Input(
 	'presharedkey',
-	'Pre-Shared Key',
+	'Pre-shared Key',
 	'text'
-))->setHelp('Optional Pre-Shared Key for this peer.%1$s ' .
+))->setHelp('Optional Pre-shared Key for this peer.%1$s ' .
 		'Mixes symmetric-key cryptography into public-key cryptography for post-quantum resistance.', '<br/>');
 
 $group2->add(new Form_Button(
@@ -393,7 +393,7 @@ events.push(function() {
 	});
 
 	// Eliminate ghost lines in modal
-	//$('.form-group').css({"border-bottom-width" : "0"});
+	$('.form-group').css({"border-bottom-width" : "0"});
 
 	// Return text from peer table cell
 	function tabletext (row, col) {
