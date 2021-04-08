@@ -38,6 +38,13 @@ $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
 $pglinks = array("", "@self", "@self");
 $shortcut_section = "wireguard";
 
+$tab_array = array();
+$tab_array[] = array(gettext("Tunnels"), true, "vpn_wg.php");
+$tab_array[] = array(gettext("Wizards"), false, "#");
+$tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
+add_package_tabs("wireguard", $tab_array);
+display_top_tabs($tab_array);
+
 include("head.inc");
 
 // Delete a tunnel?
