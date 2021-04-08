@@ -173,7 +173,8 @@ $form->add($section);
 // ============ Interface edit modal ==================================
 $section1 = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
-$iflist = get_configured_interface_list_by_realif();
+// We want all configured interfaces, including disabled ones
+$iflist = get_configured_interface_list_by_realif(true);
 
 if (empty($iflist[$pconfig['name']])) {
 
@@ -195,9 +196,12 @@ if (empty($iflist[$pconfig['name']])) {
 
 } else {
 
+	// We want all configured interfaces, including disabled ones
+	$ifdescr = get_configured_interface_with_descr(true)
+
 	$section1->addInput(new Form_StaticText(
-		'Address',
-		"This interface is assigned to {$iflist[$pconfig['name']]} ({$pconfig['name']})."
+		'Notice',
+		"This interface is assigned to {$ifdescr[$iflist[$pconfig['name']]]} ({$pconfig['name']})."
 	));
 
 }
