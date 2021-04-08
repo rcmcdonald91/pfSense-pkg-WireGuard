@@ -40,7 +40,7 @@ $shortcut_section = "wireguard";
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "vpn_wg.php");
-$tab_array[] = array(gettext("Wizards"), false, "#");
+//$tab_array[] = array(gettext("Wizards"), false, "#");
 $tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
 
 include("head.inc");
@@ -58,7 +58,6 @@ if (array_key_exists('delidx', $_POST) &&
 }
 
 add_package_tabs("wireguard", $tab_array);
-
 display_top_tabs($tab_array);
 
 if ($input_errors) {

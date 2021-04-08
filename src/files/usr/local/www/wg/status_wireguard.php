@@ -28,12 +28,21 @@
 ##|-PRIV
 
 require_once("guiconfig.inc");
+require_once("functions.inc");
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
 $shortcut_section = "WireGuard";
 $pgtitle = array(gettext("Status"), "WireGuard");
 
 include("head.inc");
+
+$tab_array = array();
+$tab_array[] = array(gettext("Tunnels"), false, "vpn_wg.php");
+//$tab_array[] = array(gettext("Wizards"), false, "#");
+$tab_array[] = array(gettext("Status"), true, "status_wireguard.php");
+
+add_package_tabs("wireguard", $tab_array);
+display_top_tabs($tab_array);
 
 ?>
 
