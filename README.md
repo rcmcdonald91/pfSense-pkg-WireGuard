@@ -34,9 +34,3 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 ## Configuration
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
-
-## Screenshots
-
-![shot1](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/images/shot1.PNG)
-
-![shot2](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/images/shot2.PNG)
