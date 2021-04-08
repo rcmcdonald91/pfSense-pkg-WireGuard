@@ -72,7 +72,7 @@ if ($input_errors) {
 						<th class="peer-entries"></th>
 						<th><?=gettext("Name")?></th>
 						<th><?=gettext("Description")?></th>
-						<th><?=gettext("Address / Interface")?></th>
+						<th><?=gettext("Address / Assignment")?></th>
 						<th><?=gettext("Port")?></th>
 						<th><?=gettext("# Peers")?></th>
 						<th><?=gettext("Actions")?></th>
