@@ -194,16 +194,9 @@ if (empty($iflist[$pconfig['name']])) {
 
 } else {
 
-	$section->addInput(new Form_Input(
-		'assigned',
-		'',
-		'hidden',
-		true
-	));
-
 	$section1->addInput(new Form_StaticText(
 		'Address',
-		"This interface is assigned to {$iflist[$pconfig['name']]}."
+		"This interface is assigned to <a href='./interfaces.php?if={$iflist[$pconfig['name']]}</a>."
 	));
 
 }

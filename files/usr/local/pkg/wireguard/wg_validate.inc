@@ -35,7 +35,12 @@ $wgpeerdefaultroute = array();
 function wg_validate_post($pconfig) {
 	$input_errors = array();
 
-	if (!isset($pconfig['interface']['assigned'])) {
+	$iflist = get_configured_interface_list_by_realif();
+
+	// Check if interface is assigned, if so we can ignore most of this checking
+	$ifassigned = array_key_exists($pconfig['name'], $iflist);
+
+	if (!($ifassigned))) {
 
 		// Check the addresses
 		$addrs = explode(",", $pconfig['interface']['address']);
@@ -65,8 +70,10 @@ function wg_validate_post($pconfig) {
 	
 	}
 
-	if (isset($pconfig['interface']['assigned']) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
-		$input_errors[] = gettext('Cannot disable a WireGuard instance while it is assigned as an interface.');
+	if ($ifassigned && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
+
+		$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
+
 	}
 
 	// Check listen port
@@ -77,7 +84,7 @@ function wg_validate_post($pconfig) {
 
 	// Check keys
 	if (empty($pconfig['interface']['privatekey'])) {
-		$input_errors[] = gettext("Private key must be specified");
+		$input_errors[] = gettext("Private key must be specified.");
 	}
 
 	// Now the peers
