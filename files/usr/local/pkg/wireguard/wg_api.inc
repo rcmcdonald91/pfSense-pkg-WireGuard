@@ -45,23 +45,25 @@ function wg_status() {
 	exec("{$wgbinpath} show", $status);
 
 	$output = implode("\n", $status);
-	return $output;
+	return htmlspecialchars($output);
 }
 
 // Get WireGuard interface status
 function wg_interface_status($ifgroup = "wg") {
 
 	$status = array();
-	exec("/sbin/ifconfig -a -g {$ifgroup}", $status);
+	exec("ifconfig -a -g {$ifgroup}", $status);
 
 	$output = implode("\n", $status);
-	return $output;
+	return htmlspecialchars($output);
 }
 
 // Get WireGuard kmod status
 function wg_kmod_status() {
+
+	$output = exec("kldstat | grep if_wg.ko");
 	
-	return exec("kldstat | grep if_wg.ko");
+	return htmlspecialchars($output);
 
 }
 
@@ -73,7 +75,7 @@ function wg_version() {
 
 	$output = implode("\n", $packages);
 
-	return $output;
+	return htmlspecialchars($output);
 
 }
 
