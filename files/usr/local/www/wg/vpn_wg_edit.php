@@ -79,7 +79,7 @@ if ($_POST['save']) {
 		}
 
 		// reload configured interfaces
-		exec("/etc/rc.reload_interfaces");
+		#exec("/etc/rc.reload_interfaces");
 
 		// Go back to the tunnel table
 		header("Location: /wg/vpn_wg.php");

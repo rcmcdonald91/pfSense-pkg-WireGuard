@@ -57,7 +57,7 @@ function wg_configure() {
 	wg_write_rcfile();
 
 	// reload configured interfaces
-	exec("/etc/rc.reload_interfaces");
+	#exec("/etc/rc.reload_interfaces");
 
 }
 
