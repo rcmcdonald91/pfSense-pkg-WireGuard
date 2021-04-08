@@ -7,7 +7,7 @@ Note: I'm currently developing directly in the main branch. I know this is bad p
 
 **Developed on pfSense 2.6.0-DEVLOPMENT snapshots.**
 
-**DO NOT INSTALL ON pfSense 2.5.0. 
+**DO NOT INSTALL ON pfSense 2.5.0.** 
 
 ## Build
 The build process is similar to that of other FreeBSD and pfSense packages. You will need to set up a FreeBSD build environment and install or build `wireguard` and `wireguard-kmod` on it. Please check the [pfSense package development documentation](https://docs.netgate.com/pfsense/en/latest/development/developing-packages.html#testing-building-individual-packages) for more information.
