@@ -36,7 +36,7 @@
 		<url>/wg/vpn_wg.php</url>
 	</menu>
 	<menu>
-		<name>WireGuard&zwnj;</name>
+		<name>WireGuard Status</name>
 		<section>Status</section>
 		<url>/wg/status_wireguard.php</url>
 	</menu>
