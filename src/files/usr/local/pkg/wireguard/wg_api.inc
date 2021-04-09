@@ -40,7 +40,7 @@ $ifconfigpath = '/sbin/ifconfig';
 $kldstatpath = '/sbin/kldstat';
 $pkgpath = '/usr/sbin/pkg';
 
-// Experimenting with different prefixes, need to consult with Netgate
+// Interface prefix to use for tunnels (e.g. wg)
 global $wgifprefix;
 $wgifprefix = 'wg';
 
@@ -53,6 +53,7 @@ function wg_status() {
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
+
 }
 
 // Get WireGuard interface status
@@ -64,6 +65,7 @@ function wg_interface_status($ifgroup = "wg") {
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
+
 }
 
 // Get WireGuard kmod status
@@ -73,6 +75,7 @@ function wg_kmod_status($kmod = 'if_wg.ko') {
 	$output = exec("{$kldstatpath} | grep {$kmod}");
 	
 	return htmlspecialchars($output);
+
 }
 
 // Get wg and tools version
@@ -84,6 +87,7 @@ function wg_version($pkgs = 'wireguard') {
 
 	$output = implode("\n", $packages);
 	return htmlspecialchars($output);
+
 }
 
 // Generate private key
@@ -95,6 +99,7 @@ function genKeyPair($json = false) {
 
 	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
 	return $json ? json_encode($res) : $res;
+
 }
 
 // Compose the public key from a provided private key
@@ -104,6 +109,15 @@ function genPubKey($privkey) {
 	$pubkey = exec("echo {$privkey} | {$wgbinpath} pubkey");
 
 	return $pubkey;
+
+}
+
+// Executes a wg-quick(8) action using a specified tunnel
+function exec_wg_quick_action($tunnel, $action, $verbose = false) {
+	global $wgquickpath;
+
+	exec("{$wgquickpath} {$action} {$tunnel['name']}" . ($verbose ? "" : " > /dev/null 2>&1"));
+
 }
 
 // Generate a pre-shared key
@@ -113,6 +127,7 @@ function genPSK() {
 	$psk = exec("{$wgbinpath} genpsk");
 
 	return $psk;
+	
 }
 
 // Return the next available WireGuard port
@@ -139,6 +154,7 @@ function next_wg_port() {
 	}
 
 	return 51820;
+
 }
 
 // Return the next available WireGuard interface
@@ -159,8 +175,13 @@ function next_wg_if() {
 		}
 	}
 	return -1;
+	
 }
 
-function wg_default_mtu() { return 1420; }
+function wg_default_mtu() { 
+	
+	return 1420; 
+
+}
 
 ?>

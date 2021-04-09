@@ -21,12 +21,13 @@
  * limitations under the License.
  */
 
-require_once('globals.inc');
 require_once('config.inc');
+require_once('globals.inc');
+require_once('interfaces.inc');
 require_once('pfsense-utils.inc');
-require_once('system.inc');
 require_once('pkg-utils.inc');
 require_once('service-utils.inc');
+require_once('system.inc');
 require_once('util.inc');
 
 require_once('wg_api.inc');
@@ -48,13 +49,16 @@ function wg_configure() {
 	$tunnel =[];
 	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-			wg_configure_if($tunnel['name']);
+			wg_configure_if($tunnel);
 		} else {
-			wg_destroy_if($tunnel['name']);
+			wg_destroy_if($tunnel);
 		}
 	}
 
 	wg_write_rcfile();
+
+	// Regenerate interface group in pfSense (just in case)
+	wg_ifgroup_install();
 
 }
 
@@ -91,35 +95,32 @@ function wg_write_rcfile() {
 }
 
 // Setup WireGuard tunnel
-function wg_configure_if($wg_ifname, $destroyfirst = true, $verbose = false) {
+function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
 
 	// Usually want to destroy the interface first
 	if ($destroyfirst) {
 
-		wg_destroy_if($wg_ifname);
-
-		exec("{$wgquickpath} down {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
+		wg_destroy_if($tunnel, $verbose);
 
 	}
 
 	// Bring up interface using wg-quick(8)
-	exec("{$wgquickpath} up {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
-
-	// We need to bounce assigned interfaces here so wg-quick doesn't nuke addresses
+	exec_wg_quick_action($tunnel, "up", $verbose);
 
 	// Add the interface to interface group (i.e. WireGuard)
 	exec("ifconfig {$wg_ifname} group {$wgifgroup}");
-
-	// Regenerate interface group in pfSense (just in case)
-	wg_ifgroup_install();
 
 }
 
 
 // Remove WireGuard tunnel
-function wg_destroy_if($wg_ifname) {
-	return (pfSense_interface_destroy($wg_ifname));
+function wg_destroy_if($tunnel, $verbose = false) {
+	
+	exec_wg_quick_action($tunnel, $verbose);
+
+	pfSense_interface_destroy($tunnel['name']);
+
 }
 
 function deleteTunnel($tunidx) {
@@ -280,10 +281,6 @@ function wg_do_post($post, $json = false) {
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
 }
 
-/*
- * Read the WireGuard configurations from config.xml and create a number of
- * *.conf files for wg-quick to read
- */
 function wg_resync() {
 
 	wg_configure();
