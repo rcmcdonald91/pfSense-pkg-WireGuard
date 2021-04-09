@@ -101,7 +101,7 @@ function genKeyPair($json = false) {
 function genPubKey($privkey) {
 	global $wgbinpath;
 
-	$pubkey = exec("echo {$privkey} | {$wgbinpath} pubkey")
+	$pubkey = exec("echo {$privkey} | {$wgbinpath} pubkey");
 
 	return $pubkey;
 }
