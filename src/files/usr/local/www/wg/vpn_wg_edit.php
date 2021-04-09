@@ -181,9 +181,15 @@ $section1 = new Form_Section("Interface Configuration ({$pconfig['name']})");
 if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section1->addInput(new Form_StaticText(
-		'Notice',
-		"Leave these fields blank to use Interfaces / <a href='../../interfaces_assign.php'>Interface Assignments</a>"
+		'Interface',
+		"Leave these fields blank to use <a href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
+
+	$section1->addInput(new Form_StaticText(
+		'Firewall',
+		"Configure firewall rules on unassigned tunnels using the <a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
+	));
+
 
 	$section1->addInput(new Form_Input(
 		'address',
