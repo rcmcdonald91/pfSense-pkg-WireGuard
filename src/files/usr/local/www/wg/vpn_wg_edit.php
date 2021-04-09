@@ -208,7 +208,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 } else {
 
 	// We want all configured interfaces, including disabled ones
-	$iflist = get_configured_interface_with_realif(true);
+	$iflist = get_configured_interface_list_by_realif(true);
 	$ifdescr = get_configured_interface_with_descr(true);
 	
 	$ifname = $iflist[$pconfig['name']];
