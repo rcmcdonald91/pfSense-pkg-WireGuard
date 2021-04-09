@@ -2,7 +2,7 @@
 
 PORTNAME=		pfSense-pkg-WireGuard
 PORTVERSION=	0.0.2
-PORREVISION=	1
+PORREVISION=	2
 CATEGORIES=		net
 MASTER_SITES=	# empty
 DISTFILES=		# empty
@@ -13,7 +13,8 @@ COMMENT=		pfSense package WireGuard
 
 LICENSE=		APACHE20
 
-RUN_DEPENDS=	wg:net/wireguard-tools \
+RUN_DEPENDS=	${LOCALBASE}/bin/bash:shells/bash \
+				wg:net/wireguard-tools \
 				wg-quick:net/wireguard-tools \
 				${KMODDIR}/if_wg.ko:net/wireguard-kmod
 
