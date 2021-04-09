@@ -1,6 +1,8 @@
 # pfSense-pkg-WireGuard
 This is an attempt to port the original WireGuard UI bits as implemented by [Netgate](https://www.netgate.com/) in [pfSense 2.5.0](https://github.com/pfsense/pfsense/tree/RELENG_2_5_0) to a package suitable for sideloading and more frequent updating on future releases of pfSense.
 
+This also includes some improvments such as a proper status page (Status>WireGuard Status), improved assigned interface handling, and more.
+
 XML configuration bits have been moved from `wireguard/tunnel` to `installedpackages/wireguard/tunnel`
 
 Note: I'm currently developing directly in the main branch. I know this is bad practice. Please ignore the mess.
