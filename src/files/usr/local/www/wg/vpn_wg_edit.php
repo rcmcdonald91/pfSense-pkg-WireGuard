@@ -185,12 +185,6 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		"Leave these fields blank to use <a href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
-	$section1->addInput(new Form_StaticText(
-		'Firewall',
-		"Configure firewall rules on unassigned tunnels using the <a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
-	));
-
-
 	$section1->addInput(new Form_Input(
 		'address',
 		'Address',
@@ -206,6 +200,10 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		['placeholder' => wg_default_mtu()]
 	))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
 
+	$section1->addInput(new Form_StaticText(
+		'Firewall Rules',
+		"Configure firewall rules on unassigned tunnels using the <a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
+	));
 
 } else {
 
@@ -216,8 +214,13 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	$iffriendly = $ifdescr[$ifname];
 
 	$section1->addInput(new Form_StaticText(
-		'Notice',
-		"This interface is assigned to {$iffriendly} (<a href='../../interfaces.php?if={$ifname}'>Configuration</a>)"
+		'Interface',
+		"<a href='../../interfaces.php?if={$ifname}'>Interface Configuration</a>"
+	));
+
+	$section1->addInput(new Form_StaticText(
+		'Firewall Rules',
+		"<a href='../../firewall_rules.php?if={$ifname}'>Firewall Configuration</a>"
 	));
 
 }
