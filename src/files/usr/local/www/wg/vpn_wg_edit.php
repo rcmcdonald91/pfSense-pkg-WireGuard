@@ -373,6 +373,8 @@ $section2->add($group2);
 						print("<td style=\"display:none;\">" . htmlspecialchars($peer['peerwgaddr']) . "</td>\n");
 ?>
 						<td style="cursor: pointer;">
+							<a class="fa fa-download" href="https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7" title="<?=gettext("Download Peer Configuration"); ?>"></a>
+							<a class="fa fq-qrcode" href="https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7" title="<?gettext("Peer QR code"); ?>"></a>
 							<a class="fa fa-pencil" href="#" id="editpeer_<?=$peer_num?>"title="<?=gettext("Edit peer"); ?>"></a>
 							<a class="fa fa-trash text-danger no-confirm" href="#" id="killpeer_<?=$peer_num?>" title="<?=gettext('Delete peer');?>"></a>
 						</td>

@@ -123,8 +123,8 @@ if ($input_errors) {
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit tunnel"); ?>"></a>
-							<a class="fa fa-trash text-danger" id="Xdel_<?=$i?>" title="<?=gettext('Delete tunnel'); ?>"></a>
+							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel"); ?>"></a>
+							<a class="fa fa-trash text-danger" id="Xdel_<?=$i?>" title="<?=gettext('Delete Tunnel'); ?>"></a>
 						</td>
 					</tr>
 
