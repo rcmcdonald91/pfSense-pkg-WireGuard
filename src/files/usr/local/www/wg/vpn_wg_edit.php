@@ -215,6 +215,11 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	$iffriendly = $ifdescr[$ifname];
 
 	$section1->addInput(new Form_StaticText(
+		'Assignment',
+		"This interface is assigned to {$iffriendly} ({$ifname})"
+	));
+
+	$section1->addInput(new Form_StaticText(
 		'Interface',
 		"<a href='../../interfaces.php?if={$ifname}'>Interface Configuration</a>"
 	));
