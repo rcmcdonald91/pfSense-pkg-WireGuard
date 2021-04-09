@@ -28,15 +28,17 @@ require_once('pkg-utils.inc');
 require_once('service-utils.inc');
 require_once('util.inc');
 
-// Various paths to WireGuard bits
+// Various paths to WireGuard binaries and confs
 global $wgbinpath, $wgquickpath, $wgconfpath;
 $wgbinpath = '/usr/local/bin/wg';
 $wgquickpath = '/usr/local/bin/wg-quick';
 $wgconfpath = '/etc/wireguard';
 
+// Various paths to relevant binaries
 global $ifconfigpath, $kldstatpath;
 $ifconfigpath = '/sbin/ifconfig';
 $kldstatpath = '/sbin/kldstat';
+$pkgpath = '/usr/sbin/pkg';
 
 // Experimenting with different prefixes, need to consult with Netgate
 global $wgifprefix;
@@ -62,23 +64,23 @@ function wg_interface_status($ifgroup = "wg") {
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
-
 }
 
 // Get WireGuard kmod status
-function wg_kmod_status() {
+function wg_kmod_status($kmod = 'if_wg.ko') {
 	global $kldstatpath;
 
-	$output = exec("{$kldstatpath} | grep if_wg.ko");
+	$output = exec("{$kldstatpath} | grep {$kmod}");
 	
 	return htmlspecialchars($output);
 }
 
 // Get wg and tools version
-function wg_version() {
+function wg_version($pkgs = 'wireguard') {
+	global $pkgpath;
 
 	$packages = array();
-	exec("pkg info | grep wireguard", $packages);
+	exec("{$pkgpath} info | grep {$pkgs}", $packages);
 
 	$output = implode("\n", $packages);
 	return htmlspecialchars($output);
@@ -99,14 +101,18 @@ function genKeyPair($json = false) {
 function genPubKey($privkey) {
 	global $wgbinpath;
 
-	return (exec("echo {$privkey} | {$wgbinpath} pubkey"));
+	$pubkey = exec("echo {$privkey} | {$wgbinpath} pubkey")
+
+	return $pubkey;
 }
 
-// Generate a preshared key
+// Generate a pre-shared key
 function genPSK() {
 	global $wgbinpath;
 
-	return exec("{$wgbinpath} genpsk");
+	$psk = exec("{$wgbinpath} genpsk");
+
+	return $psk;
 }
 
 // Return the next available WireGuard port

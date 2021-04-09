@@ -35,6 +35,7 @@ $wgpeerdefaultroute = array();
 function wg_validate_post($pconfig) {
 	$input_errors = array();
 
+	// Assigned tunnels don't need these validation checks
 	if (!is_wg_tunnel_assigned($pconfig)) {
 
 		// Check the addresses
@@ -169,6 +170,7 @@ function wg_defaultroute_check($peer) {
 	return false;
 }
 
+// Check if wg tunnel is assigned to an interface
 function is_wg_tunnel_assigned($tunnel, $disabled = true) {
 
 	$iflist = get_configured_interface_list_by_realif($disabled);

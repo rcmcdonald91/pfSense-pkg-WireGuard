@@ -24,7 +24,7 @@
 ##|+PRIV
 ##|*IDENT=page-vpn-wg-edit
 ##|*NAME=VPN: WireGuard: Edit
-##|*DESCR=Edit WireGuard tunnele.
+##|*DESCR=Edit WireGuard tunnel.
 ##|*MATCH=vpn_wg_edit.php*
 ##|-PRIV
 
