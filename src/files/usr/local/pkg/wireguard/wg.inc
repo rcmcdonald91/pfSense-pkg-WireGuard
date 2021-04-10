@@ -109,7 +109,7 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	exec_wg_quick_action($tunnel, "up", $verbose);
 
 	// Add the interface to interface group (i.e. WireGuard)
-	exec("ifconfig {$wg_ifname} group {$wgifgroup}");
+	exec("ifconfig {$tunnel['name']} group {$wgifgroup}");
 
 }
 
