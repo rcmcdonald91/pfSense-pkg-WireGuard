@@ -64,14 +64,14 @@ function wg_configure() {
 
 
 		} else {
-			
+
 			wg_destroy_if($tunnel);
 
 		}
 
 	}
 
-	wg_write_rcfile();
+	// wg_write_rcfile();
 
 	// Regenerate interface group in pfSense (just in case)
 	wg_ifgroup_install();
