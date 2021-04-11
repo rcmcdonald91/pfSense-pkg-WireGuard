@@ -68,7 +68,7 @@ wg_configure_from_confs($wgconfpath, true);
 
 if (platform_booting()) {
 
-	print_message("done. \n";)
+	print_message("done. \n");
 
 }
 
