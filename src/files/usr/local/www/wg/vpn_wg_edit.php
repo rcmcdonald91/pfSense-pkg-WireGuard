@@ -104,11 +104,12 @@ $pglinks = array("", "/wg/vpn_wg.php", "/wg/vpn_wg.php", "@self");
 include("head.inc");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), true, "vpn_wg.php");
-//$tab_array[] = array(gettext("Wizards"), false, "#");
-$tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
+$tab_array[] = array(gettext("Tunnels"), false, "vpn_wg.php");
+$tab_array[] = array(gettext("Settings"), false, "vpn_wg_settings.php");
+$tab_array[] = array(gettext("Status"), true, "status_wireguard.php");
 
 add_package_tabs("wireguard", $tab_array);
+
 display_top_tabs($tab_array);
 
 if ($input_errors) {

@@ -40,7 +40,7 @@ $shortcut_section = "wireguard";
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "vpn_wg.php");
-//$tab_array[] = array(gettext("Wizards"), false, "#");
+$tab_array[] = array(gettext("Settings"), false, "vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
 
 include("head.inc");
@@ -250,3 +250,4 @@ events.push(function() {
 
 <?php
 include("foot.inc");
+?>

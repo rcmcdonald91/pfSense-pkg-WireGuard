@@ -41,24 +41,46 @@ function wg_configure() {
 	global $config;
 
 	if (!is_array($config['installedpackages']['wireguard']['tunnel'])) {
+
 		return;
+
+	}
+
+	if (platform_booting()) {
+
+		echo gettext("Configuring WireGuard Tunnels... ");
+
 	}
 
 	wg_create_config_files();
 
-	$tunnel =[];
+	$tunnel = [];
+
 	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
+
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
 			wg_configure_if($tunnel);
+
+
 		} else {
+			
 			wg_destroy_if($tunnel);
+
 		}
+
 	}
 
 	wg_write_rcfile();
 
 	// Regenerate interface group in pfSense (just in case)
 	wg_ifgroup_install();
+
+	if (platform_booting()) {
+
+		echo gettext("done.") . "\n";
+
+	}
 
 }
 

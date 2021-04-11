@@ -46,8 +46,9 @@ do-install:
 		${STAGEDIR}${PREFIX}/www/wg
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg.php \
 		${STAGEDIR}${PREFIX}/www/wg
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg.php \
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg_settings.php \
 		${STAGEDIR}${PREFIX}/www/wg
+		
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 
