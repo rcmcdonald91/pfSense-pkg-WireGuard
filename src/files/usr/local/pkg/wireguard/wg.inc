@@ -77,17 +77,17 @@ function wg_configure() {
 function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
 
-	// Usually want to destroy the interface first
-	if ($destroyfirst) {
+	// Usually want to destroy the interface first if it is not assigned
+	if ($destroyfirst && !is_wg_tunnel_assigned($tunnel)) {
 
 		wg_destroy_if($tunnel, $verbose);
 
 	}
 
-	// Bring up interface using wg-quick(8)
+	// Attempt to bring up interface using wg-quick(8)
 	exec_wg_quick_action($tunnel, "up", $verbose);
 
-	// Add the interface to interface group (i.e. WireGuard)
+	// Attempt to add the interface to interface group (i.e. WireGuard)
 	exec("ifconfig {$tunnel['name']} group {$wgifgroup}");
 
 }
@@ -179,7 +179,7 @@ function wg_earlyshellcmd_install() {
 			$a_earlyshellcmd[] = "{$wgrcfile}";
 
 		}
-		
+
 	} else {
 
 		$config['system']['earlyshellcmd'] = "{$wgrcfile}";
