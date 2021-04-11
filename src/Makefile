@@ -55,6 +55,8 @@ do-install:
 
 	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/wireguard.priv.inc \
 		${STAGEDIR}/etc/inc/priv
+	${INSTALL_DATA} ${FILESDIR}/etc/rc.reload_wireguard \
+		${STAGEDIR}/etc
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_api.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
