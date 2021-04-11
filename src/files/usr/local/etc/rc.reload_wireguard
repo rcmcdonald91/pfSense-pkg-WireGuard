@@ -37,8 +37,16 @@ function exec_wg_quick_action($ifconf, $action, $verbose = false) {
 
 }
 
+function print_message($message) {
+
+	$message = gettext($message);
+
+	exec("printf {$message} >&2");
+
+}
+
 // Reads conf files and builds tunnel interfaces
-function wg_configure_from_confs($path = '/etc/wireguard', $verbose = false) {
+function wg_configure_from_confs($path, $verbose = false) {
 
 	$wgconfigs = glob("{$path}/*.conf");
 
@@ -50,6 +58,18 @@ function wg_configure_from_confs($path = '/etc/wireguard', $verbose = false) {
 
 }
 
+if (platform_booting()) {
+
+	print_message("Configuring WireGuard Tunnels... ");
+
+}
+
 wg_configure_from_confs($wgconfpath, true);
+
+if (platform_booting()) {
+
+	print_message("done. \n";)
+
+}
 
 ?>
