@@ -217,7 +217,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section1->addInput(new Form_StaticText(
 		'Assignment',
-		"This interface is assigned to {$iffriendly} ({$ifname})"
+		"{$iffriendly} ({$ifname})"
 	));
 
 	$section1->addInput(new Form_StaticText(

@@ -50,10 +50,10 @@ function wg_configure_from_confs($path = '/etc/wireguard', $verbose = false) {
 
 }
 
-if (platform_booting()) { echo gettext("Configuring WireGuard Tunnels..."); }
+echo gettext("Configuring WireGuard Tunnels...");
 
-wg_configure_from_confs($wgconfpath, true);
+wg_configure_from_confs($wgconfpath, false);
 
-if (platform_booting()) { echo gettext("done.") . "\n"; }
+echo gettext("done.") . "\n";
 
 ?>
