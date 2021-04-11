@@ -1,8 +1,8 @@
 # $FreeBSD$
 
 PORTNAME=		pfSense-pkg-WireGuard
-PORTVERSION=	0.0.2
-PORREVISION=	2
+PORTVERSION=	0.0.3
+PORREVISION=	0
 CATEGORIES=		net
 MASTER_SITES=	# empty
 DISTFILES=		# empty
@@ -69,7 +69,7 @@ do-install:
 		
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
-		
+
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/wireguard.xml
