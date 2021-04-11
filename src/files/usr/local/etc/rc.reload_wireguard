@@ -44,16 +44,16 @@ function wg_configure_from_confs($path = '/etc/wireguard', $verbose = false) {
 
 	foreach ($wgconfigs as $wgconfig) {
 
-		exec_wg_quick_action("up", $wgconfig, $verbose);	
+		exec_wg_quick_action($wgconfig, "up", $verbose);	
 
 	}
 
 }
 
-if (!platform_booting()) { echo gettext("Configuring WireGuard Tunnels..."); }
+if (platform_booting()) { echo gettext("Configuring WireGuard Tunnels..."); }
 
 wg_configure_from_confs($wgconfpath, true);
 
-if (!platform_booting()) { echo gettext("done.") . "\n"; }
+if (platform_booting()) { echo gettext("done.") . "\n"; }
 
 ?>
