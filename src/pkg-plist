@@ -8,5 +8,6 @@ www/wg/vpn_wg_settings.php
 www/wg/vpn_wg_edit.php
 www/wg/vpn_wg.php
 /etc/inc/priv/wireguard.priv.inc
+/etc/rc.reload_wireguard
 %%DATADIR%%/info.xml
 @dir /etc/inc/priv

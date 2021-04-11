@@ -1,0 +1,59 @@
+#!/usr/local/bin/php-cgi -f
+<?php
+/*
+ * rc.reload_wireguard
+ *
+ * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2021 R. Christian McDonald
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+require_once('globals.inc');
+require_once('config.inc');
+
+// Various paths to WireGuard binaries and confs
+global $wgbinpath, $wgquickpath, $wgconfpath;
+$wgbinpath = '/usr/local/bin/wg';
+$wgquickpath = '/usr/local/bin/wg-quick';
+$wgconfpath = '/etc/wireguard';
+
+// Executes a wg-quick(8) action using a specified interface or config file
+function exec_wg_quick_action($ifconf, $action, $verbose = false) {
+	global $wgquickpath;
+
+	exec("{$wgquickpath} {$action} {$ifconf}" . ($verbose ? "" : " > /dev/null 2>&1"));
+
+}
+
+// Reads conf files and builds tunnel interfaces
+function wg_configure_from_confs($path = '/etc/wireguard', $verbose = false) {
+
+	$wgconfigs = glob("{$path}/*.conf");
+
+	foreach ($wgconfigs as $wgconfig) {
+
+		exec_wg_quick_action("up", $wgconfig, $verbose);	
+
+	}
+
+}
+
+if (!platform_booting()) { echo gettext("Configuring WireGuard Tunnels..."); }
+
+wg_configure_from_confs($wgconfpath, true);
+
+if (!platform_booting()) { echo gettext("done.") . "\n"; }
+
+?>
