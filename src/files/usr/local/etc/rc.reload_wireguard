@@ -41,7 +41,7 @@ function print_message($message) {
 
 	$message = gettext($message);
 
-	exec("printf {$message} >&2");
+	exec("printf '{$message}' >&2");
 
 }
 
@@ -57,23 +57,10 @@ function wg_configure_from_confs($path, $verbose = false) {
 	}
 
 }
-
-$run_verbose = true;
-
-if (!platform_booting()) {
-
-	print_message("Configuring WireGuard Tunnels... ");
-
-	$run_verbose = false;
-
-}
+print_message("Configuring WireGuard Tunnels... ");
 
 wg_configure_from_confs($wgconfpath, $run_verbose);
 
-if (!platform_booting()) {
-
-	print_message("done. \n");
-
-}
+print_message("done. \n");
 
 ?>
