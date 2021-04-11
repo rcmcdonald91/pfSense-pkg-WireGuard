@@ -64,9 +64,6 @@ if ($_POST['save']) {
 		// Create the new WG config files
 		wg_create_config_files();
 		
-		// Write out RC file
-		wg_write_rcfile();
-
 		// Create interface group
 		wg_ifgroup_install();
 
