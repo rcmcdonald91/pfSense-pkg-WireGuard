@@ -20,6 +20,7 @@
  * limitations under the License.
  */
 
+// pfSense includes
 require_once('globals.inc');
 require_once('config.inc');
 require_once('pfsense-utils.inc');
@@ -83,7 +84,7 @@ function wg_version($pkgs = 'wireguard') {
 	global $pkgpath;
 
 	$packages = array();
-	exec("{$pkgpath} info | grep {$pkgs}", $packages);
+	exec("{$pkgpath} info | grep -i {$pkgs}", $packages);
 
 	$output = implode("\n", $packages);
 	return htmlspecialchars($output);
@@ -112,11 +113,22 @@ function genPubKey($privkey) {
 
 }
 
-// Executes a wg-quick(8) action using a specified tunnel
+// Executes a wg-quick(8) action using a specified tunnel or interface
 function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	global $wgquickpath;
 
-	exec("{$wgquickpath} {$action} {$tunnel['name']}" . ($verbose ? "" : " > /dev/null 2>&1"));
+	// Assume we have an interface first
+	$wg_ifname = $tunnel;
+
+	// Looks like we have a tunnel structure
+	if (is_array($tunnel)) {
+
+		$wg_ifname = $tunnel['name'];
+
+	}
+
+	// Execute wg-quick(8) on the interface using the provided action 
+	exec("{$wgquickpath} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
 }
 
@@ -135,22 +147,33 @@ function next_wg_port() {
 	global $config;
 
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+
 	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
 	for ($idx=51820; $idx<65535; $idx++) {
+
 		// Check to see if the port is already in use
 		$found = false;
+
 		foreach ($tunnels as $tunnel) {
+
 			if ($tunnel['interface']['listenport'] == $idx) {
+
 				$found = true;
+
 				break;
+
 			}
+
 		}
 
 		// If not, it can be used
 		if (!$found) {
+
 			return $idx;
+			
 		}
+
 	}
 
 	return 51820;
@@ -160,28 +183,33 @@ function next_wg_port() {
 // Return the next available WireGuard interface
 function next_wg_if() {
 	global $config, $wgifprefix;
+
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+
 	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
 	$used_ifs = array();
+
 	foreach ($tunnels as $tunnel) {
+
 		$used_ifs[] = $tunnel['name'];
+
 	}
 
 	for ($ifnum = 0; $ifnum < 32768; $ifnum++) {
+
 		$want_if = "{$wgifprefix}{$ifnum}";
+		
 		if (!in_array($want_if, $used_ifs)) {
+
 			return $want_if;
+
 		}
+
 	}
+
 	return -1;
 	
-}
-
-function wg_default_mtu() { 
-	
-	return 1420; 
-
 }
 
 ?>

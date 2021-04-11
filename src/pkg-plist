@@ -1,8 +1,10 @@
+etc/rc.reload_wireguard
 pkg/wireguard.xml
 pkg/wireguard/wg_api.inc
+pkg/wireguard/wg_extras.inc
 pkg/wireguard/wg_validate.inc
 pkg/wireguard/wg.inc
-etc/rc.reload_wireguard
+pkg/wireguard/etc/rc.bootstrap_wireguard
 www/shortcuts/pkg_wireguard.inc
 www/wg/status_wireguard.php
 www/wg/vpn_wg_settings.php

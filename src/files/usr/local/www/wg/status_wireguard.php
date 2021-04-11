@@ -30,9 +30,12 @@
 $shortcut_section = "wireguard";
 $pgtitle = array(gettext("Status"), "WireGuard");
 
+// pfSense includes
 require_once("guiconfig.inc");
 require_once("functions.inc");
 require_once("shortcuts.inc");
+
+// WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
 include("head.inc");

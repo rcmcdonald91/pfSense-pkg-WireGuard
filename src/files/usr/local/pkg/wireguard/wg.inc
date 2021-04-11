@@ -21,6 +21,7 @@
  * limitations under the License.
  */
 
+// pfSense includes
 require_once('config.inc');
 require_once('globals.inc');
 require_once('interfaces.inc');
@@ -30,14 +31,16 @@ require_once('service-utils.inc');
 require_once('system.inc');
 require_once('util.inc');
 
+// WireGuard includes
 require_once('wg_api.inc');
+require_once('wg_extras.inc');
 require_once('wg_validate.inc');
 
 global $wgifgroup;
 $wgifgroup = 'WireGuard';
 
-global $wgrcfile;
-$wgrcfile = '/usr/local/etc/rc.reload_wireguard';
+global $wgearlyshellcmds;
+$wgearlyshellcmds = array('/usr/local/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.reload_wireguard');
 
 // Setup all WireGuard tunnels
 function wg_configure() {
@@ -68,9 +71,6 @@ function wg_configure() {
 
 	}
 
-	// Regenerate interface group in pfSense (just in case)
-	wg_ifgroup_install();
-
 }
 
 // Setup WireGuard tunnel
@@ -78,7 +78,7 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
 
 	// Usually want to destroy the interface first if it is not assigned
-	if ($destroyfirst && !is_wg_tunnel_assigned($tunnel)) {
+	if ($destroyfirst) {
 
 		wg_destroy_if($tunnel, $verbose);
 
@@ -96,9 +96,28 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 // Remove WireGuard tunnel
 function wg_destroy_if($tunnel, $verbose = false) {
 	
-	exec_wg_quick_action($tunnel, $verbose);
+	exec_wg_quick_action($tunnel, "down", $verbose);
 
 	pfSense_interface_destroy($tunnel['name']);
+
+}
+
+// Reads conf files and builds tunnel interfaces
+function wg_configure_from_confs($path, $destroyfirst = false, $verbose = false) {
+
+	$wgconfigs = glob("{$path}/*.conf");
+
+	foreach ($wgconfigs as $wgconfig) {
+
+		if ($destroyfirst) {
+
+			exec_wg_quick_action($wgconfig, "down", $verbose);
+
+		}
+
+		exec_wg_quick_action($wgconfig, "up", $verbose);	
+
+	}
 
 }
 
@@ -166,37 +185,54 @@ function wg_ifgroup_install() {
 
 }
 
+function wg_earlyshellcmd_deinstall($clean = true) {
+
+
+}
+
 function wg_earlyshellcmd_install() {
-	global $config, $wgrcfile;
+	global $config, $wgearlyshellcmds;
 
-	// Check conf file for any earlyshellcmds
-	if (isset($config['system']['earlyshellcmd'])) {
+	// This ensures we are always starting clean
+	wg_earlyshellcmd_deinstall();
 
-		$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
+	// Need to generalize this and clean it up...
+	unlink_if_exists('/usr/local/etc/rc.bootstrap_wireguard');
+	copy('/usr/local/pkg/wireguard/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.bootstrap_wireguard');
+	chmod('/usr/local/etc/rc.bootstrap_wireguard', 0755);
 
-		if (!preg_grep("/rc.reload_wireguard/", $a_earlyshellcmd)) {
+	$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
 
-			$a_earlyshellcmd[] = "{$wgrcfile}";
+	// Unlikely the user already has earlyshellcmds configured
+	if (!is_array($a_earlyshellcmd)) {
 
-		}
-
-	} else {
-
-		$config['system']['earlyshellcmd'] = "{$wgrcfile}";
+		$a_earlyshellcmd = array();
 
 	}
 
-	write_config("WireGuard: Saving earlyshellcmd [{$wgrcfile}]");
+	// Make sure our WireGuard scripts always run first
+	$a_earlyshellcmd = array_merge($wgearlyshellcmds, $a_earlyshellcmd);
+
+	write_config("WireGuard earlyshellcmds updated.");
 
 }
 
 function wg_install() {
-
-	// Install the earlyshellcmd
+	
+	// Installs the earlyshellcmds
 	wg_earlyshellcmd_install();
+
+	// Create the 'WireGuard' interface group
+	wg_ifgroup_install();
 
 	// Configure any existing interfaces
 	wg_configure();
+
+}
+
+function wg_deinstall() {
+
+	# TODO
 
 }
 
@@ -440,3 +476,5 @@ function wg_find_tunnel_gw($tunnel, $addr) {
 	// If no viable candidate is found, return the tunnel address
 	return $ip;
 }
+
+?>

@@ -1,7 +1,6 @@
-#!/usr/local/bin/php-cgi -f
 <?php
 /*
- * 20-reload_wireguard.sh
+ * wg_extras.inc
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald
@@ -20,30 +19,20 @@
  * limitations under the License.
  */
 
-// pfSense includes
-require_once('globals.inc');
-require_once('config.inc');
+// This is a hack to get text onto the console during booting
+function print_message($message) {
 
-// WireGuard includes
-require_once('/usr/local/pkg/wireguard/wg.inc');
+	$message = gettext($message);
 
-// Nice to have someoutput when running manually after system startup for testing
-$run_verbose = true;
+    $message = escapeshellarg($message);
 
-if (platform_booting()) {
-
-	$run_verbose = false;
-
-	print_message("Configuring WireGuard tunnels... ");
+	exec("printf {$message} >&2");
 
 }
 
-// Destroy first to supersede any lo placeholder interfaces after boot 
-wg_configure_from_confs($wgconfpath, true, $run_verbose);
-
-if (platform_booting()) {
-
-	print_message("done. \n");
+function wg_default_mtu() { 
+	
+	return 1420; 
 
 }
 

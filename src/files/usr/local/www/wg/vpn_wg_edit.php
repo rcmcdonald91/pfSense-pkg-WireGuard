@@ -28,8 +28,11 @@
 ##|*MATCH=vpn_wg_edit.php*
 ##|-PRIV
 
+// pfSense includes
 require_once("functions.inc");
 require_once("guiconfig.inc");
+
+// WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
 init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
@@ -101,9 +104,9 @@ $pglinks = array("", "/wg/vpn_wg.php", "/wg/vpn_wg.php", "@self");
 include("head.inc");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "vpn_wg.php");
+$tab_array[] = array(gettext("Tunnels"), true, "vpn_wg.php");
 $tab_array[] = array(gettext("Settings"), false, "vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), true, "status_wireguard.php");
+$tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
 
 add_package_tabs("wireguard", $tab_array);
 
@@ -127,10 +130,10 @@ $section->addInput(new Form_Input(
 
 $section->addInput(new Form_Checkbox(
 	'enabled',
-	'Enabled',
+	'Tunnel Enabled',
 	'',
 	$pconfig['enabled'] == 'yes'
-))->setHelp('Tunnel must be enabled for interface assignment');
+))->setHelp('Note: Tunnel must be enabled for interface assignment');
 
 $section->addInput(new Form_Input(
 	'descr',
@@ -174,34 +177,26 @@ $section->add($group);
 $form->add($section);
 
 // ============ Interface edit modal ==================================
-$section1 = new Form_Section("Interface Configuration ({$pconfig['name']})");
+$section = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
 if (!is_wg_tunnel_assigned($pconfig)) {
 
-	$section1->addInput(new Form_StaticText(
-		'Interface',
+	$section->addInput(new Form_StaticText(
+		'Assignment',
 		"Leave these fields blank to use <a href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
-	$section1->addInput(new Form_Input(
+	$section->addInput(new Form_StaticText(
+		'Firewall Rules',
+		"Configure firewall rules on unassigned tunnels using the <a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
+	));
+
+	$section->addInput(new Form_Input(
 		'address',
 		'Address',
 		'text',
 		$pconfig['interface']['address']
 	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
-
-	$section1->addInput(new Form_Input(
-		'mtu',
-		'MTU',
-		'text',
-		$pconfig['interface']['mtu'],
-		['placeholder' => wg_default_mtu()]
-	))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
-
-	$section1->addInput(new Form_StaticText(
-		'Firewall Rules',
-		"Configure firewall rules on unassigned tunnels using the <a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
-	));
 
 } else {
 
@@ -212,24 +207,24 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	$ifname = $iflist[$pconfig['name']];
 	$iffriendly = $ifdescr[$ifname];
 
-	$section1->addInput(new Form_StaticText(
+	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"{$iffriendly} ({$ifname})"
+		"<a href='../../interfaces_assign.php'>{$iffriendly} ({$ifname})</a>"
 	));
 
-	$section1->addInput(new Form_StaticText(
+	$section->addInput(new Form_StaticText(
 		'Interface',
 		"<a href='../../interfaces.php?if={$ifname}'>Interface Configuration</a>"
 	));
 
-	$section1->addInput(new Form_StaticText(
+	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
 		"<a href='../../firewall_rules.php?if={$ifname}'>Firewall Configuration</a>"
 	));
 
 }
 
-$form->add($section1);
+$form->add($section);
 
 print($form);
 
@@ -624,3 +619,5 @@ events.push(function() {
 <?php
 
 include("foot.inc");
+
+?>

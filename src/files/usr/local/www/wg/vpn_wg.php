@@ -27,8 +27,11 @@
 ##|*MATCH=vpn_wg.php*
 ##|-PRIV
 
+// pfSense includes
 require_once("guiconfig.inc");
 require_once("functions.inc");
+
+// WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
 init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));

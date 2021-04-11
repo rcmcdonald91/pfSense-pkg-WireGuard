@@ -27,11 +27,15 @@
 ##|*MATCH=vpn_wg_settings.php*
 ##|-PRIV
 
+// pfSense includes
 require_once("guiconfig.inc");
 require_once("functions.inc");
 
+// WireGuard includes
+require_once("/usr/local/pkg/wireguard/wg.inc");
+
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Settings"));
-$pglinks = array("", "vpn_wg.php", "@self");
+$pglinks = array("", "/wg/vpn_wg.php", "@self");
 $shortcut_section = "wireguard";
 
 $tab_array = array();
@@ -44,6 +48,90 @@ include("head.inc");
 add_package_tabs("wireguard", $tab_array);
 
 display_top_tabs($tab_array);
+
+if ($input_errors) {
+	print_input_errors($input_errors);
+}
+
+$form = new Form(false);
+
+$section = new Form_Section("WireGuard Settings");
+
+$section->addInput(new Form_Input(
+    'mtu',
+    'Default MTU',
+    'text',
+    $pconfig['mtu'],
+    ['placeholder' => wg_default_mtu()]
+))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
+
+$form->add($section);
+
+print($form);
+
+?>
+
+<nav class="action-buttons">
+	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save Settings')?>">
+		<i class="fa fa-save icon-embed-btn"></i>
+		<?=gettext("Save")?>
+	</button>
+</nav>
+
+<?php $jpconfig = json_encode($pconfig, JSON_HEX_APOS); ?>
+
+<!-- ============== JavaScript =================================================================================================-->
+<script type="text/javascript">
+//<![CDATA[
+events.push(function() {
+	var pconfig = JSON.parse('<?=$jpconfig?>');
+
+	// Eliminate ghost lines in modal
+	$('.form-group').css({"border-bottom-width" : "0"});
+
+	// Return text from peer table cell
+	function tabletext (row, col) {
+		row++; col++;
+		return $('#peertable tr:nth-child(' + row + ') td:nth-child('+ col + ')').text();
+	}
+
+
+	// Save the form
+	$('#saveform').click(function () {
+
+		$('<input>').attr({type: 'hidden',name: 'save',value: 'save'}).appendTo(form);
+
+
+		$(form).submit();
+	});
+
+	// These are action buttons, not submit buttons
+	$("#savemodal").prop('type' ,'button');
+
+
+
+
+	// Warn the user if the peer table has been updated, but the form has not yet been saved ----------------------------
+	// Save the table state on page load
+	var tableHash = hashCode($('#peertable').html());
+
+	window.addEventListener('beforeunload', (event) => {
+		// If the table has changed since page load . .
+		if (hashCode($('#peertable').html()) !== tableHash) {
+			// Cause the browser to display "Are you sure" message)
+			// Unfortunately it is no longer possible to customize the browser message
+			event.returnValue = '';
+		}
+	});
+
+	function hashCode(s){
+		return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+	}
+});
+//]]>
+</script>
+
+<?php
 
 include("foot.inc");
 
