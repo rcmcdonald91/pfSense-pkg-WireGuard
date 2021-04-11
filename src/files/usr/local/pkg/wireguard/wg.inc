@@ -36,6 +36,9 @@ require_once('wg_validate.inc');
 global $wgifgroup;
 $wgifgroup = 'WireGuard';
 
+global $wgrcfile;
+$wgrcfile = '/usr/local/etc/rc.reload_wireguard';
+
 // Setup all WireGuard tunnels
 function wg_configure() {
 	global $config;
@@ -43,12 +46,6 @@ function wg_configure() {
 	if (!is_array($config['installedpackages']['wireguard']['tunnel'])) {
 
 		return;
-
-	}
-
-	if (platform_booting()) {
-
-		echo gettext("Configuring WireGuard Tunnels... ");
 
 	}
 
@@ -71,48 +68,8 @@ function wg_configure() {
 
 	}
 
-	// wg_write_rcfile();
-
 	// Regenerate interface group in pfSense (just in case)
 	wg_ifgroup_install();
-
-	if (platform_booting()) {
-
-		echo gettext("done.") . "\n";
-
-	}
-
-}
-
-function wg_write_rcfile() {
-	global $config, $wgconfpath, $wgquickpath, $wgifgroup; 
-
-	$wgconfigs = glob("{$wgconfpath}/*.conf");
-
-	$rcfilepath = '/usr/local/etc/rc.d/wireguard';
-
-	// Probably not necessary
-	unlink_if_exists('$rcfilepath');
-
-	// This ensures that write_rcfile will always create the file
-	$start = $stop = ['# DO NOT REMOVE'];
-
-	foreach ($wgconfigs as $wgconfig) {
-		$wg_ifname = basename($wgconfig, '.conf');
-		array_push($start, "{$wgquickpath} up {$wg_ifname} && ifconfig {$wg_ifname} group {$wgifgroup} && /etc/rc.filter_configure");
-		array_push($stop, "{$wgquickpath} down {$wg_ifname}");
-	}
-
-	$rcfile = [];
-
-	$rcfile['file'] = 'wireguard';
-	$rcfile['start'] = implode("\n\t", $start);
-	$rcfile['stop'] = implode("\n\t", $stop);
-
-	write_rcfile($rcfile);
-
-	// for good measure
-	chmod($rcfilepath, 0755);
 
 }
 
@@ -209,18 +166,27 @@ function wg_ifgroup_install() {
 
 }
 
-
-function wg_earlyshellcmd_deinstall() {
-	global $config;
-
-	# TODO
-
-}
-
 function wg_earlyshellcmd_install() {
-	global $config;
+	global $config, $wgrcfile;
 
-	# TODO
+	// Check conf file for any earlyshellcmds
+	if (isset($config['system']['earlyshellcmd'])) {
+
+		$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
+
+		if (!preg_grep("/rc.reload_wireguard/", $a_earlyshellcmd)) {
+
+			$a_earlyshellcmd[] = "{$wgrcfile}";
+
+		}
+		
+	} else {
+
+		$config['system']['earlyshellcmd'] = "{$wgrcfile}";
+
+	}
+
+	write_config("WireGuard: Saving earlyshellcmd [{$wgrcfile}]");
 
 }
 
@@ -229,7 +195,7 @@ function wg_install() {
 	// Install the earlyshellcmd
 	wg_earlyshellcmd_install();
 
-	// Configure existing interfaces
+	// Configure any existing interfaces
 	wg_configure();
 
 }
