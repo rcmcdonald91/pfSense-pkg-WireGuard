@@ -29,42 +29,47 @@ do-extract:
 
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
+
+	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
-	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 	${MKDIR} ${STAGEDIR}${PREFIX}/www
-	${MKDIR} ${STAGEDIR}${DATADIR}
-
-	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg
+
+	${MKDIR} ${STAGEDIR}${DATADIR}
+	
+	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/wireguard.priv.inc \
+		${STAGEDIR}/etc/inc/priv
+
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/etc/rc.reload_wireguard \
+		${STAGEDIR}${PREFIX}/etc
+
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
+		${STAGEDIR}${PREFIX}/pkg
+
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_api.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/pkg_wireguard.inc \
 		${STAGEDIR}${PREFIX}/www/shortcuts
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/status_wireguard.php \
 		${STAGEDIR}${PREFIX}/www/wg
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg_edit.php \
-		${STAGEDIR}${PREFIX}/www/wg
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg.php \
+		${STAGEDIR}${PREFIX}/www/wg
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg_edit.php \
 		${STAGEDIR}${PREFIX}/www/wg
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/vpn_wg_settings.php \
 		${STAGEDIR}${PREFIX}/www/wg
 		
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg.inc \
-		${STAGEDIR}${PREFIX}/pkg/wireguard
-
-	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/wireguard.priv.inc \
-		${STAGEDIR}/etc/inc/priv
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/etc/rc.reload_wireguard \
-		${STAGEDIR}${PREFIX}/etc
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_api.inc \
-		${STAGEDIR}${PREFIX}/pkg/wireguard
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
-		${STAGEDIR}${PREFIX}/pkg/wireguard
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
-		${STAGEDIR}${PREFIX}/pkg
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
+		
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/wireguard.xml
