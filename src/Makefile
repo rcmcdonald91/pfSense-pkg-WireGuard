@@ -29,9 +29,9 @@ do-extract:
 
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
-	${MKDIR} ${STAGEDIR}/etc/rc.d
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
+	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 	${MKDIR} ${STAGEDIR}${PREFIX}/www
 	${MKDIR} ${STAGEDIR}${DATADIR}
 
