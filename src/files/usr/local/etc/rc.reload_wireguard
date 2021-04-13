@@ -1,7 +1,7 @@
 #!/usr/local/bin/php-cgi -f
 <?php
 /*
- * 20-reload_wireguard.sh
+ * rc.reload_wireguard
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald
@@ -38,7 +38,7 @@ if (platform_booting()) {
 
 }
 
-// Destroy first to supersede any lo placeholder interfaces after boot 
+// Destroy first to supersede any lo placeholder interfaces after startup 
 wg_configure_from_confs($wgconfpath, true, $run_verbose);
 
 if (platform_booting()) {
