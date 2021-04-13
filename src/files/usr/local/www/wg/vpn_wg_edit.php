@@ -73,9 +73,9 @@ if ($_POST['save']) {
 		// Setup and start the new WG tunnel
 		if (isset($pconfig['enabled']) &&
 		    ($pconfig['enabled'] == 'yes')) {
-			wg_configure_if($pconfig['name']);
+			wg_configure_if($pconfig);
 		} else {
-			wg_destroy_if($pconfig['name']);
+			wg_destroy_if($pconfig);
 		}
 
 		// Go back to the tunnel table
