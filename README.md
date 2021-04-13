@@ -11,6 +11,8 @@ Note: I'm currently developing directly in the main branch. I know this is bad p
 
 **Developed on pfSense 2.6.0-DEVELOPMENT snapshots.**
 
+**Now tested on pfSense 2.5.1-RC and 2.6.0-DEVELOPMENT**
+
 **DO NOT INSTALL ON pfSense 2.5.0.** 
 
 ## Build
