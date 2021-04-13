@@ -1,7 +1,7 @@
 #!/usr/local/bin/php-cgi -f
 <?php
 /*
- * 10-bootstrap_wireguard.sh
+ * rc.bootstrap_wireguard
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald
@@ -24,7 +24,7 @@
 require_once('globals.inc');
 require_once('config.inc');
 
-// This is a hack to get text onto the console during booting
+// This is a hack to get text onto the console during booting from a php-cgi script
 function print_message($message) {
 
 	$message = gettext($message);
@@ -42,11 +42,11 @@ if (platform_booting()) {
 
 	$run_verbose = false;
 
-	print_message("Bootstrapping WireGuard interfaces...\n");
+	print_message("Bootstrapping WireGuard interfaces... \n");
 
 }
 
-// Iterate through each assigned interface looking for "wg" interfaces to bootstrap
+// Iterate through each assigned interface looking for any wg interfaces to bootstrap
 $a_interfaces = $config['interfaces'];
 
 if (is_array($a_interfaces)) {
@@ -55,10 +55,11 @@ if (is_array($a_interfaces)) {
 
         $ifname = $interface['if'];
         
+        // We found one, create a temporary loopback interface of the same name to allow booting if the package disappears
         if (substr($ifname, 0, 2) == "wg") {
 
-            // Create a wgX interface using lo driver.
-            exec("ifconfig lo create name {$ifname}" . ($run_verbose ? "" : " > /dev/null 2>&1"));
+            // Create a wgX interface using lo driver, keeping track of any erroneous loifs created
+            exec("ifconfig lo create name {$ifname}" . ($run_verbose ? "" : " > /dev/null 2>&1"), $loifs);
 
         }
 
@@ -66,9 +67,20 @@ if (is_array($a_interfaces)) {
 
 }
 
+// Need to clean up any erroneous loifs that might have been created
+if (isset($loifs) && is_array($loifs)) {
+
+    foreach ($loifs as $loif) {
+
+        exec("ifconfig {$loif} destroy" . ($run_verbose ? "" : " > /dev/null 2>&1"));
+
+    }
+
+}
+
 if (platform_booting()) {
 
-	print_message("Finished bootstrapping WireGuard interfaces.\n");
+	print_message("Finished bootstrapping WireGuard interfaces. \n");
 
 }
 
