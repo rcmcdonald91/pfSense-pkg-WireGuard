@@ -24,7 +24,7 @@ function print_message($message) {
 
 	$message = gettext($message);
 
-    $message = escapeshellarg($message);
+    	$message = escapeshellarg($message);
 
 	exec("printf {$message} >&2");
 

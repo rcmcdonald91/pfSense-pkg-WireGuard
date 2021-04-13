@@ -187,6 +187,7 @@ function wg_ifgroup_install() {
 
 function wg_earlyshellcmd_deinstall($clean = true) {
 
+	# TODO
 
 }
 
@@ -218,15 +219,23 @@ function wg_earlyshellcmd_install() {
 }
 
 function wg_install() {
+
+	update_status("Creating earlyshellcmds...\n");
 	
 	// Installs the earlyshellcmds
 	wg_earlyshellcmd_install();
 
+	update_status(" done.\nCreating WireGuard interface group...\n");
+
 	// Create the 'WireGuard' interface group
 	wg_ifgroup_install();
 
+	update_status(" done.\nConfiguring any existing WireGuard interfaces...\n");
+
 	// Configure any existing interfaces
 	wg_configure();
+
+	update_status(" done.\n");
 
 }
 
