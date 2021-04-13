@@ -233,17 +233,17 @@ function wg_earlyshellcmd_install() {
 
 function wg_install() {
 
-	update_status("Creating earlyshellcmds...\n");
+	update_status("\nCreating earlyshellcmds... ");
 	
 	// Installs the earlyshellcmds
 	wg_earlyshellcmd_install();
 
-	update_status(" done.\nCreating WireGuard interface group...\n");
+	update_status(" done.\nCreating WireGuard interface group... ");
 
 	// Create the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status(" done.\nConfiguring any existing WireGuard interfaces...\n");
+	update_status(" done.\nConfiguring any existing WireGuard interfaces... ");
 
 	// Configure any existing interfaces
 	wg_configure();
