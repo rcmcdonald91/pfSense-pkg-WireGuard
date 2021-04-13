@@ -39,8 +39,10 @@ require_once('wg_validate.inc');
 global $wgifgroup;
 $wgifgroup = 'WireGuard';
 
+// The order of this array matters
 global $wgearlyshellcmds;
 $wgearlyshellcmds = array('/usr/local/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.reload_wireguard');
+
 
 // Setup all WireGuard tunnels
 function wg_configure() {
@@ -197,10 +199,21 @@ function wg_earlyshellcmd_install() {
 	// This ensures we are always starting clean
 	wg_earlyshellcmd_deinstall();
 
-	// Need to generalize this and clean it up...
-	unlink_if_exists('/usr/local/etc/rc.bootstrap_wireguard');
-	copy('/usr/local/pkg/wireguard/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.bootstrap_wireguard');
-	chmod('/usr/local/etc/rc.bootstrap_wireguard', 0755);
+	$installscripts = array('rc.bootstrap_wireguard');
+
+	$installsource = '/usr/local/pkg/wireguard/etc';
+
+	$installdest = '/usr/local/etc';
+
+	foreach ($installscripts as $script) {
+
+		unlink_if_exists("{$installdest}/{$script}");
+
+		copy("{$installsource}/{$script}", "{$installdest}/{$script}");
+
+		chmod("{$installdest}/{$script}", 0755);
+
+	}
 
 	$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
 

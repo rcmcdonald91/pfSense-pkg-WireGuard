@@ -46,33 +46,23 @@ if (platform_booting()) {
 
 }
 
-// Iterate through each assigned interface looking for any wg interfaces to bootstrap
+// Iterate through each assigned interface looking for any wg interfaces that need bootstrap
 $a_interfaces = $config['interfaces'];
 
 if (is_array($a_interfaces)) {
 
     foreach ($a_interfaces as $interface) {
 
-        $ifname = $interface['if'];
+        $ifname = escapeshellargs($interface['if']);
+
+        $verbosestr = ($run_verbose ? "" : " > /dev/null 2>&1")
         
         // We found one, create a temporary loopback interface of the same name to allow booting if the package disappears
         if (substr($ifname, 0, 2) == "wg") {
 
-            // Create a wgX interface using lo driver, keeping track of any erroneous loifs created
-            exec("ifconfig lo create name {$ifname}" . ($run_verbose ? "" : " > /dev/null 2>&1"), $loifs);
+            exec("ifconfig {$ifname}" . $verbosestr . " || ifconfig lo create name {$ifname}");
 
         }
-
-    }
-
-}
-
-// Need to clean up any erroneous loifs that might have been created
-if (isset($loifs) && is_array($loifs)) {
-
-    foreach ($loifs as $loif) {
-
-        exec("ifconfig {$loif} destroy" . ($run_verbose ? "" : " > /dev/null 2>&1"));
 
     }
 
