@@ -39,7 +39,7 @@ $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 
 if ($_POST['save']) {
 
-	print_r($_POST)
+	print_r($_POST);
 
 }
 
