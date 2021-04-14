@@ -212,7 +212,7 @@ function wg_extra_script_install($scripts_to_install, $install_dest = '/usr/loca
 
 		$script_source_path = dirname($script);
 
-		update_status("Installing {$script_name} to {$install_dest} ...");
+		update_status("\nInstalling {$script_name} to {$install_dest} ...");
 
 		unlink_if_exists("{$script}");
 
@@ -242,7 +242,7 @@ function wg_earlyshellcmd_install($cmds_to_install) {
 	}
 
 	// Make sure our WireGuard scripts always run first, push everything else after us
-	$a_earlyshellcmds = array_merge($wgearlyshellcmds, $a_earlyshellcmds);
+	$a_earlyshellcmds = array_merge($cmds_to_install, $a_earlyshellcmds);
 
 	write_config("[WireGuard] Earlyshellcmds installed.");
 
