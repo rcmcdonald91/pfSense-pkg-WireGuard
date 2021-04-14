@@ -47,7 +47,7 @@ if (platform_booting()) {
 
 }
 
-$verbose_pipe = ($run_verbose ? "" : " > /dev/null 2>&1")
+$verbose_pipe = ($run_verbose ? "" : " > /dev/null 2>&1");
 
 $if_list = get_configured_interface_list_by_realif($disabled);
 
@@ -57,7 +57,7 @@ foreach ($if_list as $realif => $name) {
 
 	if (substr($realif, 0, 2) == "wg") {
 
-		exec("/sbin/ifconfig {$ifname}" . $verbose_pipe . " || ifconfig lo create name {$ifname}")
+		exec("/sbin/ifconfig {$ifname}" . $verbose_pipe . " || ifconfig lo create name {$ifname}");
 
 	}
 
