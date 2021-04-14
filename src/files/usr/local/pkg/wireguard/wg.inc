@@ -168,7 +168,7 @@ function wg_ifgroup_install() {
 	$wg_group_entry['ifname'] = $wgifgroup;
 	$wg_group_entry['descr'] = 'Created by WireGuard';
 
-	$a_ifgroups[] = wg_group_entry;
+	$a_ifgroups[] = $wg_group_entry;
 
 	write_config("[WireGuard] Interface group ({$wgifgroup}) updated.");
 
