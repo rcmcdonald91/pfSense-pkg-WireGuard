@@ -31,6 +31,7 @@ function print_message($message) {
 
     $message = escapeshellarg($message);
 
+    // printf is a shell builtin 
 	exec("printf {$message} >&2");
 
 }
@@ -46,25 +47,19 @@ if (platform_booting()) {
 
 }
 
-// Iterate through each assigned interface looking for any wg interfaces that need bootstrap
-$a_interfaces = $config['interfaces'];
+$verbose_pipe = ($run_verbose ? "" : " > /dev/null 2>&1")
 
-if (is_array($a_interfaces)) {
+$if_list = get_configured_interface_list_by_realif($disabled);
 
-    foreach ($a_interfaces as $interface) {
+foreach ($if_list as $realif => $name) {
 
-        $ifname = escapeshellargs($interface['if']);
+    $ifname = escapeshellarg($realif);
 
-        $verbosestr = ($run_verbose ? "" : " > /dev/null 2>&1")
-        
-        // We found one, create a temporary loopback interface of the same name to allow booting if the package disappears
-        if (substr($ifname, 0, 2) == "wg") {
+	if (substr($realif, 0, 2) == "wg") {
 
-            exec("ifconfig {$ifname}" . $verbosestr . " || ifconfig lo create name {$ifname}");
+		exec("/sbin/ifconfig {$ifname}" . $verbose_pipe . " || ifconfig lo create name {$ifname}")
 
-        }
-
-    }
+	}
 
 }
 
