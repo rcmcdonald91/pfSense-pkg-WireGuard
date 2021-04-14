@@ -87,17 +87,25 @@ if ($_POST) {
 		// Process ajax call requesting new key pair
 		print(genKeyPair(true));
 		exit;
-	} else {
-		if (isset($index)) {
-			if ($tunnels[$index]) {
-				$pconfig = &$tunnels[$index];
-			}
-		} else {
-			$pconfig = array();
-			$pconfig['name'] = next_wg_if();
-		}
 	}
 
+} else {
+
+	if (isset($index)) {
+
+		if ($tunnels[$index]) {
+
+			$pconfig = &$tunnels[$index];
+		}
+
+	} else {
+
+		$pconfig = array();
+
+		$pconfig['name'] = next_wg_if();
+
+	}
+	
 }
 
 $shortcut_section = "wireguard";
