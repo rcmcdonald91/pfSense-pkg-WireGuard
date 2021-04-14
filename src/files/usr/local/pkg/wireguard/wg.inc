@@ -147,35 +147,30 @@ function wg_delete_tunnel($tunidx) {
 function wg_ifgroup_install() {
 	global $g, $config, $wgifgroup;
 
-	if (!is_array($config['ifgroups'])) {
-		$config['ifgroups'] = array();
-	}
-
-	// Create interface group
-	if (!is_array($config['ifgroups']['ifgroupentry'])) {
-		$config['ifgroups']['ifgroupentry'] = array();
-	}
+	init_config_arr(array('ifgroups', 'ifgroupentry'));
 
 	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
 
-	// Don't add the interface group if it already exists
-	$found = false;
-	foreach ($a_ifgroups as $ifg) {
+	foreach ($a_ifgroups as $index => $ifg) {
+
 		if ($ifg['ifname'] == $wgifgroup) {
-			$found = true;
+
+
+
+			unset($a_ifgroups[$index]);
+
 		}
+		
 	}
 
-	if (!$found) {
-		$ifgroupentry = array();
-		$ifgroupentry['members'] = '';
-		$ifgroupentry['descr'] = 'WireGuard (DO NOT REMOVE)';
-		$ifgroupentry['hide'] = 'yes';
-		$ifgroupentry['ifname'] = $wgifgroup;
-		$a_ifgroups[] = $ifgroupentry;
-	}
+	$wg_group_entry = array();
 
-	write_config("[WireGuard] Interface group updated.");
+	$wg_group_entry['ifname'] = $wgifgroup;
+	$wg_group_entry['descr'] = 'Created by WireGuard';
+
+	$a_ifgroups[] = wg_group_entry
+
+	write_config("[WireGuard] Interface group ({$wgifgroup}) updated.");
 
 	unlink_if_exists("{$g['tmp_path']}/config.cache");
 
