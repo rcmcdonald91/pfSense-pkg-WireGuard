@@ -7,7 +7,7 @@ Under the hood, this implementation relies on `wg-quick(8)` for interacting with
 
 XML configuration bits have been moved from `wireguard/tunnel` to `installedpackages/wireguard/tunnel`
 
-Note: I'm currently developing directly in the main branch. I know this is bad practice. Please ignore the mess.
+Note: I have now moved development to the dev branch. Moving forward main will contain code that has been tested. If you want to run dev branch code, you will need to checkout the branch and `make package` yourself.
 
 **Developed on pfSense 2.6.0-DEVELOPMENT snapshots.**
 
