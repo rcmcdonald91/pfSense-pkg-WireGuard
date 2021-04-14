@@ -249,7 +249,7 @@ function wg_earlyshellcmd_install($cmds_to_install) {
 }
 
 function wg_install() {
-	global $g, $wg_scripts_to_install;
+	global $g, $wg_scripts_to_install, $wgearlyshellcmds;
 
 	$g['wireguard_install'] = true;
 
@@ -258,7 +258,9 @@ function wg_install() {
 	// Installs any extra scripts
 	wg_extra_script_install($wg_scripts_to_install);
 
-	update_status(" done.\nSetting up earlyshellcmds... ");
+	update_status("Finished installing extra scripts.\n" 
+	
+	update_status("Setting up earlyshellcmds... ");
 	
 	// Installs the earlyshellcmds
 	wg_earlyshellcmd_install($wgearlyshellcmds);
