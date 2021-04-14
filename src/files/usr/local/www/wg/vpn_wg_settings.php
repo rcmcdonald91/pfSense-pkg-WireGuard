@@ -55,15 +55,25 @@ if ($input_errors) {
 
 $form = new Form(false);
 
-$section = new Form_Section("WireGuard Settings");
+$section = new Form_Section("General Settings");
 
-$section->addInput(new Form_Input(
-    'mtu',
-    'Default MTU',
-    'text',
-    $pconfig['mtu'],
-    ['placeholder' => wg_default_mtu()]
-))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
+$section->addInput(new Form_Checkbox(
+	'conf_keep',
+	'Keep Configurations',
+    	gettext('Enable'),
+    	$pconfig['conf_keep']
+))->setHelp('<span class="text-danger">Note: </span>'
+		. 'With \'Keep Configurations\' enabled, tunnel configurations will remain on-disk.'
+);
+
+$section->addInput(new Form_Checkbox(
+	'helpers_keep',
+	'Keep Helpers',
+	gettext('Enable'),
+	$pconfig['helpers_keep']
+))->setHelp('<span class="text-danger">Note: </span>'
+		. 'With \'Keep Helpers\' enabled, helper scripts will remain on-disk.'
+);
 
 $form->add($section);
 
