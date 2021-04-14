@@ -37,9 +37,26 @@ require_once("/usr/local/pkg/wireguard/wg.inc");
 init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
 $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 
-if ($_POST['save']) {
+if ($_POST) {
 
-	print_r($_POST);
+	if ($_POST['save']) {
+
+		if (!$input_errors) {
+
+			$pconfig = $_POST;
+
+			$wg_config['keep_conf'] = $pconfig['keep_conf'];
+			$wg_config['blur_secrets'] = $pconfig['blur_secrets'];
+
+			write_config('[WireGuard] Save general settings');
+
+			//wg_resync();
+
+			header("Location: /wg/vpn_wg_edit.php");
+
+		}
+
+	}
 
 }
 
@@ -67,10 +84,10 @@ $form = new Form(false);
 $section = new Form_Section("General Settings");
 
 $section->addInput(new Form_Checkbox(
-	'conf_keep',
+	'keep_conf',
 	'Keep Configuration',
     	gettext('Enable'),
-    	$pconfig['conf_keep']
+    	$pconfig['keep_conf']
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );

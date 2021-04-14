@@ -52,48 +52,52 @@ if ($_REQUEST['ajax']) {
 }
 
 // All form save logic is in /etc/inc/wg.inc
-if ($_POST['save']) {
-	if (empty($_POST['listenport'])) {
-		$_POST['listenport'] = next_wg_port();
-	}
-	if (empty($_POST['mtu'])) {
-		$_POST['mtu'] = wg_default_mtu();
-	}
-	$res = wg_do_post($_POST);
-	$input_errors = $res['input_errors'];
-	$pconfig = $res['pconfig'];
+if ($_POST) {
 
-	if (!$input_errors) {
-		// Create the new WG config files
-		wg_create_config_files();
-		
-		// Create interface group
-		wg_ifgroup_install();
-
-		// Setup and start the new WG tunnel
-		if (isset($pconfig['enabled']) &&
-		    ($pconfig['enabled'] == 'yes')) {
-			wg_configure_if($pconfig);
-		} else {
-			wg_destroy_if($pconfig);
+	if ($_POST['save']) {
+		if (empty($_POST['listenport'])) {
+			$_POST['listenport'] = next_wg_port();
 		}
-
-		// Go back to the tunnel table
-		header("Location: /wg/vpn_wg.php");
-	}
-} elseif ($_POST['action'] == 'genkeys') {
-	// Process ajax call requesting new key pair
-	print(genKeyPair(true));
-	exit;
-} else {
-	if (isset($index)) {
-		if ($tunnels[$index]) {
-			$pconfig = &$tunnels[$index];
+		if (empty($_POST['mtu'])) {
+			$_POST['mtu'] = wg_default_mtu();
 		}
+		$res = wg_do_post($_POST);
+		$input_errors = $res['input_errors'];
+		$pconfig = $res['pconfig'];
+
+		if (!$input_errors) {
+			// Create the new WG config files
+			wg_create_config_files();
+			
+			// Create interface group
+			wg_ifgroup_install();
+
+			// Setup and start the new WG tunnel
+			if (isset($pconfig['enabled']) &&
+			($pconfig['enabled'] == 'yes')) {
+				wg_configure_if($pconfig);
+			} else {
+				wg_destroy_if($pconfig);
+			}
+
+			// Go back to the tunnel table
+			header("Location: /wg/vpn_wg.php");
+		}
+	} elseif ($_POST['action'] == 'genkeys') {
+		// Process ajax call requesting new key pair
+		print(genKeyPair(true));
+		exit;
 	} else {
-		$pconfig = array();
-		$pconfig['name'] = next_wg_if();
+		if (isset($index)) {
+			if ($tunnels[$index]) {
+				$pconfig = &$tunnels[$index];
+			}
+		} else {
+			$pconfig = array();
+			$pconfig['name'] = next_wg_if();
+		}
 	}
+
 }
 
 $shortcut_section = "wireguard";
