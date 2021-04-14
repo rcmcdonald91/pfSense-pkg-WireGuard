@@ -52,7 +52,7 @@ if ($_POST) {
 
 			//wg_resync();
 
-			header("Location: /wg/vpn_wg_edit.php");
+			header("Location: /wg/vpn_wg_settings.php");
 
 		}
 
@@ -87,7 +87,7 @@ $section->addInput(new Form_Checkbox(
 	'keep_conf',
 	'Keep Configuration',
     	gettext('Enable'),
-    	$pconfig['keep_conf']
+    	$wg_config['keep_conf']
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );
@@ -96,7 +96,7 @@ $section->addInput(new Form_Checkbox(
 	'blur_secrets',
 	'Blur Secrets',
     	gettext('Enable'),
-    	$pconfig['blur_secrets']
+    	$wg_config['blur_secrets']
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'With \'Blur Secrets\' enabled, all secrets (private and pre-shared keys) are blurred in the user interface.'
 );
