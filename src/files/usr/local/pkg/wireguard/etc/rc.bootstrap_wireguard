@@ -59,6 +59,8 @@ foreach ($if_list as $realif => $name) {
 
 		exec("/sbin/ifconfig {$ifname}" . $verbose_pipe . " || ifconfig lo create name {$ifname}");
 
+		exec("/sbin/ifconfig {$ifname} group wg");
+
 	}
 
 }
