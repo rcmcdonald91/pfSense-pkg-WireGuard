@@ -134,7 +134,7 @@ $section->addInput(new Form_Checkbox(
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'Tunnel must be enabled for interface assignment');
+		. 'Tunnel must be enabled in order to be assigned to an interface');
 
 $section->addInput(new Form_Input(
 	'descr',
