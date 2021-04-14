@@ -55,7 +55,7 @@ if (array_key_exists('delidx', $_POST) &&
 	if (!empty($iflist[$tunnels[$_POST['delidx']]['name']])) {
 		$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
 	} else {
-		deleteTunnel($_POST['delidx']);
+		wg_delete_tunnel($_POST['delidx']);
 		header("Location: /wg/vpn_wg.php");
 	}
 }

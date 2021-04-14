@@ -49,7 +49,7 @@ $wg_scripts_to_install = array('/usr/local/pkg/wireguard/etc/rc.bootstrap_wiregu
 
 
 // Setup all WireGuard tunnels
-function wg_configure() {
+function wg_configure($verbose = false) {
 	global $config;
 
 	if (!is_array($config['installedpackages']['wireguard']['tunnel'])) {
@@ -66,12 +66,12 @@ function wg_configure() {
 
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			wg_configure_if($tunnel);
+			wg_configure_if($tunnel, true, $verbose);
 
 
 		} else {
 
-			wg_destroy_if($tunnel);
+			wg_destroy_if($tunnel, $verbose);
 
 		}
 
@@ -82,6 +82,8 @@ function wg_configure() {
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
+	
+	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
 	// Usually want to destroy the interface first if it is not assigned
 	if ($destroyfirst && !is_wg_tunnel_assigned($tunnel)) {
@@ -94,40 +96,28 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	exec_wg_quick_action($tunnel, "up", $verbose);
 
 	// Attempt to add the interface to the interface group (i.e. WireGuard)
-	exec("/sbin/ifconfig {$tunnel['name']} group {$wgifgroup}");
+	exec("/sbin/ifconfig {$tunnel['name']} group {$wgifgroup}" . $verbose_pipe);
 
 }
 
 
 // Remove WireGuard tunnel
 function wg_destroy_if($tunnel, $verbose = false) {
-	
+
 	exec_wg_quick_action($tunnel, "down", $verbose);
 
-	pfSense_interface_destroy($tunnel['name']);
+	// Need to transform out of tunnel structure because pfSense _interface_destroy expects an ifname
+	if (is_array($tunnel) && isset($tunnel['name'])) {
 
-}
-
-// Reads conf files and builds tunnel interfaces
-function wg_configure_from_confs($path, $destroyfirst = false, $verbose = false) {
-
-	$wgconfigs = glob("{$path}/*.conf");
-
-	foreach ($wgconfigs as $wgconfig) {
-
-		if ($destroyfirst) {
-
-			exec_wg_quick_action($wgconfig, "down", $verbose);
-
-		}
-
-		exec_wg_quick_action($wgconfig, "up", $verbose);	
+		$tunnel = $tunnel['name'];
 
 	}
 
+	pfSense_interface_destroy($tunnel);
+
 }
 
-function deleteTunnel($tunidx) {
+function wg_delete_tunnel($tunidx) {
 	global $config, $wgconfpath;
 
 	if ($config['installedpackages']['wireguard']['tunnel'][$tunidx]) {
