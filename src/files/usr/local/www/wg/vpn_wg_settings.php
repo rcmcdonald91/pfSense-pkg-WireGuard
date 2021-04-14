@@ -66,7 +66,7 @@ $section->addInput(new Form_Checkbox(
     	gettext('Enable'),
     	$pconfig['conf_keep']
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Keep Configurations\' enabled, all tunnel configurations and package settings will persist.'
+		. 'With \'Keep Configurations\' enabled, all tunnel configurations and package settings will persist on install/de-install.'
 );
 
 $form->add($section);
