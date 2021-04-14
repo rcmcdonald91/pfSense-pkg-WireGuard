@@ -51,7 +51,7 @@ if ($_POST) {
 
 			write_config('[WireGuard] Save general settings');
 
-			//wg_resync();
+			wg_resync();
 
 			header("Location: /wg/vpn_wg_settings.php");
 

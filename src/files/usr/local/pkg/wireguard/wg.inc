@@ -84,7 +84,7 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
 
 	// Usually want to destroy the interface first if it is not assigned
-	if ($destroyfirst) {
+	if ($destroyfirst && !is_wg_tunnel_assigned($tunnel)) {
 
 		wg_destroy_if($tunnel, $verbose);
 
@@ -93,7 +93,7 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	// Attempt to bring up interface using wg-quick(8)
 	exec_wg_quick_action($tunnel, "up", $verbose);
 
-	// Attempt to add the interface to interface group (i.e. WireGuard)
+	// Attempt to add the interface to the interface group (i.e. WireGuard)
 	exec("/sbin/ifconfig {$tunnel['name']} group {$wgifgroup}");
 
 }
