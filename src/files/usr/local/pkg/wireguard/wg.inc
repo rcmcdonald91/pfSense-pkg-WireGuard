@@ -214,7 +214,7 @@ function wg_extra_script_install($scripts_to_install, $install_dest = '/usr/loca
 
 		update_status("\nInstalling {$script_name} to {$install_dest} ...");
 
-		unlink_if_exists("{$script}");
+		unlink_if_exists("{$install_dest}/{$script_name}");
 
 		copy("{$script}", "{$install_dest}/{$script_name}");
 
