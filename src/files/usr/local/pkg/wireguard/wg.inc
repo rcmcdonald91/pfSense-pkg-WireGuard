@@ -258,7 +258,7 @@ function wg_install() {
 	// Installs any extra scripts
 	wg_extra_script_install($wg_scripts_to_install);
 
-	update_status("Finished installing extra scripts.\n" 
+	update_status("Finished installing extra scripts.\n"); 
 	
 	update_status("Setting up earlyshellcmds... ");
 	
