@@ -31,6 +31,7 @@ function print_message($message) {
 
     $message = escapeshellarg($message);
 
+    // printf is a shell builtin 
 	exec("printf {$message} >&2");
 
 }
@@ -46,35 +47,21 @@ if (platform_booting()) {
 
 }
 
-// Iterate through each assigned interface looking for any wg interfaces to bootstrap
-$a_interfaces = $config['interfaces'];
+$verbose_pipe = ($run_verbose ? "" : " > /dev/null 2>&1");
 
-if (is_array($a_interfaces)) {
+$if_list = get_configured_interface_list_by_realif($disabled);
 
-    foreach ($a_interfaces as $interface) {
+foreach ($if_list as $realif => $name) {
 
-        $ifname = $interface['if'];
-        
-        // We found one, create a temporary loopback interface of the same name to allow booting if the package disappears
-        if (substr($ifname, 0, 2) == "wg") {
+    $ifname = escapeshellarg($realif);
 
-            // Create a wgX interface using lo driver, keeping track of any erroneous loifs created
-            exec("ifconfig lo create name {$ifname}" . ($run_verbose ? "" : " > /dev/null 2>&1"), $loifs);
+	if (substr($realif, 0, 2) == "wg") {
 
-        }
+		exec("/sbin/ifconfig {$ifname}" . $verbose_pipe . " || ifconfig lo create name {$ifname}");
 
-    }
+		exec("/sbin/ifconfig {$ifname} group wg");
 
-}
-
-// Need to clean up any erroneous loifs that might have been created
-if (isset($loifs) && is_array($loifs)) {
-
-    foreach ($loifs as $loif) {
-
-        exec("ifconfig {$loif} destroy" . ($run_verbose ? "" : " > /dev/null 2>&1"));
-
-    }
+	}
 
 }
 

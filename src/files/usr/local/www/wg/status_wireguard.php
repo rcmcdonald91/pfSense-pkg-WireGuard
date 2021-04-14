@@ -56,7 +56,7 @@ display_top_tabs($tab_array);
 	</div>
 	<div class="panel-body">
 		<dl class="dl-horizontal">
-			<pre><?php echo wg_status(); ?></pre>
+			<pre><?=wg_status(); ?></pre>
 		</dl>
     </div>
 </div>
@@ -67,7 +67,7 @@ display_top_tabs($tab_array);
 	</div>
 	<div class="panel-body">
 		<dl class="dl-horizontal">
-			<pre><?php echo wg_interface_status(); ?></pre>
+			<pre><?=wg_interface_status(); ?></pre>
 		</dl>
     </div>
 </div>
@@ -78,7 +78,7 @@ display_top_tabs($tab_array);
 	</div>
 	<div class="panel-body">
 		<dl class="dl-horizontal">
-			<pre><?php echo wg_version(); ?></pre>
+			<pre><?=wg_version(); ?></pre>
 		</dl>
     </div>
 </div>
@@ -89,7 +89,7 @@ display_top_tabs($tab_array);
 	</div>
 	<div class="panel-body">
 		<dl class="dl-horizontal">
-			<pre><?php echo wg_kmod_status(); ?></pre>
+			<pre><?=wg_kmod_status(); ?></pre>
 		</dl>
     </div>
 </div>

@@ -173,12 +173,24 @@ function wg_defaultroute_check($peer) {
 
 // Check if wg tunnel is assigned to an interface
 function is_wg_tunnel_assigned($tunnel, $disabled = true) {
+	global $config;
 
-	$iflist = get_configured_interface_list_by_realif($disabled);
+	// Assume we have an interface first
+	$wg_ifname = $tunnel;
 
-	$ifassigned = array_key_exists($tunnel['name'], $iflist);
+	// Looks like we have a tunnel structure
+	if (is_array($tunnel)) {
 
-	return $ifassigned;
+		$wg_ifname = $tunnel['name'];
+
+	}
+
+	$if_list = get_configured_interface_list_by_realif($disabled);
+
+	$if_assigned = array_key_exists($wg_ifname, $if_list);
+
+	return $if_assigned;
+	
 }
 
 // Check if at least one tunnel is enabled

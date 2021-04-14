@@ -34,6 +34,9 @@ require_once("functions.inc");
 // WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
+init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
+$wg_config = &$config['installedpackages']['wireguard']['config'][0];
+
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Settings"));
 $pglinks = array("", "/wg/vpn_wg.php", "@self");
 $shortcut_section = "wireguard";
@@ -55,15 +58,16 @@ if ($input_errors) {
 
 $form = new Form(false);
 
-$section = new Form_Section("WireGuard Settings");
+$section = new Form_Section("General Settings");
 
-$section->addInput(new Form_Input(
-    'mtu',
-    'Default MTU',
-    'text',
-    $pconfig['mtu'],
-    ['placeholder' => wg_default_mtu()]
-))->setHelp('This is typically %s bytes but can vary in some circumstances.', wg_default_mtu());
+$section->addInput(new Form_Checkbox(
+	'conf_keep',
+	'Keep Configuration',
+    	gettext('Enable'),
+    	$pconfig['conf_keep']
+))->setHelp('<span class="text-danger">Note: </span>'
+		. 'With \'Keep Configurations\' enabled, all tunnel configurations and package settings will persist on install/de-install.'
+);
 
 $form->add($section);
 
