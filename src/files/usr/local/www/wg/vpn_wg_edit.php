@@ -38,6 +38,9 @@ require_once("/usr/local/pkg/wireguard/wg.inc");
 init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 $tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
+init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
+$wg_config = &$config['installedpackages']['wireguard']['config'][0];
+
 if (is_numericint($_REQUEST['index'])) {
 	$index = $_REQUEST['index'];
 }
@@ -105,7 +108,7 @@ if ($_POST) {
 		$pconfig['name'] = next_wg_if();
 
 	}
-	
+
 }
 
 $shortcut_section = "wireguard";
@@ -408,6 +411,8 @@ $section2->add($group2);
 </nav>
 
 <?php $jpconfig = json_encode($pconfig, JSON_HEX_APOS); ?>
+<?php $jwg_config = json_encode($wg_config, JSON_HEX_APOS); ?>
+
 <?php $genkeywarning = gettext("Are you sure you want to overwrite keys?"); ?>
 
 <!-- ============== JavaScript =================================================================================================-->
@@ -415,6 +420,7 @@ $section2->add($group2);
 //<![CDATA[
 events.push(function() {
 	var pconfig = JSON.parse('<?=$jpconfig?>');
+	var wg_config = JSON.parse('<?=$jwg_config?>');
 
 	// Double-click handler for peer table
 	$('[id^=peer_row_]').dblclick(function() {
@@ -424,6 +430,17 @@ events.push(function() {
 
 	// Eliminate ghost lines in modal
 	$('.form-group').css({"border-bottom-width" : "0"});
+
+	// Blurs secrets
+	if (wg_config['blur_secrets'] == 'yes') {
+
+		var blur = {"color" : "transparent", "text-shadow" : "text-shadow: 0 0 5px rgba(0,0,0,0.5);"};
+
+		$("#privatekey").css(blur);
+
+		$("#presharedkey").css({blur);
+
+	}
 
 	// Return text from peer table cell
 	function tabletext (row, col) {
