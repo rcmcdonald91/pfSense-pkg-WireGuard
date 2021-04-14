@@ -198,7 +198,7 @@ function wg_earlyshellcmd_deinstall($cmds_to_remove) {
 
 	$a_earlyshellcmds = array_diff($a_earlyshellcmds, $cmds_to_remove);
 
-	$cmds_to_remove = implode(',' $cmds_to_remove);
+	$cmds_to_remove = implode(',', $cmds_to_remove);
 	
 	write_config("[WireGuard] ( {$cmds_to_remove} ) earlyshellcmds deinstalled.");
 	
