@@ -34,6 +34,9 @@ require_once("functions.inc");
 // WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
+init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
+$wg_config = &$config['installedpackages']['wireguard']['config'][0];
+
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Settings"));
 $pglinks = array("", "/wg/vpn_wg.php", "@self");
 $shortcut_section = "wireguard";
@@ -59,20 +62,11 @@ $section = new Form_Section("General Settings");
 
 $section->addInput(new Form_Checkbox(
 	'conf_keep',
-	'Keep Configurations',
+	'Keep Configuration',
     	gettext('Enable'),
     	$pconfig['conf_keep']
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Keep Configurations\' enabled, tunnel configurations will remain on-disk.'
-);
-
-$section->addInput(new Form_Checkbox(
-	'helpers_keep',
-	'Keep Helpers',
-	gettext('Enable'),
-	$pconfig['helpers_keep']
-))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Keep Helpers\' enabled, helper scripts will remain on-disk.'
+		. 'With \'Keep Configurations\' enabled, all tunnel configurations and package settings will persist.'
 );
 
 $form->add($section);

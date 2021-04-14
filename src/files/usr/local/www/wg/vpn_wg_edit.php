@@ -131,14 +131,15 @@ $section->addInput(new Form_Input(
 $section->addInput(new Form_Checkbox(
 	'enabled',
 	'Tunnel Enabled',
-	'',
+	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
-))->setHelp('Note: Tunnel must be enabled for interface assignment');
+))->setHelp('<span class="text-danger">Note: </span>'
+		. 'Tunnel must be enabled for interface assignment');
 
 $section->addInput(new Form_Input(
 	'descr',
 	'Description',
-	'text',
+	gettext('Description'),
 	$pconfig['descr']
 ))->setHelp('Tunnel description for administrative reference (not parsed)');
 
@@ -183,12 +184,12 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"Leave these fields blank to use <a href='../../interfaces_assign.php'>Interface Assignments</a>"
+		"<a href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"Configure firewall rules on unassigned tunnels using the <a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
+		"<a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
 	));
 
 	$section->addInput(new Form_Input(
@@ -349,7 +350,9 @@ $section2->add($group2);
 
 			<tbody>
 <?php
+
 				$peer_num = 0;
+
 				if (!empty($pconfig['peers']['wgpeer'])) {
 					foreach ($pconfig['peers']['wgpeer'] as $peer) {
 						print('<tr id="peer_row_' . $peer_num . '" class="peer_group_' . $peer_num . '">');
