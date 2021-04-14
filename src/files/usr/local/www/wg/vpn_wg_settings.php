@@ -46,6 +46,7 @@ if ($_POST) {
 			$pconfig = $_POST;
 
 			$wg_config['keep_conf'] = $pconfig['keep_conf'];
+			
 			$wg_config['blur_secrets'] = $pconfig['blur_secrets'];
 
 			write_config('[WireGuard] Save general settings');
