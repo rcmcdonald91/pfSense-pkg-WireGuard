@@ -187,7 +187,7 @@ function is_wg_tunnel_assigned($tunnel, $disabled = true) {
 
 	$if_list = get_configured_interface_list_by_realif($disabled);
 
-	$if_assigned = array_key_exists($wg_ifname, $if_ist);
+	$if_assigned = array_key_exists($wg_ifname, $if_list);
 
 	return $if_assigned;
 	

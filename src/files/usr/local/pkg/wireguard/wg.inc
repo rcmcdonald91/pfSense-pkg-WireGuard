@@ -232,6 +232,9 @@ function wg_earlyshellcmd_install() {
 }
 
 function wg_install() {
+	global $g;
+
+	$g['wireguard_install'] = true;
 
 	update_status("\nCreating earlyshellcmds... ");
 	
@@ -249,6 +252,8 @@ function wg_install() {
 	wg_configure();
 
 	update_status(" done.\n");
+
+	unset($g['wireguard_install']);
 
 }
 
