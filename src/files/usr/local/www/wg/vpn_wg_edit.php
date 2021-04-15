@@ -35,11 +35,11 @@ require_once("guiconfig.inc");
 // WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
-init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
-
 init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
 $wg_config = &$config['installedpackages']['wireguard']['config'][0];
+
+init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
 if (is_numericint($_REQUEST['index'])) {
 	$index = $_REQUEST['index'];
@@ -143,13 +143,24 @@ $section->addInput(new Form_Input(
 	$index
 ));
 
-$section->addInput(new Form_Checkbox(
+$enabled_button = new Form_Checkbox(
 	'enabled',
 	'Tunnel Enabled',
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'Tunnel must be enabled in order to be assigned to an interface');
+
+// Set the tunnel enabled button to readonly if interface is assigned
+if (is_wg_tunnel_assigned($pconfig) {
+
+	$enabled_button->setReadOnly();
+	$enabled_button->setHelp('<span class="text-danger">Note: </span>'
+					. 'Tunnel cannot be disabled when assigned to an interface');
+
+}
+
+$section->addInput($enabled_button);
 
 $section->addInput(new Form_Input(
 	'descr',
