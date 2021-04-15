@@ -179,7 +179,7 @@ function is_wg_tunnel_assigned($tunnel, $disabled = true) {
 	$wg_ifname = $tunnel;
 
 	// Looks like we have a tunnel structure
-	if (is_array($tunnel)) {
+	if (is_array($tunnel) && isset($tunnel['name'])) {
 
 		$wg_ifname = $tunnel['name'];
 
@@ -187,10 +187,36 @@ function is_wg_tunnel_assigned($tunnel, $disabled = true) {
 
 	$if_list = get_configured_interface_list_by_realif($disabled);
 
-	$if_assigned = array_key_exists($wg_ifname, $if_list);
+	$is_assigned = array_key_exists($wg_ifname, $if_list);
 
-	return $if_assigned;
+	return $is_assigned;
 	
+}
+
+// Check if at least one tunnel is assigned
+function is_wg_assigned($disabled = true) {
+	global $wgg;
+
+	// Assume that no tunnels are assigned
+	$is_assigned = false;
+
+	$if_list = get_configured_interface_list_by_realif($disabled);
+
+	foreach ($if_list as $realif => $name) {
+
+		// We found one, no need to keep checking
+		if (substr($realif, 0, strlen($wgg['if_prefix'])) == $wgg['if_prefix']) {
+	
+			$is_assigned = true;
+
+			break;
+	
+		}
+	    
+	    }
+
+	return $is_assigned;
+
 }
 
 // Check if at least one tunnel is enabled
@@ -200,10 +226,15 @@ function is_wg_enabled() {
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 
 	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
+
 		if (empty($tunnel['enabled'])) {
+
 			continue;
+
 		}
+
 		return true;
+
 	}
 
 	return false;

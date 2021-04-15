@@ -108,7 +108,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	$wg_ifname = $tunnel;
 
 	// Looks like we have a tunnel structure
-	if (is_array($tunnel)) {
+	if (is_array($tunnel) && isset($tunnel['name'])) {
 
 		$wg_ifname = $tunnel['name'];
 

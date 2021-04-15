@@ -23,20 +23,26 @@
 
 global $wgg;
 
+$pkg_name                       = "wireguard";
+
 $wgg = array(
         'wg'                    => '/usr/local/bin/wg',
         'wg_quick'              => '/usr/local/bin/wg-quick',
-        'conf_path'             => '/etc/wireguard',
         'ifconfig'              => '/sbin/ifconfig',
         'kldstat'               => '/sbin/kldstat',
         'pkg'                   => '/usr/sbin/pkg',
+        
+        'conf_path'             => '/etc/wireguard',
+        
         'if_prefix'             => 'wg',
         'if_group'              => 'WireGuard',
         'default_mtu'           => 1420,
+
         'script_path'           => '/usr/local/etc',
         'earlyshellcmds'        => array('/usr/local/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.reload_wireguard'),
         'pkg_scripts'           => array('/usr/local/etc/rc.reload_wireguard'),
         'extra_scripts'         => array('/usr/local/pkg/wireguard/etc/rc.bootstrap_wireguard'),
+
         'verbose'               => false
 );
 
