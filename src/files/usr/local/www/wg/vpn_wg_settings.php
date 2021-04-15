@@ -110,12 +110,12 @@ if (is_wg_assigned()) {
 	// Prevent removal of extra scripts 
 	$keep_extras_btn->setDisabled();
 	$keep_extras_btn->setHelp('<span class="text-danger">Note: </span>'
-					. 'Extra scripts <b>cannot be removed</b> with any tunnels assigned to interfaces.'
+					. 'Extra scripts <b>cannot be removed</b> with any tunnels assigned to interfaces.';
 
 } else {
 
 	$keep_extras_btn->setHelp('<span class="text-danger">Note: </span>'
-				. 'With \'Keep Extra Scripts\' enabled, any extra scripts installed by the package will persist on install/de-install.'
+				. 'With \'Keep Extra Scripts\' enabled, any extra scripts installed by the package will persist on install/de-install.';
 
 }
 
