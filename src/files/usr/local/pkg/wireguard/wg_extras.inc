@@ -30,10 +30,4 @@ function print_message($message) {
 
 }
 
-function wg_default_mtu() { 
-	
-	return 1420; 
-
-}
-
 ?>

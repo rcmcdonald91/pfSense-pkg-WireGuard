@@ -29,28 +29,15 @@ require_once('pkg-utils.inc');
 require_once('service-utils.inc');
 require_once('util.inc');
 
-// Various paths to WireGuard binaries and confs
-global $wgbinpath, $wgquickpath, $wgconfpath;
-$wgbinpath = '/usr/local/bin/wg';
-$wgquickpath = '/usr/local/bin/wg-quick';
-$wgconfpath = '/etc/wireguard';
-
-// Various paths to relevant binaries
-global $ifconfigpath, $kldstatpath;
-$ifconfigpath = '/sbin/ifconfig';
-$kldstatpath = '/sbin/kldstat';
-$pkgpath = '/usr/sbin/pkg';
-
-// Interface prefix to use for tunnels (e.g. wg)
-global $wgifprefix;
-$wgifprefix = 'wg';
+// WireGuard includes
+require_once('wg_globals.inc');
 
 // Get WireGuard status
 function wg_status() {
-	global $wgbinpath;
+	global $wgg;
 
 	$status = array();
-	exec("{$wgbinpath} show", $status);
+	exec("{$wgg['wg']} show", $status);
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
@@ -59,10 +46,10 @@ function wg_status() {
 
 // Get WireGuard interface status
 function wg_interface_status($ifgroup = "wg") {
-	global $ifconfigpath;
+	global $wgg;
 
 	$status = array();
-	exec("{$ifconfigpath} -a -g {$ifgroup}", $status);
+	exec("{$wgg['ifconfig']} -a -g {$ifgroup}", $status);
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
@@ -71,20 +58,20 @@ function wg_interface_status($ifgroup = "wg") {
 
 // Get WireGuard kmod status
 function wg_kmod_status($kmod = 'if_wg.ko') {
-	global $kldstatpath;
+	global $wgg;
 
-	$output = exec("{$kldstatpath} | grep {$kmod}");
+	$output = exec("{$wgg['kldstat']} | grep {$kmod}");
 	
 	return htmlspecialchars($output);
 
 }
 
 // Get wg and tools version
-function wg_version($pkgs = 'wireguard') {
-	global $pkgpath;
+function wg_version($to_grep = 'wireguard') {
+	global $wgg;
 
 	$packages = array();
-	exec("{$pkgpath} info | grep -i {$pkgs}", $packages);
+	exec("{$wgg['pkg']} info | grep -i {$to_grep}", $packages);
 
 	$output = implode("\n", $packages);
 	return htmlspecialchars($output);
@@ -93,9 +80,9 @@ function wg_version($pkgs = 'wireguard') {
 
 // Generate private key
 function genKeyPair($json = false) {
-	global $wgbinpath;
+	global $wgg;
 
-	$privkey = exec("{$wgbinpath} genkey");
+	$privkey = exec("{$wgg['wg']} genkey");
 	$pubkey = genPubKey($privkey);
 
 	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
@@ -105,9 +92,9 @@ function genKeyPair($json = false) {
 
 // Compose the public key from a provided private key
 function genPubKey($privkey) {
-	global $wgbinpath;
+	global $wgg;
 
-	$pubkey = exec("echo {$privkey} | {$wgbinpath} pubkey");
+	$pubkey = exec("echo {$privkey} | {$wgg['wg']} pubkey");
 
 	return $pubkey;
 
@@ -115,7 +102,7 @@ function genPubKey($privkey) {
 
 // Executes a wg-quick(8) action using a specified tunnel or interface
 function exec_wg_quick_action($tunnel, $action, $verbose = false) {
-	global $wgquickpath;
+	global $wgg;
 
 	// Assume we have an interface first
 	$wg_ifname = $tunnel;
@@ -128,15 +115,15 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	}
 
 	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgquickpath} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
+	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
 }
 
 // Generate a pre-shared key
 function genPSK() {
-	global $wgbinpath;
+	global $wgg;
 
-	$psk = exec("{$wgbinpath} genpsk");
+	$psk = exec("{$wgg['wg']} genpsk");
 
 	return $psk;
 	
@@ -182,7 +169,7 @@ function next_wg_port() {
 
 // Return the next available WireGuard interface
 function next_wg_if() {
-	global $config, $wgifprefix;
+	global $config, $wgg['if_prefix'];
 
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 
@@ -198,7 +185,7 @@ function next_wg_if() {
 
 	for ($ifnum = 0; $ifnum < 32768; $ifnum++) {
 
-		$want_if = "{$wgifprefix}{$ifnum}";
+		$want_if = "{$wgg['if_prefix']}{$ifnum}";
 		
 		if (!in_array($want_if, $used_ifs)) {
 

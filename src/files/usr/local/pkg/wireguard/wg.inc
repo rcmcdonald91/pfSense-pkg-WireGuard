@@ -33,20 +33,10 @@ require_once('util.inc');
 
 // WireGuard includes
 require_once('wg_api.inc');
+require_once('wg_globals.inc');
+require_once('wg_install.inc');
 require_once('wg_extras.inc');
 require_once('wg_validate.inc');
-
-global $wgifgroup;
-$wgifgroup = 'WireGuard';
-
-global $wgearlyshellcmds, $wgearlyshellcmds_pkg;
-$wgearlyshellcmds = array('/usr/local/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.reload_wireguard');
-$wgearlyshellcmds_pkg = array('/usr/local/etc/rc.reload_wireguard');
-
-// Full source path of extra scripts to install
-global $wg_scripts_to_install;
-$wg_scripts_to_install = array('/usr/local/pkg/wireguard/etc/rc.bootstrap_wireguard');
-
 
 // Setup all WireGuard tunnels
 function wg_configure($verbose = false) {
@@ -81,7 +71,7 @@ function wg_configure($verbose = false) {
 
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
-	global $config, $wgconfpath, $wgquickpath, $wgifgroup;
+	global $config, $wgg;
 	
 	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
@@ -96,7 +86,7 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	exec_wg_quick_action($tunnel, "up", $verbose);
 
 	// Attempt to add the interface to the interface group (i.e. WireGuard)
-	exec("/sbin/ifconfig {$tunnel['name']} group {$wgifgroup}" . $verbose_pipe);
+	exec("/sbin/ifconfig {$tunnel['name']} group {$wgg['if_group']}" . $verbose_pipe);
 
 }
 
@@ -118,163 +108,42 @@ function wg_destroy_if($tunnel, $verbose = false) {
 }
 
 function wg_delete_tunnel($tunidx) {
-	global $config, $wgconfpath;
+	global $config, $wgg;
 
 	if ($config['installedpackages']['wireguard']['tunnel'][$tunidx]) {
+
 		unset($ifname);
+
 		unset($conf_path);
+
 		if (isset($config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'])) {
-			$ifname =
-			    $config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'];
+
+			$ifname = $config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'];
+
 		}
+		
 		if (isset($ifname)) {
-			$conf_path = $wgconfpath . "/" . $ifname . ".conf";
+
+			$conf_path = $wgg['conf_path'] . "/" . $ifname . ".conf";
+
 		}
+
 		// Delete the tunnel configuration entry
 		unset($config['installedpackages']['wireguard']['tunnel'][$tunidx]);
+
 		write_config("[WireGuard] tunnel {$index} updated.");
 
 		// Delete the wg?.conf file
+
 		if (isset($conf_path) && is_file($conf_path)) {
+
 			unlink($conf_path);
+
 		}
 
 		// Destroy the deleted tunnel
 		wg_destroy_if($ifname);
 	}
-}
-
-function wg_ifgroup_install() {
-	global $g, $config, $wgifgroup;
-
-	init_config_arr(array('ifgroups', 'ifgroupentry'));
-
-	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
-
-	foreach ($a_ifgroups as $index => $ifg) {
-
-		if ($ifg['ifname'] == $wgifgroup) {
-
-
-
-			unset($a_ifgroups[$index]);
-
-		}
-		
-	}
-
-	$wg_group_entry = array();
-
-	$wg_group_entry['ifname'] = $wgifgroup;
-	$wg_group_entry['descr'] = 'Created by WireGuard';
-
-	$a_ifgroups[] = $wg_group_entry;
-
-	write_config("[WireGuard] Interface group ({$wgifgroup}) updated.");
-
-	unlink_if_exists("{$g['tmp_path']}/config.cache");
-
-}
-
-function wg_earlyshellcmd_deinstall($cmds_to_remove) {
-	global $config;
-
-	$a_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	$a_earlyshellcmds = array_diff($a_earlyshellcmds, $cmds_to_remove);
-
-	$cmds_to_remove = implode(',', $cmds_to_remove);
-	
-	write_config("[WireGuard] ( {$cmds_to_remove} ) earlyshellcmds deinstalled.");
-	
-}
-
-function wg_extra_script_install($scripts_to_install, $install_dest = '/usr/local/etc', $verbose = false) {
-
-	foreach ($scripts_to_install as $script) {
-
-		$script_name = basename($script);
-
-		$script_source_path = dirname($script);
-
-		update_status("\nInstalling {$script_name} to {$install_dest} ...");
-
-		unlink_if_exists("{$install_dest}/{$script_name}");
-
-		copy("{$script}", "{$install_dest}/{$script_name}");
-
-		chmod("{$install_dest}/{$script_name}", 0755);
-
-		update_status(" done.\n");
-
-	}
-
-}
-
-function wg_earlyshellcmd_install($cmds_to_install) {
-	global $config;
-
-	// Ensures we are always starting clean
-	wg_earlyshellcmd_deinstall($cmds_to_install);
-
-	$a_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	// Unlikely the user already has earlyshellcmds configured, but maybe...
-	if (!is_array($a_earlyshellcmds)) {
-
-		$a_earlyshellcmds = array();
-
-	}
-
-	// Make sure our WireGuard scripts always run first, push everything else after us
-	$a_earlyshellcmds = array_merge($cmds_to_install, $a_earlyshellcmds);
-
-	write_config("[WireGuard] Earlyshellcmds installed.");
-
-}
-
-function wg_install() {
-	global $g, $wg_scripts_to_install, $wgearlyshellcmds;
-
-	$g['wireguard_install'] = true;
-
-	update_status("\nInstalling extra scripts... ");
-
-	// Installs any extra scripts
-	wg_extra_script_install($wg_scripts_to_install);
-
-	update_status("Finished installing extra scripts.\n"); 
-	
-	update_status("Setting up earlyshellcmds... ");
-	
-	// Installs the earlyshellcmds
-	wg_earlyshellcmd_install($wgearlyshellcmds);
-
-	update_status(" done.\nCreating WireGuard interface group... ");
-
-	// Installs the 'WireGuard' interface group
-	wg_ifgroup_install();
-
-	update_status(" done.\nConfiguring existing WireGuard interfaces... ");
-
-	// Configure any existing interfaces
-	wg_configure();
-
-	update_status(" done.\n");
-
-	unset($g['wireguard_install']);
-
-}
-
-function wg_deinstall() {
-	global $wgearlyshellcmds_pkg;
-
-	update_status("Removing earlyshellcmds... ");
-
-	wg_earlyshellcmd_deinstall($wgearlyshellcmds_pkg);
-
-	update_status(" done.\n");
-
 }
 
 // Write new tunnel values to the configuration system
@@ -353,34 +222,45 @@ function wg_resync() {
 }
 
 function wg_create_config_files($clean = true) {
-	global $config, $wgconfpath;
+	global $config, $wgg;
 
 	if ($config['installedpackages']['wireguard']['tunnel']) {
-		$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
-		$cfgpath = $wgconfpath;
 
-		if (!file_exists($cfgpath)) {
-			mkdir($cfgpath, 0700, true);
+		$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+
+		if (!file_exists($wgg['conf_path'])) {
+
+			mkdir($wgg['conf_path'], 0700, true);
+
 		} else {
-			chmod($cfgpath, 0700);
+
+			chmod($wgg['conf_path'], 0700);
+
 		}
 
 		if ($clean) {
+
 			delete_wg_configs();
+
 		}
 
 		foreach ($wg_tunnels as $tunnel) {
-			if (!empty($tunnel['enabled']) &&
-			    $tunnel['enabled'] == 'yes') {
+
+			if (!empty($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
 				make_wg_conf($tunnel);
+
 			}
+
 		}
+
 	}
+
 }
 
 // Write each file
 function make_wg_conf($tunnel) {
-	global $wgconfpath;
+	global $wgg;
 
 	$txt = "# This WireGuard config file has been created automatically. " .
 	    "Do not edit!\n";
@@ -446,16 +326,16 @@ function make_wg_conf($tunnel) {
 		}
 	}
 
-	file_put_contents($wgconfpath . "/" . $tunnel['name'] . ".conf", $txt);
+	file_put_contents($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", $txt);
 
-	chmod($wgconfpath . "/" . $tunnel['name'] . ".conf", 0600);
+	chmod($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", 0600);
 }
 
 // Remove all wg config files from the conf directory
 function delete_wg_configs() {
-	global $wgconfpath;
+	global $wgg;
 
-	unlink_if_exists($wgconfpath . "/*.conf");
+	unlink_if_exists($wgg['conf_path'] . "/*.conf");
 
 }
 

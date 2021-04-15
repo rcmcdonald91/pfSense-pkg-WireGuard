@@ -62,7 +62,7 @@ if ($_POST) {
 			$_POST['listenport'] = next_wg_port();
 		}
 		if (empty($_POST['mtu'])) {
-			$_POST['mtu'] = wg_default_mtu();
+			$_POST['mtu'] = $wgg['default_mtu'];
 		}
 		$res = wg_do_post($_POST);
 		$input_errors = $res['input_errors'];
@@ -204,7 +204,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
+		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
 	$section->addInput(new Form_Input(
