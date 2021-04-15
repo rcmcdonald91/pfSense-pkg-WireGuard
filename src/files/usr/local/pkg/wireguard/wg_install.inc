@@ -125,7 +125,7 @@ function wg_extra_scripts_deinstall() {
  * This function creates earlyshellcmd entries in the config
  */
 function wg_earlyshellcmd_install() {
-	global $config, $wgg
+	global $config, $wgg;
 
         wg_earlyshellcmd_deinstall($wgg['earlyshellcmds']);
 
