@@ -38,10 +38,8 @@ function wg_install() {
 
                 // Installs any extra scripts
                 wg_extra_scripts_install();
-
-	update_status("Finished installing extra scripts.\n"); 
 	
-	update_status("Setting up earlyshellcmds... ");
+	update_status(" done.\nSetting up earlyshellcmds... ");
 	
                 // Installs the earlyshellcmds
                 wg_earlyshellcmd_install();
@@ -83,7 +81,7 @@ function wg_deinstall() {
 /*
  * This function installs any extra scripts not installed by pkg(7)
  */
-function wg_extra_scripts_install($verbose = true) {
+function wg_extra_scripts_install($verbose = false) {
 	global $wgg;
 
 	foreach ($wgg['extra_scripts'] as $script) {
@@ -94,7 +92,7 @@ function wg_extra_scripts_install($verbose = true) {
 
 		if ($verbose) { 
 			
-			update_status("\nInstalling {$script_name} to {$wgg['script_path']} ... \n"); 
+			update_status("\nInstalling ( {$script_name} ) to ( {$wgg['script_path']} ) ... "); 
 		
 		}
 
