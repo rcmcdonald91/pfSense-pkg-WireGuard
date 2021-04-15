@@ -442,12 +442,13 @@ events.push(function() {
 	// Eliminate ghost lines in modal
 	$('.form-group').css({"border-bottom-width" : "0"});
 
+	// Eliminates blurred placeholder text
+	$('body').append('<style>::placeholder{color:revert;text-shadow:none;}</style>');
+
 	// Blurs secrets
 	if (wg_config['blur_secrets'] == 'yes') {
 
 		var blur = {"color" : "transparent", "text-shadow" : "0 0 5px rgba(0,0,0,0.5)"}
-
-		$("::placeholder").css({"color" : "revert", "text-shadow" : "none"});
 
 		$("#privatekey").css(blur);
 
