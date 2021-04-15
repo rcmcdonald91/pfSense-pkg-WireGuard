@@ -37,6 +37,8 @@ require_once("/usr/local/pkg/wireguard/wg.inc");
 init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
 $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 
+$pconfig['keep_conf'] = isset($wg_config['keep_conf']) ? $wg_config['keep_conf'] : 'yes';
+
 if ($_POST) {
 
 	if ($_POST['save']) {
@@ -95,14 +97,29 @@ $section->addInput(new Form_Checkbox(
 		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );
 
-$section->addInput(new Form_Checkbox(
+$keep_extras_btn = new Form_Checkbox(
 	'keep_extras',
 	'Keep Extra Scripts',
     	gettext('Enable'),
     	$wg_config['keep_extras'] == 'yes'
-))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Keep Extra Scripts\' enabled, any extra scripts installed by the package will persist on install/de-install.'
 );
+
+// Check if any WireGuard tunnel is assigned to an interface
+if (is_wg_assigned()) {
+
+	// Prevent removal of extra scripts 
+	$keep_extras_btn->setDisabled();
+	$keep_extras_btn->setHelp('<span class="text-danger">Note: </span>'
+					. 'Extra scripts <b>cannot be removed</b> with any tunnels assigned to interfaces.'
+
+} else {
+
+	$keep_extras_btn->setHelp('<span class="text-danger">Note: </span>'
+				. 'With \'Keep Extra Scripts\' enabled, any extra scripts installed by the package will persist on install/de-install.'
+
+}
+
+$section->addInput($keep_extras_btn);
 
 $form->add($section);
 
