@@ -205,7 +205,7 @@ function is_wg_assigned($disabled = true) {
 	foreach ($if_list as $realif => $name) {
 
 		// We found one, no need to keep checking
-		if (substr($realif, 0, strlen($wgg['if_prefix']))) == $wgg['if_prefix']) {
+		if (substr($realif, 0, strlen($wgg['if_prefix'])) == $wgg['if_prefix']) {
 	
 			$is_assigned = true;
 
