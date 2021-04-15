@@ -70,6 +70,8 @@ if ($_POST) {
 	$pconfig['keep_extras'] = isset($wg_config['keep_conf']) ? $wg_config['keep_extras'] : 'no';
 	$pconfig['keep_extras'] = is_wg_assigned() ? 'yes' : $pconfig['keep_extras'];
 
+	$pconfig['blur_secrets'] = $wg_config['blur_secrets'];
+
 }
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Settings"));
@@ -99,7 +101,7 @@ $section->addInput(new Form_Checkbox(
 	'keep_conf',
 	'Keep Configuration',
     	gettext('Enable'),
-    	$wg_config['keep_conf'] == 'yes'
+    	$pconfig['keep_conf'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );
@@ -108,7 +110,7 @@ $keep_extras_btn = new Form_Checkbox(
 	'keep_extras',
 	'Keep Extra Scripts',
     	gettext('Enable'),
-    	$wg_config['keep_extras'] == 'yes'
+    	$pconfig['keep_extras'] == 'yes'
 );
 
 // Check if any WireGuard tunnel is assigned to an interface
@@ -136,7 +138,7 @@ $section->addInput(new Form_Checkbox(
 	'blur_secrets',
 	'Blur Secrets',
     	gettext('Enable'),
-    	$wg_config['blur_secrets'] == 'yes'
+    	$pconfig['blur_secrets'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'With \'Blur Secrets\' enabled, all secrets (private and pre-shared keys) are blurred in the user interface.'
 );
