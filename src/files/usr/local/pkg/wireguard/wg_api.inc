@@ -169,7 +169,7 @@ function next_wg_port() {
 
 // Return the next available WireGuard interface
 function next_wg_if() {
-	global $config, $wgg['if_prefix'];
+	global $config, $wgg;
 
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 
