@@ -37,13 +37,6 @@ require_once("/usr/local/pkg/wireguard/wg.inc");
 init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
 $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 
-// Default to yes
-$pconfig['keep_conf'] = isset($wg_config['keep_conf']) ? $wg_config['keep_conf'] : 'yes';
-
-// Default to no, unless there are interfaces already assigned
-$pconfig['keep_extras'] = isset($wg_config['keep_conf']) ? $wg_config['keep_extras'] : 'no';
-$pconfig['keep_extras'] = is_wg_assigned() ? 'yes' : $pconfig['keep_extras'];
-
 if ($_POST) {
 
 	if ($_POST['save']) {
@@ -67,6 +60,15 @@ if ($_POST) {
 		}
 
 	}
+
+} else {
+
+	// Default to yes
+	$pconfig['keep_conf'] = isset($wg_config['keep_conf']) ? $wg_config['keep_conf'] : 'yes';
+
+	// Default to no, unless there are interfaces already assigned
+	$pconfig['keep_extras'] = isset($wg_config['keep_conf']) ? $wg_config['keep_extras'] : 'no';
+	$pconfig['keep_extras'] = is_wg_assigned() ? 'yes' : $pconfig['keep_extras'];
 
 }
 
