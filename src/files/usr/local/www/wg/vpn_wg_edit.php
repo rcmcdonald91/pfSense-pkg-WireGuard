@@ -154,7 +154,7 @@ $enabled_button->setHelp('<span class="text-danger">Note: </span>'
 				. 'Tunnel must be enabled in order to be assigned to an interface');	
 
 // Set the tunnel enabled button to readonly if interface is assigned
-if (is_wg_tunnel_assigned($pconfig) {
+if (is_wg_tunnel_assigned($pconfig)) {
 
 	$enabled_button->setReadOnly();
 	$enabled_button->setHelp('<span class="text-danger">Note: </span>'
