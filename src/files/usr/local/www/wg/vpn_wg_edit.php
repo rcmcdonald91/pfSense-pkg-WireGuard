@@ -38,6 +38,9 @@ require_once("/usr/local/pkg/wireguard/wg.inc");
 init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 $tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
+init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
+$wg_config = &$config['installedpackages']['wireguard']['config'][0];
+
 if (is_numericint($_REQUEST['index'])) {
 	$index = $_REQUEST['index'];
 }
@@ -52,48 +55,60 @@ if ($_REQUEST['ajax']) {
 }
 
 // All form save logic is in /etc/inc/wg.inc
-if ($_POST['save']) {
-	if (empty($_POST['listenport'])) {
-		$_POST['listenport'] = next_wg_port();
-	}
-	if (empty($_POST['mtu'])) {
-		$_POST['mtu'] = wg_default_mtu();
-	}
-	$res = wg_do_post($_POST);
-	$input_errors = $res['input_errors'];
-	$pconfig = $res['pconfig'];
+if ($_POST) {
 
-	if (!$input_errors) {
-		// Create the new WG config files
-		wg_create_config_files();
-		
-		// Create interface group
-		wg_ifgroup_install();
-
-		// Setup and start the new WG tunnel
-		if (isset($pconfig['enabled']) &&
-		    ($pconfig['enabled'] == 'yes')) {
-			wg_configure_if($pconfig);
-		} else {
-			wg_destroy_if($pconfig);
+	if ($_POST['save']) {
+		if (empty($_POST['listenport'])) {
+			$_POST['listenport'] = next_wg_port();
 		}
+		if (empty($_POST['mtu'])) {
+			$_POST['mtu'] = $wgg['default_mtu'];
+		}
+		$res = wg_do_post($_POST);
+		$input_errors = $res['input_errors'];
+		$pconfig = $res['pconfig'];
 
-		// Go back to the tunnel table
-		header("Location: /wg/vpn_wg.php");
+		if (!$input_errors) {
+			// Create the new WG config files
+			wg_create_config_files();
+			
+			// Create interface group
+			wg_ifgroup_install();
+
+			// Setup and start the new WG tunnel
+			if (isset($pconfig['enabled']) &&
+			($pconfig['enabled'] == 'yes')) {
+				wg_configure_if($pconfig);
+			} else {
+				wg_destroy_if($pconfig);
+			}
+
+			// Go back to the tunnel table
+			header("Location: /wg/vpn_wg.php");
+		}
+	} elseif ($_POST['action'] == 'genkeys') {
+		// Process ajax call requesting new key pair
+		print(genKeyPair(true));
+		exit;
 	}
-} elseif ($_POST['action'] == 'genkeys') {
-	// Process ajax call requesting new key pair
-	print(genKeyPair(true));
-	exit;
+
 } else {
+
 	if (isset($index)) {
+
 		if ($tunnels[$index]) {
+
 			$pconfig = &$tunnels[$index];
 		}
+
 	} else {
+
 		$pconfig = array();
+
 		$pconfig['name'] = next_wg_if();
+
 	}
+
 }
 
 $shortcut_section = "wireguard";
@@ -134,7 +149,7 @@ $section->addInput(new Form_Checkbox(
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'Tunnel must be enabled for interface assignment');
+		. 'Tunnel must be enabled in order to be assigned to an interface');
 
 $section->addInput(new Form_Input(
 	'descr',
@@ -189,7 +204,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<a href='../../firewall_rules.php?if={$wgifgroup}'>WireGuard Interface Group</a>"
+		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
 	$section->addInput(new Form_Input(
@@ -396,6 +411,8 @@ $section2->add($group2);
 </nav>
 
 <?php $jpconfig = json_encode($pconfig, JSON_HEX_APOS); ?>
+<?php $jwg_config = json_encode($wg_config, JSON_HEX_APOS); ?>
+
 <?php $genkeywarning = gettext("Are you sure you want to overwrite keys?"); ?>
 
 <!-- ============== JavaScript =================================================================================================-->
@@ -403,6 +420,7 @@ $section2->add($group2);
 //<![CDATA[
 events.push(function() {
 	var pconfig = JSON.parse('<?=$jpconfig?>');
+	var wg_config = JSON.parse('<?=$jwg_config?>');
 
 	// Double-click handler for peer table
 	$('[id^=peer_row_]').dblclick(function() {
@@ -412,6 +430,17 @@ events.push(function() {
 
 	// Eliminate ghost lines in modal
 	$('.form-group').css({"border-bottom-width" : "0"});
+
+	// Blurs secrets
+	if (wg_config['blur_secrets'] == 'yes') {
+
+		var blur = {"color" : "transparent", "text-shadow" : "0 0 5px rgba(0,0,0,0.5)"};
+
+		$("#privatekey").css(blur);
+
+		$("#presharedkey").css(blur);
+
+	}
 
 	// Return text from peer table cell
 	function tabletext (row, col) {

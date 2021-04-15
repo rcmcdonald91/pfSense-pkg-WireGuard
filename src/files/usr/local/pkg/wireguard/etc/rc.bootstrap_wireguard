@@ -24,14 +24,16 @@
 require_once('globals.inc');
 require_once('config.inc');
 
+// This file absolutely cannot be dependent on the package! It must standalone and only depend on pfSense includes
+
 // This is a hack to get text onto the console during booting from a php-cgi script
 function print_message($message) {
 
 	$message = gettext($message);
 
-    $message = escapeshellarg($message);
+    	$message = escapeshellarg($message);
 
-    // printf is a shell builtin 
+    	// printf is a shell builtin 
 	exec("printf {$message} >&2");
 
 }
@@ -57,9 +59,9 @@ foreach ($if_list as $realif => $name) {
 
 	if (substr($realif, 0, 2) == "wg") {
 
-		exec("/sbin/ifconfig {$ifname}" . $verbose_pipe . " || ifconfig lo create name {$ifname}");
+		exec("(/sbin/ifconfig {$ifname} || /sbin/ifconfig lo create name {$ifname})" . $verbose_pipe);
 
-		exec("/sbin/ifconfig {$ifname} group wg");
+		exec("/sbin/ifconfig {$ifname} group wg" . $verbose_pipe);
 
 	}
 

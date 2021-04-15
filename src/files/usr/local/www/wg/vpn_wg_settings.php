@@ -37,6 +37,30 @@ require_once("/usr/local/pkg/wireguard/wg.inc");
 init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
 $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 
+if ($_POST) {
+
+	if ($_POST['save']) {
+
+		if (!$input_errors) {
+
+			$pconfig = $_POST;
+
+			$wg_config['keep_conf'] = $pconfig['keep_conf'];
+			
+			$wg_config['blur_secrets'] = $pconfig['blur_secrets'];
+
+			write_config('[WireGuard] Save general settings');
+
+			wg_resync();
+
+			header("Location: /wg/vpn_wg_settings.php");
+
+		}
+
+	}
+
+}
+
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Settings"));
 $pglinks = array("", "/wg/vpn_wg.php", "@self");
 $shortcut_section = "wireguard";
@@ -61,13 +85,23 @@ $form = new Form(false);
 $section = new Form_Section("General Settings");
 
 $section->addInput(new Form_Checkbox(
-	'conf_keep',
+	'keep_conf',
 	'Keep Configuration',
     	gettext('Enable'),
-    	$pconfig['conf_keep']
+    	$wg_config['keep_conf']
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Keep Configurations\' enabled, all tunnel configurations and package settings will persist on install/de-install.'
+		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );
+
+$section->addInput(new Form_Checkbox(
+	'blur_secrets',
+	'Blur Secrets',
+    	gettext('Enable'),
+    	$wg_config['blur_secrets']
+))->setHelp('<span class="text-danger">Note: </span>'
+		. 'With \'Blur Secrets\' enabled, all secrets (private and pre-shared keys) are blurred in the user interface.'
+);
+
 
 $form->add($section);
 
@@ -105,32 +139,10 @@ events.push(function() {
 
 		$('<input>').attr({type: 'hidden',name: 'save',value: 'save'}).appendTo(form);
 
-
 		$(form).submit();
+
 	});
 
-	// These are action buttons, not submit buttons
-	$("#savemodal").prop('type' ,'button');
-
-
-
-
-	// Warn the user if the peer table has been updated, but the form has not yet been saved ----------------------------
-	// Save the table state on page load
-	var tableHash = hashCode($('#peertable').html());
-
-	window.addEventListener('beforeunload', (event) => {
-		// If the table has changed since page load . .
-		if (hashCode($('#peertable').html()) !== tableHash) {
-			// Cause the browser to display "Are you sure" message)
-			// Unfortunately it is no longer possible to customize the browser message
-			event.returnValue = '';
-		}
-	});
-
-	function hashCode(s){
-		return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
-	}
 });
 //]]>
 </script>

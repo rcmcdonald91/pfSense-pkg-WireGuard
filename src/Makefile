@@ -1,8 +1,8 @@
 # $FreeBSD$
 
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.0.4
-PORREVISION=	1
+PORTVERSION=	0.0.5
+PORREVISION=	0
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -56,10 +56,15 @@ do-install:
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_api.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_globals.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_install.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_extras.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
+
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/pkg/wireguard/etc/rc.bootstrap_wireguard \
 		${STAGEDIR}${PREFIX}/pkg/wireguard/etc
 

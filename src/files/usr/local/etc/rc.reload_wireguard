@@ -27,7 +27,7 @@ require_once('config.inc');
 // WireGuard includes
 require_once('/usr/local/pkg/wireguard/wg.inc');
 
-// Nice to have someoutput when running manually after system startup for testing
+// Nice to have some output when running manually after system startup for testing
 $run_verbose = true;
 
 if (platform_booting()) {
@@ -38,8 +38,7 @@ if (platform_booting()) {
 
 }
 
-// Destroy first to supersede any lo placeholder interfaces after startup 
-wg_configure_from_confs($wgconfpath, true, $run_verbose);
+wg_configure($run_verbose);
 
 if (platform_booting()) {
 
