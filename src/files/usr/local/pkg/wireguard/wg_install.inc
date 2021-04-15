@@ -175,7 +175,7 @@ function wg_ifgroup_install() {
 
 	$wg_group_entry['ifname'] = $wgg['if_group'];
 	$wg_group_entry['descr'] = 'Dynamic Group for WireGuard';
-	$wg_group_entry['members'] = null
+	$wg_group_entry['members'] = '';
 
 	$a_ifgroups[] = $wg_group_entry;
 
