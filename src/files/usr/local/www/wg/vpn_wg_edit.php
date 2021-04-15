@@ -150,15 +150,13 @@ $enabled_button = new Form_Checkbox(
 	$pconfig['enabled'] == 'yes'
 );
 
-$enabled_button->setHelp('<span class="text-danger">Note: </span>'
-				. 'Tunnel must be enabled in order to be assigned to an interface');	
+$enabled_button->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to an interface');	
 
-// Set the tunnel enabled button to readonly if interface is assigned
+// Disable the tunnel enabled button if interface is assigned
 if (is_wg_tunnel_assigned($pconfig)) {
 
-	$enabled_button->setReadOnly();
-	$enabled_button->setHelp('<span class="text-danger">Note: </span>'
-					. 'Tunnel cannot be disabled when assigned to an interface');
+	$enabled_button->setDisabled();
+	$enabled_button->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to an interface');
 
 }
 
@@ -447,7 +445,9 @@ events.push(function() {
 	// Blurs secrets
 	if (wg_config['blur_secrets'] == 'yes') {
 
-		var blur = {"color" : "transparent", "text-shadow" : "0 0 5px rgba(0,0,0,0.5)"};
+		var blur = {"color" : "transparent", "text-shadow" : "0 0 5px rgba(0,0,0,0.5)"}
+
+		$("::placeholder").css({"color" : "revert", "text-shadow" : "none"});
 
 		$("#privatekey").css(blur);
 
