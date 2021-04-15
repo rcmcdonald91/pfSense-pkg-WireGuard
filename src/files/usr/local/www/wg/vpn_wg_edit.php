@@ -148,8 +148,10 @@ $enabled_button = new Form_Checkbox(
 	'Tunnel Enabled',
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
-)->setHelp('<span class="text-danger">Note: </span>'
-		. 'Tunnel must be enabled in order to be assigned to an interface');
+);
+
+$enabled_button->setHelp('<span class="text-danger">Note: </span>'
+				. 'Tunnel must be enabled in order to be assigned to an interface');	
 
 // Set the tunnel enabled button to readonly if interface is assigned
 if (is_wg_tunnel_assigned($pconfig) {
