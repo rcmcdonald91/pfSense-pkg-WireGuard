@@ -36,7 +36,8 @@ $wgg = array(
         'script_path'           => '/usr/local/etc',
         'earlyshellcmds'        => array('/usr/local/etc/rc.bootstrap_wireguard', '/usr/local/etc/rc.reload_wireguard'),
         'pkg_scripts'           => array('/usr/local/etc/rc.reload_wireguard'),
-        'extra_scripts'         => array('/usr/local/pkg/wireguard/etc/rc.bootstrap_wireguard')
+        'extra_scripts'         => array('/usr/local/pkg/wireguard/etc/rc.bootstrap_wireguard'),
+        'verbose'               => false
 );
 
 ?>
