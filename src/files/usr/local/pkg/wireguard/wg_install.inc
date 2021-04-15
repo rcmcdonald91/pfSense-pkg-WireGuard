@@ -83,7 +83,7 @@ function wg_deinstall() {
 /*
  * This function installs any extra scripts not installed by pkg(7)
  */
-function wg_extra_scripts_install($verbose = false) {
+function wg_extra_scripts_install($verbose = true) {
 	global $wgg;
 
 	foreach ($wgg['extra_scripts'] as $script) {
@@ -94,7 +94,7 @@ function wg_extra_scripts_install($verbose = false) {
 
 		if ($verbose) { 
 			
-			update_status("\nInstalling {$script_name} to {$wgg['script_path']} ..."); 
+			update_status("\nInstalling {$script_name} to {$wgg['script_path']} ... \n"); 
 		
 		}
 
