@@ -42,8 +42,10 @@ require_once('wg_validate.inc');
 function wg_configure($conf_hard = false, $verbose = false) {
 	global $config;
 
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+
 	// Nothing to configure, bail out early
-	if (!is_array($config['installedpackages']['wireguard']['tunnel'])) {
+	if (!is_array($wg_tunnels)) {
 
 		return;
 
@@ -54,7 +56,7 @@ function wg_configure($conf_hard = false, $verbose = false) {
 
 	$tunnel = [];
 
-	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
+	foreach ($wg_tunnels as $tunnel) {
 
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 			
@@ -224,19 +226,40 @@ function wg_do_post($post) {
 }
 
 function wg_resync() {
+	global $config, $wgg;
 
-	// Attempt to reinstall the interface group to keep it clean
+	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
+
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel']
+
+	if (is_array($wg_tunnels)) {
+
+		foreach ($wg_tunnels as $tunnel) {
+
+			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
+				$is_assigned = is_wg_tunnel_assigned($tunnel)
+
+				wg_configure_if($tunnel, !($is_assigned));
+
+			}
+
+		}
+
+	}
 
 }
 
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
 
-	if ($config['installedpackages']['wireguard']['tunnel']) {
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'] 
 
-		$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+	// We've got some tunnels to configure
+	if (is_array($wg_tunnels)) {
 
+		// Create configuration path if it is missing
 		if (!file_exists($wgg['conf_path'])) {
 
 			mkdir($wgg['conf_path'], 0700, true);
@@ -247,6 +270,7 @@ function wg_create_config_files($clean = true) {
 
 		}
 
+		// We almost always want to just overwrite the configurations
 		if ($clean) {
 
 			delete_wg_configs();
