@@ -115,13 +115,13 @@ function wg_syncconf($tunnel) {
 
 	}
 
-	// Get the stripped conf from wg-quick(8)
-	$stripped_conf = exec_wg_quick_action($tunnel, "strip");
-
-	$stripped_conf = escapeshellarg($stripped_conf);
-
 	// Pass the stripped configuration to wg(8)
-	exec("{$wgg['wg']} syncconf {$wg_ifname} <( echo {$stripped_conf} )");
+	$syncconf_command ="{$wgg['wg']} syncconf {$wg_ifname} <({$wgg['wg_quick']} strip {$wg_ifname})";
+
+	$syncconf_command = escapeshellarg($syncconf_command);
+
+	// We need <() process substitution, so use bash...
+	exec("{$wgg['bash']} -c {$syncconf_command}");
 
 }
 
@@ -140,18 +140,9 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 
 	}
 
-	if ($action == "strip") {
-
-		// The strip action is functionally useless without being verbose
-		$verbose = true;
-
-	}
-
 	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"), $output);
+	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
 
-	$output = implode("\n", $output);
-	return $output;		
 }
 
 // Generate a pre-shared key
