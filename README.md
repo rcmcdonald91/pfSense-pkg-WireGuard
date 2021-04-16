@@ -18,7 +18,7 @@ Note: I have now moved development to the dev branch. Moving forward main will c
 
 **Developed on pfSense 2.6.0-DEVELOPMENT snapshots.**
 
-**Now tested on pfSense 2.5.1-RC and 2.6.0-DEVELOPMENT**
+**Now tested on pfSense 2.5.1 and 2.6.0-DEVELOPMENT**
 
 **DO NOT INSTALL ON pfSense 2.5.0.** 
 
