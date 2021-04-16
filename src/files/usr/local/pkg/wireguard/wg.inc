@@ -231,7 +231,7 @@ function wg_resync() {
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
 
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel']
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
 	if (is_array($wg_tunnels)) {
 
@@ -239,7 +239,7 @@ function wg_resync() {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				$is_assigned = is_wg_tunnel_assigned($tunnel)
+				$is_assigned = is_wg_tunnel_assigned($tunnel);
 
 				wg_configure_if($tunnel, !($is_assigned));
 
@@ -254,7 +254,7 @@ function wg_resync() {
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
 
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'] 
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
 	// We've got some tunnels to configure
 	if (is_array($wg_tunnels)) {
