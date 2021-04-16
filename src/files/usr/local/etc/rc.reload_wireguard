@@ -27,18 +27,19 @@ require_once('config.inc');
 // WireGuard includes
 require_once('/usr/local/pkg/wireguard/wg.inc');
 
-// Nice to have some output when running manually after system startup for testing
-$run_verbose = true;
+// We always want to configure hard during system startup
+$conf_hard = platform_booting();
+
+// Nice to have some output for testing purposes when not booting
+$verbose = !(platform_booting());
 
 if (platform_booting()) {
-
-	$run_verbose = false;
 
 	print_message("Configuring WireGuard tunnels... ");
 
 }
 
-wg_configure($run_verbose);
+wg_configure($conf_hard, $verbose);
 
 if (platform_booting()) {
 

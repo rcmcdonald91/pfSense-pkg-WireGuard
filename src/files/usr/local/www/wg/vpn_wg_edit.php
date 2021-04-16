@@ -143,24 +143,24 @@ $section->addInput(new Form_Input(
 	$index
 ));
 
-$enabled_button = new Form_Checkbox(
+$tun_enable = new Form_Checkbox(
 	'enabled',
 	'Tunnel Enabled',
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
 );
 
-$enabled_button->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to an interface');	
+$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to an interface');	
 
 // Disable the tunnel enabled button if interface is assigned
 if (is_wg_tunnel_assigned($pconfig)) {
 
-	$enabled_button->setDisabled();
-	$enabled_button->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to an interface');
+	$tun_enable->setDisabled();
+	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to an interface');
 
 }
 
-$section->addInput($enabled_button);
+$section->addInput($tun_enable);
 
 $section->addInput(new Form_Input(
 	'descr',

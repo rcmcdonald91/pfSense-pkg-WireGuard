@@ -28,6 +28,7 @@ $pkg_name                       = "wireguard";
 $wgg = array(
         'wg'                    => '/usr/local/bin/wg',
         'wg_quick'              => '/usr/local/bin/wg-quick',
+        'bash'                  => '/usr/local/bin/bash',
         'ifconfig'              => '/sbin/ifconfig',
         'kldstat'               => '/sbin/kldstat',
         'pkg'                   => '/usr/sbin/pkg',
@@ -36,6 +37,7 @@ $wgg = array(
         
         'if_prefix'             => 'wg',
         'if_group'              => 'WireGuard',
+        'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
 
         'script_path'           => '/usr/local/etc',

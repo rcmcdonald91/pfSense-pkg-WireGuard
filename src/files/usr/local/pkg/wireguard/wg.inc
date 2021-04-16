@@ -39,28 +39,34 @@ require_once('wg_extras.inc');
 require_once('wg_validate.inc');
 
 // Setup all WireGuard tunnels
-function wg_configure($verbose = false) {
+function wg_configure($conf_hard = false, $verbose = false) {
 	global $config;
 
-	if (!is_array($config['installedpackages']['wireguard']['tunnel'])) {
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+
+	// Nothing to configure, bail out early
+	if (!is_array($wg_tunnels)) {
 
 		return;
 
 	}
 
+	// Sync conf files to disk
 	wg_create_config_files();
 
 	$tunnel = [];
 
-	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
+	foreach ($wg_tunnels as $tunnel) {
 
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-
-			wg_configure_if($tunnel, true, $verbose);
+			
+			// Attempt to configure the WireGuard tunnel
+			wg_configure_if($tunnel, $conf_hard, $verbose);
 
 
 		} else {
 
+			// Attempt to destroy the WireGaurd tunnel
 			wg_destroy_if($tunnel, $verbose);
 
 		}
@@ -70,23 +76,27 @@ function wg_configure($verbose = false) {
 }
 
 // Setup WireGuard tunnel
-function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
+function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
 	
 	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
-	// Usually want to destroy the interface first if it is not assigned
-	if ($destroyfirst && !is_wg_tunnel_assigned($tunnel)) {
+	// Should be perform a hard reconfiguration
+	if ($conf_hard) {
 
+		// Destroy the interface first
 		wg_destroy_if($tunnel, $verbose);
+
+		// Then attempt to bring up interface using wg-quick(8)
+		exec_wg_quick_action($tunnel, "up", $verbose);
 
 	}
 
-	// Attempt to bring up interface using wg-quick(8)
-	exec_wg_quick_action($tunnel, "up", $verbose);
+	// Now let's always soft configure the interface
+	wg_syncconf($tunnel);
 
-	// Attempt to add the interface to the interface group (i.e. WireGuard)
-	exec("/sbin/ifconfig {$tunnel['name']} group {$wgg['if_group']}" . $verbose_pipe);
+	// Add the interface to the interface group (i.e. WireGuard)
+	exec("{$wgg['ifconfig']} {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}" . $verbose_pipe);
 
 }
 
@@ -96,7 +106,7 @@ function wg_destroy_if($tunnel, $verbose = false) {
 
 	exec_wg_quick_action($tunnel, "down", $verbose);
 
-	// Need to transform out of tunnel structure because pfSense _interface_destroy expects an ifname
+	// Need to transform out of tunnel structure because pfSense_interface_destroy expects an ifname
 	if (is_array($tunnel) && isset($tunnel['name'])) {
 
 		$tunnel = $tunnel['name'];
@@ -147,7 +157,7 @@ function wg_delete_tunnel($tunidx) {
 }
 
 // Write new tunnel values to the configuration system
-function wg_do_post($post, $json = false) {
+function wg_do_post($post) {
 	global $config;
 
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
@@ -216,18 +226,40 @@ function wg_do_post($post, $json = false) {
 }
 
 function wg_resync() {
+	global $config, $wgg;
 
-	wg_configure();
+	// Attempt to reinstall the interface group to keep things clean
+	wg_ifgroup_install();
+
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+
+	if (is_array($wg_tunnels)) {
+
+		foreach ($wg_tunnels as $tunnel) {
+
+			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
+				$is_assigned = is_wg_tunnel_assigned($tunnel);
+
+				wg_configure_if($tunnel, !($is_assigned));
+
+			}
+
+		}
+
+	}
 
 }
 
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
 
-	if ($config['installedpackages']['wireguard']['tunnel']) {
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
-		$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+	// We've got some tunnels to configure
+	if (is_array($wg_tunnels)) {
 
+		// Create configuration path if it is missing
 		if (!file_exists($wgg['conf_path'])) {
 
 			mkdir($wgg['conf_path'], 0700, true);
@@ -238,6 +270,7 @@ function wg_create_config_files($clean = true) {
 
 		}
 
+		// We almost always want to just overwrite the configurations
 		if ($clean) {
 
 			delete_wg_configs();

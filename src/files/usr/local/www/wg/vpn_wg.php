@@ -177,35 +177,16 @@ if ($input_errors) {
 					</tr>
 <?php
 			$i++;
-		endforeach;	 // $tunnelsa
+
+		endforeach;
+
+	endif;
+	
 ?>
 				</tbody>
 			</table>
 		</div>
 	</div>
-
-
-<?php
-		$section = new Form_Section('Firewall keys');
-		$section->addClass('fwkeys');
-
-		$section->addInput(new Form_Input(
-			'pubkey',
-			'Public key',
-			'',
-			''
-		))->setReadonly();
-
-		$section->addInput(new Form_Input(
-			'privkey',
-			'Private key',
-			'',
-			''
-		))->setReadonly();
-
-		print($section);
-	endif;
-?>
 
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
@@ -233,7 +214,6 @@ events.push(function() {
 	var keyshidden = true;
 
 	hideClass('peer-entries', peershidden);
-	hideClass('fwkeys', keyshidden);
 
 	// Toggle peer visibility
 	$('#showpeers').click(function () {

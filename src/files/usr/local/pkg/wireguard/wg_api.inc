@@ -100,6 +100,31 @@ function genPubKey($privkey) {
 
 }
 
+// This soft resyncs a given WireGuard Tunnel (i.e. wg syncconf wgX <(wg-quick strip wgX))
+function wg_syncconf($tunnel) {
+	global $wgg;
+
+	// Assume we have an interface first
+	$wg_ifname = $tunnel;
+
+	// Looks like we have a tunnel structure
+	if (is_array($tunnel) && isset($tunnel['name'])) {
+
+		// Transform to an interface name
+		$wg_ifname = $tunnel['name'];
+
+	}
+
+	// Pass the stripped configuration to wg(8)
+	$syncconf_command ="{$wgg['wg']} syncconf {$wg_ifname} <({$wgg['wg_quick']} strip {$wg_ifname})";
+
+	$syncconf_command = escapeshellarg($syncconf_command);
+
+	// We need <() process substitution, so use bash...
+	exec("{$wgg['bash']} -c {$syncconf_command}");
+
+}
+
 // Executes a wg-quick(8) action using a specified tunnel or interface
 function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	global $wgg;
@@ -110,6 +135,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	// Looks like we have a tunnel structure
 	if (is_array($tunnel) && isset($tunnel['name'])) {
 
+		// Transform to an interface name
 		$wg_ifname = $tunnel['name'];
 
 	}

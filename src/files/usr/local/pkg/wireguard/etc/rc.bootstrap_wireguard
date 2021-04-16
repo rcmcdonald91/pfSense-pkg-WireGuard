@@ -59,8 +59,10 @@ foreach ($if_list as $realif => $name) {
 
 	if (substr($realif, 0, 2) == "wg") {
 
+		// Let's create temporary lo loopback interfaces just to be safe 
 		exec("(/sbin/ifconfig {$ifname} || /sbin/ifconfig lo create name {$ifname})" . $verbose_pipe);
 
+		// Add them to the 'wg' group so wg-quick(8) can tear them down later
 		exec("/sbin/ifconfig {$ifname} group wg" . $verbose_pipe);
 
 	}
