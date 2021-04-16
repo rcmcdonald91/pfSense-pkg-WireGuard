@@ -189,7 +189,7 @@ function wg_ifgroup_deinstall() {
 
 	foreach ($a_ifgroups as $index => $ifg) {
 
-		if ($ifg['ifname'] == $wgg['ifgroupentry']['ifname']}) {
+		if ($ifg['ifname'] == $wgg['ifgroupentry']['ifname']) {
 
 			unset($a_ifgroups[$index]);
 
