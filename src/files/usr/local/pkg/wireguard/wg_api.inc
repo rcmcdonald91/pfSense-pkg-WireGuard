@@ -121,7 +121,7 @@ function wg_syncconf($tunnel) {
 	$stripped_conf = escapeshellarg($stripped_conf);
 
 	// Pass this to wg(8)
-	exec("{$wgg['wg']} syncconf {$wg_ifname} <({$stripped_conf})");
+	//exec("{$wgg['wg']} syncconf {$wg_ifname} <({$stripped_conf})");
 
 }
 
