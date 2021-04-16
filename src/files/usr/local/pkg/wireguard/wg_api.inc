@@ -139,7 +139,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = true) {
 	}
 
 	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"), $output)
+	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"), $output);
 
 	$output = implode("\n", $packages);
 	return $output;		
