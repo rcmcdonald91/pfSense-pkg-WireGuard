@@ -125,7 +125,7 @@ if ($_POST) {
 	}
 
 	// Save the MTU settings prior to re(saving)
-	$pconfig['mtu'] = get_interface_mtu($pconfig['name'])
+	$pconfig['mtu'] = get_interface_mtu($pconfig['name']);
 
 }
 
