@@ -51,8 +51,8 @@ function wg_install() {
 
 	update_status(" done.\nConfiguring existing WireGuard interfaces... ");
 
-                // Configure any existing interfaces
-                wg_configure();
+                // Configure hard any existing interfaces
+                wg_configure(true);
 
 	update_status(" done.\n");
 
