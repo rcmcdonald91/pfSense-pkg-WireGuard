@@ -177,7 +177,11 @@ if ($input_errors) {
 					</tr>
 <?php
 			$i++;
-		endforeach;	 // $tunnelsa
+
+		endforeach;
+
+	endif;
+	
 ?>
 				</tbody>
 			</table>
