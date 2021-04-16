@@ -158,7 +158,7 @@ function wg_delete_tunnel($tunidx) {
 
 // Write new tunnel values to the configuration system
 function wg_do_post($post) {
-	global $config;
+	global $config, $wgg;
 
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 
@@ -169,12 +169,22 @@ function wg_do_post($post) {
 	$pconfig = &$config['installedpackages']['wireguard']['tunnel'][$index];
 
 	if (empty($pconfig['name'])) {
+
 		$pconfig['name'] = next_wg_if();
+
 	}
-	$pconfig['enabled'] = empty($post['enabled']) ? 'no':'yes';
+
+	if (empty($pconfig['mtu'])) {
+
+		$pconfig['mtu'] = $wgg['default_mtu'];
+
+	}
+
+	$pconfig['enabled'] = empty($post['enabled']) ? 'no' : 'yes';
+
 	$pconfig['descr'] = $post['descr'];
 
-	// Interface section
+	// Tunnel section
 	$pconfig['interface']['address'] = $post['address'];
 	$pconfig['interface']['listenport'] = $post['listenport'];
 	$pconfig['interface']['privatekey'] = $post['privatekey'];
@@ -238,7 +248,6 @@ function wg_resync() {
 		foreach ($wg_tunnels as $tunnel) {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-
 				$is_assigned = is_wg_tunnel_assigned($tunnel);
 
 				wg_configure_if($tunnel, !($is_assigned));

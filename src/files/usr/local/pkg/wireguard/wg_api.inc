@@ -157,13 +157,13 @@ function genPSK() {
 
 // Return the next available WireGuard port
 function next_wg_port() {
-	global $config;
+	global $config, $wgg;
 
 	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 
 	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
-	for ($idx=51820; $idx<65535; $idx++) {
+	for ($idx=$wgg['default_port']; $idx<65535; $idx++) {
 
 		// Check to see if the port is already in use
 		$found = false;
@@ -189,7 +189,7 @@ function next_wg_port() {
 
 	}
 
-	return 51820;
+	return $wgg['default_port'];
 
 }
 
