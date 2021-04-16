@@ -124,6 +124,9 @@ if ($_POST) {
 
 	}
 
+	// Save the MTU settings prior to re(saving)
+	$pconfig['mtu'] = get_interface_mtu($pconfig['name'])
+
 }
 
 $shortcut_section = "wireguard";
@@ -274,6 +277,14 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	));
 
 }
+
+// We still need to keep track of this otherwise wg-quick and pfSense will fight
+$section->addInput(new Form_Input(
+	'mtu',
+	'',
+	'hidden',
+	$pconfig['mtu']
+));
 
 $form->add($section);
 
