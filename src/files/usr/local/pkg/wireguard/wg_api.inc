@@ -118,13 +118,15 @@ function wg_syncconf($tunnel) {
 	// Get the stripped conf from wg-quick(8)
 	$stripped_conf = exec_wg_quick_action($tunnel, "strip");
 
+	$stripped_conf = escapeshellarg($stripped_conf);
+
 	// Pass this to wg(8)
 	exec("{$wgg['wg']} syncconf {$wg_ifname} <({$stripped_conf})");
 
 }
 
 // Executes a wg-quick(8) action using a specified tunnel or interface
-function exec_wg_quick_action($tunnel, $action, $verbose = true) {
+function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	global $wgg;
 
 	// Assume we have an interface first
@@ -138,10 +140,17 @@ function exec_wg_quick_action($tunnel, $action, $verbose = true) {
 
 	}
 
+	if ($action == "strip") {
+
+		// The strip action is functionally useless without being verbose
+		$verbose = true;
+
+	}
+
 	// Execute wg-quick(8) on the interface using the provided action 
 	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"), $output);
 
-	$output = implode("\n", $packages);
+	$output = implode("\n", $output);
 	return $output;		
 }
 
