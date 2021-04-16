@@ -171,7 +171,7 @@ function wg_do_post($post) {
 	if (empty($pconfig['name'])) {
 		$pconfig['name'] = next_wg_if();
 	}
-	$pconfig['enabled'] = empty($post['enabled']) ? 'no':'yes';
+	$pconfig['enabled'] = empty($post['enabled']) ? 'no' : 'yes';
 	$pconfig['descr'] = $post['descr'];
 
 	// Interface section

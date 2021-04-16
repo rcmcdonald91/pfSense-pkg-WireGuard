@@ -58,45 +58,60 @@ if ($_REQUEST['ajax']) {
 if ($_POST) {
 
 	if ($_POST['save']) {
+
 		if (empty($_POST['listenport'])) {
+
 			$_POST['listenport'] = next_wg_port();
+
 		}
-		if (empty($_POST['mtu'])) {
-			$_POST['mtu'] = $wgg['default_mtu'];
-		}
+
 		$res = wg_do_post($_POST);
+		
 		$input_errors = $res['input_errors'];
+
 		$pconfig = $res['pconfig'];
 
 		if (!$input_errors) {
+
 			// Create the new WG config files
 			wg_create_config_files();
 			
-			// Create interface group
+			// Attempt to reinstall the interface group to keep things clean
 			wg_ifgroup_install();
 
-			// Setup and start the new WG tunnel
-			if (isset($pconfig['enabled']) &&
-			($pconfig['enabled'] == 'yes')) {
-				wg_configure_if($pconfig);
+			// Configure the new WG tunnel
+			if (isset($pconfig['enabled']) && $pconfig['enabled'] == 'yes') {
+
+				// Should we soft configure?
+				$is_assigned = is_wg_tunnel_assigned($pconfig);
+
+				wg_configure_if($pconfig, !($is_assigned));
+
 			} else {
+
 				wg_destroy_if($pconfig);
+
 			}
 
 			// Go back to the tunnel table
 			header("Location: /wg/vpn_wg.php");
+
 		}
+
 	} elseif ($_POST['action'] == 'genkeys') {
+
 		// Process ajax call requesting new key pair
 		print(genKeyPair(true));
+
 		exit;
+
 	}
 
 } else {
 
 	if (isset($index)) {
 
-		if ($tunnels[$index]) {
+		if (is_array($tunnels[$index])) {
 
 			$pconfig = &$tunnels[$index];
 		}
@@ -156,7 +171,16 @@ $tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>e
 if (is_wg_tunnel_assigned($pconfig)) {
 
 	$tun_enable->setDisabled();
+
 	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to an interface');
+
+	// We still want to POST this field, make a a hidden field now
+	$section->addInput(new Form_Input(
+		'enabled',
+		'',
+		'hidden',
+		'yes'
+	));
 
 }
 
