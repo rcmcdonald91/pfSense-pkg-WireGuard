@@ -90,7 +90,7 @@ function wg_extra_scripts_install($verbose = false) {
 
 		$script_source_path = dirname($script);
 
-		if ($verbose) { 
+		if ($verbose || platform_booting()) { 
 			
 			update_status("\nInstalling ( {$script_name} ) to ( {$wgg['script_path']} ) ... "); 
 		
@@ -102,7 +102,7 @@ function wg_extra_scripts_install($verbose = false) {
 
 		chmod("{$wgg['script_path']}/{$script_name}", 0755);
 
-		if ($verbose) {
+		if ($verbose || platform_booting()) {
 
 			update_status(" done.\n");
 
@@ -122,10 +122,10 @@ function wg_extra_scripts_deinstall() {
 /*
  * This function creates earlyshellcmd entries in the config
  */
-function wg_earlyshellcmd_install() {
+function wg_earlyshellcmd_install($clean = true) {
 	global $config, $wgg;
 
-        wg_earlyshellcmd_deinstall($wgg['earlyshellcmds']);
+	wg_earlyshellcmd_deinstall($wgg['earlyshellcmds']);
 
         init_config_arr(array('system', 'earlyshellcmd'));
 
@@ -169,15 +169,9 @@ function wg_ifgroup_install() {
 
 	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
 
-	$wg_group_entry = array();
+	$a_ifgroups[] = $wgg['ifgroupentry'];
 
-	$wg_group_entry['ifname'] = $wgg['if_group'];
-	$wg_group_entry['descr'] = 'Dynamic Group for WireGuard';
-	$wg_group_entry['members'] = '';
-
-	$a_ifgroups[] = $wg_group_entry;
-
-	write_config("[WireGuard] Interface group ({$wgg['if_group']}) (re)installed.");
+	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) (re)installed.");
 
 	unlink_if_exists("{$g['tmp_path']}/config.cache");
 
@@ -195,7 +189,7 @@ function wg_ifgroup_deinstall() {
 
 	foreach ($a_ifgroups as $index => $ifg) {
 
-		if ($ifg['ifname'] == $wgg['if_group']) {
+		if ($ifg['ifname'] == $wgg['ifgroupentry']['ifname']}) {
 
 			unset($a_ifgroups[$index]);
 
@@ -203,7 +197,7 @@ function wg_ifgroup_deinstall() {
 		
 	}
 
-	write_config("[WireGuard] Interface group ({$wgg['if_group']}) de-installed.");
+	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
 
 	unlink_if_exists("{$g['tmp_path']}/config.cache");
 

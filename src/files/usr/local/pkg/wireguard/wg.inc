@@ -86,7 +86,7 @@ function wg_configure_if($tunnel, $destroyfirst = true, $verbose = false) {
 	exec_wg_quick_action($tunnel, "up", $verbose);
 
 	// Attempt to add the interface to the interface group (i.e. WireGuard)
-	exec("/sbin/ifconfig {$tunnel['name']} group {$wgg['if_group']}" . $verbose_pipe);
+	exec("/sbin/ifconfig {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}" . $verbose_pipe);
 
 }
 
@@ -216,6 +216,9 @@ function wg_do_post($post, $json = false) {
 }
 
 function wg_resync() {
+
+	// Attempt to reinstall the group definition to keep it clean
+	wg_ifgroup_install();
 
 	wg_configure();
 

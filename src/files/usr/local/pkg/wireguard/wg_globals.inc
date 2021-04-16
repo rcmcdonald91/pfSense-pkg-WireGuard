@@ -36,6 +36,7 @@ $wgg = array(
         
         'if_prefix'             => 'wg',
         'if_group'              => 'WireGuard',
+        'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
 
         'script_path'           => '/usr/local/etc',
