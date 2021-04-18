@@ -169,7 +169,7 @@ if ($input_errors) {
 								</tbody>
 							</table>
 						</td>
-<?php
+						<?php
 			else:
 				print('<td colspan="6">' . gettext("No peers have been configured") . '</td>');
 			endif;
@@ -177,16 +177,35 @@ if ($input_errors) {
 					</tr>
 <?php
 			$i++;
-
-		endforeach;
-
-	endif;
-	
+		endforeach;	 // $tunnelsa
 ?>
 				</tbody>
 			</table>
 		</div>
 	</div>
+
+
+<?php
+		$section = new Form_Section('Firewall keys');
+		$section->addClass('fwkeys');
+
+		$section->addInput(new Form_Input(
+			'pubkey',
+			'Public key',
+			'',
+			''
+		))->setReadonly();
+
+		$section->addInput(new Form_Input(
+			'privkey',
+			'Private key',
+			'',
+			''
+		))->setReadonly();
+
+		print($section);
+	endif;
+?>
 
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
