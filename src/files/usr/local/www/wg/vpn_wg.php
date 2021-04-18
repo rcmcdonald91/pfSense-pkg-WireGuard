@@ -169,7 +169,7 @@ if ($input_errors) {
 								</tbody>
 							</table>
 						</td>
-<?php
+						<?php
 			else:
 				print('<td colspan="6">' . gettext("No peers have been configured") . '</td>');
 			endif;
@@ -177,16 +177,17 @@ if ($input_errors) {
 					</tr>
 <?php
 			$i++;
-
-		endforeach;
-
-	endif;
-	
+		endforeach;	 // $tunnelsa
 ?>
 				</tbody>
 			</table>
 		</div>
 	</div>
+
+
+<?php
+	endif;
+?>
 
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">

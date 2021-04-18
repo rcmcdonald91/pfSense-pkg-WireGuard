@@ -17,5 +17,9 @@
 		<pkginfolink>https://github.com/theonemcdonald/pfSense-pkg-WireGuard</pkginfolink>
 		<version>%%PKGVERSION%%</version>
 		<configurationfile>wireguard.xml</configurationfile>
+		<logging>
+			<facilityname>wireguard</facilityname>
+			<logfilename>wireguard.log</logfilename>
+		</logging>
 	</package>
 </pfsensepkgs>
