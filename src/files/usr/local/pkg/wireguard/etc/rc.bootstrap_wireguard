@@ -20,11 +20,18 @@
  * limitations under the License.
  */
 
+/*
+ * This file absolutely cannot be dependent on the package! It must standalone,
+ * and only depend on pfSense includes. This script protects the firewall from
+ * being unable to boot in the event that the package is removed with wg
+ * interfaces assigned to pfSenses interfaces.
+ */
+
 // pfSense includes
 require_once('globals.inc');
 require_once('config.inc');
 
-// This file absolutely cannot be dependent on the package! It must standalone and only depend on pfSense includes
+$ifconfig = '/sbin/ifconfig';
 
 // This is a hack to get text onto the console during booting from a php-cgi script
 function print_message($message) {
@@ -39,19 +46,17 @@ function print_message($message) {
 }
 
 // Nice to have some output when running manually after system startup for testing purposes
-$run_verbose = true;
+$verbose = !(platform_booting());
 
 if (platform_booting()) {
-
-	$run_verbose = false;
 
 	print_message("Bootstrapping WireGuard interfaces... \n");
 
 }
 
-$verbose_pipe = ($run_verbose ? "" : " > /dev/null 2>&1");
+$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
-$if_list = get_configured_interface_list_by_realif($disabled);
+$if_list = get_configured_interface_list_by_realif(true);
 
 foreach ($if_list as $realif => $name) {
 
@@ -60,10 +65,10 @@ foreach ($if_list as $realif => $name) {
 	if (substr($realif, 0, 2) == "wg") {
 
 		// Let's create temporary lo loopback interfaces just to be safe 
-		exec("(/sbin/ifconfig {$ifname} || /sbin/ifconfig lo create name {$ifname})" . $verbose_pipe);
+		exec("({$ifconfig} {$ifname} || {$ifconfig} lo create name {$ifname})" . $verbose_pipe);
 
 		// Add them to the 'wg' group so wg-quick(8) can tear them down later
-		exec("/sbin/ifconfig {$ifname} group wg" . $verbose_pipe);
+		exec("{$ifconfig} {$ifname} group wg" . $verbose_pipe);
 
 	}
 
