@@ -133,7 +133,7 @@ function wg_earlyshellcmd_deinstall() {
 	// This is dangerous, only for testing
 	unset($a_earlyshellcmds);
 
-	write_config("[WireGuard] Earlyshellcmds removed.")
+	write_config("[WireGuard] Earlyshellcmds removed.");
 	
 }
 
