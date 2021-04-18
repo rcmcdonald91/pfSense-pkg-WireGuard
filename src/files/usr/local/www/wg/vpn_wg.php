@@ -186,24 +186,6 @@ if ($input_errors) {
 
 
 <?php
-		$section = new Form_Section('Firewall keys');
-		$section->addClass('fwkeys');
-
-		$section->addInput(new Form_Input(
-			'pubkey',
-			'Public key',
-			'',
-			''
-		))->setReadonly();
-
-		$section->addInput(new Form_Input(
-			'privkey',
-			'Private key',
-			'',
-			''
-		))->setReadonly();
-
-		print($section);
 	endif;
 ?>
 
