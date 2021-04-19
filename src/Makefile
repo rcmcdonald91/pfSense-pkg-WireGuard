@@ -1,7 +1,7 @@
 # $FreeBSD$
 
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.0.5
+PORTVERSION=	0.0.6
 PORREVISION=	1
 CATEGORIES=	net
 MASTER_SITES=	# empty
@@ -31,11 +31,8 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
-	${MKDIR} ${STAGEDIR}${PREFIX}/etc
-
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
-	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/etc
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
@@ -45,9 +42,6 @@ do-install:
 	
 	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/wireguard.priv.inc \
 		${STAGEDIR}/etc/inc/priv
-
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/etc/rc.reload_wireguard \
-		${STAGEDIR}${PREFIX}/etc
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
 		${STAGEDIR}${PREFIX}/pkg
@@ -64,9 +58,6 @@ do-install:
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
-
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/pkg/wireguard/etc/rc.bootstrap_wireguard \
-		${STAGEDIR}${PREFIX}/pkg/wireguard/etc
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/pkg_wireguard.inc \
 		${STAGEDIR}${PREFIX}/www/shortcuts

@@ -34,29 +34,12 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("\nInstalling extra scripts... ");
+	update_status("\n  Creating WireGuard interface group...");
 
-                // Installs any extra scripts
-                wg_extra_scripts_install();
-	
-	update_status(" done.\nSetting up earlyshellcmds... ");
-	
-                // Installs the earlyshellcmds
-                wg_earlyshellcmd_install();
+	// Installs the 'WireGuard' interface group
+	wg_ifgroup_install();
 
-	update_status(" done.\nCreating WireGuard interface group... ");
-
-                // Installs the 'WireGuard' interface group
-                wg_ifgroup_install();
-
-	update_status(" done.\nConfiguring existing WireGuard interfaces... ");
-
-                // Configure hard any existing interfaces
-                wg_configure(true);
-
-	update_status(" done.\n");
-
-	unset($g['wireguard_installing']);
+	update_status("done.\n");
 
 }
 
@@ -64,102 +47,21 @@ function wg_install() {
  * This is the main deinstall hook
  */
 function wg_deinstall() {
-	global $wgg;
+	global $config, $wgg;
 
-	update_status("Removing earlyshellcmds... ");
-
-	wg_earlyshellcmd_deinstall($wgg['pkg_scripts']);
-
-	update_status(" done.\nRemoving WireGuard interface group... ");
+	update_status("\n  Removing WireGuard interface group...");
 
 	wg_ifgroup_deinstall();
 
-	update_status(" done.\n");
+	update_status("done.\n");
 
-}
-
-/*
- * This function installs any extra scripts not installed by pkg(7)
- */
-function wg_extra_scripts_install($verbose = false) {
-	global $wgg;
-
-	foreach ($wgg['extra_scripts'] as $script) {
-
-		$script_name = basename($script);
-
-		$script_source_path = dirname($script);
-
-		if ($verbose || platform_booting()) { 
-			
-			update_status("\nInstalling ( {$script_name} ) to ( {$wgg['script_path']} ) ... "); 
-		
-		}
-
-		unlink_if_exists("{$wgg['script_path']}/{$script_name}");
-
-		copy("{$script}", "{$wgg['script_path']}/{$script_name}");
-
-		chmod("{$wgg['script_path']}/{$script_name}", 0755);
-
-		if ($verbose || platform_booting()) {
-
-			update_status(" done.\n");
-
-		}
-
-	}
-
-}
-
-/*
- * This function removes any extra scripts not installed by pkg(7)
- */
-function wg_extra_scripts_deinstall() {
 	# TODO
-}
-
-/*
- * This function creates earlyshellcmd entries in the config
- */
-function wg_earlyshellcmd_install($clean = true) {
-	global $config, $wgg;
-
-	wg_earlyshellcmd_deinstall($wgg['earlyshellcmds']);
-
-        init_config_arr(array('system', 'earlyshellcmd'));
-
-	$a_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	$a_earlyshellcmds = array_merge($wgg['earlyshellcmds'], $a_earlyshellcmds);
-
-        $output = implode(',', $wgg['earlyshellcmds']);
-
-	write_config("[WireGuard] Earlyshellcmds ( {$output} ) (re)installed.");
 
 }
 
 /*
- * This function removes earlyshellcmd entries in the config
+ * This function creates the WireGuard interface group
  */
-function wg_earlyshellcmd_deinstall($cmds_to_deinstall) {
-	global $config;
-
-        init_config_arr(array('system', 'earlyshellcmd'));
-
-	$a_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	$a_earlyshellcmds = array_diff($a_earlyshellcmds, $cmds_to_deinstall);
-
-	$cmds_to_deinstall = implode(',', $cmds_to_deinstall);
-
-	write_config("[WireGuard] ( {$cmds_to_deinstall} ) earlyshellcmds de-installed.");
-	
-}
-
- /*
-  * This function creates the WireGuard interface group
-  */
 function wg_ifgroup_install() {
 	global $g, $config, $wgg;
 
@@ -177,9 +79,9 @@ function wg_ifgroup_install() {
 
 }
 
- /*
-  * This function removes the WireGuard interface group
-  */
+/*
+ * This function removes the WireGuard interface group
+ */
 function wg_ifgroup_deinstall() {
 	global $g, $config, $wgg;
 

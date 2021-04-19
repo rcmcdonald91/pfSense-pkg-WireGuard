@@ -38,50 +38,13 @@ require_once('wg_install.inc');
 require_once('wg_extras.inc');
 require_once('wg_validate.inc');
 
-// Setup all WireGuard tunnels
-function wg_configure($conf_hard = false, $verbose = false) {
-	global $config;
-
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
-
-	// Nothing to configure, bail out early
-	if (!is_array($wg_tunnels)) {
-
-		return;
-
-	}
-
-	// Sync conf files to disk
-	wg_create_config_files();
-
-	$tunnel = [];
-
-	foreach ($wg_tunnels as $tunnel) {
-
-		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-			
-			// Attempt to configure the WireGuard tunnel
-			wg_configure_if($tunnel, $conf_hard, $verbose);
-
-
-		} else {
-
-			// Attempt to destroy the WireGaurd tunnel
-			wg_destroy_if($tunnel, $verbose);
-
-		}
-
-	}
-
-}
-
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
 	
 	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
-	// Should be perform a hard reconfiguration
+	// Should we perform a hard reconfiguration
 	if ($conf_hard) {
 
 		// Destroy the interface first
@@ -104,6 +67,7 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 // Remove WireGuard tunnel
 function wg_destroy_if($tunnel, $verbose = false) {
 
+	// Execute the wg-quick(8) way of tearing down an interface
 	exec_wg_quick_action($tunnel, "down", $verbose);
 
 	// Need to transform out of tunnel structure because pfSense_interface_destroy expects an ifname
@@ -113,6 +77,7 @@ function wg_destroy_if($tunnel, $verbose = false) {
 
 	}
 
+	// Now execute the pfSense way of tearing down an interface
 	pfSense_interface_destroy($tunnel);
 
 }
@@ -235,12 +200,22 @@ function wg_do_post($post) {
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
 }
 
-function wg_resync() {
-	global $config, $wgg;
+function wg_resync($verbose = false) {
+	global $config, $g, $wgg;
+
+	// Write out configuration files to disk
+	wg_create_config_files();
 
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
 
+	if ($g['wireguard_installing']) {
+
+		update_status("\n  Configuring WireGuard tunnels...");
+
+	}
+
+	// Get a list of configured tunnels
 	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
 	if (is_array($wg_tunnels)) {
@@ -248,13 +223,35 @@ function wg_resync() {
 		foreach ($wg_tunnels as $tunnel) {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-				$is_assigned = is_wg_tunnel_assigned($tunnel);
 
-				wg_configure_if($tunnel, !($is_assigned));
+				// Determine if we should configure hard or soft
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
+
+				wg_configure_if($tunnel, $conf_hard, $verbose);
+
+				$if_friendly = convert_real_interface_to_friendly_interface_name($tunnel['name']);
+
+				interface_reconfigure($if_friendly);
+
+			} else {
+
+				// Attempt to destroy the WireGuard tunnel
+				wg_destroy_if($tunnel, $verbose);
 
 			}
 
+			
+
 		}
+
+	}
+
+	if ($g['wireguard_installing']) {
+
+		update_status("done.\n");
+
+		// We are no longer installing
+		unset($g['wireguard_installing']);
 
 	}
 
@@ -282,7 +279,7 @@ function wg_create_config_files($clean = true) {
 		// We almost always want to just overwrite the configurations
 		if ($clean) {
 
-			delete_wg_configs();
+			wg_delete_config_files();
 
 		}
 
@@ -297,6 +294,16 @@ function wg_create_config_files($clean = true) {
 		}
 
 	}
+
+}
+
+/* 
+ * Remove all wg config files from the conf directory
+ */
+function wg_delete_config_files() {
+	global $wgg;
+
+	unlink_if_exists("{$wgg['conf_path']}/*.conf");
 
 }
 
@@ -371,14 +378,6 @@ function make_wg_conf($tunnel) {
 	file_put_contents($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", $txt);
 
 	chmod($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", 0600);
-}
-
-// Remove all wg config files from the conf directory
-function delete_wg_configs() {
-	global $wgg;
-
-	unlink_if_exists($wgg['conf_path'] . "/*.conf");
-
 }
 
 // Return WireGuard tunnel networks for a given address family
