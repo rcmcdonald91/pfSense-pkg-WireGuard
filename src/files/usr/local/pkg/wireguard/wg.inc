@@ -265,8 +265,6 @@ function wg_resync() {
 function wg_write_rcfile() {
 	global $config, $wgg;
 
-	$configPaths = glob("{$wgg['conf_path']}/*.conf");
-
 	$start = $stop = array();
 
 	$start[] = "# DO NOT REMOVE";
@@ -282,9 +280,9 @@ function wg_write_rcfile() {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				$start[] = "{$wgg['wg_quick']} up {$ifname} && /etc/rc.filter_configure";
+				$start[] = "{$wgg['wg_quick']} up {$tunnel['name']} && /etc/rc.filter_configure";
 
-				$stop[] = "{$wgg['wg_quick']} down {$ifname}";
+				$stop[] = "{$wgg['wg_quick']} down {$tunnel['name']}";
 
 
 			}
