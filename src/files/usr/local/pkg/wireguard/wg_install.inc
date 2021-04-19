@@ -34,12 +34,12 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("Creating WireGuard interface group... ");
+	update_status("  \nCreating WireGuard interface group... ");
 
                 // Installs the 'WireGuard' interface group
                 wg_ifgroup_install();
 
-	update_status(" done.\nConfiguring existing WireGuard interfaces... ");
+	update_status(" done.\n  Configuring existing WireGuard interfaces... ");
 
                 // Configure hard any existing interfaces
                 wg_configure(true);
@@ -56,7 +56,7 @@ function wg_install() {
 function wg_deinstall() {
 	global $wgg;
 
-	update_status("Removing WireGuard interface group... ");
+	update_status("  Removing WireGuard interface group... ");
 
 	wg_ifgroup_deinstall();
 
