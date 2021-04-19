@@ -57,7 +57,7 @@ function wg_deinstall() {
 
 	update_status("done.\n");
 
-	if (!is_set($wg_config['keep_conf'] || $wg_config['keep_conf'] != 'yes') {
+	if (!is_set($wg_config['keep_conf']) || $wg_config['keep_conf'] != 'yes') {
 
 		update_status("  Removing WireGuard configuration data...");
 
