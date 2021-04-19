@@ -267,33 +267,44 @@ function wg_write_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "# DO NOT REMOVE";
-
-	$stop[] = "# DO NOT REMOVE";
+	// Ensures that write_rcfile() always has something to write
+	$start[] = stop[] = "# DO NOT REMOVE";
 
 	// Get a list of configured tunnels
 	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
-	if (is_array($wg_tunnels)) {
+	if (is_wg_enabled()) {
 
-		foreach ($wg_tunnels as $tunnel) {
+		if (is_array($wg_tunnels)) {
 
-			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-
-				$start[] = "{$wgg['wg_quick']} up {$tunnel['name']} && /etc/rc.filter_configure";
-
-				$stop[] = "{$wgg['wg_quick']} down {$tunnel['name']}";
-
-
+			foreach ($wg_tunnels as $tunnel) {
+	
+				if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+	
+					$start[] = "{$wgg['wg_quick']} up {$tunnel['name']}";
+	
+					$stop[] = "{$wgg['wg_quick']} down {$tunnel['name']}";
+	
+	
+				}
+	
 			}
+	
+		}
 
+		// Append any additional rc scripts from global defines
+		foreach ($wgg['rc_scripts'] as $script) {
+
+			$start[] = $script;
+		
 		}
 
 	}
 
+
 	$rcfile = array();
 
-	$rcfile['file'] = 'wireguard.sh';
+	$rcfile['file'] = $wgg['rc_file'];
 
 	$rcfile['start'] = implode("\n\t", $start);
 

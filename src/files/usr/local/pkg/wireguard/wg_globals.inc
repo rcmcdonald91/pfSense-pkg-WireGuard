@@ -33,15 +33,16 @@ $wgg = array(
         'kldstat'               => '/sbin/kldstat',
         'pkg'                   => '/usr/sbin/pkg',
         
-        'conf_path'             => '/etc/wireguard',
+        'conf_path'             => '/usr/local/etc/wireguard',
         
         'if_prefix'             => 'tun_wg',
         'if_group'              => 'WireGuard',
         'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
         'default_port'          => 51820,
-
-        'earlyshellcmds'        => array('/usr/local/etc/rc.reload_wireguard'),
+        
+        'rc_file'               => 'wireguard.sh',
+        'rc_scripts'            => array('/etc/rc.reload_interfaces'),
 
         'verbose'               => false
 );
