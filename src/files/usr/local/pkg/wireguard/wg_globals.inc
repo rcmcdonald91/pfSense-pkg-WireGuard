@@ -40,9 +40,6 @@ $wgg = array(
         'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
         'default_port'          => 51820,
-        
-        'rc_file'               => 'wireguard.sh',
-        'rc_scripts'            => array('/etc/rc.reload_interfaces'),
 
         'verbose'               => false
 );
