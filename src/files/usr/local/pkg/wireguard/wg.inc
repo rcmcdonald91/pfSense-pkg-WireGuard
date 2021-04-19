@@ -240,7 +240,7 @@ function wg_resync() {
 
 	if (platform_booting()) {
 
-		print_message("Configuring WireGuard tunnels... ");
+		update_status("Configuring WireGuard tunnels... ");
 	
 	}	
 
@@ -256,9 +256,10 @@ function wg_resync() {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				$is_assigned = is_wg_tunnel_assigned($tunnel);
+				// We always want to configure hard during system startup
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || platform_booting()) ;
 
-				wg_configure_if($tunnel, !($is_assigned));
+				wg_configure_if($tunnel, $conf_hard);
 
 			}
 
@@ -268,7 +269,7 @@ function wg_resync() {
 
 	if (platform_booting()) {
 
-		print_message("done. \n");
+		update_status("done. \n");
 	
 	}
 
