@@ -265,7 +265,7 @@ function wg_resync() {
 function wg_write_rcfile() {
 	global $config, $wgg;
 
-	$configPaths = glob("{$wgg['conf_path']}*.conf");
+	$configPaths = glob("{$wgg['conf_path']}/*.conf");
 
 	$start = $stop = $rcfile = array();
 
