@@ -41,7 +41,7 @@ $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 $tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
-$secret_input_type = (isset($wg_config['hide_seecrets'] && $wg_config['hide_secrets'] == 'yes')) : 'password' ? 'text';
+$secret_input_type = (isset($wg_config['hide_seecrets'] && $wg_config['hide_secrets'] == 'yes')) ? 'password' : 'text';
 
 if (is_numericint($_REQUEST['index'])) {
 	$index = $_REQUEST['index'];
