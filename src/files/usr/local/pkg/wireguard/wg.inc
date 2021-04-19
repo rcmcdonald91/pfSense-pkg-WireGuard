@@ -81,7 +81,7 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	
 	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
-	// Should be perform a hard reconfiguration
+	// Should we perform a hard reconfiguration
 	if ($conf_hard) {
 
 		// Destroy the interface first
@@ -241,6 +241,8 @@ function wg_resync() {
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
 
+	update_status("\n  Configuring WireGuard tunnels... ");
+
 	// Get a list of configured tunnels
 	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
@@ -250,7 +252,8 @@ function wg_resync() {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !(does_interface_exist($tunnel['name'])));
+				// Determine if we should configure hard or soft
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
 				wg_configure_if($tunnel, $conf_hard);
 
@@ -260,63 +263,9 @@ function wg_resync() {
 
 	}
 
-
-
-}
-
-function wg_write_rcfile() {
-	global $config, $wgg;
-
-	$start = $stop = array();
-
-	// Ensures that write_rcfile() always has something to write
-	$start[] = "# DO NOT REMOVE";
-	$stop[] = "# DO NOT REMOVE";
-
-	// Get a list of configured tunnels
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
-
-	if (is_wg_enabled()) {
-
-		if (is_array($wg_tunnels)) {
-
-			foreach ($wg_tunnels as $tunnel) {
-	
-				if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-	
-					$start[] = "{$wgg['wg_quick']} up {$tunnel['name']}";
-	
-					$stop[] = "{$wgg['wg_quick']} down {$tunnel['name']}";
-	
-	
-				}
-	
-			}
-	
-		}
-
-		// Append any additional rc scripts from global defines
-		foreach ($wgg['rc_scripts'] as $script) {
-
-			$start[] = $script;
-		
-		}
-
-	}
-
-
-	$rcfile = array();
-
-	$rcfile['file'] = $wgg['rc_file'];
-
-	$rcfile['start'] = implode("\n\t", $start);
-
-	$rcfile['stop'] = implode("\n\t", $stop);
-
-	write_rcfile($rcfile);
+	update_status(" done");
 
 }
-
 
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
@@ -355,8 +304,6 @@ function wg_create_config_files($clean = true) {
 		}
 
 	}
-
-	// wg_write_rcfile();
 
 }
 
@@ -437,7 +384,7 @@ function make_wg_conf($tunnel) {
 function delete_wg_configs() {
 	global $wgg;
 
-	unlink_if_exists($wgg['conf_path'] . "/*.conf");
+	unlink_if_exists("{$wgg['conf_path']}/*.conf");
 
 }
 
