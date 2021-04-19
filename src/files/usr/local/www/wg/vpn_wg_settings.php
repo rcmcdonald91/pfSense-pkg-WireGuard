@@ -49,11 +49,9 @@ if ($_POST) {
 
 			$wg_config['keep_extras'] = $pconfig['keep_extras'];
 			
-			$wg_config['blur_secrets'] = $pconfig['blur_secrets'];
+			$wg_config['hide_secrets'] = $pconfig['hide_secrets'];
 
 			write_config('[WireGuard] Save WireGuard settings');
-
-			//wg_resync();
 
 			header("Location: /wg/vpn_wg_settings.php");
 
@@ -70,7 +68,7 @@ if ($_POST) {
 	$pconfig['keep_extras'] = isset($wg_config['keep_conf']) ? $wg_config['keep_extras'] : 'no';
 	$pconfig['keep_extras'] = is_wg_assigned() ? 'yes' : $pconfig['keep_extras'];
 
-	$pconfig['blur_secrets'] = $wg_config['blur_secrets'];
+	$pconfig['hide_secrets'] = $wg_config['hide_secrets'];
 
 }
 
@@ -135,12 +133,12 @@ $form->add($section);
 $section = new Form_Section("User Interface Settings");
 
 $section->addInput(new Form_Checkbox(
-	'blur_secrets',
-	'Blur Secrets',
+	'hide_secrets',
+	'Hide Secrets',
     	gettext('Enable'),
-    	$pconfig['blur_secrets'] == 'yes'
+    	$pconfig['hide_secrets'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Blur Secrets\' enabled, all secrets (private and pre-shared keys) are blurred in the user interface.'
+		. 'With \'Hide Secrets\' enabled, all secrets (private and pre-shared keys) are hidden in the user interface.'
 );
 
 $form->add($section);

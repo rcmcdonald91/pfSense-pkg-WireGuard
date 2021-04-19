@@ -248,6 +248,7 @@ function wg_resync() {
 		foreach ($wg_tunnels as $tunnel) {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+				
 				$is_assigned = is_wg_tunnel_assigned($tunnel);
 
 				wg_configure_if($tunnel, !($is_assigned));
