@@ -41,7 +41,7 @@ $wg_config = &$config['installedpackages']['wireguard']['config'][0];
 init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
 $tunnels = &$config['installedpackages']['wireguard']['tunnel'];
 
-$secret_input_type = (isset($wg_config['hide_seecrets'] && $wg_config['hide_secrets'] == 'yes')) ? 'password' : 'text';
+$secrets_input_type = (isset($wg_config['hide_secrets']) && $wg_config['hide_secrets'] =='yes') ? 'password' : 'text';
 
 if (is_numericint($_REQUEST['index'])) {
 	$index = $_REQUEST['index'];
@@ -191,7 +191,7 @@ if (is_wg_tunnel_assigned($pconfig)) {
 
 $section->addInput($tun_enable);
 
-$form->addInput(new Form_Input(
+$section->addInput(new Form_Input(
 	'descr',
 	'Description',
 	gettext('Description'),
@@ -211,7 +211,7 @@ $group = new Form_Group('*Interface Keys');
 $group->add(new Form_Input(
 	'privatekey',
 	'Private Key',
-	$secret_input_type,
+	$secrets_input_type,
 	$pconfig['interface']['privatekey']
 ))->setHelp('Private key for this tunnel (Required)');
 
@@ -280,7 +280,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 }
 
-// We still need to keep track of this otherwise wg-quick and pfSense will fight about it
+// We still need to keep track of this otherwise wg-quick and pfSense will fight
 $form->addGlobal(new Form_Input(
 	'mtu',
 	'',
@@ -351,7 +351,7 @@ $group2 = new Form_Group('Pre-shared Key');
 $group2->add(new Form_Input(
 	'presharedkey',
 	'Pre-shared Key',
-	$secret_input_type
+	$secrets_input_type
 ))->setHelp('Optional Pre-shared Key for this peer.%1$s ' .
 		'Mixes symmetric-key cryptography into public-key cryptography for post-quantum resistance.', '<br/>');
 
@@ -478,6 +478,20 @@ events.push(function() {
 
 	// Eliminate ghost lines in modal
 	$('.form-group').css({"border-bottom-width" : "0"});
+
+	// Eliminates blurred placeholder text
+	$('body').append('<style>::placeholder{color:revert;text-shadow:none;}</style>');
+
+	// Blurs secrets
+	if (wg_config['blur_secrets'] == 'yes') {
+
+		var blur = {"color" : "transparent", "text-shadow" : "0 0 5px rgba(0,0,0,0.5)"}
+
+		$("#privatekey").css(blur);
+
+		$("#presharedkey").css(blur);
+
+	}
 
 	// Return text from peer table cell
 	function tabletext (row, col) {
