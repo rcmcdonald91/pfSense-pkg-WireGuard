@@ -279,7 +279,7 @@ function wg_create_config_files($clean = true) {
 		// We almost always want to just overwrite the configurations
 		if ($clean) {
 
-			delete_wg_configs();
+			wg_delete_config_files();
 
 		}
 
@@ -294,6 +294,16 @@ function wg_create_config_files($clean = true) {
 		}
 
 	}
+
+}
+
+/* 
+ * Remove all wg config files from the conf directory
+ */
+function wg_delete_config_files() {
+	global $wgg;
+
+	unlink_if_exists("{$wgg['conf_path']}/*.conf");
 
 }
 
@@ -368,14 +378,6 @@ function make_wg_conf($tunnel) {
 	file_put_contents($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", $txt);
 
 	chmod($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", 0600);
-}
-
-// Remove all wg config files from the conf directory
-function delete_wg_configs() {
-	global $wgg;
-
-	unlink_if_exists("{$wgg['conf_path']}/*.conf");
-
 }
 
 // Return WireGuard tunnel networks for a given address family

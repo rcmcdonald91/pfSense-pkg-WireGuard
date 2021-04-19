@@ -49,23 +49,35 @@ function wg_install() {
 function wg_deinstall() {
 	global $config, $wgg;
 
+	$wg_config = $config['installedpackages']['wireguard']['config'][0];
+
 	update_status("\n  Removing WireGuard interface group...");
 
 	wg_ifgroup_deinstall();
 
 	update_status("done.\n");
 
+	if (!is_set($wg_config['keep_conf'] || $wg_config['keep_conf'] != 'yes') {
+
+		update_status("  Removing WireGuard configuration data...");
+
+		wg_delete_config_files();
+
+		unset($config['installedpackages']['wireguard']);
+
+		update_status("done.\n");
+
+	} else {
+
+		update_status("  Keeping WireGuard configuration data...done.\n");
+
+	}
+
 }
 
-function wg_ifgroup_update() {
-
-	wg_ifgroup_install();
-
-}
-
- /*
-  * This function creates the WireGuard interface group
-  */
+/*
+ * This function creates the WireGuard interface group
+ */
 function wg_ifgroup_install() {
 	global $g, $config, $wgg;
 
@@ -83,9 +95,9 @@ function wg_ifgroup_install() {
 
 }
 
- /*
-  * This function removes the WireGuard interface group
-  */
+/*
+ * This function removes the WireGuard interface group
+ */
 function wg_ifgroup_deinstall() {
 	global $g, $config, $wgg;
 
