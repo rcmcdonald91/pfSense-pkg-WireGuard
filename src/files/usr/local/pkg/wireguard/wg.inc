@@ -268,7 +268,8 @@ function wg_write_rcfile() {
 	$start = $stop = array();
 
 	// Ensures that write_rcfile() always has something to write
-	$start[] = stop[] = "# DO NOT REMOVE";
+	$start[] = "# DO NOT REMOVE";
+	$stop[] = "# DO NOT REMOVE";
 
 	// Get a list of configured tunnels
 	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
