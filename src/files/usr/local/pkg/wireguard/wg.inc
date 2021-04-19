@@ -250,7 +250,7 @@ function wg_resync() {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				$conf_hard = (!is_wg_tunnel_assigned($tunnel));
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !(does_interface_exist($tunnel['name'])));
 
 				wg_configure_if($tunnel, $conf_hard);
 
@@ -259,6 +259,8 @@ function wg_resync() {
 		}
 
 	}
+
+
 
 }
 
