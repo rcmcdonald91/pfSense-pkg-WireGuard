@@ -267,21 +267,33 @@ function wg_write_rcfile() {
 
 	$configPaths = glob("{$wgg['conf_path']}/*.conf");
 
-	$start = $stop = $rcfile = array();
+	$start = $stop = array();
 
 	$start[] = "# DO NOT REMOVE";
 
 	$stop[] = "# DO NOT REMOVE";
 
-	foreach ($configPaths as $configPath) {
+	// Get a list of configured tunnels
+	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
-		$ifname = basename($configPath, '.conf');
+	if (is_array($wg_tunnels)) {
 
-		$start[] = "{$wgg['wg_quick']} up {$ifname} && /etc/rc.filter_configure";
+		foreach ($wg_tunnels as $tunnel) {
 
-		$stop[] = "{$wgg['wg_quick']} down {$ifname}";
+			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
+				$start[] = "{$wgg['wg_quick']} up {$ifname} && /etc/rc.filter_configure";
+
+				$stop[] = "{$wgg['wg_quick']} down {$ifname}";
+
+
+			}
+
+		}
 
 	}
+
+	$rcfile = array();
 
 	$rcfile['file'] = 'wireguard.sh';
 
@@ -290,8 +302,6 @@ function wg_write_rcfile() {
 	$rcfile['stop'] = implode("\n\t", $stop);
 
 	write_rcfile($rcfile);
-
-	// unlink_if_exists("/usr/local/etc/rc.d/wireguard");
 
 }
 
