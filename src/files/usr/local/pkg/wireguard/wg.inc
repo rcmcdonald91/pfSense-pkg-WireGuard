@@ -354,7 +354,7 @@ function wg_create_config_files($clean = true) {
 
 	}
 
-	wg_write_rcfile();
+	// wg_write_rcfile();
 
 }
 
