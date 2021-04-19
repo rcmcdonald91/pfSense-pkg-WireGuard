@@ -59,7 +59,7 @@ if ($_POST) {
 
 } else {
 
-	// Default to yes
+	// Default to yes if not set (i.e. a new installation)
 	$pconfig['keep_conf'] = isset($wg_config['keep_conf']) ? $wg_config['keep_conf'] : 'yes';
 
 	$pconfig['hide_secrets'] = $wg_config['hide_secrets'];
