@@ -229,9 +229,13 @@ function wg_resync($verbose = false) {
 
 				wg_configure_if($tunnel, $conf_hard, $verbose);
 
+				$if_friendly = convert_real_interface_to_friendly_interface_name($tunnel['name']);
+
+				interface_reconfigure($if_friendly);
+
 			} else {
 
-				// Attempt to destroy the WireGaurd tunnel
+				// Attempt to destroy the WireGuard tunnel
 				wg_destroy_if($tunnel, $verbose);
 
 			}
