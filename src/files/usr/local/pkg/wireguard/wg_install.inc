@@ -34,7 +34,7 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("  \nCreating WireGuard interface group... ");
+	update_status("\n  Creating WireGuard interface group... ");
 
                 // Installs the 'WireGuard' interface group
                 wg_ifgroup_install();
