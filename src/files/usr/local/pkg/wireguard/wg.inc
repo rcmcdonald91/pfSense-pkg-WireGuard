@@ -38,43 +38,6 @@ require_once('wg_install.inc');
 require_once('wg_extras.inc');
 require_once('wg_validate.inc');
 
-// Setup all WireGuard tunnels
-function wg_configure($conf_hard = false, $verbose = false) {
-	global $config;
-
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
-
-	// Nothing to configure, bail out early
-	if (!is_array($wg_tunnels)) {
-
-		return;
-
-	}
-
-	// Write out configuration files to disk
-	wg_create_config_files();
-
-	$tunnel = array();
-
-	foreach ($wg_tunnels as $tunnel) {
-
-		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-			
-			// Attempt to configure the WireGuard tunnel
-			wg_configure_if($tunnel, $conf_hard, $verbose);
-
-
-		} else {
-
-			// Attempt to destroy the WireGaurd tunnel
-			wg_destroy_if($tunnel, $verbose);
-
-		}
-
-	}
-
-}
-
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
@@ -104,6 +67,7 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 // Remove WireGuard tunnel
 function wg_destroy_if($tunnel, $verbose = false) {
 
+	// Execute the wg-quick(8) way of tearing down an interface
 	exec_wg_quick_action($tunnel, "down", $verbose);
 
 	// Need to transform out of tunnel structure because pfSense_interface_destroy expects an ifname
@@ -113,6 +77,7 @@ function wg_destroy_if($tunnel, $verbose = false) {
 
 	}
 
+	// Now execute the pfSense way of tearing down an interface
 	pfSense_interface_destroy($tunnel);
 
 }
@@ -235,13 +200,20 @@ function wg_do_post($post) {
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
 }
 
-function wg_resync() {
-	global $config, $wgg;
+function wg_resync($verbose = false) {
+	global $config, $g, $wgg;
+
+	// Write out configuration files to disk
+	wg_create_config_files();
 
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
 
-	update_status("\n  Configuring WireGuard tunnels... ");
+	if ($g['wireguard_installing']) {
+
+		update_status("\n  Configuring WireGuard tunnels...");
+
+	}
 
 	// Get a list of configured tunnels
 	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
@@ -255,15 +227,29 @@ function wg_resync() {
 				// Determine if we should configure hard or soft
 				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
-				wg_configure_if($tunnel, $conf_hard);
+				wg_configure_if($tunnel, $conf_hard, $verbose);
+
+			} else {
+
+				// Attempt to destroy the WireGaurd tunnel
+				wg_destroy_if($tunnel, $verbose);
 
 			}
+
+			
 
 		}
 
 	}
 
-	update_status(" done.\n");
+	if ($g['wireguard_installing']) {
+
+		update_status("done.\n");
+
+		// We are no longer installing
+		unset($g['wireguard_installing']);
+
+	}
 
 }
 
