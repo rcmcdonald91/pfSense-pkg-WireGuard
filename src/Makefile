@@ -65,9 +65,6 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/pkg/wireguard/etc/rc.bootstrap_wireguard \
-		${STAGEDIR}${PREFIX}/pkg/wireguard/etc
-
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/pkg_wireguard.inc \
 		${STAGEDIR}${PREFIX}/www/shortcuts
 
