@@ -272,8 +272,6 @@ function wg_resync() {
 	
 	}
 
-	wg_earlyshellcmd_update();
-
 }
 
 function wg_create_config_files($clean = true) {
