@@ -31,11 +31,11 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
+	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/rc.d
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
-	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/etc
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
