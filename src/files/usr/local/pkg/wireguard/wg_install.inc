@@ -34,12 +34,7 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status(" done.\nSetting up earlyshellcmds... ");
-	
-                // Installs the earlyshellcmds
-                wg_earlyshellcmd_install();
-
-	update_status(" done.\nCreating WireGuard interface group... ");
+	update_status("Creating WireGuard interface group... ");
 
                 // Installs the 'WireGuard' interface group
                 wg_ifgroup_install();
@@ -61,107 +56,12 @@ function wg_install() {
 function wg_deinstall() {
 	global $wgg;
 
-	update_status("Removing earlyshellcmds... ");
-
-	wg_earlyshellcmd_deinstall();
-
-	update_status(" done.\nRemoving WireGuard interface group... ");
+	update_status("Removing WireGuard interface group... ");
 
 	wg_ifgroup_deinstall();
 
 	update_status(" done.\n");
 
-}
-
-function wg_earlyshellcmd_update() {
-
-	wg_earlyshellcmd_install();
-
-}
-
-function wg_earlyshellcmd_generate($bootstrap = true) {
-	global $wgg;
-
-	$bs_earlyshellcmds = array();
-
-	if ($bootstrap) {
-
-		// Get a list of all assigned interfaces, even those that are disabled
-		$if_list = get_configured_interface_list_by_realif(true);
-
-		foreach ($if_list as $realif => $name) {
-		
-			$ifname = escapeshellarg($realif);
-		
-			// We are looking for wg interfaces
-			if (substr($realif, 0, 2) == "wg") {
-		
-				// Create a temporary lo loopback interface and add it to the 'wg' interface group
-				$bs_earlyshellcmds[] = "(({$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}) && {$wgg['ifconfig']} {$ifname} group wg) >/dev/null 2>&1";
-		
-			}
-		
-		}
-	
-	}
-
-	$a_earlyshellcmds = array_merge($bs_earlyshellcmds, $wgg['earlyshellcmds']);
-
-	return $a_earlyshellcmds;
-
-}
-
-/*
- * This function creates earlyshellcmd entries in the config
- */
-function wg_earlyshellcmd_install() {
-	global $config, $wgg;
-
-	wg_earlyshellcmd_deinstall();
-
-        init_config_arr(array('system', 'earlyshellcmd'));
-
-	$a_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	$bs_earlyshellcmds = array();
-
-	// Get a list of all assigned interfaces, even those that are disabled
-	$if_list = get_configured_interface_list_by_realif(true);
-
-	foreach ($if_list as $realif => $name) {
-	
-	    	$ifname = escapeshellarg($realif);
-	
-		// We are looking for wg interfaces
-		if (substr($realif, 0, 2) == "wg") {
-	
-			// Create a temporary lo loopback interface and add it to the 'wg' interface group
-			$bs_earlyshellcmds[] = "(({$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}) && {$wgg['ifconfig']} {$ifname} group wg) >/dev/null 2>&1";
-	
-		}
-	
-	}
-	
-	// Push everything else to the bottom of the list
-	$a_earlyshellcmds = array_merge($bs_earlyshellcmds, $wgg['earlyshellcmds'], $a_earlyshellcmds);
-
-	write_config("[WireGuard] Earlyshellcmds (re)installed.");
-
-}
-
-/*
- * This function removes earlyshellcmd entries in the config
- */
-function wg_earlyshellcmd_deinstall() {
-	global $config, $wgg;
-
-        init_config_arr(array('system', 'earlyshellcmd'));
-
-	// This is really dangerous! Only for testing the install logic above
-	unset($config['system']['earlyshellcmd']);
-
-	write_config("[WireGuard] Earlyshellcmds removed.");
-	
 }
 
 function wg_ifgroup_update() {
