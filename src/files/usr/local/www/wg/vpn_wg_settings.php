@@ -46,8 +46,6 @@ if ($_POST) {
 			$pconfig = $_POST;
 
 			$wg_config['keep_conf'] = $pconfig['keep_conf'];
-
-			$wg_config['keep_extras'] = $pconfig['keep_extras'];
 			
 			$wg_config['hide_secrets'] = $pconfig['hide_secrets'];
 
@@ -63,10 +61,6 @@ if ($_POST) {
 
 	// Default to yes
 	$pconfig['keep_conf'] = isset($wg_config['keep_conf']) ? $wg_config['keep_conf'] : 'yes';
-
-	// Default to no, unless there are interfaces already assigned
-	$pconfig['keep_extras'] = isset($wg_config['keep_conf']) ? $wg_config['keep_extras'] : 'no';
-	$pconfig['keep_extras'] = is_wg_assigned() ? 'yes' : $pconfig['keep_extras'];
 
 	$pconfig['hide_secrets'] = $wg_config['hide_secrets'];
 
@@ -103,30 +97,6 @@ $section->addInput(new Form_Checkbox(
 ))->setHelp('<span class="text-danger">Note: </span>'
 		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );
-
-$keep_extras_btn = new Form_Checkbox(
-	'keep_extras',
-	'Keep Extra Scripts',
-    	gettext('Enable'),
-    	$pconfig['keep_extras'] == 'yes'
-);
-
-// Check if any WireGuard tunnel is assigned to an interface
-if (is_wg_assigned()) {
-
-	// Prevent removal of extra scripts 
-	$keep_extras_btn->setDisabled();
-	$keep_extras_btn->setHelp('<span class="text-danger">Note: </span>'
-					. 'Extra scripts <b>cannot be removed</b> with any tunnels assigned to interfaces.');
-
-} else {
-
-	$keep_extras_btn->setHelp('<span class="text-danger">Note: </span>'
-				. 'With \'Keep Extra Scripts\' enabled, any extra scripts installed by the package will persist on install/de-install.');
-
-}
-
-$section->addInput($keep_extras_btn);
 
 $form->add($section);
 
