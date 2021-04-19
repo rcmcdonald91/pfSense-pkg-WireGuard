@@ -79,6 +79,38 @@ function wg_earlyshellcmd_update() {
 
 }
 
+function wg_earlyshellcmd_generate($bootstrap = true) {
+	global $wgg;
+
+	$bs_earlyshellcmds = array();
+
+	if ($bootstrap) {
+
+		// Get a list of all assigned interfaces, even those that are disabled
+		$if_list = get_configured_interface_list_by_realif(true);
+
+		foreach ($if_list as $realif => $name) {
+		
+			$ifname = escapeshellarg($realif);
+		
+			// We are looking for wg interfaces
+			if (substr($realif, 0, 2) == "wg") {
+		
+				// Create a temporary lo loopback interface and add it to the 'wg' interface group
+				$bs_earlyshellcmds[] = "(({$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}) && {$wgg['ifconfig']} {$ifname} group wg) >/dev/null 2>&1";
+		
+			}
+		
+		}
+	
+	}
+
+	$a_earlyshellcmds = array_merge($bs_earlyshellcmds, $wgg['earlyshellcmds']);
+
+	return $a_earlyshellcmds;
+
+}
+
 /*
  * This function creates earlyshellcmd entries in the config
  */
@@ -104,7 +136,7 @@ function wg_earlyshellcmd_install() {
 		if (substr($realif, 0, 2) == "wg") {
 	
 			// Create a temporary lo loopback interface and add it to the 'wg' interface group
-			$bs_earlyshellcmds[] = "({$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}) && {$wgg['ifconfig']} {$ifname} group wg";
+			$bs_earlyshellcmds[] = "(({$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}) && {$wgg['ifconfig']} {$ifname} group wg) >/dev/null 2>&1";
 	
 		}
 	

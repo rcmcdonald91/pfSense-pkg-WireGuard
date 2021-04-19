@@ -35,7 +35,7 @@ $wgg = array(
         
         'conf_path'             => '/etc/wireguard',
         
-        'if_prefix'             => 'wg',
+        'if_prefix'             => 'tun_wg',
         'if_group'              => 'WireGuard',
         'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
