@@ -49,29 +49,13 @@ function wg_install() {
 function wg_deinstall() {
 	global $config, $wgg;
 
-	$wg_config = $config['installedpackages']['wireguard']['config'][0];
-
 	update_status("\n  Removing WireGuard interface group...");
 
 	wg_ifgroup_deinstall();
 
 	update_status("done.\n");
 
-	if (!isset($wg_config['keep_conf']) || $wg_config['keep_conf'] != 'yes') {
-
-		update_status("  Removing WireGuard configuration data...");
-
-		wg_delete_config_files();
-
-		unset($config['installedpackages']['wireguard']);
-
-		update_status("done.\n");
-
-	} else {
-
-		update_status("  Keeping WireGuard configuration data...done.\n");
-
-	}
+	# TODO
 
 }
 
