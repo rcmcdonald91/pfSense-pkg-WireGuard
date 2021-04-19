@@ -250,8 +250,7 @@ function wg_resync() {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				// We always want to configure hard during system startup
-				$conf_hard = (!is_wg_tunnel_assigned($tunnel))
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel));
 
 				wg_configure_if($tunnel, $conf_hard);
 
