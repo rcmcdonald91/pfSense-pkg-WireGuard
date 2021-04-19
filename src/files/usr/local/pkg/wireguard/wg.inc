@@ -51,10 +51,10 @@ function wg_configure($conf_hard = false, $verbose = false) {
 
 	}
 
-	// Sync conf files to disk
+	// Write out configuration files to disk
 	wg_create_config_files();
 
-	$tunnel = [];
+	$tunnel = array();
 
 	foreach ($wg_tunnels as $tunnel) {
 
@@ -238,12 +238,6 @@ function wg_do_post($post) {
 function wg_resync() {
 	global $config, $wgg;
 
-	if (platform_booting()) {
-
-		update_status("Configuring WireGuard tunnels... ");
-	
-	}	
-
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
 
@@ -257,7 +251,7 @@ function wg_resync() {
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
 				// We always want to configure hard during system startup
-				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || platform_booting()) ;
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel))
 
 				wg_configure_if($tunnel, $conf_hard);
 
@@ -267,13 +261,41 @@ function wg_resync() {
 
 	}
 
-	if (platform_booting()) {
+}
 
-		update_status("done. \n");
-	
+function wg_write_rcfile() {
+	global $config, $wgg;
+
+	$configPaths = glob("{$wgg['conf_path']}*.conf");
+
+	$start = $stop = $rcfile = array();
+
+	$start[] = "# DO NOT REMOVE";
+
+	$stop[] = "# DO NOT REMOVE";
+
+	foreach ($configPaths as $configPath) {
+
+		$ifname = basename($configPath, '.conf');
+
+		$start[] = "{$wgg['wg_quick']} up {$ifname} && /etc/rc.filter_configure";
+
+		$stop[] = "{$wgg['wg_quick']} down {$ifname}";
+
 	}
 
+	$rcfile['file'] = 'wireguard.sh';
+
+	$rcfile['start'] = implode("\n\t", $start);
+
+	$rcfile['stop'] = implode("\n\t", $stop);
+
+	write_rcfile($rcfile);
+
+	// unlink_if_exists("/usr/local/etc/rc.d/wireguard");
+
 }
+
 
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
@@ -312,6 +334,8 @@ function wg_create_config_files($clean = true) {
 		}
 
 	}
+
+	wg_write_rcfile();
 
 }
 
