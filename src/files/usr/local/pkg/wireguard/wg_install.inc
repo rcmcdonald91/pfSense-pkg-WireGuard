@@ -47,7 +47,7 @@ function wg_install() {
  * This is the main deinstall hook
  */
 function wg_deinstall() {
-	global $wgg;
+	global $config, $wgg;
 
 	update_status("\n  Removing WireGuard interface group...");
 
