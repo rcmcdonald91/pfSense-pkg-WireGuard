@@ -263,7 +263,7 @@ function wg_resync() {
 
 	}
 
-	update_status(" done");
+	update_status(" done.\n");
 
 }
 
