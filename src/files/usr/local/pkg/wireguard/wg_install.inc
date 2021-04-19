@@ -103,11 +103,8 @@ function wg_earlyshellcmd_install() {
 		// We are looking for wg interfaces
 		if (substr($realif, 0, 2) == "wg") {
 	
-			// Create a temporary lo loopback interface
-			$bs_earlyshellcmds[] = "{$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}";
-			
-			// Now we add it to the 'wg' group so wg-quick can tear it down later
-			$bs_earlyshellcmds[] = "{$wgg['ifconfig']} {$ifname} group wg";
+			// Create a temporary lo loopback interface and add it to the 'wg' interface group
+			$bs_earlyshellcmds[] = "({$wgg['ifconfig']} {$ifname} || {$wgg['ifconfig']} lo create name {$ifname}) && {$wgg['ifconfig']} {$ifname} group wg";
 	
 		}
 	
@@ -128,10 +125,8 @@ function wg_earlyshellcmd_deinstall() {
 
         init_config_arr(array('system', 'earlyshellcmd'));
 
-	$a_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	// This is dangerous, only for testing
-	unset($a_earlyshellcmds);
+	// This is really dangerous! Only for testing the install logic above
+	unset($config['system']['earlyshellcmd']);
 
 	write_config("[WireGuard] Earlyshellcmds removed.");
 	
