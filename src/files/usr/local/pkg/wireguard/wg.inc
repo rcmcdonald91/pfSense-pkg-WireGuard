@@ -238,9 +238,16 @@ function wg_do_post($post) {
 function wg_resync() {
 	global $config, $wgg;
 
+	if (platform_booting()) {
+
+		print_message("Configuring WireGuard tunnels... ");
+	
+	}	
+
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
 
+	// Get a list of configured tunnels
 	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
 
 	if (is_array($wg_tunnels)) {
@@ -248,7 +255,7 @@ function wg_resync() {
 		foreach ($wg_tunnels as $tunnel) {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-				
+
 				$is_assigned = is_wg_tunnel_assigned($tunnel);
 
 				wg_configure_if($tunnel, !($is_assigned));
@@ -257,6 +264,12 @@ function wg_resync() {
 
 		}
 
+	}
+
+	if (platform_booting()) {
+
+		print_message("done. \n");
+	
 	}
 
 	wg_earlyshellcmd_update();
