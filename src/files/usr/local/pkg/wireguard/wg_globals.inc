@@ -56,7 +56,7 @@ function wg_globals() {
 
         $wgg['config'] = &$config['installedpackages'][$wgg['pkg_name']]['config'][0];
 
-        $wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']['tunnel'];
+        $wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
 
 }
 
