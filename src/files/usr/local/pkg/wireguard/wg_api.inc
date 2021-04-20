@@ -30,7 +30,6 @@ require_once('service-utils.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wg_extras.inc');
 require_once('wg_globals.inc');
 
 // Get WireGuard status

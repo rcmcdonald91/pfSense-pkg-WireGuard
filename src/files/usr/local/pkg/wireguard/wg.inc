@@ -35,7 +35,6 @@ require_once('util.inc');
 require_once('wg_api.inc');
 require_once('wg_globals.inc');
 require_once('wg_install.inc');
-require_once('wg_extras.inc');
 require_once('wg_validate.inc');
 
 // Setup WireGuard tunnel
@@ -208,7 +207,7 @@ function wg_do_post($post) {
 		$wgg['tunnels'][$index] = $pconfig;
 
 		write_config("[WireGuard] Tunnel {$pconfig['name']} (Index {$index}) updated.");
-		
+
 	}
 
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
