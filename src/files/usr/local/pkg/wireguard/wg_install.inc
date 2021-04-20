@@ -65,7 +65,7 @@ function wg_deinstall() {
 
 		update_status("  Keeping WireGuard configuration settings... ");
 
-		update_status(" done.\n");
+		update_status("done.\n");
 
 	} else {
 
