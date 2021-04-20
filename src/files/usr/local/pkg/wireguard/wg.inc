@@ -41,8 +41,6 @@ require_once('wg_validate.inc');
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
-	
-	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
 	// Should we perform a hard reconfiguration
 	if ($conf_hard) {
@@ -59,7 +57,18 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	wg_syncconf($tunnel);
 
 	// Add the interface to the interface group (i.e. WireGuard)
-	exec("{$wgg['ifconfig']} {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}" . $verbose_pipe);
+	exec("{$wgg['ifconfig']} {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}" . verbose_pipe($verbose));
+
+	// Get the tunnel interface friendly name if assigned
+	$if_fname = convert_real_interface_to_friendly_interface_name($tunnel['name']);
+
+	if(isset($if_fname)) {
+
+		interface_reconfigure($if_fname);
+
+		system_routing_configure($if_fname);
+	
+	}
 
 }
 
@@ -227,11 +236,8 @@ function wg_resync($verbose = false) {
 				// Determine if we should configure hard or soft
 				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
+				// Attempt to create the WireGuard tunnel
 				wg_configure_if($tunnel, $conf_hard, $verbose);
-
-				$if_friendly = convert_real_interface_to_friendly_interface_name($tunnel['name']);
-
-				interface_reconfigure($if_friendly);
 
 			} else {
 
@@ -378,65 +384,6 @@ function make_wg_conf($tunnel) {
 	file_put_contents($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", $txt);
 
 	chmod($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", 0600);
-}
-
-// Return WireGuard tunnel networks for a given address family
-function wg_get_tunnel_networks($family = 'both') {
-	global $config;
-	$wg_tunnel_networks = array();
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-	if (is_wg_enabled()) {
-		foreach ($config['installedpackages']['wireguard']['tunnel'] as $wg) {
-			if (empty($wg['enabled']) ||
-			    empty($wg['interface']['address'])) {
-				continue;
-			}
-			foreach(explode(',', $wg['interface']['address']) as $wga) {
-				list($wgnet, $wgmask) = explode('/', trim($wga));
-				if ((is_ipaddrv6($wgnet) && ($family == 'ipv4')) ||
-				    (is_ipaddrv4($wgnet) && ($family == 'ipv6'))) {
-					continue;
-				}
-				$network = gen_subnet($wgnet, $wgmask);
-				$wg_tunnel_networks[] = "{$network}/{$wgmask}";
-			}
-		}
-	}
-	return $wg_tunnel_networks;
-}
-
-// Locate a viable remote gateway address for a WireGuard tunnel
-// Fall back to using the tunnel address itself.
-// https://redmine.pfsense.org/issues/11300
-function wg_find_tunnel_gw($tunnel, $addr) {
-	list($ip, $mask) = explode("/", trim($addr));
-	// Loop through peers looking for a viable remote gateway address
-	if (is_array($tunnel['peers']) &&
-	    is_array($tunnel['peers']['wgpeer']) &&
-	    count($tunnel['peers']['wgpeer']) > 0) {
-		foreach ($tunnel['peers']['wgpeer'] as $peer) {
-			// If this peer has no configured Peer WireGuard Address, skip it.
-			if (empty($peer['peerwgaddr'])) {
-				continue;
-			}
-			// Check each Peer WireGuard Address entry
-			foreach (explode(',', $peer['peerwgaddr']) as $pwga) {
-				// Ensure the address family of this entry matches the one we're seeking
-				if (is_v4($ip) !== is_v4($pwga)) {
-					continue;
-				}
-				// If there is a subnet mask, ditch it.
-				list($pip, $pmask) = explode('/', trim($pwga));
-				// Check that this address is in the desired subnet
-				if (ip_in_subnet($pip, trim($addr))) {
-					// We found a good candidate, return it
-					return $pip;
-				}
-			}
-		}
-	}
-	// If no viable candidate is found, return the tunnel address
-	return $ip;
 }
 
 ?>

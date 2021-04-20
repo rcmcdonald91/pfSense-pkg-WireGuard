@@ -21,9 +21,10 @@
 
 // Global defines
 
-global $wgg;
+require_once('config.inc');
+require_once('globals.inc');
 
-$pkg_name                       = "wireguard";
+global $wgg;
 
 $wgg = array(
         'wg'                    => '/usr/local/bin/wg',
@@ -32,6 +33,8 @@ $wgg = array(
         'ifconfig'              => '/sbin/ifconfig',
         'kldstat'               => '/sbin/kldstat',
         'pkg'                   => '/usr/sbin/pkg',
+        'kmod'                  => 'if_wg.ko',
+        'pkg_name'              => 'wireguard',
         
         'conf_path'             => '/usr/local/etc/wireguard',
         
@@ -43,5 +46,22 @@ $wgg = array(
 
         'verbose'               => false
 );
+
+/*
+ * This populates the $wgg with the latest information from config.xml
+ */
+function wg_global() {
+        global $config, $wgg;
+
+        // Reload config.xml to get any recent changes
+	$config = parse_config(true);
+
+        $wgg['config'] = $config['installedpackages']['wireguard']['config'][0];
+
+        $wgg['tunnels'] = $config['installedpackages']['wireguard']['tunnel'];
+
+}
+
+wg_global();
 
 ?>

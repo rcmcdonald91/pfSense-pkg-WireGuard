@@ -30,6 +30,7 @@ require_once('service-utils.inc');
 require_once('util.inc');
 
 // WireGuard includes
+require_once('wg_extras');
 require_once('wg_globals.inc');
 
 // Get WireGuard status
@@ -45,11 +46,11 @@ function wg_status() {
 }
 
 // Get WireGuard interface status
-function wg_interface_status($ifgroup = "wg") {
+function wg_interface_status() {
 	global $wgg;
 
 	$status = array();
-	exec("{$wgg['ifconfig']} -a -g {$ifgroup}", $status);
+	exec("{$wgg['ifconfig']} -a -g {$wgg['if_group']}", $status);
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
@@ -57,21 +58,21 @@ function wg_interface_status($ifgroup = "wg") {
 }
 
 // Get WireGuard kmod status
-function wg_kmod_status($kmod = 'if_wg.ko') {
+function wg_kmod_status() {
 	global $wgg;
 
-	$output = exec("{$wgg['kldstat']} | grep {$kmod}");
+	$output = exec("{$wgg['kldstat']} | grep {$wgg['kmod']}");
 	
 	return htmlspecialchars($output);
 
 }
 
 // Get wg and tools version
-function wg_version($to_grep = 'wireguard') {
+function wg_version() {
 	global $wgg;
 
 	$packages = array();
-	exec("{$wgg['pkg']} info | grep -i {$to_grep}", $packages);
+	exec("{$wgg['pkg']} info | grep -i {$wgg['pkg_name']}", $packages);
 
 	$output = implode("\n", $packages);
 	return htmlspecialchars($output);
@@ -141,7 +142,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	}
 
 	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
+	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));
 
 }
 

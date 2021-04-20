@@ -84,10 +84,9 @@ if ($_POST) {
 			// Configure the new WG tunnel
 			if (isset($pconfig['enabled']) && $pconfig['enabled'] == 'yes') {
 
-				// Should we soft configure?
-				$is_assigned = is_wg_tunnel_assigned($pconfig);
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
-				wg_configure_if($pconfig, !($is_assigned));
+				wg_configure_if($pconfig, $conf_hard));
 
 			} else {
 

@@ -30,4 +30,10 @@ function print_message($message) {
 
 }
 
+function verbose_pipe($verbose) {
+
+	return $verbose ? "" : " > /dev/null 2>&1";
+
+}
+
 ?>
