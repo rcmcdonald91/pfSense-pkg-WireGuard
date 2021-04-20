@@ -121,7 +121,7 @@ function wg_syncconf($tunnel) {
 
 	$syncconf_command = escapeshellarg($syncconf_command);
 
-	// We need <() process substitution, so use bash...
+	// We need <() process substitution, so use bash...might as well use bash everywhere?
 	exec("{$wgg['bash']} -c {$syncconf_command}");
 
 }
@@ -160,16 +160,14 @@ function genPSK() {
 function next_wg_port() {
 	global $config, $wgg;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-
-	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
+	wg_globals();
 
 	for ($idx=$wgg['default_port']; $idx<65535; $idx++) {
 
 		// Check to see if the port is already in use
 		$found = false;
 
-		foreach ($tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			if ($tunnel['interface']['listenport'] == $idx) {
 
@@ -198,13 +196,11 @@ function next_wg_port() {
 function next_wg_if() {
 	global $config, $wgg;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-
-	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
+	wg_globals();
 
 	$used_ifs = array();
 
-	foreach ($tunnels as $tunnel) {
+	foreach ($wgg['tunnels'] as $tunnel) {
 
 		$used_ifs[] = $tunnel['name'];
 
@@ -224,6 +220,12 @@ function next_wg_if() {
 
 	return -1;
 	
+}
+
+function verbose_pipe($verbose) {
+
+	return $verbose ? "" : " > /dev/null 2>&1";
+
 }
 
 ?>

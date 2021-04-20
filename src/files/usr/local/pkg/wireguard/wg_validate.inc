@@ -223,9 +223,9 @@ function is_wg_assigned($disabled = true) {
 function is_wg_enabled() {
 	global $config;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+	wg_globals();
 
-	foreach ($config['installedpackages']['wireguard']['tunnel'] as $tunnel) {
+	foreach ($wgg['tunnels'] as $tunnel) {
 
 		if (empty($tunnel['enabled'])) {
 

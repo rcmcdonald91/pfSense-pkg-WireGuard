@@ -54,8 +54,6 @@ do-install:
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_install.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_extras.inc \
-		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 

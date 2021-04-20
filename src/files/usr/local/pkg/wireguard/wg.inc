@@ -94,15 +94,17 @@ function wg_destroy_if($tunnel, $verbose = false) {
 function wg_delete_tunnel($tunidx) {
 	global $config, $wgg;
 
-	if ($config['installedpackages']['wireguard']['tunnel'][$tunidx]) {
+	wg_globals();
+
+	if ($wgg['tunnels'][$tunidx]) {
 
 		unset($ifname);
 
 		unset($conf_path);
 
-		if (isset($config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'])) {
+		if (isset($wgg['tunnels'][$tunidx]['name'])) {
 
-			$ifname = $config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'];
+			$ifname = $wgg['tunnels'][$tunidx]['name'];
 
 		}
 		
@@ -113,7 +115,7 @@ function wg_delete_tunnel($tunidx) {
 		}
 
 		// Delete the tunnel configuration entry
-		unset($config['installedpackages']['wireguard']['tunnel'][$tunidx]);
+		unset($wgg['tunnels'][$tunidx]);
 
 		write_config("[WireGuard] tunnel {$index} updated.");
 
@@ -134,13 +136,13 @@ function wg_delete_tunnel($tunidx) {
 function wg_do_post($post) {
 	global $config, $wgg;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+	wg_globals();
 
 	$input_errors = array();
 
 	$index = $post['index'];
 
-	$pconfig = &$config['installedpackages']['wireguard']['tunnel'][$index];
+	$pconfig = &$wgg['tunnels'][$index];
 
 	if (empty($pconfig['name'])) {
 
@@ -202,8 +204,11 @@ function wg_do_post($post) {
 	$input_errors = wg_validate_post($pconfig);
 
 	if (!$input_errors) {
-		$config['installedpackages']['wireguard']['tunnel'][$index] = $pconfig;
+
+		$wgg['tunnels'][$index] = $pconfig;
+
 		write_config("[WireGuard] Tunnel {$pconfig['name']} (Index {$index}) updated.");
+		
 	}
 
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
@@ -211,6 +216,9 @@ function wg_do_post($post) {
 
 function wg_resync($verbose = false) {
 	global $config, $g, $wgg;
+
+	// Read latest settings
+	wg_globals();
 
 	// Write out configuration files to disk
 	wg_create_config_files();
@@ -224,12 +232,9 @@ function wg_resync($verbose = false) {
 
 	}
 
-	// Get a list of configured tunnels
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+	if (is_array($wgg['tunnels'])) {
 
-	if (is_array($wg_tunnels)) {
-
-		foreach ($wg_tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
@@ -266,10 +271,10 @@ function wg_resync($verbose = false) {
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
 
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+	wg_globals();
 
 	// We've got some tunnels to configure
-	if (is_array($wg_tunnels)) {
+	if (is_array($wgg['tunnels'])) {
 
 		// Create configuration path if it is missing
 		if (!file_exists($wgg['conf_path'])) {
@@ -289,7 +294,7 @@ function wg_create_config_files($clean = true) {
 
 		}
 
-		foreach ($wg_tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			if (!empty($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
@@ -304,12 +309,35 @@ function wg_create_config_files($clean = true) {
 }
 
 /* 
- * Remove all wg config files from the conf directory
+ * Remove all wg config files from any potential conf directory
  */
 function wg_delete_config_files() {
 	global $wgg;
 
-	unlink_if_exists("{$wgg['conf_path']}/*.conf");
+	// Loop through each potential conf path and delete all .conf files
+	foreach ($wgg['conf_paths_to_clean'] as $confpath) {
+
+		unlink_if_exists("{$confpath}/*.conf");
+
+	}
+
+}
+
+/* 
+ * Removes any configuration xml paths as defined by $wgg['xml_conf_tags']
+ */
+function wg_remove_config_settings() {
+	global $config, $wgg;
+
+	foreach ($wgg['xml_conf_tags'] as $conf_tag) {
+
+		if (isset($config['installedpackages'][$conf_tag])) {
+
+			unset($config['installedpackages'][$conf_tag]);
+
+		}
+
+	}
 
 }
 

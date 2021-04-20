@@ -29,6 +29,7 @@ $priv_list['page-vpn-wireguard']['match'] = array();
 
 $priv_list['page-vpn-wireguard']['match'][] = "wg/vpn_wg.php";
 $priv_list['page-vpn-wireguard']['match'][] = "wg/vpn_wg_edit.php";
+$priv_list['page-vpn-wireguard']['match'][] = "wg/vpn_wg_settings.php";
 
 $priv_list['page-status-wireguard'] = array();
 $priv_list['page-status-wireguard']['name'] = "WebCfg - Status: WireGuard Status";
