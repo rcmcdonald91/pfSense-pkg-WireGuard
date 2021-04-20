@@ -56,6 +56,10 @@ function wg_globals() {
         // Reload config.xml to get any recent changes
 	$config = parse_config(true);
 
+        $wgg['config'] = array();
+
+        $wggp['tunnels'] = array();
+
         $wgg['config'] = &$config['installedpackages'][$wgg['pkg_name']]['config'][0];
 
         $wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
