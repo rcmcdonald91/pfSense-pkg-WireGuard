@@ -45,11 +45,11 @@ function wg_status() {
 }
 
 // Get WireGuard interface status
-function wg_interface_status($ifgroup = "wg") {
+function wg_interface_status() {
 	global $wgg;
 
 	$status = array();
-	exec("{$wgg['ifconfig']} -a -g {$ifgroup}", $status);
+	exec("{$wgg['ifconfig']} -a -g {$wgg['if_group']}", $status);
 
 	$output = implode("\n", $status);
 	return htmlspecialchars($output);
@@ -57,21 +57,21 @@ function wg_interface_status($ifgroup = "wg") {
 }
 
 // Get WireGuard kmod status
-function wg_kmod_status($kmod = 'if_wg.ko') {
+function wg_kmod_status() {
 	global $wgg;
 
-	$output = exec("{$wgg['kldstat']} | grep {$kmod}");
+	$output = exec("{$wgg['kldstat']} | grep {$wgg['kmod']}");
 	
 	return htmlspecialchars($output);
 
 }
 
 // Get wg and tools version
-function wg_version($to_grep = 'wireguard') {
+function wg_version() {
 	global $wgg;
 
 	$packages = array();
-	exec("{$wgg['pkg']} info | grep -i {$to_grep}", $packages);
+	exec("{$wgg['pkg']} info | grep -i {$wgg['pkg_name']}", $packages);
 
 	$output = implode("\n", $packages);
 	return htmlspecialchars($output);
@@ -120,7 +120,7 @@ function wg_syncconf($tunnel) {
 
 	$syncconf_command = escapeshellarg($syncconf_command);
 
-	// We need <() process substitution, so use bash...
+	// We need <() process substitution, so use bash...might as well use bash everywhere?
 	exec("{$wgg['bash']} -c {$syncconf_command}");
 
 }
@@ -141,7 +141,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	}
 
 	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . ($verbose ? "" : " > /dev/null 2>&1"));
+	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));
 
 }
 
@@ -159,16 +159,14 @@ function genPSK() {
 function next_wg_port() {
 	global $config, $wgg;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+	wg_globals();
 
-	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
-
-	for ($idx=$wgg['default_port']; $idx<65535; $idx++) {
+	for ($idx=$wgg['default_port']; $idx<$wgg['max_port']; $idx++) {
 
 		// Check to see if the port is already in use
 		$found = false;
 
-		foreach ($tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			if ($tunnel['interface']['listenport'] == $idx) {
 
@@ -197,19 +195,17 @@ function next_wg_port() {
 function next_wg_if() {
 	global $config, $wgg;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-
-	$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
+	wg_globals();
 
 	$used_ifs = array();
 
-	foreach ($tunnels as $tunnel) {
+	foreach ($wgg['tunnels'] as $tunnel) {
 
 		$used_ifs[] = $tunnel['name'];
 
 	}
 
-	for ($ifnum = 0; $ifnum < 32768; $ifnum++) {
+	for ($ifnum = 0; $ifnum < $wgg['max_tunnels']; $ifnum++) {
 
 		$want_if = "{$wgg['if_prefix']}{$ifnum}";
 		
@@ -223,6 +219,12 @@ function next_wg_if() {
 
 	return -1;
 	
+}
+
+function verbose_pipe($verbose) {
+
+	return $verbose ? "" : " > /dev/null 2>&1";
+
 }
 
 ?>

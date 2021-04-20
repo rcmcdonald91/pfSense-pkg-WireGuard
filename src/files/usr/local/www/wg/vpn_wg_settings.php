@@ -34,8 +34,9 @@ require_once("functions.inc");
 // WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
-init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
-$wg_config = &$config['installedpackages']['wireguard']['config'][0];
+global $wgg;
+
+wg_globals();
 
 if ($_POST) {
 
@@ -45,9 +46,9 @@ if ($_POST) {
 
 			$pconfig = $_POST;
 
-			$wg_config['keep_conf'] = $pconfig['keep_conf'];
+			$wgg['config']['keep_conf'] = $pconfig['keep_conf'];
 			
-			$wg_config['hide_secrets'] = $pconfig['hide_secrets'];
+			$wgg['config']['hide_secrets'] = $pconfig['hide_secrets'];
 
 			write_config('[WireGuard] Save WireGuard settings');
 
@@ -60,9 +61,9 @@ if ($_POST) {
 } else {
 
 	// Default to yes if not set (i.e. a new installation)
-	$pconfig['keep_conf'] = isset($wg_config['keep_conf']) ? $wg_config['keep_conf'] : 'yes';
+	$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
-	$pconfig['hide_secrets'] = $wg_config['hide_secrets'];
+	$pconfig['hide_secrets'] = $wgg['config']['hide_secrets'];
 
 }
 

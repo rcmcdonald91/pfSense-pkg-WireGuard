@@ -21,9 +21,10 @@
 
 // Global defines
 
-global $wgg;
+require_once('config.inc');
+require_once('globals.inc');
 
-$pkg_name                       = "wireguard";
+global $wgg;
 
 $wgg = array(
         'wg'                    => '/usr/local/bin/wg',
@@ -32,16 +33,36 @@ $wgg = array(
         'ifconfig'              => '/sbin/ifconfig',
         'kldstat'               => '/sbin/kldstat',
         'pkg'                   => '/usr/sbin/pkg',
-        
+        'kmod'                  => 'if_wg.ko',
+        'pkg_name'              => 'wireguard',
         'conf_path'             => '/usr/local/etc/wireguard',
-        
+        'conf_paths_to_clean'   => array('/usr/local/etc/wireguard', '/etc/wireguard', '/etc/wg'),
+        'xml_conf_tags'         => 'wireguard',
         'if_prefix'             => 'tun_wg',
         'if_group'              => 'WireGuard',
         'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
         'default_port'          => 51820,
-
-        'verbose'               => false
+        'max_port'              => 65535,
+        'max_tunnels'           => 32768
 );
+
+/*
+ * This populates the $wgg with the latest information from config.xml
+ */
+function wg_globals() {
+        global $config, $wgg;
+
+        // Reload config.xml to get any recent changes
+	$config = parse_config(true);
+
+        $wgg['config'] = &$config['installedpackages'][$wgg['pkg_name']]['config'][0];
+
+        $wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
+
+}
+
+// Call this to read the latest configuration
+wg_globals();
 
 ?>

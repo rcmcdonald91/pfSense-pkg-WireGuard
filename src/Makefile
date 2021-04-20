@@ -2,7 +2,7 @@
 
 PORTNAME=	pfSense-pkg-WireGuard
 PORTVERSION=	0.0.6
-PORREVISION=	1
+PORREVISION=	2
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -53,8 +53,6 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_globals.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_install.inc \
-		${STAGEDIR}${PREFIX}/pkg/wireguard
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_extras.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/wg_validate.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard

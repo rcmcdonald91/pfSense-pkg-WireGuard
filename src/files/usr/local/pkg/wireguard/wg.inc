@@ -35,14 +35,11 @@ require_once('util.inc');
 require_once('wg_api.inc');
 require_once('wg_globals.inc');
 require_once('wg_install.inc');
-require_once('wg_extras.inc');
 require_once('wg_validate.inc');
 
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
-	
-	$verbose_pipe = ($verbose ? "" : " > /dev/null 2>&1");
 
 	// Should we perform a hard reconfiguration
 	if ($conf_hard) {
@@ -59,7 +56,18 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	wg_syncconf($tunnel);
 
 	// Add the interface to the interface group (i.e. WireGuard)
-	exec("{$wgg['ifconfig']} {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}" . $verbose_pipe);
+	exec("{$wgg['ifconfig']} {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}" . verbose_pipe($verbose));
+
+	// Get the tunnel interface friendly name if assigned
+	$if_fname = convert_real_interface_to_friendly_interface_name($tunnel['name']);
+
+	if(isset($if_fname)) {
+
+		interface_reconfigure($if_fname);
+
+		system_routing_configure($if_fname);
+	
+	}
 
 }
 
@@ -85,15 +93,17 @@ function wg_destroy_if($tunnel, $verbose = false) {
 function wg_delete_tunnel($tunidx) {
 	global $config, $wgg;
 
-	if ($config['installedpackages']['wireguard']['tunnel'][$tunidx]) {
+	wg_globals();
+
+	if ($wgg['tunnels'][$tunidx]) {
 
 		unset($ifname);
 
 		unset($conf_path);
 
-		if (isset($config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'])) {
+		if (isset($wgg['tunnels'][$tunidx]['name'])) {
 
-			$ifname = $config['installedpackages']['wireguard']['tunnel'][$tunidx]['name'];
+			$ifname = $wgg['tunnels'][$tunidx]['name'];
 
 		}
 		
@@ -104,7 +114,7 @@ function wg_delete_tunnel($tunidx) {
 		}
 
 		// Delete the tunnel configuration entry
-		unset($config['installedpackages']['wireguard']['tunnel'][$tunidx]);
+		unset($wgg['tunnels'][$tunidx]);
 
 		write_config("[WireGuard] tunnel {$index} updated.");
 
@@ -125,13 +135,13 @@ function wg_delete_tunnel($tunidx) {
 function wg_do_post($post) {
 	global $config, $wgg;
 
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
+	wg_globals();
 
 	$input_errors = array();
 
 	$index = $post['index'];
 
-	$pconfig = &$config['installedpackages']['wireguard']['tunnel'][$index];
+	$pconfig = $wgg['tunnels'][$index];
 
 	if (empty($pconfig['name'])) {
 
@@ -193,8 +203,11 @@ function wg_do_post($post) {
 	$input_errors = wg_validate_post($pconfig);
 
 	if (!$input_errors) {
-		$config['installedpackages']['wireguard']['tunnel'][$index] = $pconfig;
+
+		$wgg['tunnels'][$index] = $pconfig;
+
 		write_config("[WireGuard] Tunnel {$pconfig['name']} (Index {$index}) updated.");
+
 	}
 
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
@@ -202,6 +215,9 @@ function wg_do_post($post) {
 
 function wg_resync($verbose = false) {
 	global $config, $g, $wgg;
+
+	// Read latest settings
+	wg_globals();
 
 	// Write out configuration files to disk
 	wg_create_config_files();
@@ -215,23 +231,17 @@ function wg_resync($verbose = false) {
 
 	}
 
-	// Get a list of configured tunnels
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+	if (is_array($wgg['tunnels'])) {
 
-	if (is_array($wg_tunnels)) {
-
-		foreach ($wg_tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
 				// Determine if we should configure hard or soft
 				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
+				// Attempt to create the WireGuard tunnel
 				wg_configure_if($tunnel, $conf_hard, $verbose);
-
-				$if_friendly = convert_real_interface_to_friendly_interface_name($tunnel['name']);
-
-				interface_reconfigure($if_friendly);
 
 			} else {
 
@@ -248,7 +258,7 @@ function wg_resync($verbose = false) {
 
 	if ($g['wireguard_installing']) {
 
-		update_status("done.\n");
+		update_status(" done.\n");
 
 		// We are no longer installing
 		unset($g['wireguard_installing']);
@@ -260,10 +270,10 @@ function wg_resync($verbose = false) {
 function wg_create_config_files($clean = true) {
 	global $config, $wgg;
 
-	$wg_tunnels = $config['installedpackages']['wireguard']['tunnel'];
+	wg_globals();
 
 	// We've got some tunnels to configure
-	if (is_array($wg_tunnels)) {
+	if (is_array($wgg['tunnels'])) {
 
 		// Create configuration path if it is missing
 		if (!file_exists($wgg['conf_path'])) {
@@ -283,7 +293,7 @@ function wg_create_config_files($clean = true) {
 
 		}
 
-		foreach ($wg_tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			if (!empty($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
@@ -298,12 +308,35 @@ function wg_create_config_files($clean = true) {
 }
 
 /* 
- * Remove all wg config files from the conf directory
+ * Remove all wg config files from any potential conf directory
  */
 function wg_delete_config_files() {
 	global $wgg;
 
-	unlink_if_exists("{$wgg['conf_path']}/*.conf");
+	// Loop through each potential conf path and delete all .conf files
+	foreach ($wgg['conf_paths_to_clean'] as $confpath) {
+
+		unlink_if_exists("{$confpath}/*.conf");
+
+	}
+
+}
+
+/* 
+ * Removes any configuration xml paths as defined by $wgg['xml_conf_tags']
+ */
+function wg_remove_config_settings() {
+	global $config, $wgg;
+
+	foreach ($wgg['xml_conf_tags'] as $conf_tag) {
+
+		if (isset($config['installedpackages'][$conf_tag])) {
+
+			unset($config['installedpackages'][$conf_tag]);
+
+		}
+
+	}
 
 }
 
@@ -378,65 +411,6 @@ function make_wg_conf($tunnel) {
 	file_put_contents($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", $txt);
 
 	chmod($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", 0600);
-}
-
-// Return WireGuard tunnel networks for a given address family
-function wg_get_tunnel_networks($family = 'both') {
-	global $config;
-	$wg_tunnel_networks = array();
-	init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-	if (is_wg_enabled()) {
-		foreach ($config['installedpackages']['wireguard']['tunnel'] as $wg) {
-			if (empty($wg['enabled']) ||
-			    empty($wg['interface']['address'])) {
-				continue;
-			}
-			foreach(explode(',', $wg['interface']['address']) as $wga) {
-				list($wgnet, $wgmask) = explode('/', trim($wga));
-				if ((is_ipaddrv6($wgnet) && ($family == 'ipv4')) ||
-				    (is_ipaddrv4($wgnet) && ($family == 'ipv6'))) {
-					continue;
-				}
-				$network = gen_subnet($wgnet, $wgmask);
-				$wg_tunnel_networks[] = "{$network}/{$wgmask}";
-			}
-		}
-	}
-	return $wg_tunnel_networks;
-}
-
-// Locate a viable remote gateway address for a WireGuard tunnel
-// Fall back to using the tunnel address itself.
-// https://redmine.pfsense.org/issues/11300
-function wg_find_tunnel_gw($tunnel, $addr) {
-	list($ip, $mask) = explode("/", trim($addr));
-	// Loop through peers looking for a viable remote gateway address
-	if (is_array($tunnel['peers']) &&
-	    is_array($tunnel['peers']['wgpeer']) &&
-	    count($tunnel['peers']['wgpeer']) > 0) {
-		foreach ($tunnel['peers']['wgpeer'] as $peer) {
-			// If this peer has no configured Peer WireGuard Address, skip it.
-			if (empty($peer['peerwgaddr'])) {
-				continue;
-			}
-			// Check each Peer WireGuard Address entry
-			foreach (explode(',', $peer['peerwgaddr']) as $pwga) {
-				// Ensure the address family of this entry matches the one we're seeking
-				if (is_v4($ip) !== is_v4($pwga)) {
-					continue;
-				}
-				// If there is a subnet mask, ditch it.
-				list($pip, $pmask) = explode('/', trim($pwga));
-				// Check that this address is in the desired subnet
-				if (ip_in_subnet($pip, trim($addr))) {
-					// We found a good candidate, return it
-					return $pip;
-				}
-			}
-		}
-	}
-	// If no viable candidate is found, return the tunnel address
-	return $ip;
 }
 
 ?>

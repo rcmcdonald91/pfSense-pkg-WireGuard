@@ -35,11 +35,11 @@ require_once("guiconfig.inc");
 // WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
-init_config_arr(array('installedpackages', 'wireguard', 'config', 0));
-$wg_config = &$config['installedpackages']['wireguard']['config'][0];
+global $wgg;
 
-init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
+wg_globals();
+
+$secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
 $secrets_input_type = (isset($wg_config['hide_secrets']) && $wg_config['hide_secrets'] =='yes') ? 'password' : 'text';
 
@@ -84,10 +84,9 @@ if ($_POST) {
 			// Configure the new WG tunnel
 			if (isset($pconfig['enabled']) && $pconfig['enabled'] == 'yes') {
 
-				// Should we soft configure?
-				$is_assigned = is_wg_tunnel_assigned($pconfig);
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
-				wg_configure_if($pconfig, !($is_assigned));
+				wg_configure_if($pconfig, $conf_hard);
 
 			} else {
 
@@ -113,9 +112,9 @@ if ($_POST) {
 
 	if (isset($index)) {
 
-		if (is_array($tunnels[$index])) {
+		if (is_array($wgg['tunnels'][$index])) {
 
-			$pconfig = &$tunnels[$index];
+			$pconfig = &$wgg['tunnels'][$index];
 		}
 
 	} else {
@@ -459,7 +458,7 @@ $section2->add($group2);
 </nav>
 
 <?php $jpconfig = json_encode($pconfig, JSON_HEX_APOS); ?>
-<?php $jwg_config = json_encode($wg_config, JSON_HEX_APOS); ?>
+<?php $jwg_config = json_encode($wgg['config'], JSON_HEX_APOS); ?>
 
 <?php $genkeywarning = gettext("Are you sure you want to overwrite keys?"); ?>
 
