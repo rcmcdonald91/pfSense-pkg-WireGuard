@@ -61,7 +61,13 @@ function wg_deinstall() {
 
 	update_status("done.\n");
 
-	if !(isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'yes') {
+	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'yes') {
+
+		update_status("  Keeping WireGuard configuration settings... ");
+
+		update_status(" done.\n");
+
+	} else {
 
 		update_status("  Removing WireGuard configuration settings... ");
 
