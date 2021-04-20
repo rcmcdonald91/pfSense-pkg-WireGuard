@@ -41,6 +41,8 @@ function wg_install() {
 
 	update_status(" done.\n");
 
+	// The first organic resync called by pfSense package manager will finish the installation process
+
 }
 
 /*

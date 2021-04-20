@@ -80,8 +80,10 @@ if ($input_errors) {
 
 <form name="mainform" method="post">
 <?php
-	if (count($wgg['tunnels']) == 0):
+	if (is_array($wgg['tunnels']) && count($wgg['tunnels']) == 0):
+
 		print_info_box(gettext('No WireGuard tunnels have been configured. Click the "Add Tunnel" button below to create one.'), 'warning', false);
+		
 	else:
 ?>
 	<div class="panel panel-default">

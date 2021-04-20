@@ -41,8 +41,6 @@ wg_globals();
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
-$secrets_input_type = (isset($wg_config['hide_secrets']) && $wg_config['hide_secrets'] =='yes') ? 'password' : 'text';
-
 if (is_numericint($_REQUEST['index'])) {
 	$index = $_REQUEST['index'];
 }
