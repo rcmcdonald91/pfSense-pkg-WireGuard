@@ -73,7 +73,7 @@ function wg_deinstall() {
 
 		wg_remove_config_settings();
 
-		update_status(" done.\n");
+		update_status("done.\n");
 
 	}
 
