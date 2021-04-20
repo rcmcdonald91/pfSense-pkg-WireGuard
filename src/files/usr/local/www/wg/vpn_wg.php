@@ -50,15 +50,22 @@ $tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
 include("head.inc");
 
 // Delete a tunnel?
-if (array_key_exists('delidx', $_POST) &&
-    ($wgg['tunnels'][$_POST['delidx']])) {
+if (array_key_exists('delidx', $_POST) && isset($wgg['tunnels'][$_POST['delidx']])) {
+
 	$iflist = get_configured_interface_list_by_realif();
-	if (!empty($iflist[$wgg['tunnels'][$_POST['delidx']]['name']])) {
+
+	if (is_wg_tunnel_assigned($wgg['tunnels'][$_POST['delidx']]['name'])) {
+
 		$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
+
 	} else {
+
 		wg_delete_tunnel($_POST['delidx']);
+
 		header("Location: /wg/vpn_wg.php");
+
 	}
+
 }
 
 add_package_tabs("wireguard", $tab_array);
@@ -178,7 +185,7 @@ if ($input_errors) {
 					</tr>
 <?php
 			$i++;
-		endforeach;	 // $wgg['tunnels']a
+		endforeach;
 ?>
 				</tbody>
 			</table>

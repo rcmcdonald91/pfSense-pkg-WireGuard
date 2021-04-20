@@ -141,7 +141,7 @@ function wg_do_post($post) {
 
 	$index = $post['index'];
 
-	$pconfig = &$wgg['tunnels'][$index];
+	$pconfig = $wgg['tunnels'][$index];
 
 	if (empty($pconfig['name'])) {
 

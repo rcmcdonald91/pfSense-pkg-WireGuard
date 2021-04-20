@@ -161,7 +161,7 @@ function next_wg_port() {
 
 	wg_globals();
 
-	for ($idx=$wgg['default_port']; $idx<65535; $idx++) {
+	for ($idx=$wgg['default_port']; $idx<$wgg['max_port']; $idx++) {
 
 		// Check to see if the port is already in use
 		$found = false;
@@ -205,7 +205,7 @@ function next_wg_if() {
 
 	}
 
-	for ($ifnum = 0; $ifnum < 32768; $ifnum++) {
+	for ($ifnum = 0; $ifnum < $wgg['max_tunnels']; $ifnum++) {
 
 		$want_if = "{$wgg['if_prefix']}{$ifnum}";
 		

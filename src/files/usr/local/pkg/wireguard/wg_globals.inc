@@ -42,7 +42,9 @@ $wgg = array(
         'if_group'              => 'WireGuard',
         'ifgroupentry'          => array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
         'default_mtu'           => 1420,
-        'default_port'          => 51820
+        'default_port'          => 51820,
+        'max_port'              => 65535,
+        'max_tunnels'           => 32768
 );
 
 /*
