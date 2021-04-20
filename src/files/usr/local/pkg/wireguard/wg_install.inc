@@ -49,7 +49,7 @@ function wg_install() {
 function wg_deinstall() {
 	global $config, $wgg;
 
-	wgg_globals();
+	wg_globals();
 
 	update_status("  Removing WireGuard interface group... ");
 

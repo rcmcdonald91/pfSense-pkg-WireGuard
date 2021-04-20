@@ -34,8 +34,9 @@ require_once("functions.inc");
 // WireGuard includes
 require_once("/usr/local/pkg/wireguard/wg.inc");
 
-init_config_arr(array('installedpackages', 'wireguard', 'tunnel'));
-$tunnels = &$config['installedpackages']['wireguard']['tunnel'];
+global $wgg;
+
+wg_globals();
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
 $pglinks = array("", "@self", "@self");
@@ -50,9 +51,9 @@ include("head.inc");
 
 // Delete a tunnel?
 if (array_key_exists('delidx', $_POST) &&
-    ($tunnels[$_POST['delidx']])) {
+    ($wgg['tunnels'][$_POST['delidx']])) {
 	$iflist = get_configured_interface_list_by_realif();
-	if (!empty($iflist[$tunnels[$_POST['delidx']]['name']])) {
+	if (!empty($iflist[$wgg['tunnels'][$_POST['delidx']]['name']])) {
 		$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
 	} else {
 		wg_delete_tunnel($_POST['delidx']);
@@ -72,7 +73,7 @@ if ($input_errors) {
 
 <form name="mainform" method="post">
 <?php
-	if (count($tunnels) == 0):
+	if (count($wgg['tunnels']) == 0):
 		print_info_box(gettext('No WireGuard tunnels have been configured. Click the "Add Tunnel" button below to create one.'), 'warning', false);
 	else:
 ?>
@@ -95,7 +96,7 @@ if ($input_errors) {
 <?php
 
 		$i = 0;
-		foreach ($tunnels as $tunnel):
+		foreach ($wgg['tunnels'] as $tunnel):
 			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
 			if (!$tunnel['peers'] || !is_array($tunnel['peers'])) {
 				$tunnel['peers'] = array();
@@ -177,7 +178,7 @@ if ($input_errors) {
 					</tr>
 <?php
 			$i++;
-		endforeach;	 // $tunnelsa
+		endforeach;	 // $wgg['tunnels']a
 ?>
 				</tbody>
 			</table>
