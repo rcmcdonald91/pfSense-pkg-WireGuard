@@ -56,17 +56,17 @@ function wg_globals() {
         // Reload config.xml to get any recent changes
 	$config = parse_config(true);
 
-        $wgg['config'] = array();
+        // Need to initialize as arrays
+        init_config_arr(array('installedpackages', $wgg['pkg_name'], 'config'));
+        init_config_arr(array('installedpackages', $wgg['pkg_name'], 'tunnel'));
 
-        $wggp['tunnels'] = array();
-
+        // Reference assignment for reading and writing back to the configure through $wgg
         $wgg['config'] = &$config['installedpackages'][$wgg['pkg_name']]['config'][0];
-
         $wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
 
 }
 
-// Call this to read the latest configuration
+// Call this to read the latest configuration when this file is included
 wg_globals();
 
 ?>
