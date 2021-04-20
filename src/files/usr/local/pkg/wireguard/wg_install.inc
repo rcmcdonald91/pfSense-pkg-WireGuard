@@ -55,7 +55,7 @@ function wg_deinstall() {
 
 	wg_ifgroup_deinstall();
 
-	update_status("done.\n Removing WireGuard configuration files... ");
+	update_status("done.\n  Removing WireGuard configuration files... ");
 
 	// These are ephemeral anyways...
 	wg_delete_config_files();

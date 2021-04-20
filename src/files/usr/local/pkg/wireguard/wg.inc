@@ -258,7 +258,7 @@ function wg_resync($verbose = false) {
 
 	if ($g['wireguard_installing']) {
 
-		update_status("done.\n");
+		update_status(" done.\n");
 
 		// We are no longer installing
 		unset($g['wireguard_installing']);
