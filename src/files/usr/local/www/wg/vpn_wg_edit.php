@@ -86,7 +86,7 @@ if ($_POST) {
 
 				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
-				wg_configure_if($pconfig, $conf_hard));
+				wg_configure_if($pconfig, $conf_hard);
 
 			} else {
 
