@@ -55,14 +55,21 @@ function wg_deinstall() {
 
 	wg_ifgroup_deinstall();
 
-	update_status("done.\n  Removing WireGuard configuration files... ");
+	update_status("done.\n  Removing WireGuard temporary files... ");
 
-	// These are ephemeral anyways...
 	wg_delete_config_files();
 
 	update_status("done.\n");
 
-	# TODO
+	if !(isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'yes') {
+
+		update_status("  Removing WireGuard configuration settings... ");
+
+		wg_remove_config_settings();
+
+		update_status(" done.\n");
+
+	}
 
 }
 
