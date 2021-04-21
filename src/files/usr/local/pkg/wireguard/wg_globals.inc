@@ -72,6 +72,42 @@ function array_get_value(array &$array, $parents) {
 
 }
 
+function array_set_value(array &$array, $parents, $value) {
+
+    $ref = &$array;
+
+    foreach ((array) $parents as $parent) {
+
+        if (isset($ref) && !is_array($ref)) {
+
+            $ref = array();
+
+        }
+
+        $ref = &$ref[$parent];
+
+    }
+
+    $ref = $value;
+
+}
+
+function array_unset_value(&$array, $parents) {
+
+    $key = array_shift($parents);
+
+    if (empty($parents)) {
+
+        unset($array[$key]);
+
+    } else {
+
+        array_unset_value($array[$key], $parents);
+
+    }
+
+}
+
 /*
  * This populates the $wgg with the latest information from config.xml
  */
@@ -81,15 +117,13 @@ function wg_globals() {
 	// Reload config.xml to get any recent changes
 	$config = parse_config(true);
 
-	// Need to initialize as arrays
-	init_config_arr(array($wgg['xml_path'], 'config'));
-	init_config_arr(array($wgg['xml_path'], 'tunnel'));
+	// Need to initialize as arrays relative to xml_path
+	init_config_arr(array_merge($wgg['xml_path'], array('config')));
+	init_config_arr(array_merge($wgg['xml_path'], array('tunnel')));
 
-	// Reference assignment for reading and writing back to the configure through $wgg
-	$wgg['config'] = &$config['installedpackages'][$wgg['pkg_name']]['config'][0];
-	//$wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
-
-	$wgg['tunnels'] = array_get_value($config, array($wgg['xml_path'], 'tunnel'));
+	// By reference assignment for reading and writing back to the configure at xml_path through $wgg
+	$wgg['config'] = array_get_value($config, array_merge($wgg['xml_path'], array('config', 0)));
+	$wgg['tunnels'] = array_get_value($config, array_merge($wgg['xml_path'], array('tunnel')));
 
 }
 
