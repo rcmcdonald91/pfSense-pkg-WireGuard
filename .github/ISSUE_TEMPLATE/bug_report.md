@@ -23,7 +23,7 @@ If applicable, add screenshots to help explain your problem.
  - PfSense: 
  - WireGuard-tools:
  - WireGuard-kmod:
- - pfSense-pkg-WireGuard
+ - pfSense-pkg-WireGuard:
 
 
 **Additional context**
