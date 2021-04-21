@@ -34,10 +34,10 @@ $wgg = array(
 	'kldstat'		=> '/sbin/kldstat',
 	'pkg'			=> '/usr/sbin/pkg',
 	'kmod'			=> 'if_wg.ko',
-	'pkg_names'		=> array('pfSense-pkg-WireGuard', 'wireguard-kmod', 'wireguard-tools'),
+	'pkg_names'		=> array('pfSense-pkg-WireGuard', 'bash', 'wireguard-kmod', 'wireguard-tools'),
 	'conf_path'		=> '/usr/local/etc/wireguard',
-	'conf_paths_to_clean'	=> array('/usr/local/etc/wireguard', '/etc/wireguard', '/etc/wg'),
 	'xml_path'		=> array('installedpackages', 'wireguard'),
+	'conf_paths_to_clean'	=> array('/usr/local/etc/wireguard', '/etc/wireguard', '/etc/wg'),
 	'xml_paths_to_clean'	=> array(
 					array('wireguard'), 
 					array('installedpackages', 'wireguard')),
@@ -50,7 +50,7 @@ $wgg = array(
 	'max_tunnels'		=> 32768
 );
 
-function array_get_value(array &$array, $parents) {
+function &array_get_value(array &$array, $parents) {
 
     $ref = &$array;
 
@@ -122,8 +122,8 @@ function wg_globals() {
 	init_config_arr(array_merge($wgg['xml_path'], array('tunnel')));
 
 	// By reference assignment for reading and writing back to the configure at xml_path through $wgg
-	$wgg['config'] = array_get_value($config, array_merge($wgg['xml_path'], array('config', 0)));
-	$wgg['tunnels'] = array_get_value($config, array_merge($wgg['xml_path'], array('tunnel')));
+	$wgg['config'] = &array_get_value($config, array_merge($wgg['xml_path'], array('config', 0)));
+	$wgg['tunnels'] = &array_get_value($config, array_merge($wgg['xml_path'], array('tunnel')));
 
 }
 
