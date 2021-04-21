@@ -174,7 +174,7 @@ function wg_do_post($post) {
 
 		$pconfig['peers']['wgpeer'] = array();
 
-		for ($idx = 0; $idx <= count($post['endpoint']); $idx++) {
+		for ($idx = 0; $idx < count($post['endpoint']); $idx++) {
 
 			$peer = array();
 			$peer['publickey'] = $post['publickeyp'][$idx];
