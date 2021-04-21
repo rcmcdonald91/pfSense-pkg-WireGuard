@@ -37,7 +37,10 @@ $wgg = array(
 	'pkg_names'		=> array('pfSense-pkg-WireGuard', 'wireguard-kmod', 'wireguard-tools'),
 	'conf_path'		=> '/usr/local/etc/wireguard',
 	'conf_paths_to_clean'	=> array('/usr/local/etc/wireguard', '/etc/wireguard', '/etc/wg'),
-	'xml_conf_tags'		=> 'wireguard',
+	'xml_path'		=> array('installedpackages', 'wireguard'),
+	'xml_paths_to_clean'	=> array(
+					array('wireguard'), 
+					array('installedpackages', 'wireguard')),
 	'if_prefix'		=> 'tun_wg',
 	'if_group'		=> 'WireGuard',
 	'ifgroupentry'		=> array('ifname' => 'WireGuard', 'descr' => 'Dynamic Group for WireGuard', 'members' => null),
@@ -46,6 +49,28 @@ $wgg = array(
 	'max_port'		=> 65535,
 	'max_tunnels'		=> 32768
 );
+
+function array_get_value(array &$array, $parents) {
+
+    $ref = &$array;
+
+    foreach ((array) $parents as $parent) {
+
+        if (is_array($ref) && array_key_exists($parent, $ref)) {
+
+            $ref = &$ref[$parent];
+
+        } else {
+
+            return null;
+
+        }
+
+    }
+
+    return $ref;
+
+}
 
 /*
  * This populates the $wgg with the latest information from config.xml
@@ -57,12 +82,14 @@ function wg_globals() {
 	$config = parse_config(true);
 
 	// Need to initialize as arrays
-	init_config_arr(array('installedpackages', $wgg['pkg_name'], 'config'));
-	init_config_arr(array('installedpackages', $wgg['pkg_name'], 'tunnel'));
+	init_config_arr(array($wgg['xml_path'], 'config'));
+	init_config_arr(array($wgg['xml_path'], 'tunnel'));
 
 	// Reference assignment for reading and writing back to the configure through $wgg
 	$wgg['config'] = &$config['installedpackages'][$wgg['pkg_name']]['config'][0];
-	$wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
+	//$wgg['tunnels'] = &$config['installedpackages'][$wgg['pkg_name']]['tunnel'];
+
+	$wgg['tunnels'] = array_get_value($config, array($wgg['xml_path'], 'tunnel'));
 
 }
 
