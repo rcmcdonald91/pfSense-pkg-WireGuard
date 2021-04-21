@@ -12,7 +12,7 @@ COMMENT=	pfSense package WireGuard
 LICENSE=	APACHE20
 
 RUN_DEPENDS=	bash>0:shells/bash \
-		wireguard-kmod>0:net/wireguard-kmod
+		wireguard-kmod>0:net/wireguard-kmod \
 		wireguard-tools>0:net/wireguard-tools
 
 NO_BUILD=	yes
@@ -48,7 +48,7 @@ do-install:
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/*.php \
 		${STAGEDIR}${PREFIX}/www/wg
-		
+
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
 
