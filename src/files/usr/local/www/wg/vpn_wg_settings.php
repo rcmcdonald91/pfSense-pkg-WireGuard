@@ -38,6 +38,8 @@ global $wgg;
 
 wg_globals();
 
+$save_success = false;
+
 if ($_POST) {
 
 	if ($_POST['save']) {
@@ -52,7 +54,7 @@ if ($_POST) {
 
 			write_config('[WireGuard] Save WireGuard settings');
 
-			header("Location: /wg/vpn_wg_settings.php");
+			$save_success = true;
 
 		}
 
@@ -81,6 +83,10 @@ include("head.inc");
 add_package_tabs("wireguard", $tab_array);
 
 display_top_tabs($tab_array);
+
+if ($save_success) {
+	print_info_box(gettext("The changes have been applied successfully."), 'success');
+}
 
 if ($input_errors) {
 	print_input_errors($input_errors);
