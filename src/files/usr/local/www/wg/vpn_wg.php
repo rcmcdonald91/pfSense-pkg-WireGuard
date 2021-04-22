@@ -38,9 +38,10 @@ global $wgg;
 
 wg_globals();
 
+$shortcut_section = "wireguard";
+
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
 $pglinks = array("", "@self", "@self");
-$shortcut_section = "wireguard";
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg.php");
@@ -68,15 +69,13 @@ if (array_key_exists('delidx', $_POST) && isset($wgg['tunnels'][$_POST['delidx']
 
 }
 
-add_package_tabs("wireguard", $tab_array);
-display_top_tabs($tab_array);
-
 if ($input_errors) {
 	print_input_errors($input_errors);
 }
 
-?>
+display_top_tabs($tab_array);
 
+?>
 
 <form name="mainform" method="post">
 <?php

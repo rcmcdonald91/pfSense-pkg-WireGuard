@@ -36,16 +36,17 @@ require_once('shortcuts.inc');
 require_once('wireguard/wg.inc');
 
 $shortcut_section = "wireguard";
-$pgtitle = array(gettext("Status"), "WireGuard");
 
-include("head.inc");
+$pgtitle = array(gettext("Status"), "WireGuard");
+$pglinks = array("", "@self");
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
-add_package_tabs("wireguard", $tab_array);
+include("head.inc");
+
 display_top_tabs($tab_array);
 
 ?>
