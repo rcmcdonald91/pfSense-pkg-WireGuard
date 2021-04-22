@@ -90,6 +90,12 @@ function wg_destroy_if($tunnel, $verbose = false) {
 
 }
 
+function wg_toggle_tunnel($tunidx) {
+
+	#TODO
+
+}
+
 function wg_delete_tunnel($tunidx) {
 	global $config, $wgg;
 

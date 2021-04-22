@@ -54,23 +54,31 @@ if ($_POST) {
 
 	if (array_key_exists('index', $_POST) && isset($wgg['tunnels'][$_POST['index']])) {
 
+		$index = $_POST['index'];
+
 		if ($_POST['action'] == 'toggle') {
 
-			echo("you want to toggle {$_POST['id']}");
+			if (is_wg_tunnel_assigned($wgg['tunnels'][$index]['name'])) {
+			
+				$input_errors[] = gettext('Cannot toggle a WireGuard tunnel while it is assigned as an interface.');
 
-			exit;
+			} else {
 
+				wg_toggle_tunnel($index)
+
+				header("Location: /wg/vpn_wg.php");
+
+			}
+			
 		} elseif ($_POST['action'] == 'delete') { 
 
-			$iflist = get_configured_interface_list_by_realif();
-
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$_POST['index']]['name'])) {
+			if (is_wg_tunnel_assigned($wgg['tunnels'][$index]['name'])) {
 		
 				$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
 		
 			} else {
 		
-				wg_delete_tunnel($_POST['index']);
+				wg_delete_tunnel($index]);
 		
 				header("Location: /wg/vpn_wg.php");
 		
