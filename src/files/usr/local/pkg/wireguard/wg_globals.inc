@@ -136,8 +136,8 @@ function wg_globals() {
 	init_config_arr($a_tunnels_path);
 
 	// By reference assignment for reading and writing back to the configure at xml_path through $wgg
-	$wgg['config'] = &array_get_value($config, array_merge($wgg['xml_path'], array('config', 0)));
-	$wgg['tunnels'] = &array_get_value($config, array_merge($wgg['xml_path'], array('tunnel')));
+	$wgg['config'] = &array_get_value($config, $a_config_path);
+	$wgg['tunnels'] = &array_get_value($config, $a_tunnels_path);
 
 }
 
