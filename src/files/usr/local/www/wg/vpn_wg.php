@@ -52,36 +52,31 @@ include("head.inc");
 
 if ($_POST) {
 
-	if ($_POST['action'] = 'toogle') {
+	if (array_key_exists('index', $_POST) && isset($wgg['tunnels'][$_POST['index']])) {
 
-		echo("you want to toggle {$_POST['id']}");
+		if ($_POST['action'] == 'toogle') {
 
-		exit;
+			echo("you want to toggle {$_POST['id']}");
 
-	} elseif ($_POST['action'] = 'delete') { 
+			exit;
 
-		echo("you want to delete {$_POST['id']}");
+		} elseif ($_POST['action'] == 'delete') { 
 
-		exit;
+			$iflist = get_configured_interface_list_by_realif();
 
-	}
+			if (is_wg_tunnel_assigned($wgg['tunnels'][$_POST['index']]['name'])) {
+		
+				$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
+		
+			} else {
+		
+				wg_delete_tunnel($_POST['index']);
+		
+				header("Location: /wg/vpn_wg.php");
+		
+			}
 
-}
-
-// Delete a tunnel?
-if (array_key_exists('delidx', $_POST) && isset($wgg['tunnels'][$_POST['delidx']])) {
-
-	$iflist = get_configured_interface_list_by_realif();
-
-	if (is_wg_tunnel_assigned($wgg['tunnels'][$_POST['delidx']]['name'])) {
-
-		$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
-
-	} else {
-
-		wg_delete_tunnel($_POST['delidx']);
-
-		header("Location: /wg/vpn_wg.php");
+		}
 
 	}
 
@@ -157,7 +152,7 @@ display_top_tabs($tab_array);
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel")?>"></a>
 							<a class="fa fa-<?=$icontoggle?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=delete"?>" userpost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=delete"?>" usepost></a>
 						</td>
 					</tr>
 
@@ -232,11 +227,6 @@ display_top_tabs($tab_array);
 	</nav>
 </form>
 
-<!-- Simple form that is submitted on tunnel delete -->
-<form name="delform" id="delform" method="post">
-	<input id="delidx" name="delidx" type="hidden" />
-</form>
-
 <script type="text/javascript">
 //<![CDATA[
 
@@ -252,12 +242,6 @@ events.push(function() {
 		hideClass('peer-entries', peershidden);
 	})
 
-	// Delete tunnel
-	$('[id^=Xdel_]').click(function (event) {
-		var idx = event.target.id.split('_')[1];
-		$('#delidx').val(idx);  // Set the id of the tunnel
-		$('#delform').submit(); // Submit the form
-	});
 });
 //]]>
 </script>
