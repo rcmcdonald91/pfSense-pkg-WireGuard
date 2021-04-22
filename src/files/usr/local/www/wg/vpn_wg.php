@@ -110,7 +110,6 @@ display_top_tabs($tab_array);
 				<thead>
 					<tr>
 						<th class="peer-entries"></th>
-						<th><!-- status icons --></th>
 						<th><?=gettext("Name")?></th>
 						<th><?=gettext("Description")?></th>
 						<th><?=gettext("Address / Assignment")?></th>
@@ -145,20 +144,15 @@ display_top_tabs($tab_array);
 			}
 
 			if ($tunnel['enabled'] == 'yes') {
-				$iconfn = "check text-success";
-				$title_text = gettext("Tunnel is enabled");
+				$iconfn = "ban";
 			} else {
-				$iconfn = "times text-danger";
-				$title_text = gettext("Tunnel is blocked");
+				$iconfn = "check-square-o";
 
 			}	
 
 ?>
 					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
-						<td title="<?=$title_text?>">
-							<a class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
-						</td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td><?=htmlspecialchars($tunnel['interface']['address'])?></td>
@@ -167,6 +161,7 @@ display_top_tabs($tab_array);
 
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel")?>"></a>
+							<a class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
 						</td>
 					</tr>
