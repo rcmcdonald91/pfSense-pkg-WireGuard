@@ -72,9 +72,9 @@ $pglinks = array("", "/wg/vpn_wg.php", "@self");
 $shortcut_section = "wireguard";
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "vpn_wg.php");
-$tab_array[] = array(gettext("Settings"), true, "vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), false, "status_wireguard.php");
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg.php");
+$tab_array[] = array(gettext("Settings"), true, "/wg/vpn_wg_settings.php");
+$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
