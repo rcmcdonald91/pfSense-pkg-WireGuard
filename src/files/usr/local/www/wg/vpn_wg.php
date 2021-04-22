@@ -143,12 +143,7 @@ display_top_tabs($tab_array);
 
 			}
 
-			if ($tunnel['enabled'] == 'yes') {
-				$iconfn = "ban";
-			} else {
-				$iconfn = "check-square-o";
-
-			}	
+			$icontoggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
 					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?=$entryStatus?>">
@@ -161,8 +156,8 @@ display_top_tabs($tab_array);
 
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel")?>"></a>
-							<a class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" userpost></a>
+							<a class="fa fa-<?=$icontoggle?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=delete"?>" userpost></a>
 						</td>
 					</tr>
 
