@@ -54,7 +54,7 @@ if ($_POST) {
 
 	if (array_key_exists('index', $_POST) && isset($wgg['tunnels'][$_POST['index']])) {
 
-		if ($_POST['action'] == 'toogle') {
+		if ($_POST['action'] == 'toggle') {
 
 			echo("you want to toggle {$_POST['id']}");
 
