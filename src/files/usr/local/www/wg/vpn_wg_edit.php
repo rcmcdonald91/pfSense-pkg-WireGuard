@@ -104,6 +104,12 @@ if ($_POST) {
 
 		exit;
 
+	} elseif ($_POST['action'] == 'toggle') {
+
+		echo("You want to toggle {$index}");
+
+		exit;
+
 	}
 
 } else {

@@ -139,7 +139,7 @@ display_top_tabs($tab_array);
 					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?= $entryStatus ?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td title="<?=$title_text?>">
-							<a href="<?="vpn_wg_edit.php?index={$i}&act=toggle"?>" usepost>
+							<a href="<?="vpn_wg_edit.php?index={$i}&action=toggle"?>" usepost>
 								<i class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status");?>"></i>
 							</a>
 						</td>
