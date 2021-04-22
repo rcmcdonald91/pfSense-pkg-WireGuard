@@ -58,7 +58,7 @@ if ($_POST) {
 
 		exit;
 
-	} elseif ($_POST['action'] = 'delete') { {
+	} elseif ($_POST['action'] = 'delete') { 
 
 		echo("you want to delete {$_POST['id']}");
 
@@ -162,7 +162,7 @@ display_top_tabs($tab_array);
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel")?>"></a>
 							<a class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" userpost></a>
 						</td>
 					</tr>
 
