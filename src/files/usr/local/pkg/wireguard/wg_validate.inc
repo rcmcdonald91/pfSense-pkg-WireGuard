@@ -226,7 +226,7 @@ function is_wg_assigned($disabled = true) {
 
 // Check if at least one tunnel is enabled
 function is_wg_enabled() {
-	global $config;
+	global $wgg;
 
 	wg_globals();
 
