@@ -41,7 +41,7 @@ $pgtitle = array(gettext("Status"), "WireGuard");
 include("head.inc");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/pn_wg.php");
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
