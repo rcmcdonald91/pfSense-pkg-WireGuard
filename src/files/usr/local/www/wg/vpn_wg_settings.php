@@ -80,10 +80,6 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-add_package_tabs("wireguard", $tab_array);
-
-display_top_tabs($tab_array);
-
 if ($save_success) {
 	print_info_box(gettext("The changes have been applied successfully."), 'success');
 }
@@ -91,6 +87,8 @@ if ($save_success) {
 if ($input_errors) {
 	print_input_errors($input_errors);
 }
+
+display_top_tabs($tab_array);
 
 $form = new Form(false);
 
