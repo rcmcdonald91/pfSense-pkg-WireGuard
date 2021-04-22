@@ -50,6 +50,24 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
+if ($_POST) {
+
+	if ($_POST['action'] = 'toogle') {
+
+		echo("you want to toggle {$_POST['id']}");
+
+		exit;
+
+	} elseif ($_POST['action'] = 'delete') { {
+
+		echo("you want to delete {$_POST['id']}");
+
+		exit;
+
+	}
+
+}
+
 // Delete a tunnel?
 if (array_key_exists('delidx', $_POST) && isset($wgg['tunnels'][$_POST['delidx']])) {
 
@@ -136,12 +154,10 @@ display_top_tabs($tab_array);
 			}	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?= $entryStatus ?>">
+					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td title="<?=$title_text?>">
-							<a href="<?="vpn_wg_edit.php?index={$i}&action=toggle"?>" usepost>
-								<i class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status");?>"></i>
-							</a>
+							<a class="fa fa-<?=$iconfn?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
 						</td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
@@ -150,8 +166,8 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel"); ?>"></a>
-							<a class="fa fa-trash text-danger" id="Xdel_<?=$i?>" title="<?=gettext('Delete Tunnel'); ?>"></a>
+							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel")?>"></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
 						</td>
 					</tr>
 
