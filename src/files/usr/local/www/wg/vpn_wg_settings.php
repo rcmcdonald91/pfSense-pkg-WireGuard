@@ -21,7 +21,7 @@
  */
 
 ##|+PRIV
-##|*IDENT=page-vpn-wg-settings
+##|*IDENT=page-vpn-wireguard
 ##|*NAME=VPN: WireGuard: Settings
 ##|*DESCR=Allow access to the 'VPN: WireGuard' page.
 ##|*MATCH=vpn_wg_settings.php*

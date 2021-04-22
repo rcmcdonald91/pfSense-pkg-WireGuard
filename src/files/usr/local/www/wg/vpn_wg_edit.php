@@ -22,7 +22,7 @@
  */
 
 ##|+PRIV
-##|*IDENT=page-vpn-wg-edit
+##|*IDENT=page-vpn-wireguard
 ##|*NAME=VPN: WireGuard: Edit
 ##|*DESCR=Allow access to the 'VPN: WireGuard' page.
 ##|*MATCH=vpn_wg_edit.php*

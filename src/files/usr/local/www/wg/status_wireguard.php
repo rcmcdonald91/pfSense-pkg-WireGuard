@@ -21,7 +21,7 @@
  */
 
 ##|+PRIV
-##|*IDENT=page-vpn-wg-status
+##|*IDENT=page-status-wireguard
 ##|*NAME=Status: WireGuard
 ##|*DESCR=Allow access to the 'Status: WireGuard' page.
 ##|*MATCH=status_wireguard.php*
