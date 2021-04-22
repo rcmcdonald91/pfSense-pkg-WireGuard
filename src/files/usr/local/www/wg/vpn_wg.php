@@ -69,7 +69,7 @@ if ($_POST) {
 				header("Location: /wg/vpn_wg.php");
 
 			}
-			
+
 		} elseif ($_POST['action'] == 'delete') { 
 
 			if (is_wg_tunnel_assigned($wgg['tunnels'][$index]['name'])) {
@@ -158,9 +158,10 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit Tunnel")?>"></a>
-							<a class="fa fa-<?=$icontoggle?>" title="<?=gettext("click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Tunnel')?>" href="<?="?index={$i}&action=delete"?>" usepost></a>
+							<a class="fa fa-download" href="#" title="<?=gettext("Download tunnel configuration")?>"></a>
+							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit tunnel")?>"></a>
+							<a class="fa fa-<?=$icontoggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?index={$i}&action=delete"?>" usepost></a>
 						</td>
 					</tr>
 
