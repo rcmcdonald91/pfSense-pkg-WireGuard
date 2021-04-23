@@ -45,16 +45,9 @@ $is_new = true;
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
 if (is_numericint($_REQUEST['tunid'])) {
-	$tun_id = $_REQUEST['tunid'];
-}
 
-if ($_REQUEST['ajax']) {
-	switch ($_REQUEST['action']) {
-		case "genpsk" : { 
-			print(genPSK());
-			exit;
-		}
-	}
+	$tun_id = $_REQUEST['tunid'];
+
 }
 
 // All form save logic is in /etc/inc/wg.inc
@@ -85,7 +78,7 @@ if ($_POST) {
 			// Configure the new WG tunnel
 			if (isset($pconfig['enabled']) && $pconfig['enabled'] == 'yes') {
 
-				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
+				$conf_hard = (!is_wg_tunnel_assigned($pconfig) || !does_interface_exist($pconfig['name']));
 
 				wg_configure_if($pconfig, $conf_hard);
 
@@ -94,6 +87,8 @@ if ($_POST) {
 				wg_destroy_if($pconfig);
 
 			}
+
+			$tun_id = wg_get_tunnel_id($pconfig['name']);
 
 			header("Location: /wg/vpn_wg_tunnels_edit.php?tunid={$tun_id}");
 
@@ -183,14 +178,14 @@ $tun_enable = new Form_Checkbox(
 	$pconfig['enabled'] == 'yes'
 );
 
-$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to an interface');	
+$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to a pfSense interface');	
 
 // Disable the tunnel enabled button if interface is assigned
 if (is_wg_tunnel_assigned($pconfig)) {
 
 	$tun_enable->setDisabled();
 
-	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to an interface');
+	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to a pfSense interface');
 
 	// We still want to POST this field, make a a hidden field now
 	$form->addGlobal(new Form_Input(
@@ -243,6 +238,7 @@ $group->add(new Form_Button(
 ))->setWidth(1)->addClass('btn-primary btn-xs')->setHelp('New Keys');
 
 $section->add($group);
+
 $form->add($section);
 
 // ============ Interface edit modal ==================================

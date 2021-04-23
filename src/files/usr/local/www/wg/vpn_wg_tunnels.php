@@ -54,7 +54,7 @@ if ($_POST) {
 
 				wg_toggle_tunnel($tun_id);
 
-				header("Location: /wg/vpn_wg.php");
+				header("Location: /wg/vpn_wg_tunnels.php");
 
 			}
 
@@ -68,7 +68,7 @@ if ($_POST) {
 		
 				wg_delete_tunnel($tun_id);
 		
-				header("Location: /wg/vpn_wg.php");
+				header("Location: /wg/vpn_wg_tunnels.php");
 		
 			}
 
