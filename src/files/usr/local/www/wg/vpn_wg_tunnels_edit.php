@@ -313,17 +313,21 @@ print($form);
 
 			foreach ($pconfig['peers']['wgpeer'] as $peer_id => $peer):
 
+				$icon_toggle = ($peer['enabled'] == 'yes') ? 'ban' : 'check-square-o';
+
+				$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
+
 ?>
-				<tr>
+				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>';" class="<?=$entryStatus?>">
 					<td><?=$peer_id?></td>
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=htmlspecialchars($peer['port'])?></td>
 					<td><?=htmlspecialchars($peer['publickey'])?></td>
 					<td style="cursor: pointer;">
-						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?tunid={$i}&peerid={$i}"?>"></a>
-						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$i}&peerid={$i}"?>" usepost></a>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&tunid={$i}&peerid={$i}"?>" usepost></a>
+						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>"></a>
+						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$tun_id}&peerid={$peer_id}"?>" usepost></a>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&tunid={$tun_id}&peerid={$peer_id}"?>" usepost></a>
 					</td>
 				</tr>
 
