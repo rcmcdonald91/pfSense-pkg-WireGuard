@@ -370,26 +370,27 @@ endif;
 
 <?php
 
-// We want a link to add a peer
-if ($is_new):
+// Cheat and show a disabled button for better user experience
+if (!$is_new):
 
 ?>
-	<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
+
+	<button class="btn btn-sm btn-success" title="<?=gettext('Add Peer')?>" disabled>
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
-	</a>
+	</button>
 
 <?php
 
-// Nowe we want to cheat and show a disabled button
+// Now show an actual link to add peers
 else:
 
 ?>
 
-	<button class="btn btn-sm btn-success" title="<?=gettext('Save tunnel')?>" disabled>
+	<a href="<?="vpn_wg_peers_edit.php?tunid={$$tun_id}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
-	</button>
+	</a>
 
 <?php
 
