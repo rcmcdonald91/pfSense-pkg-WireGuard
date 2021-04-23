@@ -86,7 +86,7 @@ $form->addGlobal(new Form_Input(
 $section->addInput(new Form_Input(
 	'descr',
 	'Description',
-	'text'
+	'text',
 	$peer['descr']
 ))->setHelp("Peer description");
 
