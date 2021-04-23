@@ -53,9 +53,11 @@ $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
 include("head.inc");
 
+// Check if the kernel module is loaded
 if (!is_module_loaded($wgg['kmod'])) {
 
-	print_info_box(gettext("The WireGuard kernel module is not loaded!"), 'danger');
+	// Warn the user if the kernel module is not loaded
+	print_info_box(gettext("The WireGuard kernel module is not loaded!"), 'danger', null);
 
 }
 
