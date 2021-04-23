@@ -56,6 +56,9 @@ function wg_status() {
 
 function formatBytes($size, $precision = 2)
 {
+    if (is_nan($size) || $size == 0)
+        return "-";
+
     $base = log($size, 1024);
     $suffixes = array('', 'K', 'M', 'G', 'T');   
 
