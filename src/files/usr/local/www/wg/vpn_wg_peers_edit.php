@@ -90,7 +90,7 @@ $section->addInput(new Form_Checkbox(
 	'Peer Enabled',
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
-))->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to an interface');
+))->setHelp('<span class="text-danger">Note: </span>Unset this option to disable this peer without removing it from the list.');
 
 $section->addInput(new Form_Input(
 	'descr',

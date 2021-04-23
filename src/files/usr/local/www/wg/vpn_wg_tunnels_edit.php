@@ -97,10 +97,18 @@ if ($_POST) {
 
 		}
 
-	} elseif ($_POST['action'] == 'genkeys') {
+	} elseif ($_POST['act'] == 'genkeys') {
 
 		// Process ajax call requesting new key pair
 		print(genKeyPair(true));
+
+		exit;
+
+	} elseif ($_POST['act'] == 'toggle') {
+
+		exit;
+		
+	} elseif ($_POST['act'] == 'delete') {
 
 		exit;
 
@@ -299,8 +307,9 @@ print($form);
 				<tr>
 					<th><?=gettext("Peer")?></th>
 					<th><?=gettext("Description")?></th>
-					<th><?=gettext("Endpoint")?></th>
-					<th><?=gettext("Port")?></th>
+					<th><?=gettext("Peer Address")?><th>
+					<th><?=gettext("Allowed IPs")?></th>
+					<th><?=gettext("Endpoint : Port")?></th>
 					<th><?=gettext("Public key")?></th>
 					<th>Actions</th>
 
@@ -321,9 +330,10 @@ print($form);
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>';" class="<?=$entryStatus?>">
 					<td><?=$peer_id?></td>
 					<td><?=htmlspecialchars($peer['descr'])?></td>
-					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=htmlspecialchars($peer['port'])?></td>
-					<td><?=htmlspecialchars($peer['publickey'])?></td>
+					<td><?=htmlspecialchars($peer['peerwgaddr'])?></td>
+					<td><?=htmlspecialchars($peer['allowedips'])?></td>
+					<td><?=htmlspecialchars("{$peer['endpoint']} : {$peer['port']})?></td>
+					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>"></a>
 						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$tun_id}&peerid={$peer_id}"?>" usepost></a>
@@ -341,10 +351,10 @@ print($form);
 </div>
 
 <nav class="action-buttons">
-	<button type="submit" id="editpeer_new" class="btn btn-sm btn-success" title="<?=gettext('Add new peer')?>">
+	<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
-		<?=gettext("Add peer")?>
-	</button>
+		<?=gettext("Add Peer")?>
+	</a>
 
 	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
@@ -375,7 +385,7 @@ events.push(function() {
 				{
 				type: 'post',
 				data: {
-					action: 'genkeys'
+					act: 'genkeys'
 				},
 				success: function(response, textStatus, jqXHR) {
 					resp = JSON.parse(response);
