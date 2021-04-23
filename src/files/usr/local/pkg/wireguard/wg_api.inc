@@ -37,11 +37,66 @@ function wg_status() {
 	global $wgg;
 
 	$status = array();
-	exec("{$wgg['wg']} show", $status);
+	exec("{$wgg['wg']} show all dump", $output);
 
-	$output = implode("\n", $status);
-	return htmlspecialchars($output);
+	// If dump is specified, then several lines are printed; the first contains in order separated by tab: 
+	// private-key, public-key, listen-port, fwmark. 
+	// Subsequent lines are printed for each peer and contain in order separated by tab: 
+	// public-key, preshared-key, endpoint, allowed-ips, latest-handshake, transfer-rx, transfer-tx, persistent-keepalive.
 
+
+	foreach ($output as $key => $info) {
+		$output[$key] = explode("\t", htmlspecialchars($info));
+	}
+
+	return $output;
+
+
+}
+
+function formatBytes($size, $precision = 2)
+{
+    $base = log($size, 1024);
+    $suffixes = array('', 'K', 'M', 'G', 'T');   
+
+    return round(pow(1024, $base - floor($base)), $precision) .' '. $suffixes[floor($base)];
+}
+
+
+function humanTiming ($time)
+{
+
+    $time = time() - $time; // to get the time since that moment
+    $time = ($time<1)? 1 : $time;
+    $tokens = array (
+        31536000 => 'year',
+        2592000 => 'month',
+        604800 => 'week',
+        86400 => 'day',
+        3600 => 'hour',
+        60 => 'minute',
+        1 => 'second'
+    );
+
+    foreach ($tokens as $unit => $text) {
+        if ($time < $unit) continue;
+        $numberOfUnits = floor($time / $unit);
+        return $numberOfUnits.' '.$text.(($numberOfUnits>1)?'s':'');
+    }
+
+}
+
+function get_peer_name($publickey) {
+
+global $wgg;
+	foreach ($wgg['tunnels'] as $tunnel) {
+		foreach ($tunnel['peers']['wgpeer'] as $peer) {
+				if ($publickey == $peer['publickey']) {
+					$retval = $peer['descr'];
+					return $retval;
+				}	
+		}
+	}
 }
 
 // Get WireGuard interface status
@@ -194,39 +249,6 @@ function next_wg_port() {
 	}
 
 	return $wgg['default_port'];
-
-}
-
-// Returns the array index of the given tunnel in the config, this isn't necessarily the interface number
-function wg_get_tunnel_id($tunnel) {
-	global $config, $wgg;
-
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
-
-	}
-
-	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
-
-		foreach ($wgg['tunnels'] as $index => $tunnel) {
-
-			if ($tunnel['name'] == $wg_ifname) {
-				
-				return $index;
-
-			}
-
-		}
-
-	}
-
-	return -1;
 
 }
 

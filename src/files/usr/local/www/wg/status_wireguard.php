@@ -47,7 +47,7 @@ $pgtitle = array(gettext("Status"), "WireGuard");
 $pglinks = array("", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
@@ -70,9 +70,73 @@ display_top_tabs($tab_array);
 		<h2 class="panel-title">Connection Status</h2>
 	</div>
 	<div class="panel-body">
-		<dl class="dl-horizontal">
-			<pre><?=wg_status(); ?></pre>
-		</dl>
+	<table class="table table-hover table-striped table-condensed">
+<?php
+
+$a_packages = wg_status();
+foreach ($a_packages as $package):
+?>
+
+<? if ( $package[0] != $last_device) { 
+	$new_device = true;
+	$last_device = $package[0];
+	?>
+
+			<thead>
+					<th>Interface</th>
+					<th colspan=2>Public Key</th>
+					<th colspan=5>Port</th>
+			</thead>
+			<tbody>	
+			<tr>
+					<td><?=$package[0];?></td>
+					<td colspan=2><?=$package[2];?></td>
+					<td colspan=5><?=$package[3];?></td>
+			<tr>
+
+<? 
+	} else {
+		if ($new_device) { ?>
+		
+			<tr>
+				<th>Peer</th>
+				<th width="200">Public Key(12)</th>
+				<th>Endpoint</th>
+				<th>Allowed IPs</th>
+				<th>Last HS</th>
+				<th>TX</th>
+				<th>RX</th>
+				<th>KA</th>
+			</tr>
+
+			
+		<?
+				$new_device = false;
+		
+				}
+		?>
+
+				<tr>
+        				<td><?=get_peer_name($package[1])?></td>
+    					<td><? if (strlen($package[1]) >12) {     echo substr($package[1], 0, 12)."..";  } else  {     echo $package[1]; }?></td>
+						<td><?=$package[3]?> </td>
+        				<td><?=$package[4]?></td>
+    					<td><?=humanTiming($package[5])?></td>
+						<td><?=formatBytes($package[6])?></td>
+						<td><?=formatBytes($package[7])?></td>
+						<td><?=$package[8]?></td>
+				</tr>
+				</tbody>
+
+<?	}
+
+?>
+
+<?php
+		
+			endforeach;
+?>
+		</table>
     </div>
 </div>
 
