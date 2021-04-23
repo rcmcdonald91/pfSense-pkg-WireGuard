@@ -149,7 +149,7 @@ display_top_tabs($tab_array);
 			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_edit.php?id=<?=$i?>';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?id=<?=$i?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
@@ -158,7 +158,7 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_edit.php?id={$i}"?>"></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?id={$i}"?>"></a>
 							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&id={$i}"?>" usepost></a>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&id={$i}"?>" usepost></a>
 						</td>
@@ -228,7 +228,7 @@ display_top_tabs($tab_array);
 			<?=gettext("Show peers")?>
 		</a>
 
-		<a href="vpn_wg_edit.php" class="btn btn-success btn-sm">
+		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>
 			<?=gettext("Add Tunnel")?>
 		</a>
