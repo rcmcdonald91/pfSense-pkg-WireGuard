@@ -301,7 +301,7 @@ print($form);
 
 if ($is_new):
 
-	print_info_box("New tunnels must be saved before adding peers", 'warning', null);
+	print_info_box("New tunnels must be saved before adding peers.", 'warning', null);
 
 else:
 
@@ -367,10 +367,35 @@ endif;
 ?>
 
 <nav class="action-buttons">
+
+<?php
+
+// We want a link to add a peer
+if ($is_new):
+
+?>
 	<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</a>
+
+<?php
+
+// Nowe we want to cheat and show a disabled button
+else:
+
+?>
+
+	<button class="btn btn-sm btn-success" title="<?=gettext('Save tunnel')?>" disabled>
+		<i class="fa fa-plus icon-embed-btn"></i>
+		<?=gettext("Add Peer")?>
+	</button>
+
+<?php
+
+endif;
+
+?>
 
 	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
@@ -392,7 +417,7 @@ events.push(function() {
 	});
 
 	// These are action buttons, not submit buttons
-	$("#genkeys").prop('type' ,'button');
+	$("#genkeys").prop('type', 'button');
 
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
