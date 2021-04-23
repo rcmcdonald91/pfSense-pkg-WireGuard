@@ -356,7 +356,6 @@ else:
 <?php
 			endforeach;
 		endif;
-	endif;
 ?>
 			</tbody>
 		</table>
