@@ -52,11 +52,13 @@ if (is_numericint($_REQUEST['tunid']) && is_numericint($_REQUEST['peerid'])) {
 
 	$peer = $tunnel['peers']['wgpeer'][$peer_id];
 
+	$pconfig = $peer;
+
 }
 
 $shortcut_section = "wireguard";
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), $tunnel['name'], "Peer {$peerid} ({$peer['descr']})");
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), $tunnel['name'], "Peer {$peer_id} ({$peer['descr']})");
 $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels_edit.php?id={$tun_id}", "@self");
 
 $tab_array = array();
@@ -74,7 +76,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section("Peer Configuration (PEER)");
+$section = new Form_Section("Peer Configuration ({$peer['descr']})");
 
 $form->addGlobal(new Form_Input(
 	'peer_id',
@@ -83,33 +85,45 @@ $form->addGlobal(new Form_Input(
 	$peer_id
 ));
 
+$section->addInput(new Form_Checkbox(
+	'enabled',
+	'Peer Enabled',
+	gettext('Enable'),
+	$pconfig['enabled'] == 'yes'
+))->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to an interface');
+
 $section->addInput(new Form_Input(
 	'descr',
 	'Description',
 	'text',
-	$peer['descr']
-))->setHelp("Peer description");
+	$pconfig['descr']
+))->setHelp("Peer description for administrative reference (not parsed)");
 
-$section->addInput(new Form_Input(
+$group = new Form_Group('Endpoint');
+
+$group->add(new Form_Input(
 	'endpoint',
 	'Endpoint',
 	'text',
-	$peer['endpoint']
+	$pconfig['endpoint']
 ))->setHelp('Hostname, IPv4, or IPv6 address of this peer.%1$s ' .
 		'Leave blank if unknown (dynamic endpoints).', '<br />');
 
-$section->addInput(new Form_Input(
+
+$group->add(new Form_Input(
 	'port',
 	'Endpoint Port',
 	'text',
-	$peer['port']
+	$pconfig['port']
 ))->setHelp('Port used by this peer. Ignored for dynamic endpoints. Leave blank for default (51820).');
+
+$section->add($group);
 
 $section->addInput(new Form_Input(
 	'persistentkeepalive',
 	'Keep Alive',
 	'text',
-	$peer['persistentkeepalive']
+	$pconfig['persistentkeepalive']
 ))->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer. ' .
 		'Default is empty (disabled).', '<br />');
 
@@ -117,14 +131,14 @@ $section->addInput(new Form_Input(
 	'publickey',
 	'*Public Key',
 	'text',
-	$peer['publickey']
+	$pconfig['publickey']
 ))->setHelp('WireGuard Public Key for this peer.');
 
 $section->addInput(new Form_Input(
 	'allowedips',
 	'Allowed IPs',
 	'text',
-	$peer['allowedips']
+	$pconfig['allowedips']
 ))->setHelp('List of CIDR-masked IPv4 and IPv6 subnets reached via this peer.%1$s ' .
 		'Routes for these subnets are automatically added to the routing table, except for default routes.', '<br/>');
 
@@ -132,7 +146,7 @@ $section->addInput(new Form_Input(
 	'peerwgaddr',
 	'Peer Address',
 	'text',
-	$peer['peerwgaddr']
+	$pconfig['peerwgaddr']
 ))->setHelp('Peer IPv4/IPv6 tunnel interface addresses (comma separated) since they can differ from Allowed IPs.', '<br/>');
 
 $group = new Form_Group('Pre-shared Key');
@@ -141,7 +155,7 @@ $group->add(new Form_Input(
 	'presharedkey',
 	'Pre-shared Key',
 	$secrets_input_type,
-	$peer['presharedkey']
+	$pconfig['presharedkey']
 ))->setHelp('Optional Pre-shared Key for this peer.%1$s ' .
 		'Mixes symmetric-key cryptography into public-key cryptography for post-quantum resistance.', '<br/>');
 
