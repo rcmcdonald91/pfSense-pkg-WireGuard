@@ -90,18 +90,18 @@ function wg_destroy_if($tunnel, $verbose = false) {
 
 }
 
-function wg_toggle_tunnel($tunidx) {
+function wg_toggle_tunnel($tun_id) {
 	global $wgg;
 
 	// Make sure we have the latest info
 	wg_globals();
 
 	// Make sure we have a tunnel
-	if (isset($wgg['tunnels'][$tunidx])) {
+	if (isset($wgg['tunnels'][$tun_id])) {
 
-		$wgg['tunnels'][$tunidx]['enabled'] = ($wgg['tunnels'][$tunidx]['enabled'] == 'yes') ? 'no' : 'yes';
+		$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
 
-		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tunidx]['name']} toggled.");
+		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
 		
 		wg_globals();
 
@@ -109,7 +109,7 @@ function wg_toggle_tunnel($tunidx) {
 		
 		wg_ifgroup_install();
 
-		$tunnel = $wgg['tunnels'][$tunidx];
+		$tunnel = $wgg['tunnels'][$tun_id];
 
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
@@ -127,22 +127,22 @@ function wg_toggle_tunnel($tunidx) {
 
 }
 
-function wg_delete_tunnel($tunidx) {
+function wg_delete_tunnel($tun_id) {
 	global $config, $wgg;
 
 	wg_globals();
 
-	if (isset($wgg['tunnels'][$tunidx])) {
+	if (isset($wgg['tunnels'][$tun_id])) {
 
-		$tmp_tunnel = $wgg['tunnels'][$tunidx];
+		$tmp_tunnel = $wgg['tunnels'][$tun_id];
 
 		unset($ifname);
 
 		unset($conf_path);
 
-		if (isset($wgg['tunnels'][$tunidx]['name'])) {
+		if (isset($wgg['tunnels'][$tun_id]['name'])) {
 
-			$ifname = $wgg['tunnels'][$tunidx]['name'];
+			$ifname = $wgg['tunnels'][$tun_id]['name'];
 
 		}
 		
@@ -153,7 +153,7 @@ function wg_delete_tunnel($tunidx) {
 		}
 
 		// Delete the tunnel configuration entry
-		unset($wgg['tunnels'][$tunidx]);
+		unset($wgg['tunnels'][$tun_id]);
 
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tmp_tunnel['name']} deleted.");
 

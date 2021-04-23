@@ -52,33 +52,33 @@ include("head.inc");
 
 if ($_POST) {
 
-	if (array_key_exists('index', $_POST) && isset($wgg['tunnels'][$_POST['index']])) {
+	if (array_key_exists('id', $_POST) && isset($wgg['tunnels'][$_POST['id']])) {
 
-		$index = $_POST['index'];
+		$tun_id = $_POST['id'];
 
-		if ($_POST['action'] == 'toggle') {
+		if ($_POST['act'] == 'toggle') {
 
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$index]['name'])) {
+			if (is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
 			
 				$input_errors[] = gettext('Cannot toggle a WireGuard tunnel while it is assigned as an interface.');
 
 			} else {
 
-				wg_toggle_tunnel($index);
-				
+				wg_toggle_tunnel($tun_id);
+
 				header("Location: /wg/vpn_wg.php");
 
 			}
 
-		} elseif ($_POST['action'] == 'delete') { 
+		} elseif ($_POST['act'] == 'delete') { 
 
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$index]['name'])) {
+			if (is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
 		
 				$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
 		
 			} else {
 		
-				wg_delete_tunnel($index);
+				wg_delete_tunnel($tun_id);
 		
 				header("Location: /wg/vpn_wg.php");
 		
@@ -149,7 +149,7 @@ display_top_tabs($tab_array);
 			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='vpn_wg_edit.php?id=<?=$i?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
@@ -158,9 +158,9 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit tunnel")?>"></a>
-							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?index={$i}&action=delete"?>" usepost></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_edit.php?id={$i}"?>"></a>
+							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&id={$i}"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&id={$i}"?>" usepost></a>
 						</td>
 					</tr>
 
