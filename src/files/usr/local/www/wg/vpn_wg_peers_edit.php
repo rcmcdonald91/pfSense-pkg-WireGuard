@@ -45,7 +45,7 @@ if (is_numericint($_REQUEST['tunid']) && is_numericint($_REQUEST['peerid'])) {
 
 	$tun_id = $_REQUEST['tunid'];
 
-	$peer_id = $_REQEST['peerid'];
+	$peer_id = $_REQUEST['peerid'];
 
 	
 	$tunnel = $wgg['tunnels'][$tun_id];
