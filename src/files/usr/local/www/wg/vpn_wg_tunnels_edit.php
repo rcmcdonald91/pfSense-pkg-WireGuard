@@ -299,6 +299,12 @@ $form->add($section);
 
 print($form);
 
+if ($is_new):
+
+	print_info_box("New tunnels must be saved before adding peers", 'warning', null);
+
+else:
+
 ?>
 
 <div class="panel panel-default">
@@ -322,12 +328,6 @@ print($form);
 			</thead>
 			<tbody>
 <?php
-
-	if ($is_new):
-
-		print_info_box("New tunnels must be saved before adding peers", 'warning', null);
-
-	else:
 
 		if (!empty($pconfig['peers']['wgpeer'])):
 
@@ -362,6 +362,10 @@ print($form);
 		</table>
 	</div>
 </div>
+
+<?php
+endif;
+?>
 
 <nav class="action-buttons">
 	<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
