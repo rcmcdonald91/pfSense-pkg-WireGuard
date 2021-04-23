@@ -39,7 +39,7 @@ global $wgg;
 
 wg_globals();
 
-// Assume we are making a new tunnel
+// Let's assume we are making a new tunnel
 $is_new = true;
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
@@ -95,8 +95,7 @@ if ($_POST) {
 
 			}
 
-			// Go back to the tunnel table
-			header("Location: /wg/vpn_wg.php");
+			header("Location: /wg/vpn_wg_tunnels_edit.php?tunid={$tun_id}");
 
 		}
 
@@ -168,6 +167,13 @@ $form->addGlobal(new Form_Input(
 	'',
 	'hidden',
 	$tun_id
+));
+
+$form->addGlobal(new Form_Input(
+	'save',
+	'',
+	'hidden',
+	'save'
 ));
 
 $tun_enable = new Form_Checkbox(
@@ -437,6 +443,12 @@ events.push(function() {
 			});
 		}
 	});
+
+	// Save the form
+	$('#saveform').click(function () {
+		$(form).submit();
+	});
+
 
 });
 //]]>
