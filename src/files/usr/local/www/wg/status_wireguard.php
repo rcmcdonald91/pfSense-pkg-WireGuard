@@ -31,9 +31,15 @@
 require_once('guiconfig.inc');
 require_once('functions.inc');
 require_once('shortcuts.inc');
+require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg.inc');
+
+// Grab the latest info
+wg_globals();
+
+global $wgg;
 
 $shortcut_section = "wireguard";
 
@@ -46,6 +52,12 @@ $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
 include("head.inc");
+
+if (!is_module_loaded($wgg['kmod'])) {
+
+	print_info_box(gettext("The WireGuard kernel module is not loaded!"), 'danger');
+
+}
 
 display_top_tabs($tab_array);
 
@@ -107,17 +119,6 @@ display_top_tabs($tab_array);
 			</tbody>
 		</table>
 	</div>
-</div>
-
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title">Kernel Module Status</h2>
-	</div>
-	<div class="panel-body">
-		<dl class="dl-horizontal">
-			<pre><?=wg_kmod_status(); ?></pre>
-		</dl>
-    </div>
 </div>
 
 <?php include("foot.inc"); ?>
