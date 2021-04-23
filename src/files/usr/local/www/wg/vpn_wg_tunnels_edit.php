@@ -39,6 +39,9 @@ global $wgg;
 
 wg_globals();
 
+// Assume we are making a new tunnel
+$is_new = true;
+
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
 if (is_numericint($_REQUEST['tunid'])) {
@@ -116,15 +119,16 @@ if ($_POST) {
 
 } else {
 
-	if (isset($tun_id)) {
+	if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 
-		if (is_array($wgg['tunnels'][$tun_id])) {
+		// Looks like we are editing an existing tunnel
+		$pconfig = &$wgg['tunnels'][$tun_id];
 
-			$pconfig = &$wgg['tunnels'][$tun_id];
-		}
+		$is_new = false;
 
 	} else {
 
+		// We are creating a new tunnel
 		$pconfig = array();
 
 		$pconfig['name'] = next_wg_if();
@@ -319,6 +323,12 @@ print($form);
 			<tbody>
 <?php
 
+	if ($is_new):
+
+		print_info_box("New tunnels must be saved before adding peers", 'warning', null);
+
+	elseif:
+
 		if (!empty($pconfig['peers']['wgpeer'])):
 
 			foreach ($pconfig['peers']['wgpeer'] as $peer_id => $peer):
@@ -346,6 +356,7 @@ print($form);
 <?php
 			endforeach;
 		endif;
+	endif;
 ?>
 			</tbody>
 		</table>
