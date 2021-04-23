@@ -68,7 +68,9 @@ function formatBytes($size, $precision = 2)
 
 function humanTiming ($time)
 {
-
+	if ($time == 0)
+		return "never";
+		
     $time = time() - $time; // to get the time since that moment
     $time = ($time<1)? 1 : $time;
     $tokens = array (
