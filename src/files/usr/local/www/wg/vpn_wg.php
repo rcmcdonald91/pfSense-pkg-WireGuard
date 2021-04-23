@@ -78,7 +78,7 @@ if ($_POST) {
 		
 			} else {
 		
-				wg_delete_tunnel($index]);
+				wg_delete_tunnel($index);
 		
 				header("Location: /wg/vpn_wg.php");
 		
