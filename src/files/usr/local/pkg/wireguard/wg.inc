@@ -101,7 +101,9 @@ function wg_toggle_tunnel($tunidx) {
 
 		$wgg['tunnels'][$tunidx]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
 
-		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tunidx]['name']} toggled.");		
+		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tunidx]['name']} toggled.");
+		
+		wg_globals();
 
 		wg_create_config_files();
 		
