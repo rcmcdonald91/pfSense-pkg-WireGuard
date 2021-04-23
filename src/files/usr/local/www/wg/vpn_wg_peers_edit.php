@@ -41,6 +41,12 @@ wg_globals();
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
+if (isset($_REQUEST['tun'])) {
+
+	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
+
+}
+
 // All form save logic is in /etc/inc/wg.inc
 if ($_POST) {
 
@@ -51,10 +57,6 @@ if ($_POST) {
 } else {
 
 	if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
-
-		if (isset($peer_id) && is_array($wgg['tunnels'][$tun_id['peers']['wgpeer'][$peer_id]]))
-
-		$tunnel = $wgg['tunnels'][$tun_id];
 
 		// Looks like we are editing an existing peer 
 		$pconfig = &$wgg['tunnels'][$tun_id]['peers']['wgpeer'][$peer_id];
