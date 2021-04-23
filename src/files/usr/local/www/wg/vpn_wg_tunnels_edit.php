@@ -52,7 +52,7 @@ if (isset($_REQUEST['tun'])) {
 // All form save logic is in /etc/inc/wg.inc
 if ($_POST) {
 
-	if ($_POST['save']) {
+	if ($_POST['act'] == 'save') {
 
 		if (empty($_POST['listenport'])) {
 
@@ -90,19 +90,6 @@ if ($_POST) {
 
 			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$pconfig['name']}");
-
-		} else {
-
-			$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
-
-			if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
-
-				// Looks like we are editing an existing tunnel
-				$pconfig = &$wgg['tunnels'][$tun_id];
-
-				$is_new = false;
-
-			}
 
 		}
 
@@ -175,10 +162,10 @@ $form = new Form(false);
 $section = new Form_Section("Tunnel Configuration ({$pconfig['name']})");
 
 $form->addGlobal(new Form_Input(
-	'save',
+	'index',
 	'',
 	'hidden',
-	'save'
+	$tun_id
 ));
 
 $tun_enable = new Form_Checkbox(
@@ -305,6 +292,13 @@ $form->addGlobal(new Form_Input(
 	'',
 	'hidden',
 	$pconfig['mtu']
+));
+
+$form->addGlobal(new Form_Input(
+	'act',
+	'',
+	'hidden',
+	'save'
 ));
 
 $form->add($section);
