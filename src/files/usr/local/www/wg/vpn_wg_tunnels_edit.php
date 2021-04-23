@@ -327,7 +327,7 @@ print($form);
 
 		print_info_box("New tunnels must be saved before adding peers", 'warning', null);
 
-	elseif:
+	else:
 
 		if (!empty($pconfig['peers']['wgpeer'])):
 
