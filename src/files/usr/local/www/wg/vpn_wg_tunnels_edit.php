@@ -45,9 +45,9 @@ $save_success = false;
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
-if (is_numericint($_REQUEST['tunid'])) {
+if (isset($_REQUEST['tun'])) {
 
-	$tun_id = $_REQUEST['tunid'];
+	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
 
 }
 
@@ -58,6 +58,7 @@ if ($_POST) {
 
 		if (empty($_POST['listenport'])) {
 
+			// Default to the next available port
 			$_POST['listenport'] = next_wg_port();
 
 		}
@@ -94,7 +95,7 @@ if ($_POST) {
 			$pconfig = &$wgg['tunnels'][$tun_id];
 
 			$is_new = false;
-			
+
 			$save_success = true;
 
 		}
@@ -129,6 +130,9 @@ if ($_POST) {
 
 		// We are creating a new tunnel
 		$pconfig = array();
+
+		// Default to enabled
+		$pconfig['enabled'] = 'yes';
 
 		$pconfig['name'] = next_wg_if();
 
@@ -381,7 +385,7 @@ endif;
 
 <?php
 
-// We cheat here and show a disabled button for better user experience
+// We cheat here and show a disabled button for a better user experience
 if ($is_new):
 
 ?>
@@ -393,7 +397,7 @@ if ($is_new):
 
 <?php
 
-// Now we show an actual link to add peers once the tunnel is saved
+// Now we show an actual link to add peer once the tunnel is actually saved
 else:
 
 ?>
@@ -453,7 +457,6 @@ events.push(function() {
 	$('#saveform').click(function () {
 		$(form).submit();
 	});
-
 
 });
 //]]>

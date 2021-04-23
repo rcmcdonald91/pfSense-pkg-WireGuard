@@ -41,19 +41,32 @@ wg_globals();
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
-if (is_numericint($_REQUEST['tunid']) && is_numericint($_REQUEST['peerid'])) {
+// All form save logic is in /etc/inc/wg.inc
+if ($_POST) {
 
-	$tun_id = $_REQUEST['tunid'];
+	if ($_POST['save']) {
 
-	$peer_id = $_REQUEST['peerid'];
+	}
+
+} else {
+
+	if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+
+		if (isset($peer_id) && is_array($wgg['tunnels'][$tun_id['peers']['wgpeer'][$peer_id]]))
+
+		$tunnel = $wgg['tunnels'][$tun_id];
+
+		// Looks like we are editing an existing peer 
+		$pconfig = &$wgg['tunnels'][$tun_id]['peers']['wgpeer'][$peer_id];
+
+	} else {
+
+		// We are creating a new peer
+		$pconfig = array();
+
+	}
 
 	
-	$tunnel = $wgg['tunnels'][$tun_id];
-
-	$peer = $tunnel['peers']['wgpeer'][$peer_id];
-
-	$pconfig = $peer;
-
 }
 
 $shortcut_section = "wireguard";

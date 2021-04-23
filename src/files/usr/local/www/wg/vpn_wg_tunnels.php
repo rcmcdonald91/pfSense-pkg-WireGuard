@@ -40,9 +40,9 @@ wg_globals();
 
 if ($_POST) {
 
-	if (array_key_exists('tunid', $_POST) && isset($wgg['tunnels'][$_POST['tunid']])) {
+	if (isset($_POST['tun'])) {
 
-		$tun_id = $_POST['tunid'];
+		$tun_id = wg_get_tunnel_id($_POST['tun']);
 
 		if ($_POST['act'] == 'toggle') {
 
@@ -154,7 +154,7 @@ display_top_tabs($tab_array);
 			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tunid=<?=$tun_id?>';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
@@ -163,9 +163,9 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tunid={$tun_id}"?>"></a>
-							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$tun_id}"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tunid={$tun_id}"?>" usepost></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tun={$tunnel['name']}"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
 						</td>
 					</tr>
 
