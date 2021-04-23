@@ -64,10 +64,9 @@ if ($_POST) {
 
 			} else {
 
-				//wg_toggle_tunnel($index);
-
-				echo
-				//header("Location: /wg/vpn_wg.php");
+				wg_toggle_tunnel($index);
+				
+				header("Location: /wg/vpn_wg.php");
 
 			}
 

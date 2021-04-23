@@ -99,17 +99,19 @@ function wg_toggle_tunnel($tunidx) {
 	// Make sure we have a tunnel
 	if (isset($wgg['tunnels'][$tunidx])) {
 
-		$tunnel = $wgg['tunnels'][$tunidx];
-
 		$wgg['tunnels'][$tunidx]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
+
+		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tunidx]['name']} toggled.");		
 
 		wg_create_config_files();
 		
 		wg_ifgroup_install();
 
+		$tunnel = $wgg['tunnels'][$tunidx];
+
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			$conf_hard = (!is_wg_tunnel_assigned($p) || !does_interface_exist($tunnel['name']));
+			$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
 
 			wg_configure_if($tunnel, $conf_hard);
 
@@ -118,9 +120,6 @@ function wg_toggle_tunnel($tunidx) {
 			wg_destroy_if($tunnel);
 
 		}
-
-		// Go back to the tunnel table
-		header("Location: /wg/vpn_wg.php");
 
 	}
 
