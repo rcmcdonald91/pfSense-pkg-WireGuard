@@ -39,6 +39,8 @@ global $wgg;
 
 wg_globals();
 
+$is_new = true;
+
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
 if (isset($_REQUEST['tun'])) {
@@ -86,7 +88,21 @@ if ($_POST) {
 
 			}
 
+			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$pconfig['name']}");
+
+		} else {
+
+			$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
+
+			if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+
+				// Looks like we are editing an existing tunnel
+				$pconfig = &$wgg['tunnels'][$tun_id];
+
+				$is_new = false;
+
+			}
 
 		}
 
@@ -126,8 +142,6 @@ if ($_POST) {
 
 		$pconfig['name'] = next_wg_if();
 
-		$is_new = true;
-
 	}
 
 	// Save the MTU settings prior to re(saving)
@@ -148,7 +162,9 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 include("head.inc");
 
 if ($input_errors) {
+
 	print_input_errors($input_errors);
+
 }
 
 display_top_tabs($tab_array);
@@ -157,13 +173,6 @@ $form = new Form(false);
 
 // ============ Tunnel edit modal ==================================
 $section = new Form_Section("Tunnel Configuration ({$pconfig['name']})");
-
-$form->addGlobal(new Form_Input(
-	'index',
-	'',
-	'hidden',
-	$tun_id
-));
 
 $form->addGlobal(new Form_Input(
 	'save',
