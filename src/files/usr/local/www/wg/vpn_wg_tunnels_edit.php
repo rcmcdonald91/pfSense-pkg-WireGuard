@@ -91,6 +91,17 @@ if ($_POST) {
 			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$pconfig['name']}");
 
+		} else {
+
+			if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+
+				// Looks like we failed at editing an existing tunnel
+				$pconfig = &$wgg['tunnels'][$tun_id];
+		
+				$is_new = false;
+
+			}
+
 		}
 
 	} elseif ($_POST['act'] == 'genkeys') {
