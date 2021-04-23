@@ -39,10 +39,6 @@ global $wgg;
 
 wg_globals();
 
-$is_new = true;
-
-$save_success = false;
-
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
 if (isset($_REQUEST['tun'])) {
@@ -90,13 +86,7 @@ if ($_POST) {
 
 			}
 
-			$tun_id = wg_get_tunnel_id($pconfig['name']);
-
-			$pconfig = &$wgg['tunnels'][$tun_id];
-
-			$is_new = false;
-
-			$save_success = true;
+			header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$pconfig['name']}");
 
 		}
 
@@ -136,6 +126,8 @@ if ($_POST) {
 
 		$pconfig['name'] = next_wg_if();
 
+		$is_new = true;
+
 	}
 
 	// Save the MTU settings prior to re(saving)
@@ -154,10 +146,6 @@ $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
-
-if ($save_success) {
-	print_info_box(gettext("The changes have been applied successfully."), 'success');
-}
 
 if ($input_errors) {
 	print_input_errors($input_errors);
@@ -382,37 +370,25 @@ endif;
 ?>
 
 <nav class="action-buttons">
-
 <?php
-
 // We cheat here and show a disabled button for a better user experience
 if ($is_new):
-
 ?>
-
 	<button class="btn btn-sm btn-success" title="<?=gettext('Add Peer')?>" disabled>
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</button>
-
 <?php
-
-// Now we show an actual link to add peer once the tunnel is actually saved
+// Now we show the actual link to add peer once the tunnel is actually saved
 else:
-
 ?>
-
-	<a href="<?="vpn_wg_peers_edit.php?tunid={$tun_id}"?>" class="btn btn-success btn-sm">
+	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</a>
-
 <?php
-
 endif;
-
 ?>
-
 	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save")?>
