@@ -39,8 +39,9 @@ global $wgg;
 
 wg_globals();
 
-// Let's assume we are making a new tunnel
 $is_new = true;
+
+$save_success = false;
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
@@ -90,7 +91,11 @@ if ($_POST) {
 
 			$tun_id = wg_get_tunnel_id($pconfig['name']);
 
-			header("Location: /wg/vpn_wg_tunnels_edit.php?tunid={$tun_id}");
+			$pconfig = &$wgg['tunnels'][$tun_id];
+
+			$is_new = false;
+			
+			$save_success = true;
 
 		}
 
@@ -145,6 +150,10 @@ $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
+
+if ($save_success) {
+	print_info_box(gettext("The changes have been applied successfully."), 'success');
+}
 
 if ($input_errors) {
 	print_input_errors($input_errors);
