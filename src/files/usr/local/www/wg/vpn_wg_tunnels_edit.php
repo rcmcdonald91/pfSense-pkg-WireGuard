@@ -104,6 +104,8 @@ if ($_POST) {
 
 		exit;
 
+	}
+
 } else {
 
 	if (isset($tun_id)) {
@@ -285,103 +287,7 @@ $form->add($section);
 
 print($form);
 
-// ============ Peer edit modal ==================================
-$section2 = new Form_Section('Peer');
-
-$section2->addInput(new Form_Input(
-	'peer_num',
-	'',
-	'hidden'
-));
-
-$section2->addInput(new Form_Input(
-	'pdescr',
-	'Description',
-	'text'
-))->setHelp("Peer description");
-
-$section2->addInput(new Form_Input(
-	'endpoint',
-	'Endpoint',
-	'text'
-))->setHelp('Hostname, IPv4, or IPv6 address of this peer.%1$s ' .
-		'Leave blank if unknown (dynamic endpoints).', '<br />');
-
-$section2->addInput(new Form_Input(
-	'port',
-	'Endpoint Port',
-	'text'
-))->setHelp('Port used by this peer. Ignored for dynamic endpoints. Leave blank for default (51820).');
-
-$section2->addInput(new Form_Input(
-	'persistentkeepalive',
-	'Keep Alive',
-	'text'
-))->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer. ' .
-		'Default is empty (disabled).', '<br />');
-
-$section2->addInput(new Form_Input(
-	'ppublickey',
-	'*Public Key',
-	'text'
-))->setHelp('WireGuard Public Key for this peer.');
-
-$section2->addInput(new Form_Input(
-	'allowedips',
-	'Allowed IPs',
-	'text'
-))->setHelp('List of CIDR-masked IPv4 and IPv6 subnets reached via this peer.%1$s ' .
-		'Routes for these subnets are automatically added to the routing table, except for default routes.', '<br/>');
-
-$section2->addInput(new Form_Input(
-	'peerwgaddr',
-	'Peer Address',
-	'text'
-))->setHelp('Peer IPv4/IPv6 tunnel interface addresses (comma separated) since they can differ from Allowed IPs.', '<br/>');
-
-$group2 = new Form_Group('Pre-shared Key');
-
-$group2->add(new Form_Input(
-	'presharedkey',
-	'Pre-shared Key',
-	$secrets_input_type
-))->setHelp('Optional Pre-shared Key for this peer.%1$s ' .
-		'Mixes symmetric-key cryptography into public-key cryptography for post-quantum resistance.', '<br/>');
-
-$group2->add(new Form_Button(
-	'genpsk',
-	'Generate',
-	null,
-	'fa-key'
-))->addClass('btn-primary btn-xs')->setHelp('New PSK');
-
-$section2->add($group2);
-
 ?>
-
-<!-- Modal -->
-<div id="peermodal" class="modal fade" role="dialog" data-keyboard="false" data-backdrop="static">
-  <div class="modal-dialog modal-lg">
-
-	<!-- Modal content-->
-	<div class="modal-content">
-	<div class="modal-body">
-		<?=$section2?>
-
-		<nav class="action-buttons">
-			<button type="submit" id="closemodal" class="btn btn-sm btn-info" title="<?=gettext('Cancel')?>">
-				<?=gettext("Cancel")?>
-			</button>
-
-			<button type="submit" id="savemodal" class="btn btn-sm btn-primary" title="<?=gettext('Update peer')?>">
-				<?=gettext("Update")?>
-			</button>
-		</nav>
-	</div>
-	</div>
-
-  </div>
-</div>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
