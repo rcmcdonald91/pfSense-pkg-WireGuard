@@ -41,8 +41,8 @@ wg_globals();
 
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
-if (is_numericint($_REQUEST['id'])) {
-	$tun_id = $_REQUEST['id'];
+if (is_numericint($_REQUEST['tunid'])) {
+	$tun_id = $_REQUEST['tunid'];
 }
 
 if ($_REQUEST['ajax']) {
