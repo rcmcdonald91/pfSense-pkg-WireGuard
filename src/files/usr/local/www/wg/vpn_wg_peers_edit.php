@@ -45,12 +45,16 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
 
+	$tunnel = $wgg['tunnels'][$tun_id];
+
 }
 
 // All form save logic is in /etc/inc/wg.inc
 if ($_POST) {
 
 	if ($_POST['save']) {
+
+		echo("SAVED");
 
 	}
 
@@ -74,7 +78,7 @@ if ($_POST) {
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), $tunnel['name'], "Peer {$peer_id} ({$peer['descr']})");
-$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels_edit.php?id={$tun_id}", "@self");
+$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels_edit.php?tun={$tunnel['name']}", "@self");
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
@@ -121,16 +125,15 @@ $group->add(new Form_Input(
 	'Endpoint',
 	'text',
 	$pconfig['endpoint']
-))->setHelp('Hostname, IPv4, or IPv6 address of this peer.%1$s ' .
+))->setWidth(5)->setHelp('Hostname, IPv4, or IPv6 address of this peer.%1$s ' .
 		'Leave blank if unknown (dynamic endpoints).', '<br />');
-
 
 $group->add(new Form_Input(
 	'port',
 	'Endpoint Port',
 	'text',
 	$pconfig['port']
-))->setHelp('Port used by this peer. Ignored for dynamic endpoints. Leave blank for default (51820).');
+))->setWidth(2)->setHelp('Port used by this peer. Ignored for dynamic endpoints. Leave blank for default (51820).');
 
 $section->add($group);
 
