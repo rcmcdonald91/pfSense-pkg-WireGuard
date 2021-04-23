@@ -38,18 +38,6 @@ global $wgg;
 
 wg_globals();
 
-$shortcut_section = "wireguard";
-
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
-$pglinks = array("", "@self", "@self");
-
-$tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg.php");
-$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
-
-include("head.inc");
-
 if ($_POST) {
 
 	if (array_key_exists('id', $_POST) && isset($wgg['tunnels'][$_POST['id']])) {
@@ -89,6 +77,18 @@ if ($_POST) {
 	}
 
 }
+
+$shortcut_section = "wireguard";
+
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
+$pglinks = array("", "@self", "@self");
+
+$tab_array = array();
+$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
+$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
+
+include("head.inc");
 
 if ($input_errors) {
 	print_input_errors($input_errors);

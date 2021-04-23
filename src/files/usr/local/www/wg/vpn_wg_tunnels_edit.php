@@ -137,10 +137,10 @@ if ($_POST) {
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext($pconfig['name']));
-$pglinks = array("", "/wg/vpn_wg.php", "/wg/vpn_wg.php", "@self");
+$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg.php");
+$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
@@ -411,36 +411,29 @@ $section2->add($group2);
 
 				</tr>
 			</thead>
-
 			<tbody>
 <?php
 
-				$peer_num = 0;
+		if (!empty($pconfig['peers']['wgpeer'])):
 
-				if (!empty($pconfig['peers']['wgpeer'])) {
-					foreach ($pconfig['peers']['wgpeer'] as $peer) {
-						print('<tr id="peer_row_' . $peer_num . '" class="peer_group_' . $peer_num . '">');
-						print("<td>" . htmlspecialchars($peer_num) . "</td>\n");
-						print("<td>" . htmlspecialchars($peer['descr']) . "</td>\n");
-						print("<td>" . htmlspecialchars($peer['endpoint']) . "</td>\n");
-						print("<td>" . htmlspecialchars($peer['port']) . "</td>\n");
-						print("<td>" . htmlspecialchars($peer['publickey']) . "</td>\n");
+			foreach ($pconfig['peers']['wgpeer'] as $peer => $index):
 
-						// hidden columns
-						print("<td style=\"display:none;\">" . htmlspecialchars($peer['persistentkeepalive']) . "</td>\n");
-						print("<td style=\"display:none;\">" . htmlspecialchars($peer['allowedips']) . "</td>\n");
-						print("<td style=\"display:none;\">" . htmlspecialchars($peer['presharedkey']) . "</td>\n");
-						print("<td style=\"display:none;\">" . htmlspecialchars($peer['peerwgaddr']) . "</td>\n");
 ?>
-						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" href="#" id="editpeer_<?=$peer_num?>"title="<?=gettext("Edit peer"); ?>"></a>
-							<a class="fa fa-trash text-danger no-confirm" href="#" id="killpeer_<?=$peer_num?>" title="<?=gettext('Delete peer');?>"></a>
-						</td>
+				<tr>
+					<td><?=$index?></td>
+					<td><?=htmlspecialchars($peer['descr'])?></td>
+					<td><?=htmlspecialchars($peer['endpoint'])?></td>
+					<td><?=htmlspecialchars($peer['port'])?></td>
+					<td><?=htmlspecialchars($peer['publickey'])?></td>
+					<td style="cursor: pointer;">
+						<a class="fa fa-pencil" href="#" id="editpeer_<?=$index?>"title="<?=gettext("Edit peer"); ?>"></a>
+						<a class="fa fa-trash text-danger no-confirm" href="#" id="killpeer_<?=$index?>" title="<?=gettext('Delete peer');?>"></a>
+					</td>
+				</tr>
+
 <?php
-						print("</tr>");
-						$peer_num++;
-					}
-				}
+			endforeach;
+		endif;
 ?>
 			</tbody>
 		</table>
@@ -459,114 +452,12 @@ $section2->add($group2);
 	</button>
 </nav>
 
-<?php $jpconfig = json_encode($pconfig, JSON_HEX_APOS); ?>
-<?php $jwg_config = json_encode($wgg['config'], JSON_HEX_APOS); ?>
-
 <?php $genkeywarning = gettext("Are you sure you want to overwrite keys?"); ?>
 
 <!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
-	var pconfig = JSON.parse('<?=$jpconfig?>');
-	var wg_config = JSON.parse('<?=$jwg_config?>');
-
-	// Double-click handler for peer table
-	$('[id^=peer_row_]').dblclick(function() {
-		var peernum = this.id.slice('peer_row_'.length);
-		editPeer(peernum);
-	});
-
-	// Eliminate ghost lines in modal
-	$('.form-group').css({"border-bottom-width" : "0"});
-
-	// Return text from peer table cell
-	function tabletext (row, col) {
-		row++; col++;
-		return $('#peertable tr:nth-child(' + row + ') td:nth-child('+ col + ')').text();
-	}
-
-	$('#addpeer').click(function () {
-		$('#peermodal').modal('show');
-		incrementPeer($('#address').val());
-	});
-
-	$('#closemodal').click(function () {
-		$('#peermodal').modal('hide');
-	});
-
-	$('#savemodal').click(function () {
-		var errmsg = [];
-
-		if ($('#ppublickey').val().length === 0) {
-			errmsg.push("A public key is required");
-		}
-
-		if (errmsg.length > 0) {
-			var errstr = "";
-
-			for(var i=0; i<errmsg.length; i++) {
-				errstr += (errmsg[i] + "\n");
-			}
-
-			alert(errstr);
-			return;
-		}
-
-		var peernum = $('#peer_num').val();
-
-		if (peernum == 'new') {
-			if ($('#peertable tbody').find('tr').length === 0) { // Now entries
-				peernum = 0;
-				$('#peer_num').val(0);
-
-				$('#peertable tbody').append('<tr class="peer_group_' + peernum + '"> <td></td> <td></td> <td></td> <td></td> <td></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="cursor: pointer;"><a class="fa fa-pencil" href="#" id="editpeer_' + peernum + '"title="<?=gettext("Edit peer"); ?>"></a> <a class="fa fa-trash text-danger no-confirm" href="#" id="killpeer_' + peernum + '" title="<?=gettext('Delete peer');?>"></a></td> </tr>');
-			} else {
-				var lastrow = $('#peertable tr:last td:nth-child(1)').text()
-
-				$('#peer_num').val(++lastrow)
-				peernum = lastrow
-
-				$('#peertable tr:last').after('<tr class="peer_group_' + peernum + '"> <td></td> <td></td> <td></td> <td></td> <td></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="display:none;"></td> <td style="display:none;"></td><td style="cursor: pointer;"><a class="fa fa-pencil" href="#" id="editpeer_' + peernum + '"title="<?=gettext("Edit peer"); ?>"></a> <a class="fa fa-trash text-danger no-confirm" href="#" id="killpeer_' + peernum + '" title="<?=gettext('Delete peer');?>"></a></td> </tr>');
-			}
-
-			attachhandlers()
-
-		}
-
-		$('.peer_group_' + peernum).find('td').eq(0).text(peernum)
-		$('.peer_group_' + peernum).find('td').eq(1).text($('#pdescr').val())
-		$('.peer_group_' + peernum).find('td').eq(2).text($('#endpoint').val())
-		$('.peer_group_' + peernum).find('td').eq(3).text($('#port').val())
-		$('.peer_group_' + peernum).find('td').eq(4).text($('#ppublickey').val())
-		$('.peer_group_' + peernum).find('td').eq(5).text($('#persistentkeepalive').val())
-		$('.peer_group_' + peernum).find('td').eq(6).text($('#allowedips').val())
-		$('.peer_group_' + peernum).find('td').eq(7).text($('#presharedkey').val())
-		$('.peer_group_' + peernum).find('td').eq(8).text($('#peerwgaddr').val())
-
-		$('#peermodal').modal('hide');
-	});
-
-	// Save the form
-	$('#saveform').click(function () {
-		// For each row in the peers table, construct an array of inputs with the values from the row
-		$('#peertable > tbody').find('tr').each(function (idx) {
-			$('<input>').attr({type: 'hidden',name: 'descp[]', value: $(this).find('td').eq(1).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'endpoint[]', value: $(this).find('td').eq(2).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'port[]', value: $(this).find('td').eq(3).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'publickeyp[]', value: $(this).find('td').eq(4).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'persistentkeepalive[]', value: $(this).find('td').eq(5).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'allowedips[]', value: $(this).find('td').eq(6).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'presharedkey[]', value: $(this).find('td').eq(7).text()}).appendTo(form);
-			$('<input>').attr({type: 'hidden',name: 'peerwgaddr[]', value: $(this).find('td').eq(8).text()}).appendTo(form);
-		});
-
-		$('<input>').attr({type: 'hidden',name: 'save',value: 'save'}).appendTo(form);
-
-		// Recalculate the table hash so the browser doesn't intercept the save
-		tableHash = hashCode($('#peertable').html());
-		$(form).submit();
-	});
 
 	$('#copypubkey').click(function () {
 		$('#publickey').focus();
@@ -574,81 +465,13 @@ events.push(function() {
 		document.execCommand("copy");
 	});
 
-	attachhandlers()
-
-	function attachhandlers() {
-		// Delete a peer
-		$('[id^=killpeer_]').click(function () {
-			var row = this.id.slice('killpeer_'.length)
-			if (confirm('Are you sure you want to delete peer ' + row + '?')) {
-				var target = '.peer_group_' + row
-				$(target).remove();
-			}
-		});
-
-		// Edit peer - Copy a row from the table to the edit form
-		$('[id^=editpeer_]').click(function () {
-			var peernum = this.id.slice('editpeer_'.length);
-			editPeer(peernum);
-		});
-	}
-
-	function editPeer(peernum) {
-		$('#peer_num').val(peernum);
-
-		// peer -1 means creating a new peer
-		if (peernum != "new") {
-			$('#pdescr').val(tabletext(peernum, 1));
-			$('#endpoint').val(tabletext(peernum, 2));
-			$('#port').val(tabletext(peernum, 3));
-			$('#ppublickey').val(tabletext(peernum, 4));
-			$('#persistentkeepalive').val(tabletext(peernum, 5));
-			$('#allowedips').val(tabletext(peernum, 6));
-			$('#presharedkey').val(tabletext(peernum, 7));
-			$('#peerwgaddr').val(tabletext(peernum, 8));
-		} else { // Clear all the fields
-			$('#pdescr').val("");
-			$('#endpoint').val("");
-			$('#port').val('');
-			$('#persistentkeepalive').val('');
-			$('#ppublickey').val('');
-			$('#allowedips').val('');
-			$('#presharedkey').val('');
-			$('#peerwgaddr').val('');
-		}
-
-		$('#peermodal').modal('show');
-	}
-
 	// These are action buttons, not submit buttons
-	$('#genpsk').prop('type','button');
 	$("#genkeys").prop('type' ,'button');
-	$("#savemodal").prop('type' ,'button');
-
-	$('#genpsk').click(function () {
-		ajaxRequest = $.ajax(
-			{
-				url: "/wg/vpn_wg_edit.php",
-				type: "post",
-				data: {
-					ajax: 	"ajax",
-					action: "genpsk"
-				}
-			}
-		);
-
-		// Deal with the results of the above ajax call
-		ajaxRequest.done(function (response, textStatus, jqXHR) {
-			if (response.length > 0) {
-				$('#presharedkey').val(response);
-			}
-		});
-	});
 
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
 		if ($('#privatekey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
-			ajaxRequest = $.ajax('/wg/vpn_wg_edit.php',
+			ajaxRequest = $.ajax('/wg/vpn_wg_tunnels_edit.php',
 				{
 				type: 'post',
 				data: {
@@ -656,7 +479,6 @@ events.push(function() {
 				},
 				success: function(response, textStatus, jqXHR) {
 					resp = JSON.parse(response);
-					// console.log(response);
 					$('#publickey').val(resp.pubkey);
 					$('#privatekey').val(resp.privkey);
 				}
@@ -664,22 +486,6 @@ events.push(function() {
 		}
 	});
 
-	// Warn the user if the peer table has been updated, but the form has not yet been saved ----------------------------
-	// Save the table state on page load
-	var tableHash = hashCode($('#peertable').html());
-
-	window.addEventListener('beforeunload', (event) => {
-		// If the table has changed since page load . .
-		if (hashCode($('#peertable').html()) !== tableHash) {
-			// Cause the browser to display "Are you sure" message)
-			// Unfortunately it is no longer possible to customize the browser message
-			event.returnValue = '';
-		}
-	});
-
-	function hashCode(s){
-		return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
-	}
 });
 //]]>
 </script>
