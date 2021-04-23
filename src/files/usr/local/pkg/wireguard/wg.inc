@@ -97,7 +97,7 @@ function wg_toggle_tunnel($tunidx) {
 	wg_globals();
 
 	// Make sure we have a tunnel
-	if (isset($wgg['tunnels'][$tunidx]) {
+	if (isset($wgg['tunnels'][$tunidx])) {
 
 		$tunnel = $wgg['tunnels'][$tunidx];
 
