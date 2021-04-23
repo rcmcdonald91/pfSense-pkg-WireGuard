@@ -370,8 +370,8 @@ endif;
 
 <?php
 
-// Cheat and show a disabled button for better user experience
-if (!$is_new):
+// We cheat here and show a disabled button for better user experience
+if ($is_new):
 
 ?>
 
@@ -382,12 +382,12 @@ if (!$is_new):
 
 <?php
 
-// Now show an actual link to add peers
+// Now we show an actual link to add peers once the tunnel is saved
 else:
 
 ?>
 
-	<a href="<?="vpn_wg_peers_edit.php?tunid={$$tun_id}"?>" class="btn btn-success btn-sm">
+	<a href="<?="vpn_wg_peers_edit.php?tunid={$tun_id}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</a>
