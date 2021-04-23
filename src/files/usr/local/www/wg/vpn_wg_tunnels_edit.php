@@ -107,7 +107,7 @@ if ($_POST) {
 	} elseif ($_POST['act'] == 'toggle') {
 
 		exit;
-
+		
 	} elseif ($_POST['act'] == 'delete') {
 
 		exit;
@@ -307,9 +307,10 @@ print($form);
 				<tr>
 					<th><?=gettext("Peer")?></th>
 					<th><?=gettext("Description")?></th>
-					<th><?=gettext("Peer Address")?><th>
+					<th><?=gettext("Peer Address")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
-					<th><?=gettext("Endpoint : Port")?></th>
+					<th><?=gettext("Endpoint")?></th>
+					<th><?=gettext("Port")?></th>
 					<th><?=gettext("Public key")?></th>
 					<th>Actions</th>
 
@@ -332,7 +333,8 @@ print($form);
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars($peer['peerwgaddr'])?></td>
 					<td><?=htmlspecialchars($peer['allowedips'])?></td>
-					<td><?=htmlspecialchars("{$peer['endpoint']} : {$peer['port']}")?></td>
+					<td><?=htmlspecialchars($peer['endpoint']})?></td>
+					<td><?=htmlspecialchars({$peer['endpoint']})?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>"></a>
