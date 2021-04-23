@@ -146,7 +146,7 @@ display_top_tabs($tab_array);
 
 			}
 
-			$icontoggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
+			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
 					<tr ondblclick="document.location='vpn_wg_edit.php?index=<?=$i?>';" class="<?=$entryStatus?>">
@@ -158,9 +158,8 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-download" href="#" title="<?=gettext("Download tunnel configuration")?>"></a>
 							<a class="fa fa-pencil" href="vpn_wg_edit.php?index=<?=$i?>" title="<?=gettext("Edit tunnel")?>"></a>
-							<a class="fa fa-<?=$icontoggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
+							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?index={$i}&action=toggle"?>" usepost></a>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?index={$i}&action=delete"?>" usepost></a>
 						</td>
 					</tr>

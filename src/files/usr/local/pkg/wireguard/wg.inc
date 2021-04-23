@@ -91,8 +91,38 @@ function wg_destroy_if($tunnel, $verbose = false) {
 }
 
 function wg_toggle_tunnel($tunidx) {
+	global $wgg;
 
-	#TODO
+	// Make sure we have the latest info
+	wg_globals();
+
+	// Make sure we have a tunnel
+	if (isset($wgg['tunnels'][$tunidx]) {
+
+		$tunnel = $wgg['tunnels'][$tunidx];
+
+		$wgg['tunnels'][$tunidx]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
+
+		wg_create_config_files();
+		
+		wg_ifgroup_install();
+
+		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
+			$conf_hard = (!is_wg_tunnel_assigned($p) || !does_interface_exist($tunnel['name']));
+
+			wg_configure_if($tunnel, $conf_hard);
+
+		} else {
+
+			wg_destroy_if($tunnel);
+
+		}
+
+		// Go back to the tunnel table
+		header("Location: /wg/vpn_wg.php");
+
+	}
 
 }
 
@@ -101,7 +131,9 @@ function wg_delete_tunnel($tunidx) {
 
 	wg_globals();
 
-	if ($wgg['tunnels'][$tunidx]) {
+	if (isset($wgg['tunnels'][$tunidx])) {
+
+		$tmp_tunnel = $wgg['tunnels'][$tunidx];
 
 		unset($ifname);
 
@@ -115,17 +147,16 @@ function wg_delete_tunnel($tunidx) {
 		
 		if (isset($ifname)) {
 
-			$conf_path = $wgg['conf_path'] . "/" . $ifname . ".conf";
+			$conf_path = "{$wgg['conf_path']}/{$ifname}.conf";
 
 		}
 
 		// Delete the tunnel configuration entry
 		unset($wgg['tunnels'][$tunidx]);
 
-		write_config("[WireGuard] tunnel {$index} updated.");
+		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tmp_tunnel['name']} deleted.");
 
 		// Delete the wg?.conf file
-
 		if (isset($conf_path) && is_file($conf_path)) {
 
 			unlink($conf_path);
@@ -134,7 +165,9 @@ function wg_delete_tunnel($tunidx) {
 
 		// Destroy the deleted tunnel
 		wg_destroy_if($ifname);
+
 	}
+
 }
 
 // Write new tunnel values to the configuration system
@@ -206,7 +239,7 @@ function wg_do_post($post) {
 
 		$wgg['tunnels'][$index] = $pconfig;
 
-		write_config("[WireGuard] Tunnel {$pconfig['name']} (Index {$index}) updated.");
+		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
 	}
 
@@ -363,7 +396,6 @@ function make_wg_conf($tunnel) {
 		$txt .= "MTU = {$tunnel['interface']['mtu']}\n";
 	}
 
-	// We want to let pfSense handling routing.
 	$txt .= "Table = off\n";
 
 	$txt .= "\n";
@@ -403,9 +435,12 @@ function make_wg_conf($tunnel) {
 		}
 	}
 
-	file_put_contents($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", $txt);
+	$conf_path = "{$wgg['conf_path']}/{$tunnel['name']}.conf";
 
-	chmod($wgg['conf_path'] . "/" . $tunnel['name'] . ".conf", 0600);
+	file_put_contents($conf_path, $txt);
+
+	chmod($conf_path, 0600);
+
 }
 
 ?>
