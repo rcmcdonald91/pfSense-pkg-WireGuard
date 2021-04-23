@@ -42,7 +42,7 @@ wg_globals();
 $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
 
 if (is_numericint($_REQUEST['id'])) {
-	$index = $_REQUEST['id'];
+	$tun_id = $_REQUEST['id'];
 }
 
 if ($_REQUEST['ajax']) {
@@ -104,21 +104,13 @@ if ($_POST) {
 
 		exit;
 
-	} elseif ($_POST['action'] == 'toggle') {
-
-		echo("You want to toggle {$index}");
-
-		exit;
-
-	}
-
 } else {
 
-	if (isset($index)) {
+	if (isset($tun_id)) {
 
-		if (is_array($wgg['tunnels'][$index])) {
+		if (is_array($wgg['tunnels'][$tun_id])) {
 
-			$pconfig = &$wgg['tunnels'][$index];
+			$pconfig = &$wgg['tunnels'][$tun_id];
 		}
 
 	} else {
@@ -161,7 +153,7 @@ $form->addGlobal(new Form_Input(
 	'index',
 	'',
 	'hidden',
-	$index
+	$tun_id
 ));
 
 $tun_enable = new Form_Checkbox(
@@ -404,10 +396,7 @@ $section2->add($group2);
 					<th><?=gettext("Endpoint")?></th>
 					<th><?=gettext("Port")?></th>
 					<th><?=gettext("Public key")?></th>
-					<th style="display:none;"><?=gettext("Keepalive")?></th>
-					<th style="display:none;"><?=gettext("Allowed IPs")?></th>
-					<th style="display:none;"><?=gettext("PSK")?></th>
-					<th></th>
+					<th>Actions</th>
 
 				</tr>
 			</thead>
@@ -416,18 +405,19 @@ $section2->add($group2);
 
 		if (!empty($pconfig['peers']['wgpeer'])):
 
-			foreach ($pconfig['peers']['wgpeer'] as $peer => $index):
+			foreach ($pconfig['peers']['wgpeer'] as $peer_id => $peer):
 
 ?>
 				<tr>
-					<td><?=$index?></td>
+					<td><?=$peer_id?></td>
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=htmlspecialchars($peer['port'])?></td>
 					<td><?=htmlspecialchars($peer['publickey'])?></td>
 					<td style="cursor: pointer;">
-						<a class="fa fa-pencil" href="#" id="editpeer_<?=$index?>"title="<?=gettext("Edit peer"); ?>"></a>
-						<a class="fa fa-trash text-danger no-confirm" href="#" id="killpeer_<?=$index?>" title="<?=gettext('Delete peer');?>"></a>
+						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?tunid={$i}&peerid={$i}"?>"></a>
+						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$i}&peerid={$i}"?>" usepost></a>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&tunid={$i}&peerid={$i}"?>" usepost></a>
 					</td>
 				</tr>
 

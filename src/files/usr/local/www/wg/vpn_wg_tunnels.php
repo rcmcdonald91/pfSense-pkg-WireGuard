@@ -40,9 +40,9 @@ wg_globals();
 
 if ($_POST) {
 
-	if (array_key_exists('id', $_POST) && isset($wgg['tunnels'][$_POST['id']])) {
+	if (array_key_exists('tunid', $_POST) && isset($wgg['tunnels'][$_POST['tunid']])) {
 
-		$tun_id = $_POST['id'];
+		$tun_id = $_POST['tunid'];
 
 		if ($_POST['act'] == 'toggle') {
 
@@ -123,15 +123,20 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
+		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
 
-		$i = 0;
-		foreach ($wgg['tunnels'] as $tunnel):
 			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
+
 			if (!$tunnel['peers'] || !is_array($tunnel['peers'])) {
+
 				$tunnel['peers'] = array();
+
 			}
+
 			if (!$tunnel['peers']['wgpeer'] || !is_array($tunnel['peers']['wgpeer'])) {
+
 				$tunnel['peers']['wgpeer'] = array();
+
 			}
 
 			if (is_wg_tunnel_assigned($tunnel)) {
@@ -149,7 +154,7 @@ display_top_tabs($tab_array);
 			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?id=<?=$i?>';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tunid=<?=$tun_id?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
@@ -158,9 +163,9 @@ display_top_tabs($tab_array);
 						<td><?=count($tunnel['peers']['wgpeer'])?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?id={$i}"?>"></a>
-							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&id={$i}"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&id={$i}"?>" usepost></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tunid={$tun_id}"?>"></a>
+							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$tun_id}"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tunid={$tun_id}"?>" usepost></a>
 						</td>
 					</tr>
 
@@ -209,7 +214,6 @@ display_top_tabs($tab_array);
 ?>
 					</tr>
 <?php
-			$i++;
 		endforeach;
 ?>
 				</tbody>
