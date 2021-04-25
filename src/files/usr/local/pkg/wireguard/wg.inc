@@ -382,6 +382,9 @@ function wg_remove_config_settings() {
 
 	}
 
+	// Now write out the new config to disk
+	write_config("[{$wgg['pkg_names'][0]}] Package configuration removed");
+
 }
 
 // Write each file

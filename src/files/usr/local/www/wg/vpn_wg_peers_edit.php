@@ -47,13 +47,15 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun = $_REQUEST['tun'];
 
-	$tunnel = $wgg['tunnels'][$tun_id];
-
 }
 
-if (is_numericint($_REQUEST['peerid'])) {
+if (is_numericint($_REQUEST['peer'])) {
 	
-	$peer_id = $_REQUEST['peerid'];
+	$peer_id = $_REQUEST['peer'];
+
+	$pconfig = $wgg['peers'][$peer_id];
+
+	$tun = $wgg['peers']['tun'];
 
 }
 
@@ -71,16 +73,15 @@ if ($_POST) {
 
 } else {
 
-	$pconfig = array();
+	//$pconfig = array();
 
 	$pconfig['enabled'] = 'yes';
-
 
 }
 
 $shortcut_section = "wireguard";
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), "PEER");
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), "Peer {$peer_id} ({$pconfig['descr']})");
 $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_peers.php", "@self");
 
 $tab_array = array();
