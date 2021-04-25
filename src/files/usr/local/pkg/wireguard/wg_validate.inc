@@ -45,7 +45,7 @@ function wg_validate_post($pconfig) {
 	if (!is_wg_tunnel_assigned($pconfig)) {
 
 		// Check the addresses
-		$addrs = explode(",", $pconfig['interface']['address']);
+		$addrs = explode(",", $pconfig['addresses']);
 
 		foreach ($addrs as $addr) {
 
@@ -83,7 +83,7 @@ function wg_validate_post($pconfig) {
 	}
 
 	// Check listen port
-	$lport = $pconfig['interface']['listenport'];
+	$lport = $pconfig['listenport'];
 
 	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
 
@@ -92,14 +92,14 @@ function wg_validate_post($pconfig) {
 	}
 
 	// Check keys
-	if (empty($pconfig['interface']['privatekey'])) {
+	if (empty($pconfig['privatekey'])) {
 
 		$input_errors[] = gettext("Private key must be specified.");
 
 	}
 
 	return $input_errors;
-	
+
 }
 
 // Valildate a peer
