@@ -262,12 +262,10 @@ function wg_do_post($post) {
 	}
 
 	// Tunnel section
-	$pconfig['interface']['addresses'] = implode(',', $addresses);
-	$pconfig['interface']['listenport'] = $post['listenport'];
-	$pconfig['interface']['privatekey'] = $post['privatekey'];
-	$pconfig['interface']['publickey'] = genPubKey($post['privatekey']);
-
-	$pconfig['interface']['mtu'] = $post['mtu'];
+	$pconfig['addresses'] = implode(',', $addresses);
+	$pconfig['listenport'] = $post['listenport'];
+	$pconfig['privatekey'] = $post['privatekey'];
+	$pconfig['publickey'] = genPubKey($post['privatekey']);
 
 	$input_errors = wg_validate_post($pconfig);
 

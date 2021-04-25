@@ -273,7 +273,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	
 	}
 
-	$addresses = explode(" ", $pconfig['addresses']);
+	$addresses = explode(',', $pconfig['addresses']);
 
 	$last = count($addresses) - 1;
 
