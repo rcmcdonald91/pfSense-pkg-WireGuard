@@ -219,7 +219,7 @@ print($form);
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save")?>
 	</button>
-	</nav>
+</nav>
 
 <?php $genkeywarning = gettext("Are you sure you want to overwrite the pre-shared key?"); ?>
 
@@ -244,13 +244,13 @@ events.push(function() {
 				url: "/wg/vpn_wg_peers_edit.php",
 				type: "post",
 				data: {
-					act: 	"genpsk"
+					act: "genpsk"
 				},
 				success: function(response, textStatus, jqXHR) {
 					$('#presharedkey').val(response);
 				}
 			});
-		});
+		}
 
 	});
 
