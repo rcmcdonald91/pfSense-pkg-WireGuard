@@ -218,7 +218,7 @@ function wg_parse_post_addresses($post_array, $addrstr = 'address', $subnetstr =
 
 	while ($post_array["{$addrstr}{$x}"] && $post_array["{$subnetstr}{$x}"]) {
 
-		$$a_ret[] = "{$post_array["{$addrstr}{$x}"]}/{$post_array["{$subnetstr}{$x}"]}";
+		$a_ret[] = "{$post_array["{$addrstr}{$x}"]}/{$post_array["{$subnetstr}{$x}"]}";
 
 		$x++;
 
@@ -248,6 +248,8 @@ function wg_do_peer_post($post) {
 	$pconfig['publickey'] 		= $post['publickey'];
 	$pconfig['presharedkey']	= $post['presharedkey'];
 	$pconfig['allowedips'] 		= implode(',', wg_parse_post_addresses($post));
+
+	echo($pconfig['allowedips']);
 
 	$input_errors = wg_validate_peer_post($pconfig);
 

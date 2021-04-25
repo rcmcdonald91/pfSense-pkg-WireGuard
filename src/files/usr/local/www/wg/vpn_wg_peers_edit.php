@@ -98,9 +98,7 @@ if ($_POST) {
 
 		// Automatically choose a tunnel based on request 
 		$pconfig['tun'] = $tun;
-
-		echo("new peer");
-
+		
 	}
 
 }
@@ -236,7 +234,7 @@ if (empty($pconfig['allowedips'])) {
 
 }
 
-$allowedips = explode(" ", $pconfig['allowedips']);
+$allowedips = explode(",", $pconfig['allowedips']);
 
 $last = count($allowedips) - 1;
 
