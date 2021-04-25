@@ -158,6 +158,13 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels'])) {
 		'No WireGuard tunnels have been defined. (<a href="vpn_wg_tunnels_edit.php">Create a New Tunnel</a>)'
 	));
 
+	$form->addGlobal(new Form_Input(
+		'tun',
+		'',
+		'hidden',
+		'unassigned'
+	));
+
 }
 
 $section->addInput(new Form_Input(

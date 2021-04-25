@@ -116,7 +116,7 @@ function wg_validate_peer_post($post) {
 	}
 
 	// Check key
-	if (empty($peer['publickey'])) {
+	if (empty($post['publickey'])) {
 
 		$input_errors[] = gettext("A public key must be specified");
 
@@ -124,7 +124,7 @@ function wg_validate_peer_post($post) {
 
 	// Endpoint
 
-	$ep = trim($peer['endpoint']);
+	$ep = trim($post['endpoint']);
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
 
@@ -132,9 +132,9 @@ function wg_validate_peer_post($post) {
 	}
 
 	// Allowed IPs
-	if (!empty($peer['allowedips'])) {
+	if (!empty($post['allowedips'])) {
 
-		foreach (explode(",", $peer['allowedips']) as $ip) {
+		foreach (explode(",", $post['allowedips']) as $ip) {
 
 			if (!is_subnet(trim($ip))) {
 
