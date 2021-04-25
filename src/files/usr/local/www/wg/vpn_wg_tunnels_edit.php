@@ -338,6 +338,8 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 }
 
+$form->add($section);
+
 // We still need to keep track of this otherwise wg-quick and pfSense will fight
 $form->addGlobal(new Form_Input(
 	'mtu',
@@ -352,8 +354,6 @@ $form->addGlobal(new Form_Input(
 	'hidden',
 	'save'
 ));
-
-$form->add($section);
 
 print($form);
 

@@ -59,7 +59,18 @@ if ($_POST) {
 
 	if ($_POST['act'] == 'save') {
 
-		echo("SAVED PRESSED\n\n\n\n");
+		$res = wg_do_peer_post($_POST);
+		
+		$input_errors = $res['input_errors'];
+
+		$pconfig = $res['pconfig'];
+
+		if (!$input_errors) {
+
+			// Save was successful
+			header("Location: /wg/vpn_wg_peers.php");
+
+		}
 
 	} elseif ($_POST['act'] == 'genpsk') {
 
@@ -118,7 +129,7 @@ $form = new Form(false);
 $section = new Form_Section("Peer Configuration (PEER)");
 
 $form->addGlobal(new Form_Input(
-	'peer_id',
+	'index',
 	'',
 	'hidden',
 	$peer_id
@@ -268,6 +279,13 @@ $section->addInput(new Form_Button(
 ))->addClass('btn-success btn-sm addbtn');
 
 $form->add($section);
+
+$form->addGlobal(new Form_Input(
+	'act',
+	'',
+	'hidden',
+	'save'
+));
 
 print($form);
 

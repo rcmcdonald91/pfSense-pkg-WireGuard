@@ -235,8 +235,31 @@ function wg_do_peer_post($post) {
 
 	$input_errors = array();
 
+	$index = $post['index'];
 
+	$pconfig = $wgg['peers'][$index]
 
+	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
+	$pconfig['tun'] 		= $post['tun'];
+	$pconfig['descr'] 		= $post['descr'];
+	$pconfig['endpoint'] 		= $post['endpoint'];
+	$pconfig['port'] 		= $post['port'];
+	$pconfig['persistentkeepalive']	= $post['persistentkeepalive'];
+	$pconfig['publickey'] 		= $post['publickey'];
+	$pconfig['presharedkey']	= $post['presharedkey'];
+	$pconfig['allowedips'] 		= implode(',', wg_parse_post_addresses($post));
+
+	$input_errors = wg_validate_peer_post($pconfig);
+
+	if (!$input_errors) {
+
+		$wgg['peers'][$index] = $pconfig;
+
+		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
+
+	}
+
+	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
 
 }
 
@@ -268,10 +291,8 @@ function wg_do_post($post) {
 
 	$pconfig['descr'] = $post['descr'];
 
-	$addresses = wg_parse_post_addresses($post);
-
 	// Tunnel section
-	$pconfig['addresses'] = implode(',', $addresses);
+	$pconfig['addresses'] = implode(',', wg_parse_post_addresses($post));
 	$pconfig['listenport'] = $post['listenport'];
 	$pconfig['privatekey'] = $post['privatekey'];
 	$pconfig['publickey'] = wg_gen_publickey($post['privatekey']);
