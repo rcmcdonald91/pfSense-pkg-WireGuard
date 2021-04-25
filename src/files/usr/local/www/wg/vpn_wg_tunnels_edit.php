@@ -244,7 +244,7 @@ $group->add(new Form_Button(
 	'Generate',
 	null,
 	'fa-key'
-))->addClass('btn-primary btn-xs')
+))->addClass('btn-primary btn-sm')
 	->setHelp('New Keys')
 	->setWidth(1);
 
@@ -299,7 +299,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'Delete',
 			null,
 			'fa-trash'
-		))->addClass('btn-warning');
+		))->addClass('btn-warning btn-sm');
 	
 		$section->add($group);
 
@@ -310,7 +310,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		'Add Address',
 		null,
 		'fa-plus'
-	))->addClass('btn-success addbtn');
+	))->addClass('btn-success btn-sm addbtn');
 
 } else {
 
@@ -429,7 +429,7 @@ endif;
 // We cheat here and show a disabled button for a better user experience
 if ($is_new):
 ?>
-	<button class="btn btn-success" title="<?=gettext('Add Peer')?>" disabled>
+	<button class="btn btn-success btn-sm" title="<?=gettext('Add Peer')?>" disabled>
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</button>
@@ -437,7 +437,7 @@ if ($is_new):
 // Now we show the actual link to add peer once the tunnel is actually saved
 else:
 ?>
-	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success">
+	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</a>
@@ -445,7 +445,7 @@ else:
 endif;
 ?>
 
-	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
+	<button type="submit" id="saveform" name="saveform" class="btn btn-primary btn-sm" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save Tunnel")?>
 	</button>

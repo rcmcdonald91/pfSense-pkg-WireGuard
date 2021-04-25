@@ -1,5 +1,4 @@
 <?php
-
 /*
  * vpn_wg_peers_edit.php
  *
@@ -208,7 +207,7 @@ $group->add(new Form_Button(
 	'Generate',
 	null,
 	'fa-key'
-))->addClass('btn-primary')
+))->addClass('btn-primary btn-sm')
 	->setHelp('New PSK');
 
 $section->add($group);
@@ -255,7 +254,7 @@ foreach ($allowedips as $counter => $ip) {
 		'Delete',
 		null,
 		'fa-trash'
-	))->addClass('btn-warning');
+	))->addClass('btn-warning btn-sm');
 
 	$section->add($group);
 
@@ -266,7 +265,7 @@ $section->addInput(new Form_Button(
 	'Add Allowed IP',
 	null,
 	'fa-plus'
-))->addClass('btn-success addbtn');
+))->addClass('btn-success btn-sm addbtn');
 
 $form->add($section);
 
@@ -274,8 +273,8 @@ print($form);
 
 ?>
 
-<nav>
-	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save Peer')?>">
+<nav class="action-buttons">
+	<button type="submit" id="saveform" name="saveform" class="btn btn-primary btn-sm" value="save" title="<?=gettext('Save Peer')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save Peer")?>
 	</button>
