@@ -127,6 +127,20 @@ $section->addInput(new Form_Checkbox(
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>Unset this option to disable this peer without removing it from the list.');
 
+if (true) {
+	$section->addInput($input = new Form_Select(
+		'tun',
+		'Tunnel',
+		$pconfig['tun'],
+		['tun_wg0' => 'tun_wg0', 'tun_wg1' => 'tun_wg1']
+	))->setHelp('The tunnel to assign to this peer.');
+} else {
+	$section->addInput(new Form_StaticText(
+		'Tunnel',
+		'No tunnels have been defined.'
+	));
+}
+
 $section->addInput(new Form_Input(
 	'descr',
 	'Description',
@@ -142,14 +156,14 @@ $group->add(new Form_Input(
 	'text',
 	$pconfig['endpoint']
 ))->setWidth(5)->setHelp('Hostname, IPv4, or IPv6 address of this peer.%1$s ' .
-		'Leave blank if unknown (dynamic endpoints).', '<br />');
+		'Leave endpoint and port blank if unknown (dynamic endpoints).', '<br />');
 
 $group->add(new Form_Input(
 	'port',
 	'Endpoint Port',
 	'text',
 	$pconfig['port']
-))->setWidth(2)->setHelp('Port used by this peer. Ignored for dynamic endpoints. Leave blank for default (51820).');
+))->setWidth(3)->setHelp("Port used by this peer. Leave blank for default ({$wgg['default_port']}).");
 
 $section->add($group);
 
