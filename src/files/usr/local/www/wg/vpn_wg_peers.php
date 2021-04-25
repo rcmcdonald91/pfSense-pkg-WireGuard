@@ -85,7 +85,7 @@ $pglinks = array("", "@self", "@self");
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_peers.php");
+$tab_array[] = array(gettext("Peers"), true, "/wg/vpn_wg_peers.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
@@ -113,107 +113,42 @@ display_top_tabs($tab_array);
 			<table class="table table-striped table-hover">
 				<thead>
 					<tr>
-						<th class="peer-entries"></th>
-						<th><?=gettext("Name")?></th>
+						<th><?=gettext("Peer")?></th>
+						<th><?=gettext("Tunnel")?></th>
 						<th><?=gettext("Description")?></th>
-						<th><?=gettext("Address / Assignment")?></th>
+						<th><?=gettext("Public key")?></th>
+						<th><?=gettext("Peer Address")?></th>
+						<th><?=gettext("Allowed IPs")?></th>
+						<th><?=gettext("Endpoint")?></th>
 						<th><?=gettext("Port")?></th>
-						<th><?=gettext("# Peers")?></th>
-						<th><?=gettext("Actions")?></th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
 <?php
-		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
+		foreach ($wgg['peers'] as $peer_id => $peer):
 
-			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
+			$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
 
-			if (!$tunnel['peers'] || !is_array($tunnel['peers'])) {
-
-				$tunnel['peers'] = array();
-
-			}
-
-			if (!$tunnel['peers']['wgpeer'] || !is_array($tunnel['peers']['wgpeer'])) {
-
-				$tunnel['peers']['wgpeer'] = array();
-
-			}
-
-			if (is_wg_tunnel_assigned($tunnel)) {
-
-				// We want all configured interfaces, including disabled ones
-				$iflist = get_configured_interface_list_by_realif(true);
-				$ifdescr = get_configured_interface_with_descr(true);
-
-				$iffriendly = $ifdescr[$iflist[$tunnel['name']]];
-
-				$tunnel['interface']['address'] = $iffriendly;
-
-			}
-
-			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
+			$icon_toggle = ($peer['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=$entryStatus?>">
-						<td class="peer-entries"><?=gettext('Interface')?></td>
-						<td><?=htmlspecialchars($tunnel['name'])?></td>
-						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td><?=htmlspecialchars($tunnel['interface']['address'])?></td>
-						<td><?=htmlspecialchars($tunnel['interface']['listenport'])?></td>
-						<td><?=count($tunnel['peers']['wgpeer'])?></td>
-
+					<tr ondblclick="document.location='vpn_wg_peers_edit.php?peer=';" class="<?=$entryStatus?>">
+						<td><?=htmlspecialchars($peer_id)?></td>
+						<td><?=htmlspecialchars($peer['tun'])?></td>
+						<td><?=htmlspecialchars($peer['descr'])?></td>
+						<td><?=htmlspecialchars(substr($peer['publickey'],0,12).'...')?></td>
+						<td><?=htmlspecialchars($peer['peeraddresses']['item'][0])?></td>
+						<td><?=htmlspecialchars($peer['allowedips']['item'][0])?></td>
+						<td><?=htmlspecialchars($peer['endpoint'])?></td>
+						<td><?=htmlspecialchars($peer['port'])?></td>
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
-							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tun={$tunnel['name']}"?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer="?>"></a>
+							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer="?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun="?>" usepost></a>
 						</td>
 					</tr>
 
-					<tr class="peer-entries peerbg_color">
-						<td>Peers</td>
-<?php
-			if (count($tunnel['peers']['wgpeer']) > 0):
-?>
-						<td colspan="6">
-							<table class="table table-hover peerbg_color">
-								<thead>
-									<tr class="peerbg_color">
-										<th>Description</th>
-										<th>Endpoint</th>
-										<th>Allowed IPs</th>
-										<th>Public key</th>
-									</tr>
-								</thead>
-								<tbody>
-
-<?php
-				foreach ($tunnel['peers']['wgpeer'] as $peer):
-?>
-									<tr class="peerbg_color">
-										<td><?=htmlspecialchars($peer['descr'])?></td>
-										<td>
-										<?php if (!empty($peer["endpoint"])): ?>
-											<?=htmlspecialchars($peer['endpoint'])?>:<?=((empty($peer["port"])) ? '51820' : htmlspecialchars($peer["port"]))?>
-										<?php else: ?>
-											<?=gettext("Dynamic")?>
-										<?php endif; ?>
-										</td>
-										<td><?=htmlspecialchars($peer['allowedips'])?></td>
-										<td><?=htmlspecialchars($peer['publickey'])?></td>
-									</tr>
-<?php
-				endforeach;
-?>
-								</tbody>
-							</table>
-						</td>
-						<?php
-			else:
-				print('<td colspan="6">' . gettext("No peers have been configured") . '</td>');
-			endif;
-?>
-					</tr>
 <?php
 		endforeach;
 ?>
@@ -228,14 +163,9 @@ display_top_tabs($tab_array);
 ?>
 
 	<nav class="action-buttons">
-		<a href="#" class="btn btn-info btn-sm" id="showpeers">
-			<i class="fa fa-info icon-embed-btn"></i>
-			<?=gettext("Show peers")?>
-		</a>
-
-		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
+		<a href="vpn_wg_peers_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>
-			<?=gettext("Add Tunnel")?>
+			<?=gettext("Add Peer")?>
 		</a>
 	</nav>
 </form>
@@ -244,16 +174,6 @@ display_top_tabs($tab_array);
 //<![CDATA[
 
 events.push(function() {
-	var peershidden = true;
-	var keyshidden = true;
-
-	hideClass('peer-entries', peershidden);
-
-	// Toggle peer visibility
-	$('#showpeers').click(function () {
-		peershidden = !peershidden;
-		hideClass('peer-entries', peershidden);
-	})
 
 });
 //]]>

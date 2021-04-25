@@ -153,7 +153,7 @@ $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "@self"
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_peers.php");
+$tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
@@ -340,7 +340,6 @@ else:
 					<th><?=gettext("Port")?></th>
 					<th><?=gettext("Public key")?></th>
 					<th>Actions</th>
-
 				</tr>
 			</thead>
 			<tbody>
