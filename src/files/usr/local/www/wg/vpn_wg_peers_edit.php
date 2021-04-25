@@ -43,11 +43,13 @@ $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['
 
 if (isset($_REQUEST['tun'])) {
 
+	$tun = $_REQUEST['tun'];
+
 	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
 
 }
 
-if (isset($_REQUEST['peer'] && is_numericint($_REQUEST['peer'])) {
+if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
 
 	$peer_id = $_REQUEST['peer'];
 
@@ -78,12 +80,14 @@ if ($_POST) {
 
 	} else {
 
-		// We are creating a new tunnel
+		// We are creating a new peer
 		$pconfig = array();
 
-		// Set defaults
+		// Default to enabled
 		$pconfig['enabled'] = 'yes';
-		$pconfig['tun'] = $tun_id;
+
+		// Automatically choose a tunnel based on request 
+		$pconfig['tun'] = $tun;
 
 	}
 
