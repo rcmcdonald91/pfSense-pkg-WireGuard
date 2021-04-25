@@ -161,7 +161,9 @@ display_top_tabs($tab_array);
 					<tr class="peer-entries peerbg_color">
 						<td>Peers</td>
 <?php
-			if (count($tunnel['peers']['wgpeer']) > 0):
+	$peers = wg_get_tunnel_peers($tunnel['name']);
+
+			if (count($peers) > 0):
 ?>
 						<td colspan="6">
 							<table class="table table-hover peerbg_color">
@@ -176,7 +178,7 @@ display_top_tabs($tab_array);
 								<tbody>
 
 <?php
-				foreach ($tunnel['peers']['wgpeer'] as $peer):
+				foreach ($peers as $peer):
 ?>
 									<tr class="peerbg_color">
 										<td><?=htmlspecialchars($peer['descr'])?></td>
