@@ -237,7 +237,7 @@ function wg_do_peer_post($post) {
 
 	$index = $post['index'];
 
-	$pconfig = $wgg['peers'][$index]
+	$pconfig = $wgg['peers'][$index];
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 	$pconfig['tun'] 		= $post['tun'];
