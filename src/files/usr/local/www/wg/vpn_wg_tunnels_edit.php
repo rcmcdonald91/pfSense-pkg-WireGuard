@@ -106,7 +106,7 @@ if ($_POST) {
 	} elseif ($_POST['act'] == 'genkeys') {
 
 		// Process ajax call requesting new key pair
-		print(genKeyPair(true));
+		print(wg_gen_keypair(true));
 
 		exit;
 

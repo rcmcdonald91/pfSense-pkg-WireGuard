@@ -85,11 +85,11 @@ function wg_pkg_info() {
 }
 
 // Generate private key
-function genKeyPair($json = false) {
+function wg_gen_keypair($json = false) {
 	global $wgg;
 
 	$privkey = exec("{$wgg['wg']} genkey");
-	$pubkey = genPubKey($privkey);
+	$pubkey = wg_gen_publickey($privkey);
 
 	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
 	return $json ? json_encode($res) : $res;
