@@ -45,37 +45,47 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
 
-	$tun = $_REQUEST['tun'];
-
 }
 
-if (is_numericint($_REQUEST['peer'])) {
-	
+if (isset($_REQUEST['peer'] && is_numericint($_REQUEST['peer'])) {
+
 	$peer_id = $_REQUEST['peer'];
-
-	$pconfig = $wgg['peers'][$peer_id];
-
-	$tun = $wgg['peers']['tun'];
 
 }
 
 // All form save logic is in /etc/inc/wg.inc
 if ($_POST) {
 
-	if ($_POST['act'] == 'genpsk') {
+	if ($_POST['act'] == 'save') {
+
+		echo("SAVED PRESSED\n\n\n\n");
+
+	} elseif ($_POST['act'] == 'genpsk') {
 
 		// Process ajax call requesting new pre-shared key
 		print(wg_gen_psk());
 
 		exit;
-
+	
 	}
 
 } else {
 
-	//$pconfig = array();
+	if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
 
-	$pconfig['enabled'] = 'yes';
+		// Looks like we are editing an existing tunnel
+		$pconfig = &$wgg['peer'][$peer_id];
+
+	} else {
+
+		// We are creating a new tunnel
+		$pconfig = array();
+
+		// Set defaults
+		$pconfig['enabled'] = 'yes';
+		$pconfig['tun'] = $tun_id;
+
+	}
 
 }
 
@@ -121,7 +131,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels'])) {
 	$section->addInput($input = new Form_Select(
 		'tun',
 		'Tunnel',
-		(isset($tun) ? $tun : $pconfig['tun']),
+		$pconfig['tun'],
 		build_tun_list()
 	))->setHelp('WireGuard tunnel for this peer.');
 
@@ -197,10 +207,9 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
-// TODO
 $allowedips = explode(" ", $pconfig['allowedips']);
 
-//foreach ($allowedips as $ip => $index) {
+foreach ($allowedips as $ip => $counter) {
 
 	$group = new Form_Group("Allowed IPs");
 
@@ -209,7 +218,7 @@ $allowedips = explode(" ", $pconfig['allowedips']);
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
 		'Allowed IPs',
-		$address,
+		$ip,
 		'BOTH'
 	))->addMask('address_subnet[]', $address_subnet)
 		->setWidth(5)
@@ -233,7 +242,7 @@ $allowedips = explode(" ", $pconfig['allowedips']);
 
 	$section->add($group);
 
-//}
+}
 
 $form->addGlobal(new Form_Button(
 	'addrow',

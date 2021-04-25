@@ -88,7 +88,7 @@ if ($_POST) {
 			}
 
 			// Save was successful
-			header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$pconfig['name']}");
+			header("Location: /wg/vpn_wg_tunnels.php");
 
 		} else {
 
