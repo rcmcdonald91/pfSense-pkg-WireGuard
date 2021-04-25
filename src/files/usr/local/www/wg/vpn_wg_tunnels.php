@@ -216,12 +216,12 @@ display_top_tabs($tab_array);
 ?>
 
 	<nav class="action-buttons">
-		<a href="#" class="btn btn-info btn-sm" id="showpeers">
+		<a href="#" class="btn btn-info" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
 			<?=gettext("Show peers")?>
 		</a>
 
-		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
+		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success">
 			<i class="fa fa-plus icon-embed-btn"></i>
 			<?=gettext("Add Tunnel")?>
 		</a>

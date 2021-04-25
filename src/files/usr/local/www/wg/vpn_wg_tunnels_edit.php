@@ -447,7 +447,7 @@ endif;
 
 	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
-		<?=gettext("Save")?>
+		<?=gettext("Save Tunnel")?>
 	</button>
 </nav>
 

@@ -114,7 +114,7 @@ if ($input_errors) {
 
 display_top_tabs($tab_array);
 
-$form = new Form();
+$form = new Form(false);
 
 $section = new Form_Section("Peer Configuration (PEER)");
 
@@ -275,9 +275,9 @@ print($form);
 ?>
 
 <nav>
-	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
+	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save Peer')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
-		<?=gettext("Save")?>
+		<?=gettext("Save Peer")?>
 	</button>
 </nav>
 
