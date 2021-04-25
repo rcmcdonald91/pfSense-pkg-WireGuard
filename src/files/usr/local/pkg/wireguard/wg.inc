@@ -249,8 +249,20 @@ function wg_do_post($post) {
 
 	$pconfig['descr'] = $post['descr'];
 
+	$addresses = array();
+
+	$x = 0;
+
+	while ($post["address{$x}"] && $post["address_subnet{$x}"]) {
+
+		$addresses[] = "{$post["address{$x}"]}/{$post["address_subnet{$x}"]}";
+
+		$x++;
+
+	}
+
 	// Tunnel section
-	$pconfig['interface']['address'] = $post['address'];
+	$pconfig['interface']['addresses'] = implode(',', $addresses);
 	$pconfig['interface']['listenport'] = $post['listenport'];
 	$pconfig['interface']['privatekey'] = $post['privatekey'];
 	$pconfig['interface']['publickey'] = genPubKey($post['privatekey']);
@@ -268,6 +280,7 @@ function wg_do_post($post) {
 	}
 
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
+
 }
 
 function wg_resync($verbose = false) {

@@ -210,8 +210,9 @@ $section->addInput($tun_enable);
 $section->addInput(new Form_Input(
 	'descr',
 	'Description',
-	gettext('Description'),
-	$pconfig['descr']
+	'text',
+	$pconfig['descr'],
+	['placeholder' => 'Description']
 ))->setHelp('Tunnel description for administrative reference (not parsed)');
 
 $section->addInput(new Form_Input(
