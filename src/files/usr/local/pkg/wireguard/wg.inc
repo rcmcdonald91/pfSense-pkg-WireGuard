@@ -209,6 +209,25 @@ function build_tun_list() {
 
 }
 
+// This converts a form post array containing addresses and subnets and returns an CIDR-formatted array
+function wg_parse_post_addresses($post_array, $addrstr = 'address', $subnetstr = 'address_subnet') {
+
+	$a_ret = array();
+
+	$x = 0;
+
+	while ($post_array["{$addrstr}{$x}"] && $post_array["{$subnetstr}{$x}"]) {
+
+		$$a_ret[] = "{$post_array["{$addrstr}{$x}"]}/{$post_array["{$subnetstr}{$x}"]}";
+
+		$x++;
+
+	}
+	
+	return $a_ret;
+
+}
+
 function wg_do_peer_post($post) {
 	global $config, $wgg;
 
@@ -249,23 +268,13 @@ function wg_do_post($post) {
 
 	$pconfig['descr'] = $post['descr'];
 
-	$addresses = array();
-
-	$x = 0;
-
-	while ($post["address{$x}"] && $post["address_subnet{$x}"]) {
-
-		$addresses[] = "{$post["address{$x}"]}/{$post["address_subnet{$x}"]}";
-
-		$x++;
-
-	}
+	$addresses = wg_parse_post_addresses($post);
 
 	// Tunnel section
 	$pconfig['addresses'] = implode(',', $addresses);
 	$pconfig['listenport'] = $post['listenport'];
 	$pconfig['privatekey'] = $post['privatekey'];
-	$pconfig['publickey'] = genPubKey($post['privatekey']);
+	$pconfig['publickey'] = wg_gen_publickey($post['privatekey']);
 
 	$input_errors = wg_validate_post($pconfig);
 

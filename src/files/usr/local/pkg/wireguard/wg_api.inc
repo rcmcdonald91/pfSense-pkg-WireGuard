@@ -97,7 +97,7 @@ function genKeyPair($json = false) {
 }
 
 // Compose the public key from a provided private key
-function genPubKey($privkey) {
+function wg_gen_publickey($privkey) {
 	global $wgg;
 
 	$pubkey = exec("echo {$privkey} | {$wgg['wg']} pubkey");
