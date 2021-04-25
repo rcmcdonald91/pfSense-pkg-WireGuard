@@ -143,9 +143,9 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars($peer['endpoint'])?></td>
 						<td><?=htmlspecialchars($peer['port'])?></td>
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer="?>"></a>
-							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer="?>" usepost></a>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun="?>" usepost></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>"></a>
+							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer_id}"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer_id}"?>" usepost></a>
 						</td>
 					</tr>
 

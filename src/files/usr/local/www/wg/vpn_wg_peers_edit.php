@@ -45,14 +45,9 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
 
+	$tun = $_REQUEST['tun'];
+
 	$tunnel = $wgg['tunnels'][$tun_id];
-
-	// User is somehow trying to add a peer to an invalid tunnel, bail out.
-	if (!isset($tunnel)) {
-	
-		header('Location: vpn_wg_tunnels_edit.php');
-
-	}
 
 }
 
@@ -76,6 +71,10 @@ if ($_POST) {
 
 } else {
 
+	$pconfig = array();
+
+	$pconfig['enabled'] = 'yes';
+
 
 }
 
@@ -98,7 +97,7 @@ if ($input_errors) {
 
 display_top_tabs($tab_array);
 
-$form = new Form(false);
+$form = new Form();
 
 $section = new Form_Section("Peer Configuration (PEER)");
 
@@ -114,14 +113,14 @@ $section->addInput(new Form_Checkbox(
 	'Peer Enabled',
 	gettext('Enable'),
 	$pconfig['enabled'] == 'yes'
-))->setHelp('<span class="text-danger">Note: </span>Unset this option to disable this peer without removing it from the list.');
+))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to disable this peer without removing it from the list.');
 
 if (is_array($wgg['tunnels']) && count($wgg['tunnels'])) {
 
 	$section->addInput($input = new Form_Select(
 		'tun',
 		'Tunnel',
-		$pconfig['tun'],
+		(isset($tun) ? $tun : $pconfig['tun']),
 		build_tun_list()
 	))->setHelp('WireGuard tunnel for this peer.');
 
@@ -148,15 +147,18 @@ $group->add(new Form_Input(
 	'Endpoint',
 	'text',
 	$pconfig['endpoint']
-))->setWidth(5)->setHelp('Hostname, IPv4, or IPv6 address of this peer.%1$s ' .
-		'Leave endpoint and port blank if unknown (dynamic endpoints).', '<br />');
+))->setWidth(5)
+	->setHelp('Hostname, IPv4, or IPv6 address of this peer.<br />
+			Leave endpoint and port blank if unknown (dynamic endpoints).');
 
 $group->add(new Form_Input(
 	'port',
 	'Endpoint Port',
 	'text',
 	$pconfig['port']
-))->setWidth(3)->setHelp("Port used by this peer. Leave blank for default ({$wgg['default_port']}).");
+))->setWidth(3)
+	->setHelp("Port used by this peer.<br />
+			Leave blank for default ({$wgg['default_port']}).");
 
 $section->add($group);
 
@@ -165,8 +167,8 @@ $section->addInput(new Form_Input(
 	'Keep Alive',
 	'text',
 	$pconfig['persistentkeepalive']
-))->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer. ' .
-		'Default is empty (disabled).', '<br />');
+))->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer.<br />
+		Default is empty (disabled).');
 
 $section->addInput(new Form_Input(
 	'publickey',
@@ -175,21 +177,6 @@ $section->addInput(new Form_Input(
 	$pconfig['publickey']
 ))->setHelp('WireGuard public key for this peer.');
 
-$section->addInput(new Form_Input(
-	'allowedips',
-	'Allowed IPs',
-	'text',
-	$pconfig['allowedips']
-))->setHelp('List of CIDR-masked IPv4 and IPv6 subnets reached via this peer.%1$s ' .
-		'Routes for these subnets are automatically added to the routing table, except for default routes.', '<br/>');
-
-$section->addInput(new Form_Input(
-	'peerwgaddr',
-	'Peer Address',
-	'text',
-	$pconfig['peerwgaddr']
-))->setHelp('Peer IPv4/IPv6 tunnel interface addresses (comma separated) since they can differ from Allowed IPs.', '<br/>');
-
 $group = new Form_Group('Pre-shared Key');
 
 $group->add(new Form_Input(
@@ -197,29 +184,68 @@ $group->add(new Form_Input(
 	'Pre-shared Key',
 	$secrets_input_type,
 	$pconfig['presharedkey']
-))->setHelp('Optional pre-shared key for this tunnel (%sCopy%s)', '<a id="copypsk" href="#">', '</a>');
+))->setHelp('Optional pre-shared key for this tunnel.');
 
 $group->add(new Form_Button(
 	'genpsk',
 	'Generate',
 	null,
 	'fa-key'
-))->addClass('btn-primary btn-xs')->setHelp('New PSK');
+))->addClass('btn-primary')
+	->setHelp('New PSK');
 
 $section->add($group);
+
+// TODO
+$allowedips = explode(" ", $pconfig['allowedips']);
+
+//foreach ($allowedips as $ip => $index) {
+
+	$group = new Form_Group("Allowed IPs");
+
+	$group->addClass('repeatable');
+
+	$group->add(new Form_IpAddress(
+		"address{$counter}",
+		'Allowed IPs',
+		$address,
+		'BOTH'
+	))->addMask('address_subnet[]', $address_subnet)
+		->setWidth(5)
+		->setHelp('An IPv4/IPv6 subnet or host reached via this peer.<br />
+				Routes are automatically added to the routing table unless disabled.');
+
+	$group->add(new Form_Checkbox(
+		"peeraddress{$counter}",
+		null,
+		'Peer Address',
+		false
+	))->setWidth(3)
+		->setHelp('Mark entry as a peer address.');
+
+	$group->add(new Form_Button(
+		"deleterow{$counter}",
+		'Delete',
+		null,
+		'fa-trash'
+	))->addClass('btn-warning');
+
+	$section->add($group);
+
+//}
+
+$form->addGlobal(new Form_Button(
+	'addrow',
+	'Add',
+	null,
+	'fa-plus'
+))->addClass('btn-success addbtn');
 
 $form->add($section);
 
 print($form);
 
 ?>
-
-<nav class="action-buttons">
-	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save peer')?>">
-		<i class="fa fa-save icon-embed-btn"></i>
-		<?=gettext("Save")?>
-	</button>
-</nav>
 
 <?php $genkeywarning = gettext("Are you sure you want to overwrite the pre-shared key?"); ?>
 
