@@ -331,6 +331,12 @@ events.push(function() {
 
 	});
 
+	// Save the form
+	$('#saveform').click(function () {
+		$(form).submit();
+	});
+
+
 });
 //]]>
 </script>
