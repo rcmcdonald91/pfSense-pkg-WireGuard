@@ -219,7 +219,7 @@ $section->addInput(new Form_Input(
 	'listenport',
 	'Listen Port',
 	'text',
-	$pconfig['interface']['listenport'],
+	$pconfig['listenport'],
 	['placeholder' => next_wg_port()]
 ))->setHelp('Port used by this tunnel to communicate with peers');
 
@@ -229,14 +229,14 @@ $group->add(new Form_Input(
 	'privatekey',
 	'Private Key',
 	$secrets_input_type,
-	$pconfig['interface']['privatekey']
+	$pconfig['privatekey']
 ))->setHelp('Private key for this tunnel (Required)');
 
 $group->add(new Form_Input(
 	'publickey',
 	'Public Key',
 	'text',
-	$pconfig['interface']['publickey']
+	$pconfig['publickey']
 ))->setHelp('Public key for this tunnel (%sCopy%s)', '<a id="copypubkey" href="#">', '</a>')->setReadonly();
 
 $group->add(new Form_Button(
