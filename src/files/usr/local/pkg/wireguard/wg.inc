@@ -186,6 +186,18 @@ function build_tun_list() {
 
 }
 
+function wg_do_peer_post($post) {
+	global $config, $wgg;
+
+	wg_globals();
+
+	$input_errors = array();
+
+
+
+
+}
+
 // Write new tunnel values to the configuration system
 function wg_do_post($post) {
 	global $config, $wgg;
@@ -221,33 +233,6 @@ function wg_do_post($post) {
 	$pconfig['interface']['publickey'] = genPubKey($post['privatekey']);
 
 	$pconfig['interface']['mtu'] = $post['mtu'];
-
-	if (!empty($post['endpoint'])) {
-
-		// Peers section
-		$pconfig['peers'] = array();
-
-		$pconfig['peers']['wgpeer'] = array();
-
-		for ($idx = 0; $idx < count($post['endpoint']); $idx++) {
-
-			$peer = array();
-			$peer['publickey'] = $post['publickeyp'][$idx];
-			$peer['endpoint'] = $post['endpoint'][$idx];
-			$peer['allowedips'] = $post['allowedips'][$idx];
-			$peer['descr'] = $post['descp'][$idx];
-			$peer['persistentkeepalive'] = $post['persistentkeepalive'][$idx];
-			$peer['presharedkey'] = $post['presharedkey'][$idx];
-			$peer['port'] = $post['port'][$idx];
-			$peer['peerwgaddr'] = $post['peerwgaddr'][$idx];
-
-			$pconfig['peers']['wgpeer'][] = $peer;
-
-		}
-
-	} else {
-		unset($pconfig['peers']);
-	}
 
 	$input_errors = wg_validate_post($pconfig);
 

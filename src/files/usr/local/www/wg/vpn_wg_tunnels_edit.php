@@ -264,12 +264,50 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
-	$section->addInput(new Form_Input(
-		'address',
-		'Address',
-		'text',
-		$pconfig['interface']['address']
-	))->setHelp('Comma separated list of CIDR-masked IPv4 and IPv6 addresses assigned to the tunnel interface');
+	if (empty($pconfig['addresses'])) {
+
+		$pconfig['addresses'] = '';
+	
+	}
+
+	$addresses = explode(" ", $pconfig['addresses']);
+
+	$last = count($addresses) - 1;
+
+	foreach ($addresses as $counter => $ip) {
+
+		list($address, $address_subnet) = explode("/", $ip);
+	
+		$group = new Form_Group($counter == 0 ? "Allowed IPs" : '');
+	
+		$group->addClass('repeatable');
+
+		$group->add(new Form_IpAddress(
+			"address{$counter}",
+			'Allowed IPs',
+			$address,
+			'BOTH'
+		))->setHelp($counter == $last ? 'An IPv4 and IPv6 address assigned to the tunnel interface' : null)
+			->addMask("address_subnet{$counter}", $address_subnet)
+			->setWidth(5);
+
+		$group->add(new Form_Button(
+			"deleterow{$counter}",
+			'Delete',
+			null,
+			'fa-trash'
+		))->addClass('btn-warning');
+	
+		$section->add($group);
+
+		$form->addGlobal(new Form_Button(
+			'addrow',
+			'Add Address',
+			null,
+			'fa-plus'
+		))->addClass('btn-success addbtn');
+
+	}
 
 } else {
 

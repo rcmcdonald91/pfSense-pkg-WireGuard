@@ -76,7 +76,7 @@ if ($_POST) {
 	if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
 
 		// Looks like we are editing an existing tunnel
-		$pconfig = &$wgg['peer'][$peer_id];
+		$pconfig = &$wgg['peers'][$peer_id];
 
 	} else {
 
@@ -88,6 +88,8 @@ if ($_POST) {
 
 		// Automatically choose a tunnel based on request 
 		$pconfig['tun'] = $tun;
+
+		echo("new peer");
 
 	}
 
@@ -143,7 +145,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels'])) {
 
 	$section->addInput(new Form_StaticText(
 		'Tunnel',
-		'No WireGuard tunnels have been defined. (<a href="vpn_wg_tunnels.php">Create a Tunnel</a>)'
+		'No WireGuard tunnels have been defined. (<a href="vpn_wg_tunnels_edit.php">Create a New Tunnel</a>)'
 	));
 
 }
@@ -211,31 +213,42 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
+if (empty($pconfig['allowedips'])) {
+
+	$pconfig['allowedips'] = '';
+
+}
+
 $allowedips = explode(" ", $pconfig['allowedips']);
 
-foreach ($allowedips as $ip => $counter) {
+$last = count($allowedips) - 1;
 
-	$group = new Form_Group("Allowed IPs");
+foreach ($allowedips as $counter => $ip) {
+
+	list($address, $address_subnet) = explode("/", $ip);
+
+	$group = new Form_Group($counter == 0 ? "Allowed IPs" : '');
 
 	$group->addClass('repeatable');
+
+	$address_help_txt = 	'An IPv4/IPv6 subnet or host reached via this peer.<br />
+				Routes are automatically added to the routing table unless disabled.';
 
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
 		'Allowed IPs',
-		$ip,
+		$address,
 		'BOTH'
-	))->addMask('address_subnet[]', $address_subnet)
+	))->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
 		->setWidth(5)
-		->setHelp('An IPv4/IPv6 subnet or host reached via this peer.<br />
-				Routes are automatically added to the routing table unless disabled.');
+		->setHelp($counter == $last ? $address_help_txt : null);
 
 	$group->add(new Form_Checkbox(
 		"peeraddress{$counter}",
 		null,
-		'Peer Address',
+		'Is a Peer Address?',
 		false
-	))->setWidth(3)
-		->setHelp('Mark entry as a peer address.');
+	))->setWidth(3);
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
