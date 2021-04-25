@@ -261,9 +261,9 @@ foreach ($allowedips as $counter => $ip) {
 
 }
 
-$form->addGlobal(new Form_Button(
+$section->addInput(new Form_Button(
 	'addrow',
-	'Add',
+	'Add Allowed IP',
 	null,
 	'fa-plus'
 ))->addClass('btn-success addbtn');
@@ -273,6 +273,13 @@ $form->add($section);
 print($form);
 
 ?>
+
+<nav>
+	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
+		<i class="fa fa-save icon-embed-btn"></i>
+		<?=gettext("Save")?>
+	</button>
+</nav>
 
 <?php $genkeywarning = gettext("Are you sure you want to overwrite the pre-shared key?"); ?>
 

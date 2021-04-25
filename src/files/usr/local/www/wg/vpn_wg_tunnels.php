@@ -128,18 +128,6 @@ display_top_tabs($tab_array);
 
 			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
 
-			if (!$tunnel['peers'] || !is_array($tunnel['peers'])) {
-
-				$tunnel['peers'] = array();
-
-			}
-
-			if (!$tunnel['peers']['wgpeer'] || !is_array($tunnel['peers']['wgpeer'])) {
-
-				$tunnel['peers']['wgpeer'] = array();
-
-			}
-
 			if (is_wg_tunnel_assigned($tunnel)) {
 
 				// We want all configured interfaces, including disabled ones

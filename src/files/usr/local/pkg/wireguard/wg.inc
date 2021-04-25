@@ -290,6 +290,8 @@ function wg_do_post($post) {
 
 }
 
+
+
 function wg_resync($verbose = false) {
 	global $config, $g, $wgg;
 
