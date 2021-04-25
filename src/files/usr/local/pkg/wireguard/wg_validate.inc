@@ -48,25 +48,28 @@ function wg_validate_post($pconfig) {
 		$addrs = explode(",", $pconfig['interface']['address']);
 
 		foreach ($addrs as $addr) {
+
 			$addr = trim($addr);
 
 			// Interface address is not technically required anymore
 			if (!empty($addr) && !is_subnet($addr)) {
-				$input_errors[] = sprintf(gettext(
-					'%1$s is not a valid CIDR address'), $addr);
+
+				$input_errors[] = gettext("{$addr} is not a valid CIDR address");
+
 			}
 
 			$a = explode("/", $addr);
-			$conflicts = where_is_ipaddr_configured($a[0], $skip, true,
-				true, $a[1]);
+
+			$conflicts = where_is_ipaddr_configured($a[0], $skip, true, true, $a[1]);
 
 			if (!empty($conflicts)) {
+
 				foreach ($conflicts as $conflict) {
-					$input_errors[] = sprintf(gettext(
-						'%1$s is already configured on this ' .
-						'firewall: %2$s (%3$s)'), $addr,
-						strtoupper($conflict['if']),
-						$conflict['ip_or_subnet']);
+
+					$ifname = strtoupper($conflict['if']);
+
+					$input_errors[] = gettext("{$addr} is already configured on this firewall: {$ifname} ({$conflict['ip_or_subnet']})");
+				
 				}
 			}
 		}
@@ -81,26 +84,22 @@ function wg_validate_post($pconfig) {
 
 	// Check listen port
 	$lport = $pconfig['interface']['listenport'];
+
 	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
+
 		$input_errors[] = gettext("Invalid interface listen port.");
+
 	}
 
 	// Check keys
 	if (empty($pconfig['interface']['privatekey'])) {
-		$input_errors[] = gettext("Private key must be specified.");
-	}
 
-	// Now the peers
-	if (isset($pconfig['peers']['wgpeer'])) {
-		$idx = 0;
-		foreach ($pconfig['peers']['wgpeer'] as $peer) {
-			$input_errors = array_merge($input_errors,
-			    wg_validate_peer($idx, $peer));
-			$idx++;
-		}
+		$input_errors[] = gettext("Private key must be specified.");
+
 	}
 
 	return $input_errors;
+	
 }
 
 // Valildate a peer
