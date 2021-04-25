@@ -243,7 +243,9 @@ $group->add(new Form_Button(
 	'Generate',
 	null,
 	'fa-key'
-))->setWidth(1)->addClass('btn-primary btn-xs')->setHelp('New Keys');
+))->addClass('btn-primary btn-xs')
+	->setHelp('New Keys')
+	->setWidth(1);
 
 $section->add($group);
 
@@ -278,16 +280,16 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 		list($address, $address_subnet) = explode("/", $ip);
 	
-		$group = new Form_Group($counter == 0 ? "Allowed IPs" : '');
+		$group = new Form_Group($counter == 0 ? "Interface Address" : '');
 	
 		$group->addClass('repeatable');
 
 		$group->add(new Form_IpAddress(
 			"address{$counter}",
-			'Allowed IPs',
+			'Interface Address',
 			$address,
 			'BOTH'
-		))->setHelp($counter == $last ? 'An IPv4 and IPv6 address assigned to the tunnel interface' : null)
+		))->setHelp($counter == $last ? 'An IPv4 or IPv6 address assigned to the tunnel interface' : null)
 			->addMask("address_subnet{$counter}", $address_subnet)
 			->setWidth(5);
 
@@ -300,14 +302,14 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	
 		$section->add($group);
 
-		$form->addGlobal(new Form_Button(
-			'addrow',
-			'Add Address',
-			null,
-			'fa-plus'
-		))->addClass('btn-success addbtn');
-
 	}
+
+	$section->addInput(new Form_Button(
+		'addrow',
+		'Add Address',
+		null,
+		'fa-plus'
+	))->addClass('btn-success addbtn');
 
 } else {
 
@@ -382,17 +384,18 @@ else:
 			</thead>
 			<tbody>
 <?php
+		$peers = wg_get_tunnel_peers($pconfig['name']);
 
-		if (!empty($pconfig['peers']['wgpeer'])):
+		if (!empty($peers)):
 
-			foreach ($pconfig['peers']['wgpeer'] as $peer_id => $peer):
+			foreach ($peers as $peer):
 
 				$icon_toggle = ($peer['enabled'] == 'yes') ? 'ban' : 'check-square-o';
 
 				$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
 
 ?>
-				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>';" class="<?=$entryStatus?>">
+				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=$entryStatus?>">
 					<td><?=$peer_id?></td>
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars($peer['peerwgaddr'])?></td>
@@ -401,9 +404,9 @@ else:
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td style="cursor: pointer;">
-						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?tunid={$tun_id}&peerid={$peer_id}"?>"></a>
-						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tunid={$tun_id}&peerid={$peer_id}"?>" usepost></a>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&tunid={$tun_id}&peerid={$peer_id}"?>" usepost></a>
+						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
+						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer['index']}"?>" usepost></a>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer['index']}"?>" usepost></a>
 					</td>
 				</tr>
 
@@ -425,7 +428,7 @@ endif;
 // We cheat here and show a disabled button for a better user experience
 if ($is_new):
 ?>
-	<button class="btn btn-sm btn-success" title="<?=gettext('Add Peer')?>" disabled>
+	<button class="btn btn-success" title="<?=gettext('Add Peer')?>" disabled>
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</button>
@@ -433,14 +436,15 @@ if ($is_new):
 // Now we show the actual link to add peer once the tunnel is actually saved
 else:
 ?>
-	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
+	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</a>
 <?php
 endif;
 ?>
-	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
+
+	<button type="submit" id="saveform" name="saveform" class="btn btn-primary" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save")?>
 	</button>

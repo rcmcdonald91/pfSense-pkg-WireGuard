@@ -171,10 +171,33 @@ function wg_delete_tunnel($tun_id) {
 
 }
 
+function wg_get_tunnel_peers($tunnel) {
+	global $config, $wgg;
+
+	$a_ret = array();
+
+	foreach ($wgg['peers'] as $peer_id => $peer) {
+
+		if ($peer['tun'] == $tunnel) {
+
+			$peer['index'] = $peer_id;
+
+			$a_ret[] = $peer;
+
+		}
+
+	}
+
+	return $a_ret;
+
+}
+
 function build_tun_list() {
 	global $config, $wgg;
 
 	$a_ret = array();
+
+	$a_ret['unassigned'] = 'Unassigned';
 
 	foreach ($wgg['tunnels'] as $tunnel) {
 
