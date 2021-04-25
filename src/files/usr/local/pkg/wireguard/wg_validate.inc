@@ -103,76 +103,48 @@ function wg_validate_post($pconfig) {
 }
 
 // Valildate a peer
-function wg_validate_peer($idx, $peer) {
-	global $wgpeerdefaultroute;
+function wg_validate_peer_post($post) {
 
 	$input_errors = array();
 
 	// Check remote port
-	$rport = $peer['port'];
+	$rport = $post['port'];
+
 	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
-		$input_errors[] = sprintf(gettext(
-		    'Peer %1$s: Invalid remote port. (%2$s)'), $idx, $rport);
+
+		$input_errors[] = gettext("Invalid remote port. ({$rport}})");
 	}
 
 	// Check key
 	if (empty($peer['publickey'])) {
-		$input_errors[] = sprintf(gettext(
-		    'Peer %1$s: A public key must be specified'), $idx);
+
+		$input_errors[] = gettext("A public key must be specified");
+
 	}
 
 	// Endpoint
+
 	$ep = trim($peer['endpoint']);
+
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
-		$input_errors[] = sprintf(gettext(
-		    'Peer %1$s: Endpoint must be a valid IPv4 or IPv6 ' .
-		    'adress or hostname.'), $idx);
+
+		$input_errors[] = gettext("Endpoint must be a valid IPv4 or IPv6 adress or hostname.");
 	}
 
 	// Allowed IPs
 	if (!empty($peer['allowedips'])) {
-		foreach (explode(",", $peer['allowedips']) as $ip) {
-			if (!is_subnet(trim($ip))) {
-				$input_errors[] = sprintf(gettext(
-				    'Peer %1$s: Address %2$s is not a valid ' .
-				    'IPv4 or IPv6 CIDR subnet address.'),
-					$idx, $ip);
-			}
-		}
-	}
 
-	// Default route, see https://redmine.pfsense.org/issues/11465
-	$defroute = wg_defaultroute_check($peer);
-	if ($defroute) { 
-		if ((($defroute == 'all') && !empty($wgpeerdefaultroute)) ||
-		    (($defroute == 'ipv4') && in_array('ipv4', $wgpeerdefaultroute)) ||
-		    (($defroute == 'ipv6') && in_array('ipv6', $wgpeerdefaultroute))) {
-			$input_errors[] = sprintf(gettext(
-			    'Peer %1$s: Only one endpoint per address family can be the default route ' .
-			    '(0.0.0.0/0, ::/0, or blank in the Allowed IPs field).'), $idx);
-		} else {
-			$wgpeerdefaultroute[] = $defroute;
+		foreach (explode(",", $peer['allowedips']) as $ip) {
+
+			if (!is_subnet(trim($ip))) {
+
+				$input_errors[] =gettext("Address {$ip} is not a valid IPv4 or IPv6 CIDR subnet address.");
+
+			}
 		}
 	}
 
 	return $input_errors;
-}
-
-function wg_defaultroute_check($peer) {
-
-	if (empty($peer['allowedips'])) {
-		return 'all';
-	} else {
-		foreach (explode(",", $peer['allowedips']) as $ip) {
-			$ip = trim($ip);
-			if ($ip == '0.0.0.0/0') {
-				return 'ipv4';
-			} elseif ($ip == '::/0') {
-				return 'ipv6';
-			}
-		}
-	}
-	return false;
 }
 
 // Check if wg tunnel is assigned to an interface
