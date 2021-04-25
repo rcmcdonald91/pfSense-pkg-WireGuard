@@ -1,7 +1,6 @@
 <?php
-
 /*
- * vpn_wg_edit.php
+ * vpn_wg_tunnels_edit.php
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
@@ -25,7 +24,7 @@
 ##|*IDENT=page-vpn-wireguard
 ##|*NAME=VPN: WireGuard: Edit
 ##|*DESCR=Allow access to the 'VPN: WireGuard' page.
-##|*MATCH=vpn_wg_edit.php*
+##|*MATCH=vpn_wg_tunnels_edit.php*
 ##|-PRIV
 
 // pfSense includes
@@ -154,6 +153,7 @@ $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "@self"
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_peers.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 

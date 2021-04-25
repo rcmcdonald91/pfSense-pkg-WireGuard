@@ -47,6 +47,19 @@ if (isset($_REQUEST['tun'])) {
 
 	$tunnel = $wgg['tunnels'][$tun_id];
 
+	// User is somehow trying to add a peer to an invalid tunnel, bail out.
+	if (!isset($tunnel)) {
+	
+		header('Location: vpn_wg_tunnels_edit.php');
+
+	}
+
+}
+
+if (is_numericint($_REQUEST['peerid'])) {
+	
+	$peer_id = $_REQUEST['peerid'];
+
 }
 
 // All form save logic is in /etc/inc/wg.inc
@@ -60,7 +73,7 @@ if ($_POST) {
 
 } else {
 
-	if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+	if (isset($peer_id) && is_array($wgg['tunnels'][$tun_id]['peers']['wgpeer'][$peer_id])) {
 
 		// Looks like we are editing an existing peer 
 		$pconfig = &$wgg['tunnels'][$tun_id]['peers']['wgpeer'][$peer_id];
@@ -70,9 +83,11 @@ if ($_POST) {
 		// We are creating a new peer
 		$pconfig = array();
 
+		// Default to enabled
+		$pconfig['enabled'] = 'yes';
+
 	}
 
-	
 }
 
 $shortcut_section = "wireguard";
@@ -81,7 +96,8 @@ $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), $tunn
 $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels_edit.php?tun={$tunnel['name']}", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_peers.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
@@ -174,8 +190,7 @@ $group->add(new Form_Input(
 	'Pre-shared Key',
 	$secrets_input_type,
 	$pconfig['presharedkey']
-))->setHelp('Optional Pre-shared Key for this peer.%1$s ' .
-		'Mixes symmetric-key cryptography into public-key cryptography for post-quantum resistance.', '<br/>');
+))->setHelp('Optional pre-shared key for this tunnel (%sCopy%s)', '<a id="copypsk" href="#">', '</a>');
 
 $group->add(new Form_Button(
 	'genpsk',
@@ -197,7 +212,47 @@ print($form);
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save")?>
 	</button>
-</nav>
+	</nav>
+
+<?php $genkeywarning = gettext("Are you sure you want to overwrite the pre-shared key?"); ?>
+
+<!-- ============== JavaScript =================================================================================================-->
+<script type="text/javascript">
+//<![CDATA[
+events.push(function() {
+
+	$('#copypsk').click(function () {
+		$('#presharedkey').focus();
+		$('#presharedkey').select();
+		document.execCommand("copy");
+	});
+
+	// These are action buttons, not submit buttons
+	$('#genpsk').prop('type','button');
+
+	$('#genpsk').click(function () {
+		ajaxRequest = $.ajax(
+			{
+				url: "/wg/vpn_wg_edit.php",
+				type: "post",
+				data: {
+					ajax: 	"ajax",
+					action: "genpsk"
+				}
+			}
+		);
+
+		// Deal with the results of the above ajax call
+		ajaxRequest.done(function (response, textStatus, jqXHR) {
+			if (response.length > 0) {
+				$('#presharedkey').val(response);
+			}
+		});
+	});
+
+});
+//]]>
+</script>
 
 <?php
 
