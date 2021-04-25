@@ -65,35 +65,24 @@ if (is_numericint($_REQUEST['peerid'])) {
 // All form save logic is in /etc/inc/wg.inc
 if ($_POST) {
 
-	if ($_POST['save']) {
+	if ($_POST['act'] == 'genpsk') {
 
-		echo("SAVED");
+		// Process ajax call requesting new pre-shared key
+		print(wg_gen_psk());
+
+		exit;
 
 	}
 
 } else {
 
-	if (isset($peer_id) && is_array($wgg['tunnels'][$tun_id]['peers']['wgpeer'][$peer_id])) {
-
-		// Looks like we are editing an existing peer 
-		$pconfig = &$wgg['tunnels'][$tun_id]['peers']['wgpeer'][$peer_id];
-
-	} else {
-
-		// We are creating a new peer
-		$pconfig = array();
-
-		// Default to enabled
-		$pconfig['enabled'] = 'yes';
-
-	}
 
 }
 
 $shortcut_section = "wireguard";
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), $tunnel['name'], "Peer {$peer_id} ({$peer['descr']})");
-$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels_edit.php?tun={$tunnel['name']}", "@self");
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), "PEER");
+$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_peers.php", "@self");
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
@@ -111,7 +100,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section("Peer Configuration ({$peer['descr']})");
+$section = new Form_Section("Peer Configuration (PEER)");
 
 $form->addGlobal(new Form_Input(
 	'peer_id',
@@ -127,18 +116,22 @@ $section->addInput(new Form_Checkbox(
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>Unset this option to disable this peer without removing it from the list.');
 
-if (true) {
+if (is_array($wgg['tunnels']) && count($wgg['tunnels'])) {
+
 	$section->addInput($input = new Form_Select(
 		'tun',
 		'Tunnel',
 		$pconfig['tun'],
-		['tun_wg0' => 'tun_wg0', 'tun_wg1' => 'tun_wg1']
-	))->setHelp('The tunnel to assign to this peer.');
+		build_tun_list()
+	))->setHelp('WireGuard tunnel for this peer.');
+
 } else {
+
 	$section->addInput(new Form_StaticText(
 		'Tunnel',
-		'No tunnels have been defined.'
+		'No WireGuard tunnels have been defined. (<a href="vpn_wg_tunnels.php">Create a Tunnel</a>)'
 	));
+
 }
 
 $section->addInput(new Form_Input(
@@ -180,7 +173,7 @@ $section->addInput(new Form_Input(
 	'*Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp('WireGuard Public Key for this peer.');
+))->setHelp('WireGuard public key for this peer.');
 
 $section->addInput(new Form_Input(
 	'allowedips',
@@ -244,24 +237,21 @@ events.push(function() {
 	// These are action buttons, not submit buttons
 	$('#genpsk').prop('type','button');
 
-	$('#genpsk').click(function () {
-		ajaxRequest = $.ajax(
-			{
-				url: "/wg/vpn_wg_edit.php",
+	// Request a new pre-shared key
+	$('#genpsk').click(function(event) {
+		if ($('#presharedkey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
+			ajaxRequest = $.ajax({
+				url: "/wg/vpn_wg_peers_edit.php",
 				type: "post",
 				data: {
-					ajax: 	"ajax",
-					action: "genpsk"
+					act: 	"genpsk"
+				},
+				success: function(response, textStatus, jqXHR) {
+					$('#presharedkey').val(response);
 				}
-			}
-		);
-
-		// Deal with the results of the above ajax call
-		ajaxRequest.done(function (response, textStatus, jqXHR) {
-			if (response.length > 0) {
-				$('#presharedkey').val(response);
-			}
+			});
 		});
+
 	});
 
 });

@@ -152,7 +152,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 }
 
 // Generate a pre-shared key
-function genPSK() {
+function wg_gen_psk() {
 	global $wgg;
 
 	$psk = exec("{$wgg['wg']} genpsk");

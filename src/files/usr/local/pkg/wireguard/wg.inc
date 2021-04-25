@@ -171,6 +171,21 @@ function wg_delete_tunnel($tun_id) {
 
 }
 
+function build_tun_list() {
+	global $config, $wgg;
+
+	$a_ret = array();
+
+	foreach ($wgg['tunnels'] as $tunnel) {
+
+		$a_ret[$tunnel['name']] = "{$tunnel['name']} ({$tunnel['descr']})";	
+
+	}
+
+	return $a_ret;
+
+}
+
 // Write new tunnel values to the configuration system
 function wg_do_post($post) {
 	global $config, $wgg;

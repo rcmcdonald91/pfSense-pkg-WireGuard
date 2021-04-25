@@ -427,12 +427,13 @@ events.push(function() {
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
 		if ($('#privatekey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
-			ajaxRequest = $.ajax('/wg/vpn_wg_tunnels_edit.php',
+			ajaxRequest = $.ajax(
 				{
-				type: 'post',
-				data: {
-					act: 'genkeys'
-				},
+					url: '/wg/vpn_wg_tunnels_edit.php',
+					type: 'post',
+					data: {
+						act: 'genkeys'
+					},
 				success: function(response, textStatus, jqXHR) {
 					resp = JSON.parse(response);
 					$('#publickey').val(resp.pubkey);

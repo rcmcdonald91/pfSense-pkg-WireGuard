@@ -81,7 +81,7 @@ if ($_POST) {
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"));
-$pglinks = array("", "@self", "@self");
+$pglinks = array("", "/wg/vpn_wg_tunnels.php", "@self");
 
 $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
