@@ -163,7 +163,7 @@ $section->addInput(new Form_Checkbox(
 	'Dynamic Endpoint',
 	gettext('Dynamic'),
 	empty($pconfig['endpoint']) || $is_dynamic
-))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to disable this peer without removing it from the list.');
+))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to assign an endpoint address and port for this peer.');
 
 $group = new Form_Group('Endpoint');
 
@@ -220,15 +220,16 @@ $group->add(new Form_Button(
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
-	->setHelp('New Pre-shared key');
+	->setHelp('New Pre-shared Key');
 
 $section->add($group);
 
 $section->addInput(new Form_StaticText(
 	'Allowed IPs',
-	'A list of IPv4/IPv6 subnets or hosts (/32 or /128) reached via this peer.'
+	'A list of IPv4/IPv6 subnets or hosts (/32 for IPv4 or /128 for IPv6) reachable via this peer.'
 ));
 
+// This is a hack to ensure the default subnet selection isn't /0
 if (empty($pconfig['allowedips'])) {
 
 	$pconfig['allowedips'] = '/128';
