@@ -54,8 +54,6 @@ if ($_POST) {
 
 				wg_toggle_tunnel($tun_id);
 
-				header("Location: /wg/vpn_wg_tunnels.php");
-
 			}
 
 		} elseif ($_POST['act'] == 'delete') { 
@@ -67,8 +65,6 @@ if ($_POST) {
 			} else {
 		
 				wg_delete_tunnel($tun_id);
-		
-				header("Location: /wg/vpn_wg_tunnels.php");
 		
 			}
 
@@ -138,7 +134,7 @@ display_top_tabs($tab_array);
 
 				$iffriendly = $ifdescr[$iflist[$tunnel['name']]];
 
-				$tunnel['interface']['address'] = $iffriendly;
+				$tunnel['addresses'] = $iffriendly;
 
 			}
 
@@ -149,7 +145,7 @@ display_top_tabs($tab_array);
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td><?=htmlspecialchars($tunnel['addresses'])?></td>
+						<td><?=htmlspecialchars(explode(',', $tunnel['addresses'])[0])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 

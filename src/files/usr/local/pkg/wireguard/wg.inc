@@ -96,7 +96,7 @@ function wg_toggle_tunnel($tun_id) {
 	// Make sure we have the latest info
 	wg_globals();
 
-	// Make sure we have a tunnel
+	// Make sure we have a valid tunnel
 	if (isset($wgg['tunnels'][$tun_id])) {
 
 		$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
@@ -122,6 +122,29 @@ function wg_toggle_tunnel($tun_id) {
 			wg_destroy_if($tunnel);
 
 		}
+
+	}
+
+}
+
+function wg_toggle_peer($peer_id) {
+	global $config, $wgg;
+
+	// Make sure we have the latest info
+	wg_globals();
+
+	// Make sure we have a valid peer
+	if (isset($wgg['peers'][$peer_id])) {
+
+		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id]['enabled'] == 'yes') ? 'no' : 'yes';
+
+		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} toggled.");
+
+		wg_globals();
+
+		wg_create_config_files();
+		
+		wg_ifgroup_install();
 
 	}
 

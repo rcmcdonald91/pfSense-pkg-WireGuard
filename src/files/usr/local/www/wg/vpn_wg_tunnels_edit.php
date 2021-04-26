@@ -109,14 +109,14 @@ if ($_POST) {
 		print(wg_gen_keypair(true));
 
 		exit;
-
+		
 	} elseif ($_POST['act'] == 'toggle') {
 
-		exit;
-		
+		wg_toggle_peer($_POST['peer']);
+
 	} elseif ($_POST['act'] == 'delete') {
 
-		exit;
+		wg_delete_peer($_POST['peer']);
 
 	}
 

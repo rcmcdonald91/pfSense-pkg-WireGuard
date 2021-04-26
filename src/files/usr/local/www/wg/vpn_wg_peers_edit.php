@@ -217,7 +217,6 @@ $section->addInput(new Form_StaticText(
 	'A list of IPv4/IPv6 subnets or hosts (/32 or /128) reached via this peer.'
 ));
 
-
 if (empty($pconfig['allowedips'])) {
 
 	$pconfig['allowedips'] = '/128';

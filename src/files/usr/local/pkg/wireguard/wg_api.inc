@@ -60,7 +60,7 @@ function wg_interface_status() {
 function wg_pkg_info() {
 	global $wgg;
 
-	$packages = escapeshellarg(implode(" ", $wgg['pkg_names']));
+	$packages = implode(" ", $wgg['pkg_names']);
 
 	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
 
