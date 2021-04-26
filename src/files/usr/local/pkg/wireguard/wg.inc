@@ -127,6 +127,21 @@ function wg_toggle_tunnel($tun_id) {
 
 }
 
+function wg_delete_peer($peer_id) {
+	global $config, $wgg;
+
+	wg_globals();
+
+	if (isset($wgg['peers'][$peer_id])) {
+
+		unnset($wgg['peers'][$peer_id]);
+
+		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
+
+	}
+
+}
+
 function wg_delete_tunnel($tun_id) {
 	global $config, $wgg;
 

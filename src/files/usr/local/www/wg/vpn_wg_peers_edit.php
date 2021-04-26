@@ -98,7 +98,7 @@ if ($_POST) {
 
 		// Automatically choose a tunnel based on request 
 		$pconfig['tun'] = $tun;
-		
+
 	}
 
 }
@@ -228,9 +228,14 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
+$section->addInput(new Form_StaticText(
+	'Allowed IPs',
+	'A list of IPv4/IPv6 subnets or hosts (/32 or /128) reached via this peer.'
+));
+
 if (empty($pconfig['allowedips'])) {
 
-	$pconfig['allowedips'] = '';
+	$pconfig['allowedips'] = '/128';
 
 }
 
@@ -242,12 +247,9 @@ foreach ($allowedips as $counter => $ip) {
 
 	list($address, $address_subnet) = explode("/", $ip);
 
-	$group = new Form_Group($counter == 0 ? "Allowed IPs" : '');
+	$group = new Form_Group(null);
 
 	$group->addClass('repeatable');
-
-	$address_help_txt = 	'An IPv4/IPv6 subnet or host reached via this peer.<br />
-				Routes are automatically added to the routing table unless disabled.';
 
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
@@ -255,15 +257,14 @@ foreach ($allowedips as $counter => $ip) {
 		$address,
 		'BOTH'
 	))->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
-		->setWidth(5)
-		->setHelp($counter == $last ? $address_help_txt : null);
+		->setWidth(5);
 
 	$group->add(new Form_Checkbox(
 		"peeraddress{$counter}",
 		null,
-		'Is a Peer Address?',
+		"Is Peer",
 		false
-	))->setWidth(3);
+	))->setWidth(1);
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",

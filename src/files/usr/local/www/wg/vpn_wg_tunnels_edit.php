@@ -397,7 +397,7 @@ else:
 
 ?>
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=$entryStatus?>">
-					<td><?=$peer_id?></td>
+					<td><?=$peer['index']?></td>
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars($peer['peerwgaddr'])?></td>
 					<td><?=htmlspecialchars($peer['allowedips'])?></td>

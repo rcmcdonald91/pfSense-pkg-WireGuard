@@ -40,37 +40,19 @@ wg_globals();
 
 if ($_POST) {
 
-	if (isset($_POST['tun'])) {
+	if (isset($_POST['peer'])) {
 
-		$tun_id = wg_get_tunnel_id($_POST['tun']);
+		$peer_id = $_POST['peer'];
 
 		if ($_POST['act'] == 'toggle') {
 
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
-			
-				$input_errors[] = gettext('Cannot toggle a WireGuard tunnel while it is assigned as an interface.');
-
-			} else {
-
-				wg_toggle_tunnel($tun_id);
-
-				header("Location: /wg/vpn_wg_tunnels.php");
-
-			}
+			header("Location: /wg/vpn_wg_peers.php");
 
 		} elseif ($_POST['act'] == 'delete') { 
-
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
 		
-				$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
-		
-			} else {
-		
-				wg_delete_tunnel($tun_id);
-		
-				header("Location: /wg/vpn_wg_tunnels.php");
-		
-			}
+			wg_delete_peer($peer_id);
+	
+			header("Location: /wg/vpn_wg_peers.php");
 
 		}
 
