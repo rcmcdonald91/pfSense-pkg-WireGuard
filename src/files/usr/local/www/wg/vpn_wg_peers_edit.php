@@ -67,6 +67,12 @@ if ($_POST) {
 
 		if (!$input_errors) {
 
+			// Create the new WG config files
+			wg_create_config_files();
+
+			// Attempt to reinstall the interface group to keep things clean
+			wg_ifgroup_install();
+			
 			// Save was successful
 			header("Location: /wg/vpn_wg_peers.php");
 

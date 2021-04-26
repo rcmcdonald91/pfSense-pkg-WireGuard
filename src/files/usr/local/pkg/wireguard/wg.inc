@@ -179,6 +179,12 @@ function wg_delete_peer($peer_id) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
+		// Create the new WG config files
+		wg_create_config_files();
+
+		// Attempt to reinstall the interface group to keep things clean
+		wg_ifgroup_install();
+
 	}
 
 }
@@ -561,43 +567,48 @@ function make_wg_conf($tunnel) {
 
 		foreach ($peers as $peer) {
 
-			$txt .= "# Peer: {$peer['descr']}\n";
+			if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 
-			$txt .= "[Peer]\n";
+				$txt .= "# Peer: {$peer['descr']}\n";
 
-			if (!empty($peer['publickey'])) {
+				$txt .= "[Peer]\n";
 
-				$txt .= "PublicKey = {$peer['publickey']}\n";
+				if (!empty($peer['publickey'])) {
+
+					$txt .= "PublicKey = {$peer['publickey']}\n";
+
+				}
+
+				if (!empty($peer['endpoint'])) {
+
+					$txt .= "EndPoint = ";
+
+					$txt .= is_ipaddrv6($peer['endpoint']) ? "[{$peer['endpoint']}]" : $peer['endpoint'];
+
+					$txt .= ":" . ((empty($peer['port'])) ? '51820' : $peer['port']) . "\n";
+
+				}
+
+				if (!empty($peer['allowedips'])) {
+
+					$txt .= "AllowedIPs = {$peer['allowedips']}\n";
+
+				}
+
+				if (!empty($peer['persistentkeepalive'])) {
+
+					$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
+				}
+
+				if (!empty($peer['presharedkey'])) {
+
+					$txt .= "PresharedKey = {$peer['presharedkey']}\n";
+				}
+
+				$txt .= "\n";
 
 			}
-
-			if (!empty($peer['endpoint'])) {
-
-				$txt .= "EndPoint = ";
-
-				$txt .= is_ipaddrv6($peer['endpoint']) ? "[{$peer['endpoint']}]" : $peer['endpoint'];
-
-				$txt .= ":" . ((empty($peer['port'])) ? '51820' : $peer['port']) . "\n";
-
-			}
-
-			if (!empty($peer['allowedips'])) {
-
-				$txt .= "AllowedIPs = {$peer['allowedips']}\n";
-
-			}
-
-			if (!empty($peer['persistentkeepalive'])) {
-
-				$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
-			}
-
-			if (!empty($peer['presharedkey'])) {
-
-				$txt .= "PresharedKey = {$peer['presharedkey']}\n";
-			}
-
-			$txt .= "\n";
+			
 		}
 
 	}
