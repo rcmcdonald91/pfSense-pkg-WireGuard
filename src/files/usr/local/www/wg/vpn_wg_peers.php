@@ -46,13 +46,11 @@ if ($_POST) {
 
 		if ($_POST['act'] == 'toggle') {
 
-			header("Location: /wg/vpn_wg_peers.php");
+			wg_toggle_peer($peer_id);
 
 		} elseif ($_POST['act'] == 'delete') { 
 		
 			wg_delete_peer($peer_id);
-	
-			header("Location: /wg/vpn_wg_peers.php");
 
 		}
 

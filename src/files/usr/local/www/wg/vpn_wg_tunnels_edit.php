@@ -44,6 +44,8 @@ $secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['
 
 if (isset($_REQUEST['tun'])) {
 
+	$tun = $_REQUEST['tun'];
+
 	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
 
 }
@@ -109,7 +111,7 @@ if ($_POST) {
 		print(wg_gen_keypair(true));
 
 		exit;
-		
+
 	} elseif ($_POST['act'] == 'toggle') {
 
 		wg_toggle_peer($_POST['peer']);
@@ -120,31 +122,29 @@ if ($_POST) {
 
 	}
 
+}
+
+if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+
+	// Looks like we are editing an existing tunnel
+	$pconfig = &$wgg['tunnels'][$tun_id];
+
+	$is_new = false;
+
 } else {
 
-	if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+	// We are creating a new tunnel
+	$pconfig = array();
 
-		// Looks like we are editing an existing tunnel
-		$pconfig = &$wgg['tunnels'][$tun_id];
+	// Default to enabled
+	$pconfig['enabled'] = 'yes';
 
-		$is_new = false;
-
-	} else {
-
-		// We are creating a new tunnel
-		$pconfig = array();
-
-		// Default to enabled
-		$pconfig['enabled'] = 'yes';
-
-		$pconfig['name'] = next_wg_if();
-
-	}
-
-	// Save the MTU settings prior to re(saving)
-	$pconfig['mtu'] = get_interface_mtu($pconfig['name']);
+	$pconfig['name'] = next_wg_if();
 
 }
+
+// Save the MTU settings prior to re(saving)
+$pconfig['mtu'] = get_interface_mtu($pconfig['name']);
 
 $shortcut_section = "wireguard";
 
@@ -406,8 +406,8 @@ else:
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
-						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer['index']}"?>" usepost></a>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer['index']}"?>" usepost></a>
+						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
 					</td>
 				</tr>
 
