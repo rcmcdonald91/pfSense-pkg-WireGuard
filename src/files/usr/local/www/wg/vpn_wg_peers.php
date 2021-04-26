@@ -111,7 +111,7 @@ display_top_tabs($tab_array);
 			$icon_toggle = ($peer['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
-					<tr ondblclick="document.location='vpn_wg_peers_edit.php?peer=';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>';" class="<?=$entryStatus?>">
 						<td><?=htmlspecialchars($peer['descr'])?></td>
 						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>

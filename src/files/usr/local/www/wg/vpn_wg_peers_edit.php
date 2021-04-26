@@ -262,12 +262,12 @@ foreach ($allowedips as $counter => $ip) {
 	))->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
 		->setWidth(5);
 
-	$group->add(new Form_Checkbox(
+/* 	$group->add(new Form_Checkbox(
 		"peeraddress{$counter}",
 		null,
 		"Is Peer",
 		false
-	))->setWidth(1);
+	))->setWidth(1); */
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
