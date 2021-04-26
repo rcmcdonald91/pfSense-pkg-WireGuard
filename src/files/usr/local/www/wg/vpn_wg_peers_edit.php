@@ -124,7 +124,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section("Peer Configuration (PEER)");
+$section = new Form_Section("Peer Configuration");
 
 $form->addGlobal(new Form_Input(
 	'index',
