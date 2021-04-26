@@ -39,7 +39,7 @@ require_once('wireguard/wg_validate.inc');
 
 global $wgg;
 
-// Setup WireGuard tunnel
+// Setup WireGuard tunnel...this needs to be reworked at some point
 function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
 
