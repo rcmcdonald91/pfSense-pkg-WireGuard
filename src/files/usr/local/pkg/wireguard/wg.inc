@@ -58,7 +58,7 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	wg_syncconf($tunnel);
 
 	$wg_ifname = escapeshellarg($tunnel['name']);
-	$group_ifname =escapeshellarg($wgg['ifgroupentry']['ifname'])
+	$group_ifname =escapeshellarg($wgg['ifgroupentry']['ifname']);
 
 	// Add the interface to the interface group (i.e. WireGuard)
 	mwexec("{$wgg['ifconfig']} {$wg_ifname} group {$group_ifname}");
