@@ -43,7 +43,7 @@ global $wgg;
 
 $shortcut_section = "wireguard";
 
-$pgtitle = array(gettext("Status"), "WireGuard");
+$pgtitle = array(gettext("Status"), gettext("WireGuard"));
 $pglinks = array("", "@self");
 
 $tab_array = array();
@@ -68,37 +68,37 @@ display_top_tabs($tab_array);
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Connection Status</h2>
+		<h2 class="panel-title"><?=gettext('Connection Status')?></h2>
 	</div>
 	<div class="panel-body">
 		<dl class="dl-horizontal">
-			<pre><?=wg_status(); ?></pre>
+			<pre><?=htmlspecialchars(wg_status())?></pre>
 		</dl>
     </div>
 </div>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Interface Status</h2>
+		<h2 class="panel-title"><?=gettext('Interface Status')?></h2>
 	</div>
 	<div class="panel-body">
 		<dl class="dl-horizontal">
-			<pre><?=wg_interface_status(); ?></pre>
+			<pre><?=htmlspecialchars(wg_interface_status())?></pre>
 		</dl>
     </div>
 </div>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Package Versions</h2>
+		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
 		<table class="table table-hover table-striped table-condensed">
 			<thead>
 				<tr>
-					<th>Name</th>
-					<th>Version</th>
-    					<th>Comment</th>
+					<th><?=gettext('Name')?></th>
+					<th><?=gettext('Version')?></th>
+    					<th><?=gettext('Comment')?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -110,9 +110,9 @@ display_top_tabs($tab_array);
 
 ?>
     				<tr>
-        				<td><?=$package[0]?></td>
-    					<td><?=$package[1]?></td>
-					<td><?=$package[2]?></td>
+        				<td><?=htmlspecialchars($package[0])?></td>
+    					<td><?=htmlspecialchars($package[1])?></td>
+					<td><?=htmlspecialchars($package[2])?></td>
 
 				</tr>
 <?php
@@ -124,4 +124,6 @@ display_top_tabs($tab_array);
 	</div>
 </div>
 
-<?php include("foot.inc"); ?>
+<?php 
+include("foot.inc"); 
+?>

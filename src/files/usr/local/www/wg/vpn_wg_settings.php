@@ -115,10 +115,16 @@ $section->addInput(new Form_Checkbox(
     	gettext('Enable'),
     	$pconfig['hide_secrets'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Hide Secrets\' enabled, all secrets (private and pre-shared keys) are hidden in the user interface.'
-);
+		. 'With \'Hide Secrets\' enabled, all secrets (private and pre-shared keys) are hidden in the user interface.');
 
 $form->add($section);
+
+$form->addGlobal(new Form_Input(
+	'act',
+	'',
+	'hidden',
+	'save'
+));
 
 print($form);
 
@@ -131,28 +137,13 @@ print($form);
 	</button>
 </nav>
 
-<?php $jpconfig = json_encode($pconfig, JSON_HEX_APOS); ?>
-
 <!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
-	var pconfig = JSON.parse('<?=$jpconfig?>');
-
-	// Eliminate ghost lines in modal
-	$('.form-group').css({"border-bottom-width" : "0"});
-
-	// Return text from peer table cell
-	function tabletext (row, col) {
-		row++; col++;
-		return $('#peertable tr:nth-child(' + row + ') td:nth-child('+ col + ')').text();
-	}
-
 
 	// Save the form
 	$('#saveform').click(function () {
-
-		$('<input>').attr({type: 'hidden',name: 'save',value: 'save'}).appendTo(form);
 
 		$(form).submit();
 

@@ -50,7 +50,13 @@ if (isset($_REQUEST['tun'])) {
 
 }
 
-// All form save logic is in /etc/inc/wg.inc
+if (isset($_REQUEST['peer'])) {
+
+	$peer_id = $_REQUEST['peer'];
+
+}
+
+// All form save logic is in wireguard/wg.inc
 if ($_POST) {
 
 	if ($_POST['act'] == 'save') {
@@ -68,26 +74,10 @@ if ($_POST) {
 
 		$pconfig = $res['pconfig'];
 
+		// This neeeds to be rewritten, not a fan...
 		if (!$input_errors) {
 
-			// Create the new WG config files
-			wg_create_config_files();
-			
-			// Attempt to reinstall the interface group to keep things clean
-			wg_ifgroup_install();
-
-			// Configure the new WG tunnel
-			if (isset($pconfig['enabled']) && $pconfig['enabled'] == 'yes') {
-
-				$conf_hard = (!is_wg_tunnel_assigned($pconfig) || !does_interface_exist($pconfig['name']));
-
-				wg_configure_if($pconfig, $conf_hard);
-
-			} else {
-
-				wg_destroy_if($pconfig);
-
-			}
+			wg_resync();
 
 			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels.php");
@@ -114,11 +104,11 @@ if ($_POST) {
 
 	} elseif ($_POST['act'] == 'toggle') {
 
-		wg_toggle_peer($_POST['peer']);
+		wg_toggle_peer($peer_id);
 
 	} elseif ($_POST['act'] == 'delete') {
 
-		wg_delete_peer($_POST['peer']);
+		wg_delete_peer($peer_id);
 
 	}
 
@@ -169,7 +159,6 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-// ============ Tunnel edit modal ==================================
 $section = new Form_Section("Tunnel Configuration ({$pconfig['name']})");
 
 $form->addGlobal(new Form_Input(
@@ -252,7 +241,6 @@ $section->add($group);
 
 $form->add($section);
 
-// ============ Interface edit modal ==================================
 $section = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
 if (!is_wg_tunnel_assigned($pconfig)) {

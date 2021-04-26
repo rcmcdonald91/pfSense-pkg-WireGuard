@@ -54,7 +54,7 @@ if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
 
 }
 
-// All form save logic is in /etc/inc/wg.inc
+// All form save logic is in wireguard/wg.inc
 if ($_POST) {
 
 	if ($_POST['act'] == 'save') {
@@ -66,12 +66,8 @@ if ($_POST) {
 		$pconfig = $res['pconfig'];
 
 		if (!$input_errors) {
-
-			// Create the new WG config files
-			wg_create_config_files();
-
-			// Attempt to reinstall the interface group to keep things clean
-			wg_ifgroup_install();
+			
+			wg_resync();
 			
 			// Save was successful
 			header("Location: /wg/vpn_wg_peers.php");
@@ -133,7 +129,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section("Peer Configuration");
+$section = new Form_Section('Peer Configuration');
 
 $form->addGlobal(new Form_Input(
 	'index',

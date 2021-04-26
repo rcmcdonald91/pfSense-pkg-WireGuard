@@ -46,27 +46,12 @@ if ($_POST) {
 
 		if ($_POST['act'] == 'toggle') {
 
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
-			
-				$input_errors[] = gettext('Cannot toggle a WireGuard tunnel while it is assigned as an interface.');
+			$input_errors[] = wg_toggle_tunnel($tun_id);
 
-			} else {
-
-				wg_toggle_tunnel($tun_id);
-
-			}
 
 		} elseif ($_POST['act'] == 'delete') { 
 
-			if (is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
-		
-				$input_errors[] = gettext('Cannot delete a WireGuard tunnel while it is assigned as an interface.');
-		
-			} else {
-		
-				wg_delete_tunnel($tun_id);
-		
-			}
+			$input_errors[] = wg_delete_tunnel($tun_id);
 
 		}
 
@@ -88,7 +73,9 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 include("head.inc");
 
 if ($input_errors) {
+
 	print_input_errors($input_errors);
+
 }
 
 display_top_tabs($tab_array);
@@ -127,6 +114,7 @@ display_top_tabs($tab_array);
 
 			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
 
+			// Not a fan of this, neeeds to be rewritten at some point
 			if (is_wg_tunnel_assigned($tunnel)) {
 
 				// We want all configured interfaces, including disabled ones
@@ -195,9 +183,11 @@ display_top_tabs($tab_array);
 								</tbody>
 							</table>
 						</td>
-						<?php
+<?php
 			else:
-				print('<td colspan="6">' . gettext("No peers have been configured") . '</td>');
+?>
+						<td colspan="6"><?=gettext("No peers have been configured")?></td>
+<?php
 			endif;
 ?>
 					</tr>
@@ -208,12 +198,9 @@ display_top_tabs($tab_array);
 			</table>
 		</div>
 	</div>
-
-
 <?php
 	endif;
 ?>
-
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
@@ -229,7 +216,6 @@ display_top_tabs($tab_array);
 
 <script type="text/javascript">
 //<![CDATA[
-
 events.push(function() {
 	var peershidden = true;
 	var keyshidden = true;

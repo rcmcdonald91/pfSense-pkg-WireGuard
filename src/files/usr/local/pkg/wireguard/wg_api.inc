@@ -40,7 +40,7 @@ function wg_status() {
 	exec("{$wgg['wg']} show", $status);
 
 	$output = implode("\n", $status);
-	return htmlspecialchars($output);
+	return $output;
 
 }
 
@@ -48,11 +48,13 @@ function wg_status() {
 function wg_interface_status() {
 	global $wgg;
 
+	$if_group = escapeshellarg($wgg['if_group']);
+
 	$status = array();
-	exec("{$wgg['ifconfig']} -a -g {$wgg['if_group']}", $status);
+	exec("{$wgg['ifconfig']} -a -g {$if_group}", $status);
 
 	$output = implode("\n", $status);
-	return htmlspecialchars($output);
+	return $output;
 
 }
 
@@ -60,13 +62,13 @@ function wg_interface_status() {
 function wg_pkg_info() {
 	global $wgg;
 
-	$packages = implode(" ", $wgg['pkg_names']);
+	$packages = escapeshellarg((implode(" ", $wgg['pkg_names']));
 
 	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
 
 	foreach ($output as $key => $package) {
 
-		$output[$key] = explode("\t", htmlspecialchars($package));
+		$output[$key] = explode("\t", $package);
 
 	}
 
@@ -149,6 +151,10 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 		$wg_ifname = $tunnel['name'];
 
 	}
+
+	$action = escapeshellarg($action);
+	
+	$wg_ifname = escapeshellarg($wg_ifname)
 
 	// Execute wg-quick(8) on the interface using the provided action 
 	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));

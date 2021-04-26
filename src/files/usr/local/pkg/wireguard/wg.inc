@@ -57,8 +57,11 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	// Now let's always soft configure the interface
 	wg_syncconf($tunnel);
 
+	$wg_ifname = escapeshellarg($tunnel['name']);
+	$group_ifname =escapeshellarg($wgg['ifgroupentry']['ifname'])
+
 	// Add the interface to the interface group (i.e. WireGuard)
-	mwexec("{$wgg['ifconfig']} {$tunnel['name']} group {$wgg['ifgroupentry']['ifname']}");
+	mwexec("{$wgg['ifconfig']} {$wg_ifname} group {$group_ifname}");
 
 	// Get the tunnel interface friendly name if assigned
 	$if_fname = convert_real_interface_to_friendly_interface_name($tunnel['name']);
@@ -95,37 +98,54 @@ function wg_destroy_if($tunnel, $verbose = false) {
 function wg_toggle_tunnel($tun_id) {
 	global $wgg;
 
+	$input_errors = array();
+
 	// Make sure we have the latest info
 	wg_globals();
 
 	// Make sure we have a valid tunnel
 	if (isset($wgg['tunnels'][$tun_id])) {
 
-		$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
+		// We can't disable tunnels if they are assigned
+		if (!is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
 
-		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
+			// Now we toggle the tunnel
+			$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
+
+			// Write the configuration to disk
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
 		
-		wg_globals();
+			// Regenerate conf files
+			wg_globals();
+			wg_create_config_files();
+			wg_ifgroup_install();
 
-		wg_create_config_files();
+			// This logic needs to be rewritten at some point
+			$tunnel = $wgg['tunnels'][$tun_id];
+
+			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
+				$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
+
+				wg_configure_if($tunnel, $conf_hard);
+
+			} else {
+
+				wg_destroy_if($tunnel);
+
+			}
 		
-		wg_ifgroup_install();
-
-		$tunnel = $wgg['tunnels'][$tun_id];
-
-		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-
-			$conf_hard = (!is_wg_tunnel_assigned($tunnel) || !does_interface_exist($tunnel['name']));
-
-			wg_configure_if($tunnel, $conf_hard);
-
 		} else {
 
-			wg_destroy_if($tunnel);
+			$action_txt = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'disable' : 'enable';
+
+			$input_errors[] = "Cannot {$action_txt} a WireGuard tunnel while it is assigned as an interface.";
 
 		}
 
 	}
+
+	return $input_errors;
 
 }
 
@@ -158,11 +178,7 @@ function wg_toggle_peer($peer_id) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} toggled.");
 
-		wg_globals();
-
-		wg_create_config_files();
-		
-		wg_ifgroup_install();
+		wg_resync();
 
 	}
 
@@ -179,11 +195,7 @@ function wg_delete_peer($peer_id) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
-		// Create the new WG config files
-		wg_create_config_files();
-
-		// Attempt to reinstall the interface group to keep things clean
-		wg_ifgroup_install();
+		wg_resync();
 
 	}
 
@@ -196,40 +208,51 @@ function wg_delete_tunnel($tun_id) {
 
 	if (isset($wgg['tunnels'][$tun_id])) {
 
-		$tmp_tunnel = $wgg['tunnels'][$tun_id];
+		// We can't disable tunnels if they are assigned
+		if (!is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
 
-		unset($ifname);
+			$tmp_tunnel = $wgg['tunnels'][$tun_id];
 
-		unset($conf_path);
+			unset($ifname);
 
-		if (isset($wgg['tunnels'][$tun_id]['name'])) {
+			unset($conf_path);
 
-			$ifname = $wgg['tunnels'][$tun_id]['name'];
+			if (isset($wgg['tunnels'][$tun_id]['name'])) {
 
-		}
+				$ifname = $wgg['tunnels'][$tun_id]['name'];
+
+			}
 		
-		if (isset($ifname)) {
+			if (isset($ifname)) {
 
-			$conf_path = "{$wgg['conf_path']}/{$ifname}.conf";
+				$conf_path = "{$wgg['conf_path']}/{$ifname}.conf";
+
+			}
+
+			// Delete the tunnel configuration entry
+			unset($wgg['tunnels'][$tun_id]);
+
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tmp_tunnel['name']} deleted.");
+
+			// Delete the wg?.conf file
+			if (isset($conf_path) && is_file($conf_path)) {
+
+				unlink($conf_path);
+
+			}
+
+			// Destroy the deleted tunnel
+			wg_destroy_if($ifname);
+		
+		} else {
+
+			$input_errors[] = "Cannot delete a WireGuard tunnel while it is assigned as an interface.";
 
 		}
-
-		// Delete the tunnel configuration entry
-		unset($wgg['tunnels'][$tun_id]);
-
-		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tmp_tunnel['name']} deleted.");
-
-		// Delete the wg?.conf file
-		if (isset($conf_path) && is_file($conf_path)) {
-
-			unlink($conf_path);
-
-		}
-
-		// Destroy the deleted tunnel
-		wg_destroy_if($ifname);
 
 	}
+
+	return $input_errors;
 
 }
 
