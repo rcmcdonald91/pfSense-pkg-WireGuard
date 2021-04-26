@@ -154,7 +154,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 
 	$action = escapeshellarg($action);
 
-	$wg_ifname = escapeshellarg($wg_ifname)
+	$wg_ifname = escapeshellarg($wg_ifname);
 
 	// Execute wg-quick(8) on the interface using the provided action 
 	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));
