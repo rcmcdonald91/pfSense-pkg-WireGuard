@@ -66,7 +66,7 @@ if ($_POST) {
 		$pconfig = $res['pconfig'];
 
 		if (!$input_errors) {
-			
+
 			wg_resync();
 			
 			// Save was successful
@@ -303,7 +303,7 @@ print($form);
 	</button>
 </nav>
 
-<?php $genkeywarning = gettext("Are you sure you want to overwrite the pre-shared key?"); ?>
+<?php $genkeywarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key."); ?>
 
 <!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">

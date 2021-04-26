@@ -439,7 +439,7 @@ endif;
 	</button>
 </nav>
 
-<?php $genkeywarning = gettext("Are you sure you want to overwrite keys?"); ?>
+<?php $genkeywarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
 
 <!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">
