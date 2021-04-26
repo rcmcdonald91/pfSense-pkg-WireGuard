@@ -66,7 +66,8 @@ function wg_pkg_info() {
 
 	// Escape each package element
 	array_walk($a_packages, function(&$x) { $x = escapeshellarg($x); });
-
+	
+	// Construct an escaped sequence of packages to query
 	$packages = implode(" ", $a_packages);
 
 	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
