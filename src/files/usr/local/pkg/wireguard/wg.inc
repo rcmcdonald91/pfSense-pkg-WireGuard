@@ -227,15 +227,29 @@ function wg_delete_tunnel($tun_id) {
 
 }
 
+// This returns an array of peer structs for a given tunnel
 function wg_get_tunnel_peers($tunnel) {
 	global $config, $wgg;
 
 	$a_ret = array();
 
+	// Assume we have a tunnel name first
+	$wg_ifname = $tunnel;
+
+	// Looks like we have a tunnel structure
+	if (is_array($tunnel) && isset($tunnel['name'])) {
+
+		// Transform to an interface name
+		$wg_ifname = $tunnel['name'];
+
+	}
+
+	// Look through array of peers for matching tunnel name
 	foreach ($wgg['peers'] as $peer_id => $peer) {
 
-		if ($peer['tun'] == $tunnel) {
+		if ($peer['tun'] == $wg_ifname) {
 
+			// We need the array index for future manipulations
 			$peer['index'] = $peer_id;
 
 			$a_ret[] = $peer;
@@ -244,6 +258,7 @@ function wg_get_tunnel_peers($tunnel) {
 
 	}
 
+	// Return the list of filtered peers
 	return $a_ret;
 
 }
@@ -517,59 +532,74 @@ function make_wg_conf($tunnel) {
 	// Process Interfaces section
 	$txt .= "[Interface]\n";
 
-	if (!empty($tunnel['interface']['privatekey'])) {
-		$txt .= "PrivateKey = {$tunnel['interface']['privatekey']}\n";
+	if (!empty($tunnel['privatekey'])) {
+		$txt .= "PrivateKey = {$tunnel['privatekey']}\n";
 	}
 
-	if (!empty($tunnel['interface']['listenport'])) {
-		$txt .= "ListenPort = {$tunnel['interface']['listenport']}\n";
+	if (!empty($tunnel['listenport'])) {
+		$txt .= "ListenPort = {$tunnel['listenport']}\n";
 	}
 
-	if (!empty($tunnel['interface']['address'])) {
-		$txt .= "Address = {$tunnel['interface']['address']}\n";
+	if (!empty($tunnel['address'])) {
+		$txt .= "Address = {$tunnel['address']}\n";
 	}
 
-	if (!empty($tunnel['interface']['mtu'])) {
-		$txt .= "MTU = {$tunnel['interface']['mtu']}\n";
+	if (!empty($tunnel['mtu'])) {
+		$txt .= "MTU = {$tunnel['mtu']}\n";
 	}
 
+	// We need to address this at some point
 	$txt .= "Table = off\n";
 
 	$txt .= "\n";
 
 	// Process peers section
-	if (is_array($tunnel['peers']) && is_array($tunnel['peers']['wgpeer']) &&
-	    count($tunnel['peers']['wgpeer']) > 0) {
-		foreach ($tunnel['peers']['wgpeer'] as $peer) {
+
+	$peers = wg_get_tunnel_peers($tunnel);
+
+	if (is_array($peers) && count($peers) > 0) {
+
+		foreach ($peers as $peer) {
+
 			$txt .= "# Peer: {$peer['descr']}\n";
+
 			$txt .= "[Peer]\n";
 
 			if (!empty($peer['publickey'])) {
+
 				$txt .= "PublicKey = {$peer['publickey']}\n";
+
 			}
 
 			if (!empty($peer['endpoint'])) {
+
 				$txt .= "EndPoint = ";
+
 				$txt .= is_ipaddrv6($peer['endpoint']) ? "[{$peer['endpoint']}]" : $peer['endpoint'];
+
 				$txt .= ":" . ((empty($peer['port'])) ? '51820' : $peer['port']) . "\n";
+
 			}
 
 			if (!empty($peer['allowedips'])) {
+
 				$txt .= "AllowedIPs = {$peer['allowedips']}\n";
+
 			}
 
 			if (!empty($peer['persistentkeepalive'])) {
-				$txt .= "PersistentKeepalive = " .
-				    "{$peer['persistentkeepalive']}\n";
+
+				$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
 			}
 
 			if (!empty($peer['presharedkey'])) {
-				$txt .= "PresharedKey = " .
-				    "{$peer['presharedkey']}\n";
+
+				$txt .= "PresharedKey = {$peer['presharedkey']}\n";
 			}
 
 			$txt .= "\n";
 		}
+		
 	}
 
 	$conf_path = "{$wgg['conf_path']}/{$tunnel['name']}.conf";

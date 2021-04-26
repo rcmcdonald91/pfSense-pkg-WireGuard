@@ -93,13 +93,13 @@ display_top_tabs($tab_array);
 			<table class="table table-striped table-hover">
 				<thead>
 					<tr>
-						<th><?=gettext("Public key")?></th>
 						<th><?=gettext("Description")?></th>
+						<th><?=gettext("Public key")?></th>
 						<th><?=gettext("Tunnel")?></th>
 						<th><?=gettext("Peer Address")?></th>
 						<th><?=gettext("Allowed IPs")?></th>
 						<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
-						<th>Actions</th>
+						<th><?=gettext("Actions")?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -112,8 +112,8 @@ display_top_tabs($tab_array);
 
 ?>
 					<tr ondblclick="document.location='vpn_wg_peers_edit.php?peer=';" class="<?=$entryStatus?>">
-						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($peer['descr'])?></td>
+						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
 						<td><?=htmlspecialchars(explode(',', $peer['peeraddresses'])[0])?></td>
 						<td><?=htmlspecialchars(explode(',', $peer['allowedips'])[0])?></td>
