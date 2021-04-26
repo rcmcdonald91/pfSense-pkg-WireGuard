@@ -104,7 +104,7 @@ function wg_is_valid_key($key) {
 
 	$key = escapeshellarg($key);
 
-	$retval = mwexec("echo {$key}" | {$wgg['wg'] pubkey});
+	$retval = mwexec("echo {$key} | {$wgg['wg']} pubkey");
 
 	return ($retval <> 0 ? false : true);
 
