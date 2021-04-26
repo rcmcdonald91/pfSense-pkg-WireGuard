@@ -160,7 +160,7 @@ display_top_tabs($tab_array);
 					</tr>
 
 					<tr class="peer-entries peerbg_color">
-						<td>Peers</td>
+						<td><?=gettext("Peers")?></td>
 <?php
 	$peers = wg_get_tunnel_peers($tunnel['name']);
 
@@ -170,10 +170,10 @@ display_top_tabs($tab_array);
 							<table class="table table-hover peerbg_color">
 								<thead>
 									<tr class="peerbg_color">
-										<th>Description</th>
-										<th>Public key</th>
-										<th>Endpoint</th>
-										<th>Allowed IPs</th>
+										<th><?=gettext("Description")?></th>
+										<th><?=gettext("Public key")?></th>
+										<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+										<th><?=gettext("Allowed IPs")?></th>
 									</tr>
 								</thead>
 								<tbody>

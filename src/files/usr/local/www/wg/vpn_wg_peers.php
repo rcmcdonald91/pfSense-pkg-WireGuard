@@ -98,8 +98,7 @@ display_top_tabs($tab_array);
 						<th><?=gettext("Tunnel")?></th>
 						<th><?=gettext("Peer Address")?></th>
 						<th><?=gettext("Allowed IPs")?></th>
-						<th><?=gettext("Endpoint")?></th>
-						<th><?=gettext("Port")?></th>
+						<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -118,8 +117,7 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars($peer['tun'])?></td>
 						<td><?=htmlspecialchars(explode(',', $peer['peeraddresses'])[0])?></td>
 						<td><?=htmlspecialchars(explode(',', $peer['allowedips'])[0])?></td>
-						<td><?=htmlspecialchars($peer['endpoint'])?></td>
-						<td><?=htmlspecialchars($peer['port'])?></td>
+						<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>"></a>
 							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer_id}"?>" usepost></a>
