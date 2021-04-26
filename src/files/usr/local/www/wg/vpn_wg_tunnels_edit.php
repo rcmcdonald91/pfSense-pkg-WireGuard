@@ -148,7 +148,7 @@ $pconfig['mtu'] = get_interface_mtu($pconfig['name']);
 
 $shortcut_section = "wireguard";
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext($pconfig['name']));
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext("Edit"));
 $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "@self");
 
 $tab_array = array();
