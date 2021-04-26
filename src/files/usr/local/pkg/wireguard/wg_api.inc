@@ -171,14 +171,14 @@ function next_wg_port() {
 
 	wg_globals();
 
-	for ($idx=$wgg['default_port']; $idx<$wgg['max_port']; $idx++) {
+	for ($idx = $wgg['default_port']; $idx < $wgg['max_port']; $idx++) {
 
 		// Check to see if the port is already in use
 		$found = false;
 
 		foreach ($wgg['tunnels'] as $tunnel) {
 
-			if ($tunnel['interface']['listenport'] == $idx) {
+			if ($tunnel['listenport'] == $idx) {
 
 				$found = true;
 
