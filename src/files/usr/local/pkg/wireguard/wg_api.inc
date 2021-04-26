@@ -62,7 +62,7 @@ function wg_interface_status() {
 function wg_pkg_info() {
 	global $wgg;
 
-	$packages = escapeshellarg((implode(" ", $wgg['pkg_names']));
+	$packages = escapeshellarg(implode(" ", $wgg['pkg_names']));
 
 	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
 
@@ -153,7 +153,7 @@ function exec_wg_quick_action($tunnel, $action, $verbose = false) {
 	}
 
 	$action = escapeshellarg($action);
-	
+
 	$wg_ifname = escapeshellarg($wg_ifname)
 
 	// Execute wg-quick(8) on the interface using the provided action 
