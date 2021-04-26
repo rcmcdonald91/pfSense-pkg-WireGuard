@@ -140,30 +140,12 @@ $section->addInput(new Form_Checkbox(
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to disable this peer without removing it from the list.');
 
-if (is_array($wgg['tunnels']) && count($wgg['tunnels'])) {
-
-	$section->addInput($input = new Form_Select(
-		'tun',
-		'Tunnel',
-		$pconfig['tun'],
-		build_tun_list()
-	))->setHelp('WireGuard tunnel for this peer.');
-
-} else {
-
-	$section->addInput(new Form_StaticText(
-		'Tunnel',
-		'No WireGuard tunnels have been defined. (<a href="vpn_wg_tunnels_edit.php">Create a New Tunnel</a>)'
-	));
-
-	$form->addGlobal(new Form_Input(
-		'tun',
-		'',
-		'hidden',
-		'unassigned'
-	));
-
-}
+$section->addInput($input = new Form_Select(
+	'tun',
+	'Tunnel',
+	$pconfig['tun'],
+	build_tun_list()
+))->setHelp("WireGuard tunnel for this peer. (<a href='vpn_wg_tunnels_edit.php'>Create a New Tunnel</a>)");
 
 $section->addInput(new Form_Input(
 	'descr',
@@ -224,7 +206,7 @@ $group->add(new Form_Button(
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
-	->setHelp('New PSK');
+	->setHelp('New Pre-shared key');
 
 $section->add($group);
 

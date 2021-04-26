@@ -134,7 +134,7 @@ function wg_delete_peer($peer_id) {
 
 	if (isset($wgg['peers'][$peer_id])) {
 
-		unnset($wgg['peers'][$peer_id]);
+		unset($wgg['peers'][$peer_id]);
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
