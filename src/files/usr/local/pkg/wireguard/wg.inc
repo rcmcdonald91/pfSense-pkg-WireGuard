@@ -37,6 +37,8 @@ require_once('wireguard/wg_globals.inc');
 require_once('wireguard/wg_install.inc');
 require_once('wireguard/wg_validate.inc');
 
+global $wgg;
+
 // Setup WireGuard tunnel
 function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 	global $config, $wgg;
@@ -122,6 +124,20 @@ function wg_toggle_tunnel($tun_id) {
 			wg_destroy_if($tunnel);
 
 		}
+
+	}
+
+}
+
+function wg_format_endpoint($peer, $endpoint_key = 'endpoint', $port_key = 'port') {
+
+	if (!empty($peer[$endpoint_key))) {
+
+		$ret = "{$endpoint} : {$port}";
+
+	} else {
+
+		$ret = "Dynamic";
 
 	}
 
@@ -276,6 +292,15 @@ function wg_do_peer_post($post) {
 	$index = $post['index'];
 
 	$pconfig = $wgg['peers'][$index];
+
+	// Looks like we have a dynamic endpoint, clear endpoint or port variables before saving
+	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
+
+		unset($post['endpoint']);
+
+		unset($post['port']);
+
+	}
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 	$pconfig['tun'] 		= $post['tun'];

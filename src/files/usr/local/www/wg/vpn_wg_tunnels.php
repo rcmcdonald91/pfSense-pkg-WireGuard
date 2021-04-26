@@ -111,10 +111,10 @@ display_top_tabs($tab_array);
 					<tr>
 						<th class="peer-entries"></th>
 						<th><?=gettext("Name")?></th>
-						<th><?=gettext("Public Key")?></th>
 						<th><?=gettext("Description")?></th>
+						<th><?=gettext("Public Key")?></th>
 						<th><?=gettext("Address / Assignment")?></th>
-						<th><?=gettext("Port")?></th>
+						<th><?=gettext("Listen Port")?></th>
 						<th><?=gettext("# Peers")?></th>
 						<th><?=gettext("Actions")?></th>
 					</tr>
@@ -145,8 +145,8 @@ display_top_tabs($tab_array);
 					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
-						<td><?=htmlspecialchars(substr($tunnel['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
+						<td><?=htmlspecialchars(substr($tunnel['publickey'], 0, 16).'...')?></td>
 						<td><?=htmlspecialchars(explode(',', $tunnel['addresses'])[0])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
@@ -170,8 +170,8 @@ display_top_tabs($tab_array);
 							<table class="table table-hover peerbg_color">
 								<thead>
 									<tr class="peerbg_color">
-										<th>Public key</th>
 										<th>Description</th>
+										<th>Public key</th>
 										<th>Endpoint</th>
 										<th>Allowed IPs</th>
 									</tr>
@@ -183,15 +183,9 @@ display_top_tabs($tab_array);
 ?>
 									<tr class="peerbg_color">
 										<td><?=htmlspecialchars($peer['descr'])?></td>
-										<td>
-										<?php if (!empty($peer["endpoint"])): ?>
-											<?=htmlspecialchars($peer['endpoint'])?>:<?=((empty($peer["port"])) ? '51820' : htmlspecialchars($peer["port"]))?>
-										<?php else: ?>
-											<?=gettext("Dynamic")?>
-										<?php endif; ?>
-										</td>
+										<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16))?></td>
+										<td><?=htmlspecialchars(</td>
 										<td><?=htmlspecialchars($peer['allowedips'])?></td>
-										<td><?=htmlspecialchars($peer['publickey'])?></td>
 									</tr>
 <?php
 				endforeach;

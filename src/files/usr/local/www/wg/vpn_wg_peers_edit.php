@@ -99,6 +99,9 @@ if ($_POST) {
 		// Automatically choose a tunnel based on request 
 		$pconfig['tun'] = $tun;
 
+		// Default to a dynamic tunnel
+		$is_dynamic = true;
+
 	}
 
 }
@@ -155,6 +158,13 @@ $section->addInput(new Form_Input(
 	['placeholder' => 'Description']
 ))->setHelp("Peer description for administrative reference (not parsed)");
 
+$section->addInput(new Form_Checkbox(
+	'dynamic',
+	'Dynamic Endpoint',
+	gettext('Dynamic'),
+	empty($pconfig['endpoint']) || $is_dynamic
+))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to disable this peer without removing it from the list.');
+
 $group = new Form_Group('Endpoint');
 
 $group->add(new Form_Input(
@@ -174,6 +184,8 @@ $group->add(new Form_Input(
 ))->setWidth(3)
 	->setHelp("Port used by this peer.<br />
 			Leave blank for default ({$wgg['default_port']}).");
+
+$group->addClass("endpoint");
 
 $section->add($group);
 
@@ -326,6 +338,19 @@ events.push(function() {
 		$(form).submit();
 	});
 
+	function updateSection(hide) {
+
+		hideClass('endpoint', hide);
+
+	}
+
+	$('#dynamic').click(function () {
+
+		updateSection(this.checked);
+
+	});
+
+    	updateSection($('#dynamic').prop('checked'));
 
 });
 //]]>
