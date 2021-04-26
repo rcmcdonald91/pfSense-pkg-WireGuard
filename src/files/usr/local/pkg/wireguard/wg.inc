@@ -133,7 +133,7 @@ function wg_format_endpoint($peer, $endpoint_key = 'endpoint', $port_key = 'port
 
 	if (!empty($peer[$endpoint_key])) {
 
-		$ret_str = "{$endpoint} : {$port}";
+		$ret_str = "{$peer[$endpoint_key]} : {$peer[$port_key]}";
 
 	} else {
 
