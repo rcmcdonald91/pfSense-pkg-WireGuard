@@ -149,7 +149,7 @@ display_top_tabs($tab_array);
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td><?=htmlspecialchars($tunnel'addresses'])?></td>
+						<td><?=htmlspecialchars($tunnel['addresses'])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 
