@@ -151,7 +151,8 @@ $section->addInput(new Form_Input(
 	'descr',
 	'Description',
 	'text',
-	$pconfig['descr']
+	$pconfig['descr'],
+	['placeholder' => 'Description']
 ))->setHelp("Peer description for administrative reference (not parsed)");
 
 $group = new Form_Group('Endpoint');
@@ -188,7 +189,8 @@ $section->addInput(new Form_Input(
 	'publickey',
 	'*Public Key',
 	'text',
-	$pconfig['publickey']
+	$pconfig['publickey'],
+	['placeholder' => 'Public Key']
 ))->setHelp('WireGuard public key for this peer.');
 
 $group = new Form_Group('Pre-shared Key');
@@ -214,6 +216,7 @@ $section->addInput(new Form_StaticText(
 	'Allowed IPs',
 	'A list of IPv4/IPv6 subnets or hosts (/32 or /128) reached via this peer.'
 ));
+
 
 if (empty($pconfig['allowedips'])) {
 

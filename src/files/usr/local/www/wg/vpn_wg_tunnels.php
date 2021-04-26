@@ -126,6 +126,8 @@ display_top_tabs($tab_array);
 <?php
 		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
 
+			$peers = wg_get_tunnel_peers($tunnel['name']);
+
 			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
 
 			if (is_wg_tunnel_assigned($tunnel)) {
@@ -147,9 +149,9 @@ display_top_tabs($tab_array);
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td><?=htmlspecialchars($tunnel['interface']['address'])?></td>
-						<td><?=htmlspecialchars($tunnel['interface']['listenport'])?></td>
-						<td><?=count($tunnel['peers']['wgpeer'])?></td>
+						<td><?=htmlspecialchars($tunnel'addresses'])?></td>
+						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
+						<td><?=count($peers)?></td>
 
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>

@@ -245,7 +245,7 @@ $group->add(new Form_Button(
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
-	->setHelp('New Keypair')
+	->setHelp('New Keys')
 	->setWidth(1);
 
 $section->add($group);

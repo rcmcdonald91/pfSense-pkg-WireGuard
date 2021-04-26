@@ -56,21 +56,11 @@ function wg_interface_status() {
 
 }
 
-// Get WireGuard kmod status
-function wg_kmod_status() {
-	global $wgg;
-
-	$output = exec("{$wgg['kldstat']} | grep {$wgg['kmod']}");
-	
-	return htmlspecialchars($output);
-
-}
-
 // Get various package infos and return an array
 function wg_pkg_info() {
 	global $wgg;
 
-	$packages = implode(" ", $wgg['pkg_names']);
+	$packages = escapeshellarg((implode(" ", $wgg['pkg_names']));
 
 	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
 
@@ -100,9 +90,23 @@ function wg_gen_keypair($json = false) {
 function wg_gen_publickey($privkey) {
 	global $wgg;
 
+	$privkey = escapeshellarg($privkey);
+
 	$pubkey = exec("echo {$privkey} | {$wgg['wg']} pubkey");
 
 	return $pubkey;
+
+}
+
+// Checks if a given private or public key is valid
+function wg_is_valid_key($key) {
+	global $wgg;
+
+	$key = escapeshellarg($key);
+
+	$retval = mwexec("echo {$key}" | {$wgg['wg'] pubkey});
+
+	return ($retval <> 0 ? false : true);
 
 }
 
