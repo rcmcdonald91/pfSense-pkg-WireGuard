@@ -133,14 +133,15 @@ function wg_syncconf($tunnel) {
 
 	}
 
+	// Escape the inner arguments
 	$wg_ifname = escapeshellarg($wg_ifname);
 
 	// Pass the stripped configuration to wg(8)
 	$syncconf_command ="{$wgg['wg']} syncconf {$wg_ifname} <({$wgg['wg_quick']} strip {$wg_ifname})";
 
+	// Escape the outer arguments
 	$syncconf_command = escapeshellarg($syncconf_command);
 
-	// We need <() process substitution, so use bash...might as well use bash everywhere?
 	exec("{$wgg['bash']} -c {$syncconf_command}");
 
 }
