@@ -184,7 +184,7 @@ display_top_tabs($tab_array);
 ?>
 									<tr class="peerbg_color">
 										<td><?=htmlspecialchars($peer['descr'])?></td>
-										<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16))?></td>
+										<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 										<td><?=htmlspecialchars($peer['peeraddresses'])?></td>
 										<td><?=htmlspecialchars($peer['allowedips'])?></td>
 										<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>

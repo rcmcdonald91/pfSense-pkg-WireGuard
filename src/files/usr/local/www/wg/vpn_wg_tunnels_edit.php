@@ -379,7 +379,6 @@ else:
 				<tr>
 					<th><?=gettext("Description")?></th>
 					<th><?=gettext("Public key")?></th>
-					<th><?=gettext("Tunnel")?></th>
 					<th><?=gettext("Peer Address")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
 					<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
