@@ -152,7 +152,7 @@ display_top_tabs($tab_array);
 						<td><?=count($peers)?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-plus-square-o" title="<?=gettext("Add Peer")?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-user-plus" title="<?=gettext("Add Peer")?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
 							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
 							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tun={$tunnel['name']}"?>" usepost></a>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
@@ -170,10 +170,10 @@ display_top_tabs($tab_array);
 							<table class="table table-hover peerbg_color">
 								<thead>
 									<tr class="peerbg_color">
+										<th>Public key</th>
 										<th>Description</th>
 										<th>Endpoint</th>
 										<th>Allowed IPs</th>
-										<th>Public key</th>
 									</tr>
 								</thead>
 								<tbody>

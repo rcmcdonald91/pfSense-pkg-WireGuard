@@ -116,8 +116,8 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($peer['descr'])?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
-						<td><?=htmlspecialchars($peer['peeraddresses']['item'][0])?></td>
-						<td><?=htmlspecialchars($peer['allowedips']['item'][0])?></td>
+						<td><?=htmlspecialchars(explode(',', $peer['peeraddresses'])[0])?></td>
+						<td><?=htmlspecialchars(explode(',', $peer['allowedips'])[0])?></td>
 						<td><?=htmlspecialchars($peer['endpoint'])?></td>
 						<td><?=htmlspecialchars($peer['port'])?></td>
 						<td style="cursor: pointer;">

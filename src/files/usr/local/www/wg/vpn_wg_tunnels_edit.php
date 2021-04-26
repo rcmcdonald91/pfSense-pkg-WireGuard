@@ -267,6 +267,11 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
+	$section->addInput(new Form_StaticText(
+		'Interface Addresses',
+		'A list of IPv4 or IPv6 addresses assigned to the tunnel interface'
+	));
+
 	if (empty($pconfig['addresses'])) {
 
 		$pconfig['addresses'] = '';
@@ -281,7 +286,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 		list($address, $address_subnet) = explode("/", $ip);
 	
-		$group = new Form_Group($counter == 0 ? "Interface Address" : '');
+		$group = new Form_Group(null);
 	
 		$group->addClass('repeatable');
 
@@ -290,8 +295,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'Interface Address',
 			$address,
 			'BOTH'
-		))->setHelp($counter == $last ? 'An IPv4 or IPv6 address assigned to the tunnel interface' : null)
-			->addMask("address_subnet{$counter}", $address_subnet)
+		))->addMask("address_subnet{$counter}", $address_subnet)
 			->setWidth(5);
 
 		$group->add(new Form_Button(
