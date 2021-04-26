@@ -96,6 +96,12 @@ function wg_validate_post($pconfig) {
 
 		$input_errors[] = gettext("Private key must be specified.");
 
+		if (!wg_is_valid_key($post['privatekey'])) {
+
+			$input_errors[] = gettext("The private key specified is not a valid WireGuard private key.");
+
+		}
+
 	}
 
 	return $input_errors;
@@ -118,7 +124,15 @@ function wg_validate_peer_post($post) {
 	// Check key
 	if (empty($post['publickey'])) {
 
-		$input_errors[] = gettext("A public key must be specified");
+		$input_errors[] = gettext("A public key must be specified.");
+
+	} else {
+
+		if (!wg_is_valid_key($post['publickey'])) {
+
+			$input_errors[] = gettext("The public key specified is not a valid WireGuard public key.");
+
+		}
 
 	}
 
