@@ -111,6 +111,7 @@ display_top_tabs($tab_array);
 					<tr>
 						<th class="peer-entries"></th>
 						<th><?=gettext("Name")?></th>
+						<th><?=gettext("Public Key")?></th>
 						<th><?=gettext("Description")?></th>
 						<th><?=gettext("Address / Assignment")?></th>
 						<th><?=gettext("Port")?></th>
@@ -144,12 +145,14 @@ display_top_tabs($tab_array);
 					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=$entryStatus?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
+						<td><?=htmlspecialchars(substr($tunnel['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td><?=htmlspecialchars(explode(',', $tunnel['addresses'])[0])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 
 						<td style="cursor: pointer;">
+							<a class="fa fa-plus-square-o" title="<?=gettext("Add Peer")?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
 							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
 							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&tun={$tunnel['name']}"?>" usepost></a>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
