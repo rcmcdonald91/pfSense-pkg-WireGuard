@@ -540,8 +540,8 @@ function make_wg_conf($tunnel) {
 		$txt .= "ListenPort = {$tunnel['listenport']}\n";
 	}
 
-	if (!empty($tunnel['address'])) {
-		$txt .= "Address = {$tunnel['address']}\n";
+	if (!empty($tunnel['addresses'])) {
+		$txt .= "Address = {$tunnel['addresses']}\n";
 	}
 
 	if (!empty($tunnel['mtu'])) {
@@ -599,7 +599,7 @@ function make_wg_conf($tunnel) {
 
 			$txt .= "\n";
 		}
-		
+
 	}
 
 	$conf_path = "{$wgg['conf_path']}/{$tunnel['name']}.conf";
