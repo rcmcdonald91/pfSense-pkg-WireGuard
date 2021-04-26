@@ -377,14 +377,13 @@ else:
 		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
 			<thead>
 				<tr>
-					<th><?=gettext("Peer")?></th>
+					<th><?=gettext("Public key")?></th>
 					<th><?=gettext("Description")?></th>
+					<th><?=gettext("Tunnel")?></th>
 					<th><?=gettext("Peer Address")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
-					<th><?=gettext("Endpoint")?></th>
-					<th><?=gettext("Port")?></th>
-					<th><?=gettext("Public key")?></th>
-					<th>Actions</th>
+					<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+					<th><?=gettext("Actions")?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -401,13 +400,12 @@ else:
 
 ?>
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=$entryStatus?>">
-					<td><?=$peer['index']?></td>
+					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td><?=htmlspecialchars($peer['descr'])?></td>
+					<td><?=htmlspecialchars($peer['tun'])?></td>
 					<td><?=htmlspecialchars($peer['peerwgaddr'])?></td>
 					<td><?=htmlspecialchars($peer['allowedips'])?></td>
-					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
+					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
 						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
