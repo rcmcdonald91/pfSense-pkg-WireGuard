@@ -226,10 +226,37 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
-$section->addInput(new Form_StaticText(
-	'Allowed IPs',
-	'A list of IPv4/IPv6 subnets or hosts (/32 for IPv4 or /128 for IPv6) reachable via this peer.'
-));
+$group = new Form_Group("Allowed IPs");
+
+$group->add(new Form_Checkbox(
+	'all_ipv4',
+	'Protocol',
+	'IPv4',
+	($pconfig['all_ipv4'] == 'yes')
+))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0)");
+
+$group->add(new Form_Checkbox(
+	'all_ipv6',
+	'Protocol',
+	'IPv6',
+	($pconfig['all_ipv6'] == 'yes'),
+))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0)");
+
+$section->add($group);
+
+$group = new Form_Group(null);
+
+$group->add(new Form_StaticText(
+	null,
+	'<b>IPv4 or IPv6 subnets or hosts reachable via this peer:</b>'
+))->setWidth(5);
+
+$group->add(new Form_StaticText(
+	null,
+	'<b>Peer Address:</b>'
+))->setWidth(2);
+
+$section->add($group);
 
 // This is a hack to ensure the default subnet selection isn't /0
 if (empty($pconfig['allowedips'])) {
@@ -255,15 +282,15 @@ foreach ($allowedips as $counter => $ip) {
 		'Allowed IPs',
 		$address,
 		'BOTH'
-	))->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
+	))->addMask("address_subnet{$counter}", $address_subnet)
 		->setWidth(5);
 
-/* 	$group->add(new Form_Checkbox(
+	$group->add(new Form_Checkbox(
 		"peeraddress{$counter}",
 		null,
-		"Is Peer",
+		"Peer",
 		false
-	))->setWidth(1); */
+	))->setWidth(2);
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
