@@ -49,13 +49,16 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 		// Destroy the interface first
 		wg_destroy_if($tunnel, $verbose);
 
+		// Then attempt to bring up interface using wg-quick(8)
+		exec_wg_quick_action($tunnel, "up", $verbose);
+
 	}
 
 	// Now let's always soft configure the interface
 	wg_syncconf($tunnel);
 
 	$wg_ifname = escapeshellarg($tunnel['name']);
-	$group_ifname = escapeshellarg($wgg['ifgroupentry']['ifname']);
+	$group_ifname =escapeshellarg($wgg['ifgroupentry']['ifname']);
 
 	// Add the interface to the interface group (i.e. WireGuard)
 	mwexec("{$wgg['ifconfig']} {$wg_ifname} group {$group_ifname}");
@@ -76,6 +79,9 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 
 // Remove WireGuard tunnel
 function wg_destroy_if($tunnel, $verbose = false) {
+
+	// Execute the wg-quick(8) way of tearing down an interface
+	exec_wg_quick_action($tunnel, "down", $verbose);
 
 	// Need to transform out of tunnel structure because pfSense_interface_destroy expects an ifname
 	if (is_array($tunnel) && isset($tunnel['name'])) {
@@ -382,7 +388,7 @@ function wg_do_post($post) {
 
 	if (empty($pconfig['name'])) {
 
-		$pconfig['name'] = wg_next_if();
+		$pconfig['name'] = next_wg_if();
 
 	}
 
@@ -547,37 +553,46 @@ function wg_remove_config_settings() {
 function make_wg_conf($tunnel) {
 	global $wgg;
 
-	$txt = "# This WireGuard config file has been created automatically. Do not edit!\n\n";
+	$txt = "# This WireGuard config file has been created automatically. " .
+	    "Do not edit!\n";
 
-	$txt .= "# Description: {$tunnel['descr']}\n";
+	$txt .= "# Description: {$tunnel['descr']}\n\n";
 
 	// Process Interfaces section
 	$txt .= "[Interface]\n";
 
 	if (!empty($tunnel['privatekey'])) {
-
 		$txt .= "PrivateKey = {$tunnel['privatekey']}\n";
-
 	}
 
 	if (!empty($tunnel['listenport'])) {
-
 		$txt .= "ListenPort = {$tunnel['listenport']}\n";
-
 	}
+
+	if (!empty($tunnel['addresses'])) {
+		$txt .= "Address = {$tunnel['addresses']}\n";
+	}
+
+	if (!empty($tunnel['mtu'])) {
+		$txt .= "MTU = {$tunnel['mtu']}\n";
+	}
+
+	// We need to address this at some point
+	$txt .= "Table = off\n";
 
 	$txt .= "\n";
 
 	// Process peers section
+
 	$peers = wg_get_tunnel_peers($tunnel);
 
 	if (is_array($peers) && count($peers) > 0) {
 
-		foreach ($peers as $index => $peer) {
+		foreach ($peers as $peer) {
 
 			if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 
-				$txt .= "# Peer {$index}: {$peer['descr']}\n";
+				$txt .= "# Peer: {$peer['descr']}\n";
 
 				$txt .= "[Peer]\n";
 

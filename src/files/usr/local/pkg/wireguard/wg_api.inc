@@ -87,11 +87,9 @@ function wg_gen_keypair($json = false) {
 	global $wgg;
 
 	$privkey = exec("{$wgg['wg']} genkey");
-
 	$pubkey = wg_gen_publickey($privkey);
 
 	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
-
 	return $json ? json_encode($res) : $res;
 
 }
@@ -148,6 +146,30 @@ function wg_syncconf($tunnel) {
 
 }
 
+// Executes a wg-quick(8) action using a specified tunnel or interface
+function exec_wg_quick_action($tunnel, $action, $verbose = false) {
+	global $wgg;
+
+	// Assume we have an interface first
+	$wg_ifname = $tunnel;
+
+	// Looks like we have a tunnel structure
+	if (is_array($tunnel) && isset($tunnel['name'])) {
+
+		// Transform to an interface name
+		$wg_ifname = $tunnel['name'];
+
+	}
+
+	$action = escapeshellarg($action);
+
+	$wg_ifname = escapeshellarg($wg_ifname);
+
+	// Execute wg-quick(8) on the interface using the provided action 
+	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));
+
+}
+
 // Generate a pre-shared key
 function wg_gen_psk() {
 	global $wgg;
@@ -156,6 +178,42 @@ function wg_gen_psk() {
 
 	return $psk;
 	
+}
+
+// Return the next available WireGuard port
+function next_wg_port() {
+	global $config, $wgg;
+
+	wg_globals();
+
+	for ($idx = $wgg['default_port']; $idx < $wgg['max_port']; $idx++) {
+
+		// Check to see if the port is already in use
+		$found = false;
+
+		foreach ($wgg['tunnels'] as $tunnel) {
+
+			if ($tunnel['listenport'] == $idx) {
+
+				$found = true;
+
+				break;
+
+			}
+
+		}
+
+		// If not, it can be used
+		if (!$found) {
+
+			return $idx;
+			
+		}
+
+	}
+
+	return $wgg['default_port'];
+
 }
 
 // Returns the array index of the given tunnel in the config, this isn't necessarily the interface number
@@ -192,7 +250,7 @@ function wg_get_tunnel_id($tunnel) {
 }
 
 // Return the next available WireGuard interface
-function wg_next_if() {
+function next_wg_if() {
 	global $config, $wgg;
 
 	wg_globals();
@@ -219,42 +277,6 @@ function wg_next_if() {
 
 	return -1;
 	
-}
-
-// Return the next available WireGuard port
-function wg_next_port() {
-	global $config, $wgg;
-
-	wg_globals();
-
-	for ($idx = $wgg['default_port']; $idx < $wgg['max_port']; $idx++) {
-
-		// Check to see if the port is already in use
-		$found = false;
-
-		foreach ($wgg['tunnels'] as $tunnel) {
-
-			if ($tunnel['listenport'] == $idx) {
-
-				$found = true;
-
-				break;
-
-			}
-
-		}
-
-		// If not, it can be used
-		if (!$found) {
-
-			return $idx;
-			
-		}
-
-	}
-
-	return $wgg['default_port'];
-
 }
 
 function verbose_pipe($verbose) {
