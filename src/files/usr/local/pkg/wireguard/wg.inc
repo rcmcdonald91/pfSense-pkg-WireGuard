@@ -388,9 +388,6 @@ function wg_do_peer_post($post) {
 	$pconfig['presharedkey']	= $post['presharedkey'];
 	$pconfig['allowedips'] 		= implode(',', $a_allowed_ips);
 
-	$pconfig['all_ipv4']		= $post['all_ipv4'];
-	$pconfig['all_ipv6']		= $post['all_ipv6'];
-
 	$input_errors = wg_validate_peer_post($pconfig);
 
 	if (!$input_errors) {
