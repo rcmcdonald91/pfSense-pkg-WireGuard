@@ -309,6 +309,36 @@ function build_tun_list() {
 
 }
 
+function wg_allowed_ips_filtered($allowed_ips) {
+
+	$a_all = array('0.0.0.0/0', '::/0');
+
+	$all_ipv4 = $all_ipv6 = false;
+
+	$a_ips = explode(',', $allowed_ips);
+
+	$a_ret = array();
+
+	foreach ($a_ips as $index => $ip) {
+
+		if (!in_array($ip, $a_all) {
+
+			$a_ret[] = $ip;
+
+		} elseif (in_array($ip, $a_all)) {
+
+			$all_ipv4 = is_v4($ip);
+
+			$all_ipv6 = is_v6($ip);
+
+		}
+
+	}
+
+	return array('filtered' => $a_ret, 'all_ipv4' => $all_ipv4, 'all_ipv6' => $all_ipv6);
+
+}
+
 // This converts a form post array containing addresses and subnets and returns an CIDR-formatted array
 function wg_parse_post_addresses($post, $default = true) {
 

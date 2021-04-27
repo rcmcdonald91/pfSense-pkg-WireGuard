@@ -90,6 +90,9 @@ if ($_POST) {
 		// Looks like we are editing an existing tunnel
 		$pconfig = &$wgg['peers'][$peer_id];
 
+		// Pull out an array of non-default allowed ips
+		list($allowedips, $all_ipv4, $all_ipv6) = wg_allowed_ips_filtered($pconfig['allowedips']);
+
 	} else {
 
 		// We are creating a new peer
@@ -232,14 +235,14 @@ $group->add(new Form_Checkbox(
 	'all_ipv4',
 	'Protocol',
 	'IPv4',
-	($pconfig['all_ipv4'] == 'yes')
+	$all_ipv4
 ))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0)");
 
 $group->add(new Form_Checkbox(
 	'all_ipv6',
 	'Protocol',
 	'IPv6',
-	($pconfig['all_ipv6'] == 'yes'),
+	$all_ipv6
 ))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0)");
 
 $section->add($group);
@@ -252,8 +255,6 @@ $group->add(new Form_StaticText(
 ))->setWidth(5);
 
 $section->add($group);
-
-$allowedips = explode(",", $pconfig['allowedips']);
 
 foreach ($allowedips as $index => $ip) {
 
