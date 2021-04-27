@@ -553,46 +553,37 @@ function wg_remove_config_settings() {
 function make_wg_conf($tunnel) {
 	global $wgg;
 
-	$txt = "# This WireGuard config file has been created automatically. " .
-	    "Do not edit!\n";
+	$txt = "# This WireGuard config file has been created automatically. Do not edit!\n\n";
 
-	$txt .= "# Description: {$tunnel['descr']}\n\n";
+	$txt .= "# Description: {$tunnel['descr']}\n";
 
 	// Process Interfaces section
 	$txt .= "[Interface]\n";
 
 	if (!empty($tunnel['privatekey'])) {
+
 		$txt .= "PrivateKey = {$tunnel['privatekey']}\n";
+
 	}
 
 	if (!empty($tunnel['listenport'])) {
+
 		$txt .= "ListenPort = {$tunnel['listenport']}\n";
-	}
 
-	if (!empty($tunnel['addresses'])) {
-		$txt .= "Address = {$tunnel['addresses']}\n";
 	}
-
-	if (!empty($tunnel['mtu'])) {
-		$txt .= "MTU = {$tunnel['mtu']}\n";
-	}
-
-	// We need to address this at some point
-	$txt .= "Table = off\n";
 
 	$txt .= "\n";
 
 	// Process peers section
-
 	$peers = wg_get_tunnel_peers($tunnel);
 
 	if (is_array($peers) && count($peers) > 0) {
 
-		foreach ($peers as $peer) {
+		foreach ($peers as $index => $peer) {
 
 			if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 
-				$txt .= "# Peer: {$peer['descr']}\n";
+				$txt .= "# Peer {$index}: {$peer['descr']}\n";
 
 				$txt .= "[Peer]\n";
 
