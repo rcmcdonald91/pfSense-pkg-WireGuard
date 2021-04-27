@@ -90,8 +90,8 @@ if ($_POST) {
 		// Looks like we are editing an existing tunnel
 		$pconfig = &$wgg['peers'][$peer_id];
 
-		// Pull out an array of non-default allowed ips
-		list($allowedips, $all_ipv4, $all_ipv6) = wg_allowed_ips_filtered($pconfig['allowedips']);
+		// Pull out $allowedips, $all_ipv4, and $all_ipv6 in one shot
+		extract(wg_allowed_ips_filtered($pconfig['allowedips']));
 
 	} else {
 
