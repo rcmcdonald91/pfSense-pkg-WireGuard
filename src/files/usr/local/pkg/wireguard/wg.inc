@@ -327,15 +327,15 @@ function wg_allowed_ips_filtered($allowed_ips) {
 
 		} elseif (in_array($ip, $a_all)) {
 
-			$all_ipv4 = is_v4($ip);
+			$all_ipv4 = is_v4($ip) ? true : $all_ipv4;
 
-			$all_ipv6 = is_v6($ip);
+			$all_ipv6 = is_v6($ip) ? true : $all_ipv6;
 
 		}
 
 	}
 
-	// Always want to ensure at lesat something to show on the UI
+	// Always want to ensure at lesat something to show
 	$a_ret[] = null;
 
 	return array('allowedips' => $a_ret, 'all_ipv4' => $all_ipv4, 'all_ipv6' => $all_ipv6);
