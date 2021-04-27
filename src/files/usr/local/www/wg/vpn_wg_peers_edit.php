@@ -248,7 +248,7 @@ $group = new Form_Group(null);
 
 $group->add(new Form_StaticText(
 	null,
-	'<b>IPv4 or IPv6 subnets or hosts reachable via this peer:</b>'
+	'IPv4 or IPv6 subnets or hosts reachable via this peer:'
 ))->setWidth(5);
 
 $section->add($group);

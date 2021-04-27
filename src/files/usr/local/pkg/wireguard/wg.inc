@@ -310,15 +310,25 @@ function build_tun_list() {
 }
 
 // This converts a form post array containing addresses and subnets and returns an CIDR-formatted array
-function wg_parse_post_addresses($post_array, $addrstr = 'address', $subnetstr = 'address_subnet') {
+function wg_parse_post_addresses($post) {
 
 	$a_ret = array();
 
+	$all_ipv4 = (isset($post['all_ipv4']) && $post['all_ipv4'] == 'yes');
+	$all_ipv6 = (isset($post['all_ipv6']) && $post['all_ipv6'] == 'yes');
+
+	$a_ret[] = ($all_ipv4 ? '0.0.0.0/0' : null);
+	$a_ret[] = ($all_ipv6 ? '::/0' : null);
+
 	$x = 0;
 
-	while ($post_array["{$addrstr}{$x}"] && $post_array["{$subnetstr}{$x}"]) {
+	while ($post["address{$x}"] && $post["address_subnet{$x}"]) {
 
-		$a_ret[] = "{$post_array["{$addrstr}{$x}"]}/{$post_array["{$subnetstr}{$x}"]}";
+		$s_address = "{$post["address{$x}"]}/{$post["address_subnet{$x}"]}";
+
+		$a_ret[] = (!$all_ipv4 && is_v4($s_address)) ? $s_address : null;
+
+		$a_ret[] = (!$all_ipv6 && is_v6($s_address)) ? $s_address : null;
 
 		$x++;
 
@@ -349,6 +359,10 @@ function wg_do_peer_post($post) {
 	}
 
 	$a_allowed_ips = wg_parse_post_addresses($post);
+
+	print_r($a_allowed_ips);
+
+	exit();
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 	$pconfig['tun'] 		= $post['tun'];
