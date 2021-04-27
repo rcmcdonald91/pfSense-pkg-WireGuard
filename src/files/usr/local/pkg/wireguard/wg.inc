@@ -321,7 +321,7 @@ function wg_allowed_ips_filtered($allowed_ips) {
 
 	foreach ($a_ips as $index => $ip) {
 
-		if (!in_array($ip, $a_all) {
+		if (!in_array($ip, $a_all)) {
 
 			$a_ret[] = $ip;
 
