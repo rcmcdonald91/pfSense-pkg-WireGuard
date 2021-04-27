@@ -64,7 +64,7 @@ if ($_POST) {
 		if (empty($_POST['listenport'])) {
 
 			// Default to the next available port
-			$_POST['listenport'] = next_wg_port();
+			$_POST['listenport'] = wg_next_port();
 
 		}
 
@@ -129,7 +129,7 @@ if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 	// Default to enabled
 	$pconfig['enabled'] = 'yes';
 
-	$pconfig['name'] = next_wg_if();
+	$pconfig['name'] = wg_next_if();
 
 }
 
@@ -209,7 +209,7 @@ $section->addInput(new Form_Input(
 	'Listen Port',
 	'text',
 	$pconfig['listenport'],
-	['placeholder' => next_wg_port()]
+	['placeholder' => wg_next_port()]
 ))->setHelp('Port used by this tunnel to communicate with peers');
 
 $group = new Form_Group('*Interface Keys');

@@ -49,16 +49,13 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 		// Destroy the interface first
 		wg_destroy_if($tunnel, $verbose);
 
-		// Then attempt to bring up interface using wg-quick(8)
-		exec_wg_quick_action($tunnel, "up", $verbose);
-
 	}
 
 	// Now let's always soft configure the interface
 	wg_syncconf($tunnel);
 
 	$wg_ifname = escapeshellarg($tunnel['name']);
-	$group_ifname =escapeshellarg($wgg['ifgroupentry']['ifname']);
+	$group_ifname = escapeshellarg($wgg['ifgroupentry']['ifname']);
 
 	// Add the interface to the interface group (i.e. WireGuard)
 	mwexec("{$wgg['ifconfig']} {$wg_ifname} group {$group_ifname}");
@@ -79,9 +76,6 @@ function wg_configure_if($tunnel, $conf_hard = true, $verbose = false) {
 
 // Remove WireGuard tunnel
 function wg_destroy_if($tunnel, $verbose = false) {
-
-	// Execute the wg-quick(8) way of tearing down an interface
-	exec_wg_quick_action($tunnel, "down", $verbose);
 
 	// Need to transform out of tunnel structure because pfSense_interface_destroy expects an ifname
 	if (is_array($tunnel) && isset($tunnel['name'])) {
@@ -388,7 +382,7 @@ function wg_do_post($post) {
 
 	if (empty($pconfig['name'])) {
 
-		$pconfig['name'] = next_wg_if();
+		$pconfig['name'] = wg_next_if();
 
 	}
 
