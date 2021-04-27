@@ -350,26 +350,6 @@ function wg_do_peer_post($post) {
 
 	$a_allowed_ips = wg_parse_post_addresses($post);
 
-	array_walk($a_allowed_ips, function(&$x) { 
-
-		if (isset($post['all_ipv4']) && $post['all_ipv4'] == 'yes') {
-
-			if is_v4($x) { unset ($x); }
-
-		}
-
-		if (isset($post['all_ipv6']) && $post['all_ipv6'] == 'yes') {
-
-			if is_v6($x) { unset ($x); }
-
-		}
-
-	});
-
-	print_r($a_allowed_ips);
-
-	exit;
-
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 	$pconfig['tun'] 		= $post['tun'];
 	$pconfig['descr'] 		= $post['descr'];
@@ -378,7 +358,10 @@ function wg_do_peer_post($post) {
 	$pconfig['persistentkeepalive']	= $post['persistentkeepalive'];
 	$pconfig['publickey'] 		= $post['publickey'];
 	$pconfig['presharedkey']	= $post['presharedkey'];
-	$pconfig['allowedips'] 		= implode(',', wg_parse_post_addresses($post));
+	$pconfig['allowedips'] 		= implode(',', $a_allowed_ips);
+
+	$pconfig['all_ipv4']		= $post['all_ipv4'];
+	$pconfig['all_ipv6']		= $post['all_ipv6'];
 
 	$input_errors = wg_validate_peer_post($pconfig);
 

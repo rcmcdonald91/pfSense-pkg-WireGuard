@@ -98,10 +98,10 @@ if ($_POST) {
 		// Default to enabled
 		$pconfig['enabled'] = 'yes';
 
-		// Automatically choose a tunnel based on request 
+		// Automatically choose a tunnel based on the request 
 		$pconfig['tun'] = $tun;
 
-		// Default to a dynamic tunnel
+		// Default to a dynamic tunnel, so hide the endpoint form group
 		$is_dynamic = true;
 
 	}
@@ -251,25 +251,11 @@ $group->add(new Form_StaticText(
 	'<b>IPv4 or IPv6 subnets or hosts reachable via this peer:</b>'
 ))->setWidth(5);
 
-$group->add(new Form_StaticText(
-	null,
-	'<b>Peer Address:</b>'
-))->setWidth(2);
-
 $section->add($group);
-
-// This is a hack to ensure the default subnet selection isn't /0
-if (empty($pconfig['allowedips'])) {
-
-	$pconfig['allowedips'] = '/128';
-
-}
 
 $allowedips = explode(",", $pconfig['allowedips']);
 
-$last = count($allowedips) - 1;
-
-foreach ($allowedips as $counter => $ip) {
+foreach ($allowedips as $index => $ip) {
 
 	list($address, $address_subnet) = explode("/", $ip);
 
@@ -278,22 +264,15 @@ foreach ($allowedips as $counter => $ip) {
 	$group->addClass('repeatable');
 
 	$group->add(new Form_IpAddress(
-		"address{$counter}",
+		"address{$index}",
 		'Allowed IPs',
 		$address,
 		'BOTH'
-	))->addMask("address_subnet{$counter}", $address_subnet)
+	))->addMask("address_subnet{$index}", $address_subnet, 128, 1)
 		->setWidth(5);
 
-	$group->add(new Form_Checkbox(
-		"peeraddress{$counter}",
-		null,
-		"Peer",
-		false
-	))->setWidth(2);
-
 	$group->add(new Form_Button(
-		"deleterow{$counter}",
+		"deleterow{$index}",
 		'Delete',
 		null,
 		'fa-trash'
