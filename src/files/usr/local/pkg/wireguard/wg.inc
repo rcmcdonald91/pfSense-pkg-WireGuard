@@ -335,6 +335,7 @@ function wg_allowed_ips_filtered($allowed_ips) {
 
 	}
 
+	// Always want to ensure at lesat something to show on the UI
 	$a_ret[] = null;
 
 	return array('filtered' => $a_ret, 'all_ipv4' => $all_ipv4, 'all_ipv6' => $all_ipv6);
