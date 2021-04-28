@@ -102,6 +102,13 @@ if ($_POST) {
 
 		exit;
 
+	} elseif ($_POST['act'] == 'genpubkey') {
+
+		// Process ajax call calculating the public key from a private key
+		print(wg_gen_publickey($_POST['privatekey']));
+
+		exit;
+
 	} elseif ($_POST['act'] == 'toggle') {
 
 		wg_toggle_peer($peer_id);
@@ -458,13 +465,10 @@ events.push(function() {
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
 		if ($('#privatekey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
-			ajaxRequest = $.ajax(
-				{
-					url: '/wg/vpn_wg_tunnels_edit.php',
-					type: 'post',
-					data: {
-						act: 'genkeys'
-					},
+			ajaxRequest = $.ajax({
+				url: '/wg/vpn_wg_tunnels_edit.php',
+				type: 'post',
+				data: {act: 'genkeys'},
 				success: function(response, textStatus, jqXHR) {
 					resp = JSON.parse(response);
 					$('#publickey').val(resp.pubkey);
@@ -474,8 +478,25 @@ events.push(function() {
 		}
 	});
 
+	// Request a new public key when private key is changed
+	$('#privatekey').change(function(event) {
+		ajaxRequest = $.ajax(
+			{
+				url: '/wg/vpn_wg_tunnels_edit.php',
+				type: 'post',
+				data: {
+					act: 'genpubkey',
+					privatekey: $('#privatekey').val()
+				},
+			success: function(response, textStatus, jqXHR) {
+				$('#publickey').val(response);
+			}
+		});
+	});
+
+
 	// Save the form
-	$('#saveform').click(function () {
+	$('#saveform').click(function(event) {
 		$(form).submit();
 	});
 

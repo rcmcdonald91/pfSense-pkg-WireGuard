@@ -36,7 +36,6 @@ $wgg = array(
 	'kmod'			=> 'if_wg',
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
-					'bash',
 					'wireguard-kmod',
 					'wireguard-tools'),
 	'conf_path'		=> '/usr/local/etc/wireguard',
