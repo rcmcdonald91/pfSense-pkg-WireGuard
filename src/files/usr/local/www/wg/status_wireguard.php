@@ -89,16 +89,18 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars($device_name)?></td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
-				<tr>	
 				<tr>
-					<th><?=gettext("Peer")?></th>
-					<th><?=gettext("Public Key")?></th>
-					<th><?=gettext("Endpoint")?></th>
-					<th><?=gettext("Allowed IPs")?></th>
-					<th><?=gettext("Last HS")?></th>
-					<th><?=gettext("RX")?></th>
-					<th><?=gettext("TX")?></th>
-				</tr>
+			</tbody>	
+			<thead>
+				<th><?=gettext("Peer")?></th>
+				<th><?=gettext("Public Key")?></th>
+				<th><?=gettext("Endpoint")?></th>
+				<th><?=gettext("Allowed IPs")?></th>
+				<th><?=gettext("Last HS")?></th>
+				<th><?=gettext("RX")?></th>
+				<th><?=gettext("TX")?></th>
+			</thead>
+			<tbody>
 <?php
 	foreach($device['peers'] as $peer):
 ?>
