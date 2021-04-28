@@ -53,13 +53,14 @@ $wgg = array(
 					'ifname' => 'WireGuard', 
 					'descr' => 'Dynamic Group for WireGuard (DO NOT EDIT)', 
 					'members' => null),
+	'handshake_thresholds' 	=> array(
+					time() => 'text-warning',
+					86400 => 'text-danger',
+					300 => 'text-success'),
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,
-	'max_tunnels'		=> 32768,
-	'handshake_thresholds' => array(
-						'yellow' => 6*3600000,
-						'green' => 300)
+	'max_tunnels'		=> 32768
 );
 
 function &array_get_value(array &$array, $parents) {

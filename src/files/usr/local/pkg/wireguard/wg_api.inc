@@ -93,10 +93,6 @@ function wg_status() {
 
 			$tmp_peer['name'] = wg_get_peer_name($tmp_peer['public_key'], $last_device);
 
-			$tmp_peer['transfer_rx_human'] = format_bytes($tmp_peer['transfer_rx']);
-
-			$tmp_peer['transfer_tx_human'] = format_bytes($tmp_peer['transfer_tx']);
-
 			$wg_hs_diff = microtime(true)-$tmp_peer['latest_handshake'];
 
 
@@ -122,6 +118,29 @@ function wg_status() {
 	return $a_ret;
 
 }
+
+// Returns the appropriate fa icon class for handshake status icon
+function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-heartbeat") {
+	global wgg;
+
+	$diff_time = microtime(true) - $latest_handshake;
+
+	foreach ($wgg['handshake_thresholds'] as $threshold => $color) {
+
+		if ($diff_time < $threshold) {
+
+			continue;
+
+		}
+
+		$ret_color = $color;
+
+	}
+
+	return "fa fa-heartbeat {$ret_color}";
+
+}
+
 function wg_truncate_pretty($str, $length) {
 
 	$s_truncated = substr($str, 0, $length);
