@@ -78,10 +78,10 @@ function humanTiming ($time)
 
 }
 
-function get_peer_name($publickey) {
+function get_peer_name($publickey,$tunnel) {
 	global $wgg;
 	foreach ($wgg['peers'] as $peer_id => $peer){
-	if ($publickey == $peer['publickey']) {
+	if ($publickey == $peer['publickey'] && $tunnel == $peer['tun'])  {
 				$retval = $peer['descr'];
 				break;
 		}

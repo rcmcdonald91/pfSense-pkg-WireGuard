@@ -115,7 +115,7 @@ foreach ($a_devices as $device):
 
 ?>
 				<tr>
-					<td><?=get_peer_name($device[1])?></td>
+					<td><?=get_peer_name($device[1],$device[0])?></td>
 					<td><?=substr($device[1], 0, 16)."..."?></td>
 					<td><?=htmlspecialchars($device[3])?> </td>
 					<td><?=htmlspecialchars($device[4])?></td>
