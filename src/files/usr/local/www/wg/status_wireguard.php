@@ -108,11 +108,8 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['name'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=htmlspecialchars($peer['allowed_ips'])?></td>
-					<td>
-						<i class="<?=wg_handshake_status_icon($peer['latest_handshake'])?>"></i>
-						<?=htmlspecialchars($peer['latest_handshake_human'])?>
-					</td>
+					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips'], 'Allowed IPs')?></td>
+					<td><i class="fa fa-circle text-<?=$peer['handshake_threshold_color']?>"></i>&nbsp;<?=htmlspecialchars($peer['latest_handshake_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
 				</tr>
