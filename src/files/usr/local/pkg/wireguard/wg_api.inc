@@ -45,7 +45,7 @@ function wg_status_json($pretty = false) {
 function wg_status() {
 	global $wgg;
 
-	$tunnel_keys = array('private_key', 'public_key', 'listenPort', 'fwmark');
+	$tunnel_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
 
 	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
 
@@ -72,13 +72,14 @@ function wg_status() {
 
 			foreach ($tunnel_keys as $index => $key) {
 
-				$tmp_tunnel = $a_device[$index + 1];
+				$tmp_tunnel[$key] = $a_device[$index + 1];
 
 			}
 
-			$a_ret[$current_device][$key] = $tmp_tunnel;
-
 			$last_device = $a_device[0];
+
+			// Add the tunnel to the array
+			$a_ret[$current_device] = $tmp_tunnel;
 
 		} else {
 
@@ -96,6 +97,7 @@ function wg_status() {
 
 			$tmp_peer['transfer_tx_human'] = format_bytes($tmp_peer['transfer_tx']);
 
+			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 			
 		}

@@ -82,11 +82,11 @@ foreach ($a_devices as $device_name => $device):
 			<thead>
 				<th><?=gettext("Interface")?></th>
 				<th colspan="1"><?=gettext("Public Key")?></th>
-				<th colspan="6"><?=getext("Listen Port")?></th>
+				<th colspan="6"><?=gettext("Listen Port")?></th>
 			</thead>
 			<tbody>	
 				<tr>
-					<td><?=htmlspecialchars($device_name?></td>
+					<td><?=htmlspecialchars($device_name)?></td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
 				<tr>
