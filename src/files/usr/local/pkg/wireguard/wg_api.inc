@@ -114,9 +114,11 @@ function wg_format_address_hints($addresses) {
 
 	$a_addresses = explode(',', $addresses);
 
-	$address_count = count($a_addresses);
+	$first_address = array_shift($a_addresses);
 
-	return ($address_count > 1) ? "{$a_addresses[0]} (+{$address_count})" : $a_addresses[0];
+	$extras = count($a_addresses);
+
+	return ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
 
 }
 
