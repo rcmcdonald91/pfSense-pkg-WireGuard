@@ -70,10 +70,69 @@ display_top_tabs($tab_array);
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Connection Status')?></h2>
 	</div>
-	<div class="panel-body">
-		<dl class="dl-horizontal">
-			<pre><?=htmlspecialchars(wg_status())?></pre>
-		</dl>
+	<div class="table-responsive panel-body">
+	    <table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
+<?php
+
+$a_devices = wg_status();
+foreach ($a_devices as $device):
+?>
+
+<? if ( $device[0] != $last_device) { 
+	$new_device = true;
+	$last_device = $device[0];
+	?>
+			<thead>
+					<th>Interface</th>
+					<th colspan=1>Public Key</th>
+					<th colspan=6>Listen Port</th>
+			</thead>
+			<tbody>	
+
+				<tr>
+						<td><?=htmlspecialchars($device[0]);?></td>
+						<td colspan=1><?=htmlspecialchars(substr($device[2], 0, 16)."...");?></td>
+						<td colspan=6><?=htmlspecialchars($device[3]);?></td>
+				<tr>
+				</tbody>	
+<? 
+	} else {
+		if ($new_device) { 
+?>
+				<tr>
+					<th>Peer</th>
+					<th>Public Key</th>
+					<th>Endpoint</th>
+					<th>Allowed IPs</th>
+					<th>Last HS</th>
+					<th>RX</th>
+					<th>TX</th>
+					<th>KA</th>
+				</tr>
+<?
+			$new_device = false;
+		}
+
+?>
+				<tr>
+					<td><?=get_peer_name($device[1])?></td>
+					<td><?=substr($device[1], 0, 16)."..."?></td>
+					<td><?=htmlspecialchars($device[3])?> </td>
+					<td><?=htmlspecialchars($device[4])?></td>
+					<td><?=($device[5] > 0 ? humanTiming($device[5]) : "never"); ?></td>
+					<td><?=((is_nan($device[6]) || $device[6] == 0) ? "-" : format_bytes($device[6])); ?></td>
+					<td><?=((is_nan($device[7]) || $device[7] == 0) ? "-" : format_bytes($device[7])); ?></td>
+					<td><?=htmlspecialchars($device[8])?></td>
+				</tr>
+
+<?	}
+
+?>
+
+<?php
+endforeach;
+?>
+		</table>
     </div>
 </div>
 

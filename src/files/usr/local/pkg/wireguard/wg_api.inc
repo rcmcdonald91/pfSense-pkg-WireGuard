@@ -37,10 +37,57 @@ function wg_status() {
 	global $wgg;
 
 	$status = array();
-	exec("{$wgg['wg']} show", $status);
+	exec("{$wgg['wg']} show all dump", $output);
 
-	$output = implode("\n", $status);
+	// If dump is specified, then several lines are printed; the first contains in order separated by tab: 
+	// private-key, public-key, listen-port, fwmark. 
+	// Subsequent lines are printed for each peer and contain in order separated by tab: 
+	// public-key, preshared-key, endpoint, allowed-ips, latest-handshake, transfer-rx, transfer-tx, persistent-keepalive.
+
+
+	foreach ($output as $key => $info) {
+		$output[$key] = explode("\t", htmlspecialchars($info));
+	}
+
 	return $output;
+
+
+}
+
+
+function humanTiming ($time)
+{
+	
+    $time = time() - $time; // to get the time since that moment
+    $time = ($time<1)? 1 : $time;
+    $tokens = array (
+        31536000 => 'year',
+        2592000 => 'month',
+        604800 => 'week',
+        86400 => 'day',
+        3600 => 'hour',
+        60 => 'minute',
+        1 => 'second'
+    );
+
+    foreach ($tokens as $unit => $text) {
+        if ($time < $unit) continue;
+        $numberOfUnits = floor($time / $unit);
+        return $numberOfUnits.' '.$text.(($numberOfUnits>1)?'s':'');
+    }
+
+}
+
+function get_peer_name($publickey) {
+	global $wgg;
+	foreach ($wgg['peers'] as $peer_id => $peer){
+	if ($publickey == $peer['publickey']) {
+				$retval = $peer['descr'];
+				break;
+		}
+    }
+
+	return (strlen($retval > 16) ? substr($retval,0,16)."..." : $retval); 
 
 }
 
