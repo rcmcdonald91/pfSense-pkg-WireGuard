@@ -530,6 +530,16 @@ function wg_resync($verbose = false) {
 
 	}
 
+	// TOOD: Remove this once we come up with a service restart scheme 
+	// for now reload fitlers (for interface specific rules)
+	// reload gateways / restart dpinger
+    // reload unbound / restart unbound
+
+	filter_configure();
+	setup_gateways_monitor();
+	services_unbound_configure();
+
+
 	if ($g['wireguard_installing']) {
 
 		update_status(" done.\n");
