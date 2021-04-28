@@ -32,14 +32,25 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
+// Wrapper for wg_status to output json
 function wg_status_json($pretty = false) {
+
+	$a_json = wg_status();
+
+	return(json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES));
+
+}
+
+// Returns an associative array of current wg status
+function wg_status() {
 	global $wgg;
 
 	$tunnel_keys = array('privateKey', 'publicKey', 'listenPort', 'fwmark');
 
-	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 
-				'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
+	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
 
+	$wg_output_rows = $a_ret = array();
+	
 	exec("{$wgg['wg']} show all dump", $wg_output_rows, $ret_code);
 
 	// Bail out early if necessary
@@ -59,7 +70,7 @@ function wg_status_json($pretty = false) {
 
 			foreach ($tunnel_keys as $index => $key) {
 
-				$a_json[$current_device][$key] = $a_device[$index + 1];
+				$a_ret[$current_device][$key] = $a_device[$index + 1];
 
 			}
 
@@ -69,7 +80,7 @@ function wg_status_json($pretty = false) {
 
 			foreach ($peer_keys as $index => $key) {
 
-				$a_json[$last_device]['peers'][$a_device[1]][$key] = $a_device[$index + 1];
+				$a_ret[$last_device]['peers'][$a_device[1]][$key] = $a_device[$index + 1];
 
 			}
 
@@ -77,7 +88,7 @@ function wg_status_json($pretty = false) {
 
 	}
 
-	return(json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES));
+	return $a_ret;
 
 }
 
