@@ -112,7 +112,9 @@ function wg_truncate_pretty($str, $length) {
 
 	$s_truncated = substr($str, 0, $length);
 
-	return "{$s_truncated}...";
+	$s_pretty_dots = (strlen($str) > $length) ? '...' : '';
+
+	return "{$s_truncated}{$s_pretty_dots}";
 
 }
 
