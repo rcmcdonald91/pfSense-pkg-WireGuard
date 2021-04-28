@@ -97,6 +97,8 @@ function wg_status() {
 
 			$tmp_peer['transfer_tx_human'] = format_bytes($tmp_peer['transfer_tx']);
 
+			$tmp_peer['allowed_ips_hint'] = wg_format_address_hints($tmp_peer['allowed_ips']);
+
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 			
@@ -105,6 +107,16 @@ function wg_status() {
 	}
 
 	return $a_ret;
+
+}
+
+function wg_format_address_hints($addresses) {
+
+	$a_addresses = explode(',', $addresses);
+
+	$address_count = count($a_addresses);
+
+	return ($address_count > 1) ? "{$a_addresses[0]} (+{$address_count})" : $a_addresses[0];
 
 }
 
