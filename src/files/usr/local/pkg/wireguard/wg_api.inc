@@ -108,55 +108,6 @@ function wg_status() {
 
 }
 
-function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
-
-	$a_addresses = explode(',', $addresses);
-
-	$first_address = array_shift($a_addresses);
-
-	$extras = count($a_addresses);
-
-	if ($extras > 0) {
-
-		$html = <<<"HTML"
-			<table>
-				<thead>
-					<th></th>
-				</thead>
-				<tbody>	
-HTML;
-
-		foreach ($a_addresses as $address) {
-
-			$html .= <<<"HTML"
-					<tr>
-						<td>$address</td>
-					</tr>
-HTML;
-
-		}
-
-		$html .= <<<"HTML"
-				</tbody>
-			</table>
-HTML;
-
-		$hint = ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
-
-		$ret_val = <<<"HTML" 
-			<a href="$href" data-toggle='popover' data-trigger='hover focus' title="$title" data-content="$html" data-html="true">$hint</a>
-HTML;
-
-		return $ret_val;
-
-	} else {
-
-		return $first_address;
-
-	}
-
-}
-
 function wg_truncate_pretty($str, $length) {
 
 	$s_truncated = substr($str, 0, $length);
