@@ -97,6 +97,21 @@ function wg_status() {
 
 			$tmp_peer['transfer_tx_human'] = format_bytes($tmp_peer['transfer_tx']);
 
+			$wg_hs_diff = microtime(true)-$tmp_peer['latest_handshake'];
+
+
+			$yellow = $wgg['handshake_thresholds']['yellow'];
+			$green = $wgg['handshake_thresholds']['green'];
+
+			if ($wg_hs_diff <= $green){
+				$tmp_peer['handshake_threshold_color'] = 'success';
+				
+			} else if ($wg_hs_diff < $yellow) {
+				$tmp_peer['handshake_threshold_color'] = 'warning';
+			} else {
+				$tmp_peer['handshake_threshold_color'] = 'danger';
+			}
+			
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 			
@@ -143,7 +158,7 @@ HTML;
 
 		$hint = ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
 
-		$ret_val = <<<"HTML" 
+		$ret_val = <<<"HTML"
 			<a href="$href" data-toggle='popover' data-trigger='hover focus' title="$title" data-content="$html" data-html="true">$hint</a>
 HTML;
 
