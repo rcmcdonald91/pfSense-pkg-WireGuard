@@ -56,7 +56,10 @@ $wgg = array(
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,
-	'max_tunnels'		=> 32768
+	'max_tunnels'		=> 32768,
+	'handshake_thresholds' => array(
+						'yellow' => 6*3600000,
+						'green' => 300)
 );
 
 function &array_get_value(array &$array, $parents) {

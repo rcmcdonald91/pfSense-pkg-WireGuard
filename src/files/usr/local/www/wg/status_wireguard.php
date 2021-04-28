@@ -109,7 +109,7 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips'], 'Allowed IPs')?></td>
-					<td><?=htmlspecialchars($peer['latest_handshake_human'])?></td>
+					<td><i class="fa fa-heartbeat text-<?=$peer['handshake_threshold_color']?>"></i>&nbsp;<?=htmlspecialchars($peer['latest_handshake_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
 				</tr>
