@@ -96,7 +96,7 @@ foreach ($a_devices as $device_name => $device):
 				<th><?=gettext("Public Key")?></th>
 				<th><?=gettext("Endpoint")?></th>
 				<th><?=gettext("Allowed IPs")?></th>
-				<th><?=gettext("Last HS")?></th>
+				<th><?=gettext("Latest Handshake")?></th>
 				<th><?=gettext("RX")?></th>
 				<th><?=gettext("TX")?></th>
 			</thead>
