@@ -110,42 +110,44 @@ function wg_status() {
 
 function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
 
-	$first_address = array_shift($addresses);
+	$a_addresses = explode(',', $addresses);
 
-	$extras = count($addresses);
+	$first_address = array_shift($a_addresses);
+
+	$extras = count($a_addresses);
 
 	if ($extras > 0) {
 
-		$html = <<<HTML
+		$html = <<<"HTML"
 			<table>
 				<thead>
 					<th></th>
 				</thead>
 				<tbody>	
-		HTML;
+HTML;
 
-		foreach ($addresses as $address) {
+		foreach ($a_addresses as $address) {
 
-			$html .= <<<HTML
+			$html .= <<<"HTML"
 					<tr>
 						<td>$address</td>
 					</tr>
-			HTML;
+HTML;
 
 		}
 
-		$html .= <<<HTML
+		$html .= <<<"HTML"
 				</tbody>
 			</table>
-		HTML;
+HTML;
 
 		$hint = ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
 
-		$ret = <<<HTML 
-			<a href="$href" data-toggle='popover' data-trigger='hover focus' title="$title" data-content="$html" data-html='true'>$hint</a>
-		HTML;
+		$ret_val = <<<"HTML" 
+			<a href="$href" data-toggle='popover' data-trigger='hover focus' title="$title" data-content="$html" data-html="true">$hint</a>
+HTML;
 
-		return $ret;
+		return $ret_val;
 
 	} else {
 
