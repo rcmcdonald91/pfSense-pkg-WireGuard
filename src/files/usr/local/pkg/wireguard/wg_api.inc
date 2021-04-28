@@ -97,8 +97,6 @@ function wg_status() {
 
 			$tmp_peer['transfer_tx_human'] = format_bytes($tmp_peer['transfer_tx']);
 
-			$tmp_peer['allowed_ips_hint'] = wg_format_address_hints($tmp_peer['allowed_ips']);
-
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 			
@@ -110,15 +108,50 @@ function wg_status() {
 
 }
 
-function wg_format_address_hints($addresses) {
+function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
 
-	$a_addresses = explode(',', $addresses);
+	$first_address = array_shift($addresses);
 
-	$first_address = array_shift($a_addresses);
+	$extras = count($addresses);
 
-	$extras = count($a_addresses);
+	if ($extras > 0) {
 
-	return ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
+		$html = <<<HTML
+			<table>
+				<thead>
+					<th></th>
+				</thead>
+				<tbody>	
+		HTML;
+
+		foreach ($addresses as $address) {
+
+			$html .= <<<HTML
+					<tr>
+						<td>$address</td>
+					</tr>
+			HTML;
+
+		}
+
+		$html .= <<<HTML
+				</tbody>
+			</table>
+		HTML;
+
+		$hint = ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
+
+		$ret = <<<HTML 
+			<a href="$href" data-toggle='popover' data-trigger='hover focus' title="$title" data-content="$html" data-html='true'>$hint</a>
+		HTML;
+
+		return $ret;
+
+	} else {
+
+		return $first_address;
+
+	}
 
 }
 
