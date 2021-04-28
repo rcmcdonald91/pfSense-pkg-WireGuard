@@ -92,6 +92,7 @@ foreach ($a_devices as $device_name => $device):
 				<tr>
 			</tbody>	
 				<tr>
+					<th><?=gettext("Status")?></th>
 					<th><?=gettext("Peer")?></th>
 					<th><?=gettext("Public Key")?></th>
 					<th><?=gettext("Endpoint")?></th>
@@ -99,12 +100,12 @@ foreach ($a_devices as $device_name => $device):
 					<th><?=gettext("Last HS")?></th>
 					<th><?=gettext("RX")?></th>
 					<th><?=gettext("TX")?></th>
-					<th><?=gettext("KA")?></th>
 				</tr>
 <?php
 	foreach($device['peers'] as $peer):
 ?>
 				<tr>
+					<td><i class="fa fa-circle text-success"></i></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['name'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
@@ -112,7 +113,6 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars($peer['latest_handshake_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
-					<td><?=htmlspecialchars($peer['persistent_keepalive'])?></td>
 				</tr>
 
 <?php	
