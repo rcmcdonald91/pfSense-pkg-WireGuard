@@ -366,7 +366,7 @@ else:
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext("Peer Configuration")</h2>
+		<h2 class="panel-title"><?=gettext("Peer Configuration")?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
 		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
