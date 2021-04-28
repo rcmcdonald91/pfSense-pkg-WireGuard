@@ -358,7 +358,7 @@ print($form);
 
 if ($is_new):
 
-	print_info_box("New tunnels must be saved before adding peers.", 'warning', null);
+	print_info_box("New tunnels must be saved before adding or assigning peers.", 'warning', null);
 
 else:
 

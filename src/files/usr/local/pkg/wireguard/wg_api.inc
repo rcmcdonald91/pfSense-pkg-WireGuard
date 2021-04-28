@@ -32,15 +32,124 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
+function wg_status_json($pretty = false) {
+	global $wgg;
+
+	$tunnel_keys = array('privateKey', 'publicKey', 'listenPort', 'fwmark');
+
+	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 
+				'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
+
+	exec("{$wgg['wg']} show all dump", $wg_output_rows, $ret_code);
+
+	// Bail out early if necessary
+	if ($ret_code <> 0) { 
+		
+		return false; 
+	
+	}
+	
+	foreach ($wg_output_rows as $wg_index => $wg_row) {
+
+		$a_device = explode("\t", $wg_row);
+
+		$current_device = $a_device[0];
+
+		if (strcmp($current_device, $last_device)) {
+
+			foreach ($tunnel_keys as $index => $key) {
+
+				$a_json[$current_device][$key] = $a_device[$index + 1];
+
+			}
+
+			$last_device = $a_device[0];
+
+		} else {
+
+			foreach ($peer_keys as $index => $key) {
+
+				$a_json[$last_device]['peers'][$a_device[1]][$key] = $a_device[$index + 1];
+
+			}
+
+		}
+
+	}
+
+	return(json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES));
+
+}
+
 // Get WireGuard status
 function wg_status() {
 	global $wgg;
 
-	$status = array();
-	exec("{$wgg['wg']} show", $status);
+	$output = array();
 
-	$output = implode("\n", $status);
+	exec("{$wgg['wg']} show all dump", $output);
+
+	// If dump is specified, then several lines are printed; the first contains in order separated by tab: 
+	// private-key, public-key, listen-port, fwmark. 
+	// Subsequent lines are printed for each peer and contain in order separated by tab: 
+	// public-key, preshared-key, endpoint, allowed-ips, latest-handshake, transfer-rx, transfer-tx, persistent-keepalive.
+
+	foreach ($output as $key => $info) {
+
+		$output[$key] = explode("\t", htmlspecialchars($info));
+
+	}
+
 	return $output;
+
+
+}
+
+
+function humanTiming ($time) {
+	
+	$time = time() - $time; // to get the time since that moment
+	$time = ($time<1)? 1 : $time;
+
+	$tokens = array (
+		31536000 => 'year',
+		2592000 => 'month',
+		604800 => 'week',
+		86400 => 'day',
+		3600 => 'hour',
+		60 => 'minute',
+		1 => 'second'
+	);
+
+	foreach ($tokens as $unit => $text) {
+
+		if ($time < $unit) continue;
+
+		$numberOfUnits = floor($time / $unit);
+
+		$plural = ($numberOfUnits > 1) ? 's' : '';
+		
+		return "{$numberOfUnits} {$text}{$plural}"
+
+	}
+
+}
+
+function get_peer_name($publickey) {
+	global $wgg;
+
+	foreach ($wgg['peers'] as $peer_id => $peer){
+
+		if ($publickey == $peer['publickey']) {
+
+			$retval = $peer['descr'];
+
+			break;
+		}
+
+	}
+
+	return (strlen($retval > 16) ? substr($retval,0,16)."..." : $retval); 
 
 }
 

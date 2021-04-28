@@ -70,11 +70,68 @@ display_top_tabs($tab_array);
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Connection Status')?></h2>
 	</div>
-	<div class="panel-body">
-		<dl class="dl-horizontal">
-			<pre><?=htmlspecialchars(wg_status())?></pre>
-		</dl>
-    </div>
+	<div class="table-responsive panel-body">
+		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
+<?php
+
+$a_devices = wg_status();
+
+foreach ($a_devices as $device):
+
+	if ($device[0] != $last_device):
+
+		$new_device = true;
+
+		$last_device = $device[0];
+
+?>
+			<thead>
+				<th><?=gettext("Interface")?></th>
+				<th colspan="1"><?=gettext("Public Key")?></th>
+				<th colspan="6"><?=getext("Listen Port")?></th>
+			</thead>
+			<tbody>	
+				<tr>
+					<td><?=htmlspecialchars($device[0])?></td>
+					<td colspan="1"><?=htmlspecialchars(substr($device[2], 0, 16)."...")?></td>
+					<td colspan="6"><?=htmlspecialchars($device[3])?></td>
+				<tr>
+			</tbody>	
+<?php 
+	elseif:
+		if ($new_device):
+?>
+				<tr>
+					<th><?=gettext("Peer")?></th>
+					<th><?=gettext("Public Key")?></th>
+					<th><?=gettext("Endpoint")?></th>
+					<th><?=gettext("Allowed IPs")?></th>
+					<th><?=gettext("Last HS")?></th>
+					<th><?=gettext("RX")?></th>
+					<th><?=gettext("TX")?></th>
+					<th><?=gettext("KA")?></th>
+				</tr>
+<?php
+			$new_device = false;
+		endif;
+?>
+				<tr>
+					<td><?=get_peer_name($device[1])?></td>
+					<td><?=substr($device[1], 0, 16)."..."?></td>
+					<td><?=htmlspecialchars($device[3])?> </td>
+					<td><?=htmlspecialchars($device[4])?></td>
+					<td><?=($device[5] > 0 ? humanTiming($device[5]) : "never"); ?></td>
+					<td><?=((is_nan($device[6]) || $device[6] == 0) ? "-" : format_bytes($device[6])); ?></td>
+					<td><?=((is_nan($device[7]) || $device[7] == 0) ? "-" : format_bytes($device[7])); ?></td>
+					<td><?=htmlspecialchars($device[8])?></td>
+				</tr>
+
+<?php	
+	endif;
+endforeach;
+?>
+		</table>
+    	</div>
 </div>
 
 <div class="panel panel-default">
