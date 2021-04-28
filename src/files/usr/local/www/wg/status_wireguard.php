@@ -76,13 +76,7 @@ display_top_tabs($tab_array);
 
 $a_devices = wg_status();
 
-foreach ($a_devices as $device):
-
-	if ($device[0] != $last_device):
-
-		$new_device = true;
-
-		$last_device = $device[0];
+foreach ($a_devices as $device_name => $device):
 
 ?>
 			<thead>
@@ -92,15 +86,11 @@ foreach ($a_devices as $device):
 			</thead>
 			<tbody>	
 				<tr>
-					<td><?=htmlspecialchars($device[0])?></td>
-					<td colspan="1"><?=htmlspecialchars(substr($device[2], 0, 16)."...")?></td>
-					<td colspan="6"><?=htmlspecialchars($device[3])?></td>
+					<td><?=htmlspecialchars($device_name?></td>
+					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
+					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
 				<tr>
 			</tbody>	
-<?php 
-	elseif:
-		if ($new_device):
-?>
 				<tr>
 					<th><?=gettext("Peer")?></th>
 					<th><?=gettext("Public Key")?></th>
@@ -112,22 +102,21 @@ foreach ($a_devices as $device):
 					<th><?=gettext("KA")?></th>
 				</tr>
 <?php
-			$new_device = false;
-		endif;
+	foreach($device['peers'] as $peer):
 ?>
 				<tr>
-					<td><?=get_peer_name($device[1])?></td>
-					<td><?=substr($device[1], 0, 16)."..."?></td>
-					<td><?=htmlspecialchars($device[3])?> </td>
-					<td><?=htmlspecialchars($device[4])?></td>
-					<td><?=($device[5] > 0 ? humanTiming($device[5]) : "never"); ?></td>
-					<td><?=((is_nan($device[6]) || $device[6] == 0) ? "-" : format_bytes($device[6])); ?></td>
-					<td><?=((is_nan($device[7]) || $device[7] == 0) ? "-" : format_bytes($device[7])); ?></td>
-					<td><?=htmlspecialchars($device[8])?></td>
+					<td><?=htmlspecialchars(wg_truncate_pretty($peer['name'], 16))?></td>
+					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
+					<td><?=htmlspecialchars($peer['endpoint'])?></td>
+					<td><?=htmlspecialchars($peer['allowed_ips'])?></td>
+					<td><?=htmlspecialchars($peer['latest_handshake_human'])?></td>
+					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
+					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
+					<td><?=htmlspecialchars($peer['persistent_keepalive'])?></td>
 				</tr>
 
 <?php	
-	endif;
+	endforeach;
 endforeach;
 ?>
 		</table>

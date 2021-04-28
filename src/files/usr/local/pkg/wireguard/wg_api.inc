@@ -45,7 +45,7 @@ function wg_status_json($pretty = false) {
 function wg_status() {
 	global $wgg;
 
-	$tunnel_keys = array('privateKey', 'publicKey', 'listenPort', 'fwmark');
+	$tunnel_keys = array('private_key', 'public_key', 'listenPort', 'fwmark');
 
 	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
 
@@ -62,6 +62,8 @@ function wg_status() {
 	
 	foreach ($wg_output_rows as $wg_index => $wg_row) {
 
+		$tmp_tunnel = $tmp_peer = array();
+
 		$a_device = explode("\t", $wg_row);
 
 		$current_device = $a_device[0];
@@ -70,9 +72,11 @@ function wg_status() {
 
 			foreach ($tunnel_keys as $index => $key) {
 
-				$a_ret[$current_device][$key] = $a_device[$index + 1];
+				$tmp_tunnel = $a_device[$index + 1];
 
 			}
+
+			$a_ret[$current_device][$key] = $tmp_tunnel;
 
 			$last_device = $a_device[0];
 
@@ -80,10 +84,20 @@ function wg_status() {
 
 			foreach ($peer_keys as $index => $key) {
 
-				$a_ret[$last_device]['peers'][$a_device[1]][$key] = $a_device[$index + 1];
+				$tmp_peer[$key] = $a_device[$index + 1];
 
 			}
 
+			$tmp_peer['latest_handshake_human'] = wg_human_time_diff($tmp_peer['latest_handshake']);
+
+			$tmp_peer['name'] = wg_get_peer_name($tmp_peer['public_key'], $last_device);
+
+			$tmp_peer['transfer_rx_human'] = format_bytes($tmp_peer['transfer_rx']);
+
+			$tmp_peer['transfer_tx_human'] = format_bytes($tmp_peer['transfer_tx']);
+
+			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
+			
 		}
 
 	}
@@ -92,35 +106,23 @@ function wg_status() {
 
 }
 
-// Get WireGuard status
-function wg_status() {
-	global $wgg;
+function wg_truncate_pretty($str, $length) {
 
-	$output = array();
+	$s_truncated = substr($str, 0, $length);
 
-	exec("{$wgg['wg']} show all dump", $output);
-
-	// If dump is specified, then several lines are printed; the first contains in order separated by tab: 
-	// private-key, public-key, listen-port, fwmark. 
-	// Subsequent lines are printed for each peer and contain in order separated by tab: 
-	// public-key, preshared-key, endpoint, allowed-ips, latest-handshake, transfer-rx, transfer-tx, persistent-keepalive.
-
-	foreach ($output as $key => $info) {
-
-		$output[$key] = explode("\t", htmlspecialchars($info));
-
-	}
-
-	return $output;
-
+	return "{$s_truncated}...";
 
 }
 
-
-function humanTiming ($time) {
+function wg_human_time_diff($start_time, $end_time = 0, $from_epoch = false) {
 	
-	$time = time() - $time; // to get the time since that moment
-	$time = ($time<1)? 1 : $time;
+	// If not supplied, use the current time
+	$end_time = empty($end_time) ? time() : $end_time;
+
+	// If start time is zero, proceed unless we are actually interested in calculating time from epoch, probably not...
+	$start_time = ($start_time > 0) ? $start_time : ($from_epoch ? $start_time : $end_time);
+
+	$diff_time = abs($end_time - $start_time);
 
 	$tokens = array (
 		31536000 => 'year',
@@ -134,33 +136,39 @@ function humanTiming ($time) {
 
 	foreach ($tokens as $unit => $text) {
 
-		if ($time < $unit) continue;
+		if ($diff_time < $unit) {
+			
+			continue;
+			
+		}
 
-		$numberOfUnits = floor($time / $unit);
+		$num_of_units = floor($diff_time / $unit);
 
-		$plural = ($numberOfUnits > 1) ? 's' : '';
+		$plural = ($num_of_units > 1) ? 's' : '';
 		
-		return "{$numberOfUnits} {$text}{$plural}"
+		return "{$num_of_units} {$text}{$plural}";
 
 	}
 
+	return "never";
+
 }
 
-function get_peer_name($publickey) {
+// Returns WireGuard peer name from a public key and tunnel name
+function wg_get_peer_name($public_key, $tunnel) {
 	global $wgg;
 
 	foreach ($wgg['peers'] as $peer_id => $peer){
 
-		if ($publickey == $peer['publickey']) {
+		if ($public_key == $peer['publickey'] && $tunnel = $peer['tun']) {
 
-			$retval = $peer['descr'];
+			return $peer['descr'];
 
-			break;
 		}
 
 	}
 
-	return (strlen($retval > 16) ? substr($retval,0,16)."..." : $retval); 
+	return false;
 
 }
 
