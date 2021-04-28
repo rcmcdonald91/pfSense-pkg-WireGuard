@@ -89,10 +89,8 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars($device_name)?></td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
+				<tr>	
 				<tr>
-			</tbody>	
-				<tr>
-					<th><?=gettext("Status")?></th>
 					<th><?=gettext("Peer")?></th>
 					<th><?=gettext("Public Key")?></th>
 					<th><?=gettext("Endpoint")?></th>
@@ -105,7 +103,6 @@ foreach ($a_devices as $device_name => $device):
 	foreach($device['peers'] as $peer):
 ?>
 				<tr>
-					<td><i class="fa fa-circle text-success"></i></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['name'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
@@ -114,7 +111,7 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
 				</tr>
-
+			</tbody>
 <?php	
 	endforeach;
 endforeach;
