@@ -146,10 +146,36 @@ function wg_interface_status() {
 	$if_group = escapeshellarg($wgg['if_group']);
 
 	$status = array();
-	exec("{$wgg['ifconfig']} -a -g {$if_group}", $status);
+	exec("{$wgg['ifconfig']} -f inet:cidr,inet6:cidr -a -g {$if_group}", $status);
 
 	$output = implode("\n", $status);
-	return $output;
+
+	$a_raw_interfaces = preg_split("/^(?![[:blank:]])/m",$output,0,PREG_SPLIT_NO_EMPTY);
+	$ret_val = array();
+	foreach($a_raw_interfaces as $index => $raw_interface) {
+        
+		// match (tun_wg0)
+		preg_match("/^(.*)\:\ flags/",$raw_interface,$interface_match);
+		// flags=<(UP,etc)>		
+		preg_match("/.*flags.*\<(.*)>.*/",$raw_interface,$flags_match);
+		// match mtu: (1420)
+		preg_match("/.*mtu\ ([0-9].*)/",$raw_interface,$mtu_match);
+		// match description: (blah)
+		preg_match("/.*description:\ (.*)/",$raw_interface,$descr_match);
+		// match inet (0.0.0.0/0)
+		preg_match_all("/.*inet\ (.*)/m",$raw_interface,$ip_match);
+
+		$if = $index;
+		
+		$ret_val[$if]["interface"] = $interface_match[1];
+		$ret_val[$if]["flags"] = $flags_match[1];
+		$ret_val[$if]["mtu"] = $mtu_match[1];
+		$ret_val[$if]["descr"] = $descr_match[1];
+		$ret_val[$if]["ips"] = implode(",",$ip_match[1]);
+	
+		}
+
+    return $ret_val;
 
 }
 

@@ -293,17 +293,48 @@ events.push(function() {
 	endforeach;
 ?>
 		</table>
+
+
+
     	</div>
+
+
 </div>
 
-<div class="panel panel-default">
+<div class="panel panel-default ">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Interface Status')?></h2>
+		<h2 class="panel-title"><?=gettext('Interface Status')?>
+		
+
+
 	</div>
-	<div class="panel-body">
-		<dl class="dl-horizontal">
-			<pre><?=htmlspecialchars(wg_interface_status())?></pre>
-		</dl>
+	
+	<div class="table-responsive panel-body">
+		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
+	<thead>
+				<th><?=gettext("Interface")?></th>
+				<th><?=gettext("IPs")?></th>
+				<th><?=gettext("MTU")?></th>
+				<th><?=gettext("Flags")?></th>
+				<th><?=gettext("Description")?></th>
+			</thead>
+			<tbody>
+<?php
+$a_intefaces = wg_interface_status();
+foreach ($a_intefaces as $key => $a_interface):
+?>
+				<tr>
+					<td><?=htmlspecialchars(($a_interface['interface']))?></td>
+					<td><?=wg_generate_addresses_popup_link($a_interface['ips'],gettext("IPs"),"vpn_wg_tunnels_edit.php?tun=${a_interface['interface']}")?></td>
+					<td><?=htmlspecialchars(($a_interface['mtu']))?></td>
+					<td><?=htmlspecialchars(($a_interface['flags']))?></td>
+					<td><?=htmlspecialchars(($a_interface['descr']))?></td>
+				<tr>
+<?
+endforeach;
+?>
+			</tbody>	
+		</table>
     </div>
 </div>
 
@@ -363,9 +394,18 @@ endif;
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
+		<h2 class="panel-title"><?=gettext('Package Versions')?>
+		<span class="widget-heading-icon">
+				<a data-toggle="collapse" href="#panel_package_status">
+					<!--  actual icon is determined in css based on state of body -->
+					<i class="fa fa-plus-circle"></i>
+				</a>
+			</span>
+		</h2>
+		</h2>
 	</div>
-	<div class="table-responsive panel-body">
+
+	<div id="panel_package_status" class="table-responsive panel-body collapse" aria-expanded="false">
 		<table class="table table-hover table-striped table-condensed">
 			<thead>
 				<tr>
