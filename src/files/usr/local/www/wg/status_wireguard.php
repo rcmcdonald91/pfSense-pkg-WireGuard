@@ -86,7 +86,7 @@ foreach ($a_devices as $device_name => $device):
 			</thead>
 			<tbody>	
 				<tr>
-					<td><?=htmlspecialchars($device_name)?></td>
+					<td><a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?></td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
 				<tr>
@@ -108,7 +108,7 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['name'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips'], 'Allowed IPs')?></td>
+					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
 					<td>
 						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
 						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>

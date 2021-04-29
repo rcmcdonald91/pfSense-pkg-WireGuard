@@ -89,7 +89,11 @@ function wg_status() {
 
 			}
 
-			$tmp_peer['name'] = wg_get_peer_name($tmp_peer['public_key'], $last_device);
+			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device)
+
+			$tmp_peer['name'] = $a_peer_info['name'];
+			
+			$tmp_peer['id'] = $a_peer_info['id'];
 			
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
@@ -103,14 +107,17 @@ function wg_status() {
 }
 
 // Returns WireGuard peer name from a public key and tunnel name
-function wg_get_peer_name($public_key, $tunnel) {
+function wg_get_peer_info($public_key, $tunnel) {
 	global $wgg;
 
 	foreach ($wgg['peers'] as $peer_id => $peer){
 
 		if ($public_key == $peer['publickey'] && $tunnel = $peer['tun']) {
 
-			return $peer['descr'];
+
+			$ret_val = array('name' => $peer['descr'], 'id' => $peer_id);
+
+			return $ret_val;
 
 		}
 

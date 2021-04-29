@@ -103,7 +103,7 @@ function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) 
 
 }
 
-function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
+function wg_generate_addresses_popup_link($addresses, $title = null, $href = "#") {
 
 	$a_addresses = explode(',', $addresses);
 
@@ -113,7 +113,7 @@ function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
 
 	if ($extras > 0) {
 
-		$html = '<table><thead><th></th></thead><tbody>';
+		$data_html = '<table><thead><th></th></thead><tbody>';
 
 		array_walk($a_addresses, function(&$x) {
 
@@ -121,19 +121,21 @@ function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
 
 		});
 
-		$html .= implode('', $a_addresses);
+		$data_html .= implode('', $a_addresses);
 
-		$html .= '</tbody></table>';
+		$data_html .= '</tbody></table>';
 
 		$hint = ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
 
-		$ret_val = "<a href=\"{$href}\" data-toggle=\"popover\" data-trigger=\"hover focus\" title=\"{$title}\" data-content=\"{$html}\" data-html=\"true\">{$hint}</a>";
+		$ret_html = "<a href=\"{$href}\" data-toggle=\"popover\" data-trigger=\"hover focus\" title=\"{$title}\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
 
-		return $ret_val;
+		return $ret_html;
 
 	} else {
 
-		return $first_address;
+		$ret_html = "<a href=\"{$href}\" title=\"{$title}\">{$first_address}</a>";
+
+		return $ret_html;
 
 	}
 
