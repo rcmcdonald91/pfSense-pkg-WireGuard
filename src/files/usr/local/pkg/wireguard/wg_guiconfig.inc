@@ -47,7 +47,7 @@ function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") 
 
 	foreach ($a_thresholds as $threshold => $color) {
 
-		$ret_color = ($diff_time <= threshold) ? $color : $ret_color;
+		$ret_color = ($diff_time <= $threshold) ? $color : $ret_color;
 
 	}
 
