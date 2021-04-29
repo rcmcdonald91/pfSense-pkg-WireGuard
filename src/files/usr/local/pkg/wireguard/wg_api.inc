@@ -48,8 +48,6 @@ function wg_status() {
 	$tunnel_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
 
 	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
-
-	$wg_output_rows = $a_ret = array();
 	
 	exec("{$wgg['wg']} show all dump", $wg_output_rows, $ret_code);
 
@@ -59,10 +57,12 @@ function wg_status() {
 		return false; 
 	
 	}
+
+	$a_ret = array();
 	
 	foreach ($wg_output_rows as $wg_index => $wg_row) {
 
-		$tmp_tunnel = $tmp_peer = array();
+		$tmp_tunnel = $tmp_peer = $a_ret = array();
 
 		$a_device = explode("\t", $wg_row);
 
@@ -80,6 +80,9 @@ function wg_status() {
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
+			
+			// Now provision an empty peer array
+			$a_ret[$current_device]['peers'] = array();	
 
 		} else {
 
@@ -89,6 +92,7 @@ function wg_status() {
 
 			}
 
+			// Gets some extra information about peers not returned by `wg show all dump`
 			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device);
 
 			$tmp_peer['name'] = $a_peer_info['name'];
@@ -99,6 +103,7 @@ function wg_status() {
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 			
 		}
+
 
 	}
 
