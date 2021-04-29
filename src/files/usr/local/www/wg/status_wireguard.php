@@ -122,6 +122,14 @@ foreach ($a_devices as $device_name => $device):
 endforeach;
 ?>
 		</table>
+
+		<div style="float: right;"> 
+			<p style="display: table-cell;"><i class="fa fa-handshake text-success" style="vertical-align: middle">&nbsp;</i><?=gettext('Less than 5 minutes')?>&nbsp;
+			<i class="fa fa-handshake text-warning" style="vertical-align: middle">&nbsp;</i><?=gettext('Less than 6 hours')?>&nbsp;
+			<i class="fa fa-handshake text-danger" style="vertical-align: middle">&nbsp;</i><?=gettext('More than 6 hours')?></p>
+		</div>
+
+
     	</div>
 </div>
 
