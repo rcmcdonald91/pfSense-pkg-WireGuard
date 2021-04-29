@@ -47,19 +47,16 @@ function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") 
 
 	foreach ($a_thresholds as $threshold => $color) {
 
-		if ($threshold < $diff_time) {
-
-			continue;
-
-		}
-
-		$ret_color = $color;
+		$ret_color = ($diff_time <= threshold) ? $color : $ret_color;
 
 	}
 
-	return "fa {$fa_icon} {$ret_color}";
+	$ret_html = "<i class=""fa {$fa_icon} {$ret_color}"" style=""vertical-align: middle;""></i>;"
+
+	return $ret_html;
 
 }
+
 
 function wg_human_time_diff($start_time, $end_time = 0, $from_epoch = false) {
 	

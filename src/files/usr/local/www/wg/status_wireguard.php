@@ -110,8 +110,8 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=htmlspecialchars($peer['allowed_ips'])?></td>
 					<td>
-						<i class="<?=wg_handshake_status_icon($peer['latest_handshake'])?>"></i>
-						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>
+						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
+						<?=htmlspecialchars($peer['latest_handshake'])?>
 					</td>
 					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
