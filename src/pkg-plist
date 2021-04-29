@@ -1,6 +1,7 @@
 pkg/wireguard.xml
 pkg/wireguard/wg_api.inc
 pkg/wireguard/wg_globals.inc
+pkg/wireguard/wg_guiconfig.inc
 pkg/wireguard/wg_install.inc
 pkg/wireguard/wg_validate.inc
 pkg/wireguard/wg.inc

@@ -34,6 +34,7 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg_api.inc');
 require_once('wireguard/wg_globals.inc');
+require_once('wireguard/wg_guiconfig.inc');
 require_once('wireguard/wg_install.inc');
 require_once('wireguard/wg_validate.inc');
 

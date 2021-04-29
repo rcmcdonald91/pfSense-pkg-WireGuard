@@ -89,24 +89,7 @@ function wg_status() {
 
 			}
 
-			$tmp_peer['latest_handshake_human'] = wg_human_time_diff($tmp_peer['latest_handshake']);
-
 			$tmp_peer['name'] = wg_get_peer_name($tmp_peer['public_key'], $last_device);
-
-			$wg_hs_diff = microtime(true)-$tmp_peer['latest_handshake'];
-
-
-			$yellow = $wgg['handshake_thresholds']['yellow'];
-			$green = $wgg['handshake_thresholds']['green'];
-
-			if ($wg_hs_diff <= $green){
-				$tmp_peer['handshake_threshold_color'] = 'success';
-				
-			} else if ($wg_hs_diff < $yellow) {
-				$tmp_peer['handshake_threshold_color'] = 'warning';
-			} else {
-				$tmp_peer['handshake_threshold_color'] = 'danger';
-			}
 			
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
@@ -116,78 +99,6 @@ function wg_status() {
 	}
 
 	return $a_ret;
-
-}
-
-// Returns the appropriate fa icon class for handshake status icon
-function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-heartbeat") {
-	global wgg;
-
-	$diff_time = microtime(true) - $latest_handshake;
-
-	foreach ($wgg['handshake_thresholds'] as $threshold => $color) {
-
-		if ($diff_time < $threshold) {
-
-			continue;
-
-		}
-
-		$ret_color = $color;
-
-	}
-
-	return "fa fa-heartbeat {$ret_color}";
-
-}
-
-function wg_truncate_pretty($str, $length) {
-
-	$s_truncated = substr($str, 0, $length);
-
-	$s_pretty_dots = (strlen($str) > $length) ? '...' : '';
-
-	return "{$s_truncated}{$s_pretty_dots}";
-
-}
-
-function wg_human_time_diff($start_time, $end_time = 0, $from_epoch = false) {
-	
-	// If not supplied, use the current time
-	$end_time = empty($end_time) ? time() : $end_time;
-
-	// If start time is zero, proceed unless we are actually interested in calculating time from epoch, probably not...
-	$start_time = ($start_time > 0) ? $start_time : ($from_epoch ? $start_time : $end_time);
-
-	$diff_time = abs($end_time - $start_time);
-
-	$tokens = array (
-		31536000 => 'year',
-		2592000 => 'month',
-		604800 => 'week',
-		86400 => 'day',
-		3600 => 'hour',
-		60 => 'minute',
-		1 => 'second'
-	);
-
-	foreach ($tokens as $unit => $text) {
-
-		if ($diff_time < $unit) {
-			
-			continue;
-			
-		}
-
-		$num_of_units = floor($diff_time / $unit);
-
-		$plural = ($num_of_units > 1) ? 's' : '';
-		
-		return "{$num_of_units} {$text}{$plural}";
-
-	}
-
-	return "never";
 
 }
 
