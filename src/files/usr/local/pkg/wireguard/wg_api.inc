@@ -89,10 +89,10 @@ function wg_status() {
 
 			}
 
-			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device)
+			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device);
 
 			$tmp_peer['name'] = $a_peer_info['name'];
-			
+
 			$tmp_peer['id'] = $a_peer_info['id'];
 			
 			// Add the peer to the array
