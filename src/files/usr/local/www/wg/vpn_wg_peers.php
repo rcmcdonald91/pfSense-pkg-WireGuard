@@ -116,7 +116,7 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
 						<td><?=htmlspecialchars(explode(',', $peer['peeraddresses'])[0])?></td>
-						<td><?=htmlspecialchars(explode(',', $peer['allowedips'])[0])?></td>
+						<td><?=wg_generate_addresses_popup_link($peer['allowedips'], 'Allowed IPs')?></td>
 						<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>"></a>

@@ -113,19 +113,6 @@ display_top_tabs($tab_array);
 
 			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
 
-			// Not a fan of this, neeeds to be rewritten at some point
-			if (is_wg_tunnel_assigned($tunnel)) {
-
-				// We want all configured interfaces, including disabled ones
-				$iflist = get_configured_interface_list_by_realif(true);
-				$ifdescr = get_configured_interface_with_descr(true);
-
-				$iffriendly = $ifdescr[$iflist[$tunnel['name']]];
-
-				$tunnel['addresses'] = $iffriendly;
-
-			}
-
 			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
 
 ?>
@@ -134,7 +121,7 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td><?=htmlspecialchars(substr($tunnel['publickey'], 0, 16).'...')?></td>
-						<td><?=htmlspecialchars(explode(',', $tunnel['addresses'])[0])?></td>
+						<td><?=wg_generate_addresses_popup_link($tunnel['addresses'], 'Addresses')?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 
