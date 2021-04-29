@@ -34,7 +34,7 @@ function wg_truncate_pretty($str, $length) {
 }
 
 // Returns the appropriate fa icon class for handshake status icon
-function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-heartbeat") {
+function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") {
 	global $wgg;
 
 	$current_time = time();
