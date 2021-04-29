@@ -43,11 +43,13 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 
 	$a_thresholds = $wgg['handshake_thresholds'];
 
-	foreach ($a_thresholds as $threshold => $color) {
+	foreach ($a_thresholds as $threshold => $value) {
 
 		if ($diff_time >= $threshold) {
 	
-			$ret_color = $color;
+			$ret_class = $value['class'];
+
+			$ret_title = $value['title'];
 
 			break;
 
@@ -55,7 +57,7 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 
 	}
 
-	$ret_html = "<i class=\"fa {$fa_icon} {$ret_color}\" style=\"vertical-align: middle;\"></i>";
+	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$ret_title}\"></i>";
 
 	return $ret_html;
 
