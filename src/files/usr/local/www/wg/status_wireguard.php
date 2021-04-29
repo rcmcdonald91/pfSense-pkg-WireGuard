@@ -109,7 +109,7 @@ foreach ($a_devices as $device_name => $device):
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips'], 'Allowed IPs')?></td>
-					<td><i class="fa fa-heartbeat text-<?=$peer['handshake_threshold_color']?>"></i>&nbsp;<?=htmlspecialchars($peer['latest_handshake_human'])?></td>
+					<td><i class="fa fa-handshake text-<?=$peer['handshake_threshold_color']?>" style="vertical-align: middle"></i>&nbsp;<?=htmlspecialchars($peer['latest_handshake_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
 					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
 				</tr>
@@ -119,6 +119,13 @@ foreach ($a_devices as $device_name => $device):
 endforeach;
 ?>
 		</table>
+
+		<div style="float: right;"> 
+		<p style="display: table-cell;"><i class="fa fa-handshake text-success" style="vertical-align: middle">&nbsp;</i><?=gettext('Less than 5 minutes')?>&nbsp;
+		<i class="fa fa-handshake text-warning" style="vertical-align: middle">&nbsp;</i><?=gettext('Less than 6 hours')?>&nbsp;
+		<i class="fa fa-handshake text-danger" style="vertical-align: middle">&nbsp;</i><?=gettext('More than 6 hours')?></p>
+		</div>
+
     	</div>
 </div>
 
@@ -166,6 +173,7 @@ endforeach;
 
 			</tbody>
 		</table>
+
 	</div>
 </div>
 
