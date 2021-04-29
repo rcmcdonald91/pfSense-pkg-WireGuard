@@ -34,12 +34,10 @@ function wg_truncate_pretty($str, $length) {
 }
 
 // Returns the appropriate fa icon class for handshake status icon
-function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") {
+function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshake") {
 	global $wgg;
 
 	$current_time = time();
-
-	$latest_handshake = is_numeric($latest_handshake) ? $latest_handshake : $current_time;
 
 	$diff_time = $current_time - $latest_handshake;
 
@@ -47,7 +45,13 @@ function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") 
 
 	foreach ($a_thresholds as $threshold => $color) {
 
-		$ret_color = ($diff_time <= $threshold) ? $color : $ret_color;
+		if ($diff_time >= $threshold) {
+	
+			$ret_color = $color;
+
+			break;
+
+		}
 
 	}
 
@@ -56,7 +60,6 @@ function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") 
 	return $ret_html;
 
 }
-
 
 function wg_human_time_diff($start_time, $end_time = 0, $from_epoch = false) {
 	

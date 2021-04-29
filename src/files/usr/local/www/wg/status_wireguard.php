@@ -113,8 +113,8 @@ foreach ($a_devices as $device_name => $device):
 						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
 						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>
 					</td>
-					<td><?=htmlspecialchars($peer['transfer_tx_human'])?></td>
-					<td><?=htmlspecialchars($peer['transfer_rx_human'])?></td>
+					<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
+					<td><?=htmlspecialchars(format_btyes($peer['transfer_rx']))?></td>
 				</tr>
 			</tbody>
 <?php	
