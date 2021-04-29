@@ -39,6 +39,8 @@ function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") 
 
 	$current_time = time();
 
+	$latest_handshake = is_numeric($latest_handshake) ? $latest_handshake : $current_time;
+
 	$diff_time = $current_time - $latest_handshake;
 
 	$a_thresholds = $wgg['handshake_thresholds'];
