@@ -62,7 +62,7 @@ function wg_status() {
 	
 	foreach ($wg_output_rows as $wg_index => $wg_row) {
 
-		$tmp_tunnel = $tmp_peer = $a_ret = array();
+		$tmp_tunnel = $tmp_peer = array();
 
 		$a_device = explode("\t", $wg_row);
 
