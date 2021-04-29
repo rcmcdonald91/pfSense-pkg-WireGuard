@@ -51,7 +51,7 @@ function wg_handshake_status_icon($latest_handshake, $fa_icon = "fa-handshake") 
 
 	}
 
-	$ret_html = "<i class=\"fa {$fa_icon} {$ret_color}\" style=\"vertical-align: middle;\"></i>;";
+	$ret_html = "<i class=\"fa {$fa_icon} {$ret_color}\" style=\"vertical-align: middle;\"></i>";
 
 	return $ret_html;
 
