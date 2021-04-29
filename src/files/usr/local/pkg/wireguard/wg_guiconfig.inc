@@ -61,10 +61,10 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 
 }
 
-function wg_human_time_diff($start_time, $end_time = 0, $from_epoch = false) {
+function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) {
 	
 	// If end time is not supplied, use the current time instead
-	$end_time = empty($end_time) ? time() : $end_time;
+	$end_time = is_null($end_time) ? time() : $end_time;
 
 	// If start time is zero, proceed unless we are actually interested in calculating time from epoch, probably not...
 	$start_time = ($start_time > 0) ? $start_time : ($from_epoch ? $start_time : $end_time);
@@ -100,3 +100,41 @@ function wg_human_time_diff($start_time, $end_time = 0, $from_epoch = false) {
 	return "never";
 
 }
+
+function wg_generate_addresses_popup_link($addresses, $title, $href = "#") {
+
+	$a_addresses = explode(',', $addresses);
+
+	$first_address = array_shift($a_addresses);
+
+	$extras = count($a_addresses);
+
+	if ($extras > 0) {
+
+		$html = '<table><thead><th></th></thead><tbody>';
+
+		array_walk($a_addresses, function(&$x) {
+
+			$x = "<tr><td>{$x}</tr></td>";
+
+		});
+
+		$html .= implode('', $a_addresses);
+
+		$html .= '</tbody></table>';
+
+		$hint = ($extras > 0) ? "{$first_address} (+{$extras})" : $first_address;
+
+		$ret_val = "<a href=\"{$href}\" data-toggle=\"popover\" data-trigger=\"hover focus\" title=\"{$title}\" data-content=\"{$html}\" data-html=\"true\">{$hint}</a>";
+
+		return $ret_val;
+
+	} else {
+
+		return $first_address;
+
+	}
+
+}
+
+?>
