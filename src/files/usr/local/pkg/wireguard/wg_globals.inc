@@ -56,7 +56,7 @@ $wgg = array(
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => 'Greater than 1 day'),
 					300 => array('class' => 'text-warning', 'title' => 'Greater than 5 minutes'),
-					0 => array('class' => 'text-success', 'title' => 'Less than 5 minutes'),
+					0 => array('class' => 'text-success', 'title' => 'Less than 5 minutes')),
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,
