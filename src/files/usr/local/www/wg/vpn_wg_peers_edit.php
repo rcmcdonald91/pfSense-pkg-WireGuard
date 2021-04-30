@@ -226,23 +226,20 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
-
-$allowedips = wg_allowed_ips_filtered($pconfig['allowedips']['item']);
-
 $group = new Form_Group("Allowed IPs");
 
 $group->add(new Form_Checkbox(
 	'all_ipv4',
 	'Protocol',
 	'IPv4',
-	$allowedips['all_ipv4']
+	$pconfig['all_ipv4']
 ))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0)");
 
 $group->add(new Form_Checkbox(
 	'all_ipv6',
 	'Protocol',
 	'IPv6',
-	$allowedips['all_ipv6']
+	$pconfig['all_ipv6']
 ))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0)");
 
 $section->add($group);
@@ -256,7 +253,7 @@ $group->add(new Form_StaticText(
 
 $section->add($group);
 
-foreach ($allowedips as $counter => $item) {
+foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 	list($address, $address_subnet) = explode("/", $item['addr']);
 
@@ -357,20 +354,20 @@ events.push(function() {
 	$('#saveform').click(function () {
 		$(form).submit();
 	});
+	
+	$('#dynamic').click(function () {
 
-	function updateSection(hide) {
+		updateDynamicSection(this.checked);
+
+	});
+
+	function updateDynamicSection(hide) {
 
 		hideClass('endpoint', hide);
 
 	}
 
-	$('#dynamic').click(function () {
-
-		updateSection(this.checked);
-
-	});
-
-    	updateSection($('#dynamic').prop('checked'));
+	updateDynamicSection($('#dynamic').prop('checked'));
 
 });
 //]]>

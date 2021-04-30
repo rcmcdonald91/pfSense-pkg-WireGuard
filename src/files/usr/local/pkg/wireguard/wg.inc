@@ -379,8 +379,6 @@ function wg_do_peer_post($post) {
 
 	}
 
-	$a_allowed_ips = wg_parse_post_addresses($post);
-
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 
 	$pconfig['tun'] 		= $post['tun'];
@@ -410,6 +408,26 @@ function wg_do_peer_post($post) {
 	}
 
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
+
+}
+
+function wg_generate_allow_all_ips($all_ipv4 = false, $all_ipv6 = false) {
+
+	$ret_array = array();
+
+	if ($all_ipv4) {
+
+		$ret_array[] = array('addr' => '0.0.0.0/0', 'descr' = null);
+
+	}
+
+	if ($all_ipv6) {
+
+		$ret_array[] = array('addr' => '::/0', 'descr' = null);
+
+	}
+
+	return ($all_ipv4 || $all_ipv6) ? $ret_array : false;
 
 }
 

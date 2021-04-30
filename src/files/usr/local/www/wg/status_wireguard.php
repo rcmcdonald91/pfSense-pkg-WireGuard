@@ -140,8 +140,8 @@ if (!empty($a_devices)):
 
 <?php
 else:
-	
-	print_info_box("No WireGuard tunnels configured.", 'warning', null);
+
+	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
 
 endif;
 ?>
