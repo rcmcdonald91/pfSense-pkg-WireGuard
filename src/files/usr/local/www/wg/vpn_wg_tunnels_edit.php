@@ -38,6 +38,8 @@ global $wgg;
 
 wg_globals();
 
+$pconfig = array();
+
 $is_new = true;
 
 if (isset($_REQUEST['tun'])) {
@@ -100,8 +102,6 @@ if ($_POST) {
 	}
 
 }
-
-$pconfig = array();
 
 // Looks like we are editing an existing tunnel
 if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {

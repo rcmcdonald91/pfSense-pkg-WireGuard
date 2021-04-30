@@ -226,7 +226,16 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
-$group = new Form_Group("Allowed IPs");
+$form->add($section);
+
+$section = new Form_Section('Address Configuration');
+
+$section->addInput(new Form_StaticText(
+	'Hint',
+	'IPv4 or IPv6 subnets or hosts reachable via this peer.'
+));
+
+$group = new Form_Group("Allow All");
 
 $group->add(new Form_Checkbox(
 	'all_ipv4',
@@ -244,26 +253,17 @@ $group->add(new Form_Checkbox(
 
 $section->add($group);
 
-$group = new Form_Group(null);
-
-$group->add(new Form_StaticText(
-	null,
-	'IPv4 or IPv6 subnets or hosts reachable via this peer:'
-))->setWidth(5);
-
-$section->add($group);
-
 foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 	list($address, $address_subnet) = explode("/", $item['addr']);
 
-	$group = new Form_Group(null);
+	$group = new Form_Group('Allowed IPs');
 
-	$group->addClass('repeatable');
+	$group->addClass('repeatable allowedips');
 
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
-		'Allowed IPs',
+		'Allowed Subnet or Host',
 		$address,
 		'BOTH'
 	))->addMask("address_subnet{$counter}", $address_subnet, 128, 1)
@@ -287,12 +287,18 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 }
 
-$section->addInput(new Form_Button(
+$group = new Form_Group(null);
+
+$group->addClass('allowedips');
+
+$group->add(new Form_Button(
 	'addrow',
-	'Add Allowed IP',
+	'Add',
 	null,
 	'fa-plus'
 ))->addClass('btn-success btn-sm addbtn');
+
+$section->add($group);
 
 $form->add($section);
 
@@ -354,18 +360,32 @@ events.push(function() {
 	$('#saveform').click(function () {
 		$(form).submit();
 	});
-	
+
+	$('#all_ipv4, #all_ipv6').click(function () {
+
+		updateAllowedIPsSection($('#all_ipv4').prop('checked'), $('#all_ipv6').prop('checked'));
+
+	});
+
 	$('#dynamic').click(function () {
 
 		updateDynamicSection(this.checked);
 
 	});
 
+	function updateAllowedIPsSection(ipv4, ipv6) {
+
+		hideClass('allowedips', (ipv4 && ipv6));
+
+	}
+
 	function updateDynamicSection(hide) {
 
 		hideClass('endpoint', hide);
 
 	}
+
+	updateAllowedIPsSection($('#all_ipv4').prop('checked'), $('#all_ipv6').prop('checked'));
 
 	updateDynamicSection($('#dynamic').prop('checked'));
 

@@ -370,7 +370,7 @@ function wg_do_peer_post($post) {
 
 	$pconfig = $wgg['peers'][$index];
 
-	// Looks like we have a dynamic endpoint, clear endpoint or port variables before saving
+	// Looks like we have a dynamic endpoint, sp clear endpoint or port variables before saving
 	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
 
 		unset($post['endpoint']);
@@ -394,6 +394,8 @@ function wg_do_peer_post($post) {
 	$pconfig['publickey'] 		= $post['publickey'];
 	
 	$pconfig['presharedkey']	= $post['presharedkey'];
+
+	$a_allowedips			= wg_parse_post_addresses($post);
 
 	$pconfig['allowedips']['item'] 	= wg_parse_post_addresses($post);
 
