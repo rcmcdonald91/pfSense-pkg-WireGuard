@@ -400,20 +400,28 @@ endif;
 
 <nav class="action-buttons">
 <?php
-// We cheat here and show a disabled button for a better user experience
+// We cheat here and show a disabled buttons for a better user experience
 if ($is_new):
 ?>
 	<button class="btn btn-success btn-sm" title="<?=gettext('Add Peer')?>" disabled>
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</button>
+	<button class="btn btn-danger btn-sm" title="<?=gettext('Delete Tunnel')?>" disabled>
+		<i class="fa fa-trash icon-embed-btn"></i>
+		<?=gettext("Delete Tunnel")?>
+	</button>
 <?php
-// Now we show the actual link to add peer once the tunnel is actually saved
+// Now we show the actual links once the tunnel is actually saved
 else:
 ?>
 	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
+	</a>
+	<a href="<?="vpn_wg_tunnels.php?act=delete&tun={$pconfig['name']}"?>" class="btn btn-danger btn-sm">
+		<i class="fa fa-trash icon-embed-btn"></i>
+		<?=gettext("Delete Tunnel")?>
 	</a>
 <?php
 endif;
