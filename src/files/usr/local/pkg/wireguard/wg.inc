@@ -506,7 +506,7 @@ function wg_resync($verbose = false) {
 
 		wg_upgrade_allowedips();
 
-		update_status(" done.\n Configuring WireGuard tunnels...");
+		update_status(" done.\n  Configuring WireGuard tunnels...");
 
 	}
 

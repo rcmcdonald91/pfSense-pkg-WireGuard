@@ -127,7 +127,7 @@ function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "
 
 	} else {
 
-		$ret_html = "<a href=\"{$href}\" title=\"{$a_addresses[0]['descr']}\">$a_addresses[0]['addr']}</a>";
+		$ret_html = "<a href=\"{$href}\" title=\"{$a_addresses[0]['descr']}\">{$a_addresses[0]['addr']}</a>";
 
 		return $ret_html;
 
