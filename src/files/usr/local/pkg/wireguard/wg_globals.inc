@@ -122,6 +122,34 @@ function array_unset_value(&$array, $parents) {
 }
 
 /*
+ * This is a generalized implementation of init_config_arr
+ */
+
+function wg_init_config_arr(&$a_config, $keys) {
+
+	$c = &$a_config;
+
+	if (!is_array($keys)) {
+
+		return null;
+
+	}
+
+	foreach ($keys as $k) {
+
+		if (!is_array($c[$k])) {
+
+			$c[$k] = array();
+
+		}
+
+		$c = &$c[$k];
+
+	}
+	
+}
+
+/*
  * This populates the $wgg with the latest information from config.xml
  */
 function wg_globals() {

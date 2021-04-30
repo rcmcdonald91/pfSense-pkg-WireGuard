@@ -75,17 +75,6 @@ if ($_POST) {
 			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels.php");
 
-		} else {
-
-			if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
-
-				// Looks like we failed at editing an existing tunnel
-				$pconfig = &$wgg['tunnels'][$tun_id];
-		
-				$is_new = false;
-
-			}
-
 		}
 
 	} elseif ($_POST['act'] == 'genkeys') {
@@ -114,17 +103,19 @@ if ($_POST) {
 
 }
 
+$pconfig = array();
+
+wg_init_config_arr($pconfig, array('addresses', 'item'));
+
+// Looks like we are editing an existing tunnel
 if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 
-	// Looks like we are editing an existing tunnel
 	$pconfig = &$wgg['tunnels'][$tun_id];
 
 	$is_new = false;
 
+// Looks like we are creating a new tunnel
 } else {
-
-	// We are creating a new tunnel
-	$pconfig = array();
 
 	// Default to enabled
 	$pconfig['enabled'] = 'yes';
@@ -259,13 +250,6 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		'Interface Addresses',
 		'A list of IPv4 or IPv6 addresses assigned to the tunnel interface'
 	));
-
-	// Make sure we have one blank row if no addresses are configured
-	if (!is_array($pconfig['addresses']['item'])) {
-
-		$pconfig['addresses']['item'][] = array();
-
-	}
 
 	foreach ($pconfig['addresses']['item'] as $counter => $item) {
 

@@ -345,7 +345,7 @@ function wg_allowed_ips_filtered($allowedips) {
 
 }
 
-// This converts a form post array containing addresses and subnets and returns an CIDR-formatted array
+// This converts a raw form post containing repeatable addresses, subnets, and descriptions and returns an array for saving to conf
 function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 'address_subnet', $descr_prefix = 'addrdescr') {
 
 	$a_ret = array();
@@ -362,7 +362,7 @@ function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 
 
 	}
 	
-	return $a_ret;
+	return (!empty($a_ret) ? $a_ret : false;
 
 }
 
