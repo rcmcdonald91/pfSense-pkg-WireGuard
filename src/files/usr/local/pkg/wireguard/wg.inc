@@ -428,7 +428,7 @@ function wg_do_post($post) {
 
 	$pconfig['descr'] = $post['descr'];
 
-	$pconfig['listenport'] = empty($post['listenport'] ?: next_wg_port();
+	$pconfig['listenport'] = empty($post['listenport']) ?: next_wg_port();
 
 	$pconfig['privatekey'] = $post['privatekey'];
 
