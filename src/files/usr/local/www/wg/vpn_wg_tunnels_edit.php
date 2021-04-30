@@ -453,6 +453,9 @@ endif;
 //<![CDATA[
 events.push(function() {
 
+	// Supress "Delete" button if there are fewer than two rows
+	checkLastRow();
+
 	$('#copypubkey').click(function () {
 		$('#publickey').focus();
 		$('#publickey').select();

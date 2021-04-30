@@ -76,13 +76,16 @@ function wg_status() {
 
 			}
 
-			$last_device = $a_device[0];
+			// Gets some extra information about tunnels not returned by `wg show all dump`
+			$a_ret[$current_device]['descr'] = $wgg['tunnels'][wg_get_tunnel_id($current_device)];
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
 			
 			// Now provision an empty peer array
-			$a_ret[$current_device]['peers'] = array();	
+			$a_ret[$current_device]['peers'] = array();
+			
+			$last_device = $a_device[0];
 
 		} else {
 
@@ -95,7 +98,7 @@ function wg_status() {
 			// Gets some extra information about peers not returned by `wg show all dump`
 			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device);
 
-			$tmp_peer['name'] = $a_peer_info['name'];
+			$tmp_peer['descr'] = $a_peer_info['descr'];
 
 			$tmp_peer['id'] = $a_peer_info['id'];
 			
@@ -119,8 +122,7 @@ function wg_get_peer_info($public_key, $tunnel) {
 
 		if ($public_key == $peer['publickey'] && $tunnel = $peer['tun']) {
 
-
-			$ret_val = array('name' => $peer['descr'], 'id' => $peer_id);
+			$ret_val = array('descr' => $peer['descr'], 'id' => $peer_id);
 
 			return $ret_val;
 

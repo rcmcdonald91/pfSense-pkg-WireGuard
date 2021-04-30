@@ -317,6 +317,9 @@ print($form);
 //<![CDATA[
 events.push(function() {
 
+	// Supress "Delete" button if there are fewer than two rows
+	checkLastRow();
+
 	$('#copypsk').click(function () {
 		$('#presharedkey').focus();
 		$('#presharedkey').select();
