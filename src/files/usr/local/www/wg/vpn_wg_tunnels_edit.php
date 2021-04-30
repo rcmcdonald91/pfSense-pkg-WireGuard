@@ -407,10 +407,6 @@ if ($is_new):
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</button>
-	<button class="btn btn-danger btn-sm" title="<?=gettext('Delete Tunnel')?>" disabled>
-		<i class="fa fa-trash icon-embed-btn"></i>
-		<?=gettext("Delete Tunnel")?>
-	</button>
 <?php
 // Now we show the actual links once the tunnel is actually saved
 else:
@@ -418,10 +414,6 @@ else:
 	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
-	</a>
-	<a href="<?="vpn_wg_tunnels.php?act=delete&tun={$pconfig['name']}"?>" class="btn btn-danger btn-sm" usepost>
-		<i class="fa fa-trash icon-embed-btn"></i>
-		<?=gettext("Delete Tunnel")?>
 	</a>
 <?php
 endif;
