@@ -60,14 +60,7 @@ if (isset($_REQUEST['peer'])) {
 if ($_POST) {
 
 	if ($_POST['act'] == 'save') {
-
-		if (empty($_POST['listenport'])) {
-
-			// Default to the next available port
-			$_POST['listenport'] = next_wg_port();
-
-		}
-
+		
 		$res = wg_do_post($_POST);
 		
 		$input_errors = $res['input_errors'];
