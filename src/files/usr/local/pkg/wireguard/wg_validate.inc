@@ -48,13 +48,13 @@ function wg_validate_post($pconfig) {
 
 			$addr = trim($item['addr']);
 
-			if (!empty($addr) && !is_subnet($addr)) {
+			list($address, $address_subnet) = explode("/", $addr);
+
+			if (!empty($address) && !is_subnet($addr)) {
 
 				$input_errors[] = gettext("{$addr} is not a valid CIDR address");
 
 			}
-
-			list($address, $address_subnet) = explode("/", $addr);
 
 			$conflicts = where_is_ipaddr_configured($address, $skip, true, true, $address_subnet);
 

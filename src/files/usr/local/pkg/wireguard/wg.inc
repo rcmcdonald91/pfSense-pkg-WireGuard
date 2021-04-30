@@ -352,7 +352,7 @@ function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 
 
 	$x = 0;
 
-	while (isset($post["{$addr_prefix}{$x}"]) && isset($post["{$net_prefix}{$x}"])) {
+	while (!empty($post["{$addr_prefix}{$x}"]) && !empty($post["{$net_prefix}{$x}"])) {
 
 		$s_address = "{$post["{$addr_prefix}{$x}"]}/{$post["{$net_prefix}{$x}"]}";
 
