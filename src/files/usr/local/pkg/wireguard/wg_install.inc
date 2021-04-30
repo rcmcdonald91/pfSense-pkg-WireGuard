@@ -41,7 +41,74 @@ function wg_install() {
 
 	update_status(" done.\n");
 
+	// Performing any upgrades to the XML structure for existing configs
+
+	update_status("  Upgrading any existing configuration...");
+
+	wg_upgrade_addresses();
+	
+	wg_upgrade_allowedips();
+
+	update_status(" done.\n");
+
 	// The first organic resync called by pfSense package manager will finish the installation process
+
+}
+
+function wg_upgrade_allowedips() {
+	global $wgg;
+
+	$peers = $wgg['peers'];
+
+	foreach ($peers as $t_index => $peer) {
+
+		$a_allowedips = explode(',', $peer['allowedips']);
+
+		$tmp_addrs = array();
+
+		foreach($a_allowedips as $a_index=> $ip) {
+
+			$tmp_addrs[$a_index]['item']['addr'] = $ip;
+
+			$tmp_addrs[$a_index]['item']['peeraddr'] = null;
+
+			$tmp_addrs[$a_index]['item']['descr'] = null;
+
+		}
+
+		$wgg['peers'][$t_index]['allowedips'] = $tmp_addrs;
+
+	}
+
+	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+
+}
+
+
+function wg_upgrade_addresses() {
+	global $wgg;
+
+	$tunnels = $wgg['tunnels'];
+
+	foreach ($tunnels as $t_index => $tunnel) {
+
+		$a_addresses = explode(',', $tunnel['addresses']);
+
+		$tmp_addrs = array();
+
+		foreach($a_addresses as $a_index=> $address) {
+
+			$tmp_addrs[$a_index]['item']['addr'] = $address;
+
+			$tmp_addrs[$a_index]['item']['descr'] = null;
+
+		}
+
+		$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
+
+	}
+
+	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
 
 }
 
