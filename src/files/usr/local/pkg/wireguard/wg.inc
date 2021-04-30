@@ -496,17 +496,25 @@ function wg_resync($verbose = false) {
 	// Read latest settings
 	wg_globals();
 
+	if ($g['wireguard_installing']) {
+
+		// Performing any upgrades to the XML structure for existing configs
+
+		update_status("  Upgrading any existing configuration...");
+
+		wg_upgrade_addresses();
+
+		wg_upgrade_allowedips();
+
+		update_status(" done.\n Configuring WireGuard tunnels...");
+
+	}
+
 	// Write out configuration files to disk
 	wg_create_config_files();
 
 	// Attempt to reinstall the interface group to keep things clean
 	wg_ifgroup_install();
-
-	if ($g['wireguard_installing']) {
-
-		update_status("\n  Configuring WireGuard tunnels...");
-
-	}
 
 	if (is_array($wgg['tunnels'])) {
 
