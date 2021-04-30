@@ -40,8 +40,6 @@ wg_globals();
 
 $is_new = true;
 
-$secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
-
 if (isset($_REQUEST['tun'])) {
 
 	$tun = $_REQUEST['tun'];
@@ -105,8 +103,6 @@ if ($_POST) {
 
 $pconfig = array();
 
-wg_init_config_arr($pconfig, array('addresses', 'item'));
-
 // Looks like we are editing an existing tunnel
 if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 
@@ -126,6 +122,8 @@ if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 
 // Save the MTU settings prior to re(saving)
 $pconfig['mtu'] = get_interface_mtu($pconfig['name']);
+
+wg_init_config_arr($pconfig, array('addresses', 'item', 0));
 
 $shortcut_section = "wireguard";
 
@@ -208,7 +206,7 @@ $group = new Form_Group('*Interface Keys');
 $group->add(new Form_Input(
 	'privatekey',
 	'Private Key',
-	$secrets_input_type,
+	wg_secret_input_type(),
 	$pconfig['privatekey']
 ))->setHelp('Private key for this tunnel (Required)');
 

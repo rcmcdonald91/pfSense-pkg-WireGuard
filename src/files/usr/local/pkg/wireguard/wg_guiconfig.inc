@@ -103,6 +103,21 @@ function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) 
 
 }
 
+function wg_secret_input_type() {
+	global $wgg;
+
+	wg_globals();
+
+	if (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') {
+
+		return 'password';
+
+	}
+
+	return 'text';
+	
+}
+
 function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
 
 	$extras = count($a_addresses) - 1;

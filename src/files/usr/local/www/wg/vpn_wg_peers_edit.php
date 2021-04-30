@@ -38,8 +38,6 @@ global $wgg;
 
 wg_globals();
 
-$secrets_input_type = (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') ? 'password' : 'text';
-
 if (isset($_REQUEST['tun'])) {
 
 	$tun = $_REQUEST['tun'];
@@ -212,7 +210,7 @@ $group = new Form_Group('Pre-shared Key');
 $group->add(new Form_Input(
 	'presharedkey',
 	'Pre-shared Key',
-	$secrets_input_type,
+	wg_secret_input_type(),
 	$pconfig['presharedkey']
 ))->setHelp('Optional pre-shared key for this tunnel.');
 
