@@ -126,12 +126,6 @@ if (!empty($a_devices)):
 		</table>
     	</div>
 </div>
-<?php
-else:
-	print_info_box("No WireGuard tunnels configured.", 'warning', null);
-
-endif;
-?>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -143,6 +137,14 @@ endif;
 		</dl>
     </div>
 </div>
+
+<?php
+else:
+	
+	print_info_box("No WireGuard tunnels configured.", 'warning', null);
+
+endif;
+?>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
