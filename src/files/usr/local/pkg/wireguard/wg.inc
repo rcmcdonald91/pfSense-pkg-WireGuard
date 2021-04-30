@@ -434,7 +434,7 @@ function wg_do_post($post) {
 
 	$pconfig['publickey'] = wg_gen_publickey($post['privatekey']);
 
-	$pconfig['addresses'] = wg_parse_post_addresses($post);
+	$pconfig['addresses']['item'] = wg_parse_post_addresses($post);
 
 	$pconfig['name'] = !empty($post['name']) ? $post['name'] : next_wg_if();
 

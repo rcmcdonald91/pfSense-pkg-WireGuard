@@ -109,11 +109,11 @@ function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "
 
 	if ($extras > 0) {
 
-		$data_html = '<table><thead><th>Value</th><th>Description</th></thead><tbody>';
+		$data_html = "<table><thead><th>Value</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
 
 		foreach ($a_addresses as $address) {
 
-			$data_html .= "<tr><td>{$address['addr']}</td><td>{$address['descr']}</td></tr>";
+			$data_html .= "<tr><td>{$address['addr']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
 
 		}
 
