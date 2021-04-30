@@ -346,7 +346,7 @@ function wg_allowed_ips_filtered($allowedips) {
 }
 
 // This converts a form post array containing addresses and subnets and returns an CIDR-formatted array
-function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 'address_subnet', $descr_prefix = 'descr') {
+function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 'address_subnet', $descr_prefix = 'addrdescr') {
 
 	$a_ret = array();
 
@@ -428,7 +428,7 @@ function wg_do_post($post) {
 
 	$pconfig['descr'] = $post['descr'];
 
-	$pconfig['listenport'] = empty($post['listenport']) ?: next_wg_port();
+	$pconfig['listenport'] = !empty($post['listenport']) ? $post['listenport'] : next_wg_port();
 
 	$pconfig['privatekey'] = $post['privatekey'];
 
@@ -436,9 +436,9 @@ function wg_do_post($post) {
 
 	$pconfig['addresses'] = wg_parse_post_addresses($post);
 
-	$pconfig['name'] = empty($post['name']) ?: next_wg_if();
+	$pconfig['name'] = !empty($post['name']) ? $post['name'] : next_wg_if();
 
-	$pconfig['mtu'] = empty($post['mtu']) ?: $wgg['default_mtu'];
+	$pconfig['mtu'] = !empty($post['mtu']) ? $post['mtu'] : $wgg['default_mtu'];
 
 	$input_errors = wg_validate_post($pconfig);
 
