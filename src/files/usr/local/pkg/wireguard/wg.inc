@@ -500,7 +500,7 @@ function wg_resync($verbose = false) {
 
 		// Performing any upgrades to the XML structure for existing configs
 
-		update_status("  Upgrading any existing configuration...");
+		update_status("\n  Upgrading any existing configuration...");
 
 		wg_upgrade_addresses();
 
