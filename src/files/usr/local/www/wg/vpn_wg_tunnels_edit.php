@@ -59,7 +59,7 @@ if ($_POST) {
 
 	if ($_POST['act'] == 'save') {
 
-		$res = wg_do_post($_POST);
+		$res = wg_do_tunnel_post($_POST);
 		
 		$input_errors = $res['input_errors'];
 

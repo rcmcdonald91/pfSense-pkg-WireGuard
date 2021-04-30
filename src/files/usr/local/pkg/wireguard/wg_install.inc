@@ -84,7 +84,6 @@ function wg_upgrade_allowedips() {
 	// Write the changes out to disk
 	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
-
 }
 
 

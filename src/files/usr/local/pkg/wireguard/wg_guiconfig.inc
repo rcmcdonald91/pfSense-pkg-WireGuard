@@ -136,7 +136,7 @@ function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "
 
 		$hint = "{$a_addresses[0]['addr']} (+{$extras})";
 
-		$ret_html = "<a href=\"{$href}\" data-toggle=\"popover\" data-trigger=\"hover focus\" title=\"{$title}\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+		$ret_html = "<a href=\"{$href}\" title=\"{$title}\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
 
 		return $ret_html;
 

@@ -413,7 +413,7 @@ function wg_do_peer_post($post) {
 }
 
 // Write new tunnel values to the configuration system
-function wg_do_post($post) {
+function wg_do_tunnel_post($post) {
 	global $wgg;
 
 	wg_globals();
@@ -424,21 +424,25 @@ function wg_do_post($post) {
 
 	$pconfig = $wgg['tunnels'][$index];
 
-	$pconfig['enabled'] = empty($post['enabled']) ? 'no' : 'yes';
+	if (empty($pconfig['name'])) {
 
-	$pconfig['descr'] = $post['descr'];
+		$pconfig['name'] = next_wg_if();
 
-	$pconfig['listenport'] = !empty($post['listenport']) ? $post['listenport'] : next_wg_port();
+	}
 
-	$pconfig['privatekey'] = $post['privatekey'];
+	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 
-	$pconfig['publickey'] = wg_gen_publickey($post['privatekey']);
+	$pconfig['descr'] 		= $post['descr'];
 
-	$pconfig['addresses']['item'] = wg_parse_post_addresses($post);
+	$pconfig['listenport'] 		= !empty($post['listenport']) ? $post['listenport'] : next_wg_port();
 
-	$pconfig['name'] = !empty($post['name']) ? $post['name'] : next_wg_if();
+	$pconfig['privatekey'] 		= $post['privatekey'];
 
-	$pconfig['mtu'] = !empty($post['mtu']) ? $post['mtu'] : $wgg['default_mtu'];
+	$pconfig['publickey'] 		= wg_gen_publickey($post['privatekey']);
+
+	$pconfig['addresses']['item'] 	= wg_parse_post_addresses($post);
+
+	$pconfig['mtu'] 		= !empty($post['mtu']) ? $post['mtu'] : $wgg['default_mtu'];
 
 	$input_errors = wg_validate_post($pconfig);
 
@@ -450,7 +454,7 @@ function wg_do_post($post) {
 
 	}
 
-	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
+	return array('input_errors' => $input_errors, 'pconfig' => $pconfig);
 
 }
 
