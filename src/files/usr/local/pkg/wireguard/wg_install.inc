@@ -46,7 +46,7 @@ function wg_install() {
 	update_status("  Upgrading any existing configuration...");
 
 	wg_upgrade_addresses();
-	
+
 	wg_upgrade_allowedips();
 
 	update_status(" done.\n");
@@ -62,17 +62,19 @@ function wg_upgrade_allowedips() {
 
 	foreach ($peers as $t_index => $peer) {
 
+		unset($wgg['peers'][$t_index]['allowedips']);
+
 		$a_allowedips = explode(',', $peer['allowedips']);
 
 		$tmp_addrs = array();
 
 		foreach($a_allowedips as $a_index=> $ip) {
 
-			$tmp_addrs[$a_index]['item']['addr'] = $ip;
+			$tmp_addrs['item'][$a_index]['addr'] = $ip;
 
-			$tmp_addrs[$a_index]['item']['peeraddr'] = null;
+			$tmp_addrs['item'][$a_index]['descr'] = null;
 
-			$tmp_addrs[$a_index]['item']['descr'] = null;
+			$tmp_addrs['item'][$a_index]['peeraddr'] = null;
 
 		}
 
@@ -92,15 +94,17 @@ function wg_upgrade_addresses() {
 
 	foreach ($tunnels as $t_index => $tunnel) {
 
+		unset($wgg['tunnels'][$t_index]['addresses']);
+
 		$a_addresses = explode(',', $tunnel['addresses']);
 
 		$tmp_addrs = array();
 
 		foreach($a_addresses as $a_index=> $address) {
 
-			$tmp_addrs[$a_index]['item']['addr'] = $address;
+			$tmp_addrs['item'][$a_index]['addr'] = $address;
 
-			$tmp_addrs[$a_index]['item']['descr'] = null;
+			$tmp_addrs['item'][$a_index]['descr'] = null;
 
 		}
 
