@@ -419,7 +419,7 @@ else:
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext("Add Peer")?>
 	</a>
-	<a href="<?="vpn_wg_tunnels.php?act=delete&tun={$pconfig['name']}"?>" class="btn btn-danger btn-sm">
+	<a href="<?="vpn_wg_tunnels.php?act=delete&tun={$pconfig['name']}"?>" class="btn btn-danger btn-sm" usepost>
 		<i class="fa fa-trash icon-embed-btn"></i>
 		<?=gettext("Delete Tunnel")?>
 	</a>
