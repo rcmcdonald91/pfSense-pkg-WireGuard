@@ -140,14 +140,8 @@ function update_all_routes() {
 }
 
 events.push(function() {
-	setInterval('update_all_routes()', 5000);
+	setInterval('update_all_routes()', 30000);
 	update_all_routes();
-
-	$(document.forms[0]).on('submit', function(e) {
-		update_all_routes();
-
-		e.preventDefault();
-	});
 });
 //]]>
 </script>
