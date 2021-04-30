@@ -67,6 +67,87 @@ display_top_tabs($tab_array);
 $a_devices = wg_status();
 
 if (!empty($a_devices)):
+?>
+
+<script type="text/javascript">
+//<![CDATA[
+function update_routes(section) {
+	$.ajax(
+		'/diag_routes.php',
+		{
+			type: 'post',
+			data: 'isAjax=true&filter=<?=$wgg['if_prefix']?>' +'&'+ section +'=true',
+			success: update_routes_callback,
+	});
+}
+
+function update_routes_callback(html) {
+	// First line contains section
+	var responseTextArr = html.split("\n");
+	var section = responseTextArr.shift();
+	var tbody = '';
+	var field = '';
+	var tr_class = '';
+	var thead = '<tr>';
+	var columns  = 0;
+
+	for (var i = 0; i < responseTextArr.length; i++) {
+
+		if (responseTextArr[i] == "") {
+			continue;
+		}
+
+		if (i == 0) {
+			var tmp = '';
+		} else {
+			var tmp = '<tr>';
+		}
+
+		var j = 0;
+		var entry = responseTextArr[i].split(" ");
+		columns = entry.length;
+		for (var k = 0; k < entry.length; k++) {
+			if (entry[k] == "") {
+				continue;
+			}
+			if (i == 0) {
+				tmp += '<th>' + entry[k] + '<\/th>';
+			} else {
+				tmp += '<td>' + entry[k] + '<\/td>';
+			}
+			j++;
+		}
+
+		if (i == 0) {
+			thead += tmp;
+		} else {
+			tmp += '<td><\/td>'
+			tbody += tmp;
+		}
+	}
+
+	// if no routes found  ignore the sections and remove them the dom
+	if (tbody == "") {
+		$('#' + section + ' > thead').remove();
+		$('#' + section + ' > tbody').remove();
+		$('#' + section + '_parent').remove();
+	} else {
+		$('#' + section + ' > thead').html(thead);
+		$('#' + section + ' > tbody').html(tbody);
+	}
+}
+
+function update_all_routes() {
+	update_routes("IPv4");
+	update_routes("IPv6");
+}
+
+events.push(function() {
+	setInterval('update_all_routes()', 30000);
+	update_all_routes();
+});
+//]]>
+</script>
 
 ?>
 
