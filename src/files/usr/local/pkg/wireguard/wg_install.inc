@@ -51,31 +51,37 @@ function wg_upgrade_allowedips() {
 	// Read latest settings
 	wg_globals();
 
+	// Save a copy for manipulation
 	$peers = $wgg['peers'];
 
-	foreach ($peers as $t_index => $peer) {
+	if (!is_array($wgg['peers'][$p_index]['allowedips'])) {
 
-		unset($wgg['peers'][$t_index]['allowedips']);
+		foreach ($peers as $p_index => $peer) {
 
-		$a_allowedips = explode(',', $peer['allowedips']);
+			unset($wgg['peers'][$p_index]['allowedips']);
 
-		$tmp_addrs = array();
+			$a_allowedips = explode(',', $peer['allowedips']);
 
-		foreach($a_allowedips as $a_index=> $ip) {
+			$tmp_addrs = array();
 
-			$tmp_addrs['item'][$a_index]['addr'] = $ip;
+			foreach($a_allowedips as $a_index=> $ip) {
 
-			$tmp_addrs['item'][$a_index]['descr'] = null;
+				$tmp_addrs['item'][$a_index]['addr'] = $ip;
 
-			$tmp_addrs['item'][$a_index]['peeraddr'] = null;
+				$tmp_addrs['item'][$a_index]['descr'] = null;
+
+				$tmp_addrs['item'][$a_index]['peeraddr'] = null;
+
+			}
+
+			$wgg['peers'][$p_index]['allowedips'] = $tmp_addrs;
 
 		}
-
-		$wgg['peers'][$t_index]['allowedips'] = $tmp_addrs;
+		
+		// Write the changes out to disk
+		write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
 	}
-
-	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
 }
 
@@ -86,29 +92,36 @@ function wg_upgrade_addresses() {
 	// Read latest settings
 	wg_globals();
 
+	// Save a copy for manipulation
 	$tunnels = $wgg['tunnels'];
 
-	foreach ($tunnels as $t_index => $tunnel) {
+	if (!is_array($wgg['tunnels'][$t_index]['addresses'])) {
 
-		unset($wgg['tunnels'][$t_index]['addresses']);
+		foreach ($tunnels as $t_index => $tunnel) {
 
-		$a_addresses = explode(',', $tunnel['addresses']);
+			unset($wgg['tunnels'][$t_index]['addresses']);
 
-		$tmp_addrs = array();
+			$a_addresses = explode(',', $tunnel['addresses']);
 
-		foreach($a_addresses as $a_index=> $address) {
+			$tmp_addrs = array();
 
-			$tmp_addrs['item'][$a_index]['addr'] = $address;
+			foreach($a_addresses as $a_index=> $address) {
 
-			$tmp_addrs['item'][$a_index]['descr'] = null;
+				$tmp_addrs['item'][$a_index]['addr'] = $address;
+
+				$tmp_addrs['item'][$a_index]['descr'] = null;
+
+			}
+
+			
+			$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
 
 		}
 
-		$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
+		// Write the changes out to disk
+		write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
 
 	}
-
-	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
 
 }
 
