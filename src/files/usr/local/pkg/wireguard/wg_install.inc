@@ -54,9 +54,9 @@ function wg_upgrade_allowedips() {
 	// Save a copy for manipulation
 	$peers = $wgg['peers'];
 
-	if (!is_array($wgg['peers'][$p_index]['allowedips'])) {
+	foreach ($peers as $p_index => $peer) {
 
-		foreach ($peers as $p_index => $peer) {
+		if (!is_array($wgg['peers'][$p_index]['allowedips'])) {
 
 			unset($wgg['peers'][$p_index]['allowedips']);
 
@@ -77,11 +77,13 @@ function wg_upgrade_allowedips() {
 			$wgg['peers'][$p_index]['allowedips'] = $tmp_addrs;
 
 		}
-		
-		// Write the changes out to disk
-		write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+	
 
 	}
+
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+
 
 }
 
@@ -95,9 +97,9 @@ function wg_upgrade_addresses() {
 	// Save a copy for manipulation
 	$tunnels = $wgg['tunnels'];
 
-	if (!is_array($wgg['tunnels'][$t_index]['addresses'])) {
+	foreach ($tunnels as $t_index => $tunnel) {
 
-		foreach ($tunnels as $t_index => $tunnel) {
+		if (!is_array($wgg['tunnels'][$t_index]['addresses'])) {
 
 			unset($wgg['tunnels'][$t_index]['addresses']);
 
@@ -113,15 +115,16 @@ function wg_upgrade_addresses() {
 
 			}
 
-			
 			$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
 
 		}
-
-		// Write the changes out to disk
-		write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
+	
 
 	}
+
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
+
 
 }
 
