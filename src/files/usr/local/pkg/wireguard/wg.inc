@@ -531,6 +531,7 @@ function wg_resync($verbose = false) {
 		}
 
 	}
+	
 
 
 
