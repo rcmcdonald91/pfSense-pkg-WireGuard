@@ -48,6 +48,9 @@ function wg_install() {
 function wg_upgrade_allowedips() {
 	global $wgg;
 
+	// Read latest settings
+	wg_globals();
+
 	$peers = $wgg['peers'];
 
 	foreach ($peers as $t_index => $peer) {
@@ -79,6 +82,9 @@ function wg_upgrade_allowedips() {
 
 function wg_upgrade_addresses() {
 	global $wgg;
+
+	// Read latest settings
+	wg_globals();
 
 	$tunnels = $wgg['tunnels'];
 
