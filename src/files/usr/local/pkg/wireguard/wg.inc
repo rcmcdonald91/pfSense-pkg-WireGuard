@@ -417,13 +417,13 @@ function wg_generate_allow_all_ips($all_ipv4 = false, $all_ipv6 = false) {
 
 	if ($all_ipv4) {
 
-		$ret_array[] = array('addr' => '0.0.0.0/0', 'descr' = null);
+		$ret_array[] = array('addr' => '0.0.0.0/0', 'descr' => null);
 
 	}
 
 	if ($all_ipv6) {
 
-		$ret_array[] = array('addr' => '::/0', 'descr' = null);
+		$ret_array[] = array('addr' => '::/0', 'descr' => null);
 
 	}
 
