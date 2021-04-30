@@ -121,7 +121,7 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td><?=htmlspecialchars(substr($tunnel['publickey'], 0, 16).'...')?></td>
-						<td><?=wg_generate_addresses_popup_link($tunnel['addresses'], 'Addresses', "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}")?></td>
+						<td><?=wg_generate_addresses_popup_link($tunnel['addresses']['item'], 'Addresses', "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}")?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 

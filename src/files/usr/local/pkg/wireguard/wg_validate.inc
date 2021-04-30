@@ -44,23 +44,19 @@ function wg_validate_post($pconfig) {
 	// Assigned tunnels don't need these validation checks
 	if (!is_wg_tunnel_assigned($pconfig)) {
 
-		// Check the addresses
-		$addrs = explode(",", $pconfig['addresses']);
+		foreach ($pconfig['addresses']['item'] as $counter => $item) {
 
-		foreach ($addrs as $addr) {
+			$addr = trim($item['addr']);
 
-			$addr = trim($addr);
-
-			// Interface address is not technically required anymore
 			if (!empty($addr) && !is_subnet($addr)) {
 
 				$input_errors[] = gettext("{$addr} is not a valid CIDR address");
 
 			}
 
-			$a = explode("/", $addr);
+			list($address, $address_subnet) = explode("/", $addr);
 
-			$conflicts = where_is_ipaddr_configured($a[0], $skip, true, true, $a[1]);
+			$conflicts = where_is_ipaddr_configured($address, $skip, true, true, $address_subnet);
 
 			if (!empty($conflicts)) {
 

@@ -267,19 +267,16 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		'A list of IPv4 or IPv6 addresses assigned to the tunnel interface'
 	));
 
-	if (empty($pconfig['addresses'])) {
+	// Make sure we have one blank row if no addresses are configured
+	if (!is_array($pconfig['addresses']['item'])) {
 
-		$pconfig['addresses'] = '';
-	
+		$pconfig['addresses']['item'][] = array();
+
 	}
 
-	$addresses = explode(',', $pconfig['addresses']);
+	foreach ($pconfig['addresses']['item'] as $counter => $item) {
 
-	$last = count($addresses) - 1;
-
-	foreach ($addresses as $counter => $ip) {
-
-		list($address, $address_subnet) = explode("/", $ip);
+		list($address, $address_subnet) = explode("/", $item['addr']);
 	
 		$group = new Form_Group(null);
 	
@@ -291,7 +288,14 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			$address,
 			'BOTH'
 		))->addMask("address_subnet{$counter}", $address_subnet)
-			->setWidth(5);
+			->setWidth(4);
+		
+		$group->add(new Form_Input(
+			"addrdescr{$counter}",
+			'Description',
+			'text',
+			$item['descr']
+		))->setWidth(4);
 
 		$group->add(new Form_Button(
 			"deleterow{$counter}",

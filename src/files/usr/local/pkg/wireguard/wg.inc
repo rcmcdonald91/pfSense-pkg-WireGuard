@@ -310,17 +310,15 @@ function build_tun_list() {
 
 }
 
-function wg_allowed_ips_filtered($allowed_ips) {
+function wg_allowed_ips_filtered($allowedips) {
 
 	$a_all = array('0.0.0.0/0', '::/0');
 
 	$all_ipv4 = $all_ipv6 = false;
 
-	$a_ips = explode(',', $allowed_ips);
-
 	$a_ret = array();
 
-	foreach ($a_ips as $index => $ip) {
+	foreach ($allowedips as $ip) {
 
 		if (!in_array($ip, $a_all)) {
 
@@ -442,7 +440,7 @@ function wg_do_peer_post($post) {
 
 // Write new tunnel values to the configuration system
 function wg_do_post($post) {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
@@ -452,24 +450,16 @@ function wg_do_post($post) {
 
 	$pconfig = $wgg['tunnels'][$index];
 
-	if (empty($pconfig['name'])) {
+	$pconfig['name'] = empty($pconfig['name']) ?: next_wg_if();
 
-		$pconfig['name'] = next_wg_if();
-
-	}
-
-	if (empty($pconfig['mtu'])) {
-
-		$pconfig['mtu'] = $wgg['default_mtu'];
-
-	}
+	$pconfig['mtu'] = empty($pconfig['mtu']) ?: $wgg['default_mtu'];
 
 	$pconfig['enabled'] = empty($post['enabled']) ? 'no' : 'yes';
 
 	$pconfig['descr'] = $post['descr'];
 
 	// Tunnel section
-	$pconfig['addresses'] = implode(',', wg_parse_post_addresses($post));
+	$pconfig['addresses'] = $post['addresses'];
 	$pconfig['listenport'] = $post['listenport'];
 	$pconfig['privatekey'] = $post['privatekey'];
 	$pconfig['publickey'] = wg_gen_publickey($post['privatekey']);

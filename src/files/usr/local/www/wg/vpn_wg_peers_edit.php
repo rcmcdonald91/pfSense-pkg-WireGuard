@@ -106,9 +106,6 @@ if ($_POST) {
 
 	}
 
-	// Pull out $allowedips, $all_ipv4, and $all_ipv6 in one shot
-	extract(wg_allowed_ips_filtered($pconfig['allowedips']));
-
 }
 
 $shortcut_section = "wireguard";
@@ -229,6 +226,8 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
+$allowedips = wg_allowed_ips_filtered($pconfig['allowedips']));
+
 $group = new Form_Group("Allowed IPs");
 
 $group->add(new Form_Checkbox(
@@ -256,24 +255,39 @@ $group->add(new Form_StaticText(
 
 $section->add($group);
 
-foreach ($allowedips as $index => $ip) {
+// Make sure we have a blank row if empty
+if (!is_array($allowedips)) {
 
-	list($address, $address_subnet) = explode("/", $ip);
+	$allowedips[] = array();
+
+}
+
+
+foreach ($allowedips as $counter => $item) {
+
+	list($address, $address_subnet) = explode("/", $item['addr']);
 
 	$group = new Form_Group(null);
 
 	$group->addClass('repeatable');
 
 	$group->add(new Form_IpAddress(
-		"address{$index}",
+		"address{$counter}",
 		'Allowed IPs',
 		$address,
 		'BOTH'
-	))->addMask("address_subnet{$index}", $address_subnet, 128, 1)
-		->setWidth(5);
+	))->addMask("address_subnet{$counter}", $address_subnet, 128, 1)
+		->setWidth(4);
+
+	$group->add(new Form_Input(
+		"addrdescr{$counter}",
+		'Description',
+		'text',
+		$item['descr']
+	))->setWidth(4);
 
 	$group->add(new Form_Button(
-		"deleterow{$index}",
+		"deleterow{$counter}",
 		'Delete',
 		null,
 		'fa-trash'
