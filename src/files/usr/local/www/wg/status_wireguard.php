@@ -64,6 +64,10 @@ if (!is_module_loaded($wgg['kmod'])) {
 
 display_top_tabs($tab_array);
 
+$a_devices = wg_status();
+
+if (!empty($a_devices)):
+
 ?>
 
 <div class="panel panel-default">
@@ -74,9 +78,7 @@ display_top_tabs($tab_array);
 		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
 <?php
 
-$a_devices = wg_status();
-
-foreach ($a_devices as $device_name => $device):
+	foreach ($a_devices as $device_name => $device):
 
 ?>
 			<thead>
@@ -102,7 +104,7 @@ foreach ($a_devices as $device_name => $device):
 			</thead>
 			<tbody>
 <?php
-	foreach($device['peers'] as $peer):
+		foreach($device['peers'] as $peer):
 ?>
 				<tr>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
@@ -118,12 +120,18 @@ foreach ($a_devices as $device_name => $device):
 				</tr>
 			</tbody>
 <?php	
+		endforeach;
 	endforeach;
-endforeach;
 ?>
 		</table>
     	</div>
 </div>
+<?php
+else:
+	print_info_box("No WireGuard tunnels configured.", 'warning', null);
+
+endif;
+?>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
