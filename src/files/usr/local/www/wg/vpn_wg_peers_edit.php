@@ -81,30 +81,32 @@ if ($_POST) {
 	
 	}
 
+} 
+
+$pconfig = array();
+
+if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
+
+	// Looks like we are editing an existing tunnel
+	$pconfig = &$wgg['peers'][$peer_id];
+
 } else {
 
-	if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
+	// We are creating a new peer
+	$pconfig = array();
 
-		// Looks like we are editing an existing tunnel
-		$pconfig = &$wgg['peers'][$peer_id];
+	// Default to enabled
+	$pconfig['enabled'] = 'yes';
 
-	} else {
+	// Automatically choose a tunnel based on the request 
+	$pconfig['tun'] = $tun;
 
-		// We are creating a new peer
-		$pconfig = array();
-
-		// Default to enabled
-		$pconfig['enabled'] = 'yes';
-
-		// Automatically choose a tunnel based on the request 
-		$pconfig['tun'] = $tun;
-
-		// Default to a dynamic tunnel, so hide the endpoint form group
-		$is_dynamic = true;
-
-	}
+	// Default to a dynamic tunnel, so hide the endpoint form group
+	$is_dynamic = true;
 
 }
+
+wg_init_config_arr($pconfig, array('allowedips', 'item', 0));
 
 $shortcut_section = "wireguard";
 
@@ -224,7 +226,8 @@ $group->add(new Form_Button(
 
 $section->add($group);
 
-$allowedips = wg_allowed_ips_filtered($pconfig['allowedips']));
+
+$allowedips = wg_allowed_ips_filtered($pconfig['allowedips']['item']);
 
 $group = new Form_Group("Allowed IPs");
 
@@ -232,14 +235,14 @@ $group->add(new Form_Checkbox(
 	'all_ipv4',
 	'Protocol',
 	'IPv4',
-	$all_ipv4
+	$allowedips['all_ipv4']
 ))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0)");
 
 $group->add(new Form_Checkbox(
 	'all_ipv6',
 	'Protocol',
 	'IPv6',
-	$all_ipv6
+	$allowedips['all_ipv6']
 ))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0)");
 
 $section->add($group);
@@ -252,14 +255,6 @@ $group->add(new Form_StaticText(
 ))->setWidth(5);
 
 $section->add($group);
-
-// Make sure we have a blank row if empty
-if (!is_array($allowedips)) {
-
-	$allowedips[] = array();
-
-}
-
 
 foreach ($allowedips as $counter => $item) {
 

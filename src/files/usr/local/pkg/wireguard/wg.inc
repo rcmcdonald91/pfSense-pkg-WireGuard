@@ -310,7 +310,7 @@ function build_tun_list() {
 
 }
 
-function wg_allowed_ips_filtered($allowedips) {
+function wg_allowed_ips_filtered($a_allowedips) {
 
 	$a_all = array('0.0.0.0/0', '::/0');
 
@@ -318,26 +318,19 @@ function wg_allowed_ips_filtered($allowedips) {
 
 	$a_ret = array();
 
-	foreach ($allowedips as $ip) {
+	foreach ($a_allowedips as $item) {
 
-		if (!in_array($ip, $a_all)) {
+		if (!in_array($item['addr'], $a_all)) {
 
 			$a_ret[] = $ip;
 
-		} elseif (in_array($ip, $a_all)) {
+		} elseif (in_array($item['addr'], $a_all)) {
 
-			$all_ipv4 = is_v4($ip) ? true : $all_ipv4;
+			$all_ipv4 = is_v4($item['addr']) ? true : $all_ipv4;
 
-			$all_ipv6 = is_v6($ip) ? true : $all_ipv6;
+			$all_ipv6 = is_v6($item['addr']) ? true : $all_ipv6;
 
 		}
-
-	}
-
-	// Need to make sure we return at least one for the UI
-	if (count($a_ret) == 0) {
-
-		$a_ret[] = null;
 
 	}
 
@@ -345,7 +338,7 @@ function wg_allowed_ips_filtered($allowedips) {
 
 }
 
-// This converts a raw form post containing repeatable addresses, subnets, and descriptions and returns an array for saving to conf
+// This converts a raw form post containing repeatable like addresses, subnets, and descriptions and returns an array for saving to conf
 function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 'address_subnet', $descr_prefix = 'addrdescr') {
 
 	$a_ret = array();
@@ -389,14 +382,22 @@ function wg_do_peer_post($post) {
 	$a_allowed_ips = wg_parse_post_addresses($post);
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
+
 	$pconfig['tun'] 		= $post['tun'];
+
 	$pconfig['descr'] 		= $post['descr'];
+
 	$pconfig['endpoint'] 		= $post['endpoint'];
+
 	$pconfig['port'] 		= $post['port'];
+
 	$pconfig['persistentkeepalive']	= $post['persistentkeepalive'];
+
 	$pconfig['publickey'] 		= $post['publickey'];
+	
 	$pconfig['presharedkey']	= $post['presharedkey'];
-	$pconfig['allowedips'] 		= implode(',', $a_allowed_ips);
+
+	$pconfig['allowedips']['item'] 	= wg_parse_post_addresses($post);
 
 	$input_errors = wg_validate_peer_post($pconfig);
 
