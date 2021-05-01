@@ -208,14 +208,14 @@ $group->add(new Form_Input(
 	'Private Key',
 	wg_secret_input_type(),
 	$pconfig['privatekey']
-))->setHelp('Private key for this tunnel (Required)');
+))->setHelp('Private key for this tunnel. (Required)');
 
 $group->add(new Form_Input(
 	'publickey',
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp('Public key for this tunnel (%sCopy%s)', '<a id="copypubkey" href="#">', '</a>')->setReadonly();
+))->setHelp("Public key for this tunnel (<a id=\"copypubkey\" href=\"#\"></a>")->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
@@ -245,15 +245,15 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	));
 
 	$section->addInput(new Form_StaticText(
-		'Interface Addresses',
-		'A list of IPv4 or IPv6 addresses assigned to the tunnel interface'
+		'Hint',
+		'A list of IPv4 or IPv6 addresses assigned to the tunnel interface.'
 	));
 
 	foreach ($pconfig['addresses']['item'] as $counter => $item) {
 
 		list($address, $address_subnet) = explode("/", $item['addr']);
 	
-		$group = new Form_Group(null);
+		$group = new Form_Group('Interface Addresses');
 	
 		$group->addClass('repeatable');
 
@@ -283,12 +283,16 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	}
 
-	$section->addInput(new Form_Button(
+	$group = new Form_Group(null);
+
+	$group->add(new Form_Button(
 		'addrow',
 		'Add Address',
 		null,
 		'fa-plus'
 	))->addClass('btn-success btn-sm addbtn');
+
+	$section->add($group);
 
 } else {
 

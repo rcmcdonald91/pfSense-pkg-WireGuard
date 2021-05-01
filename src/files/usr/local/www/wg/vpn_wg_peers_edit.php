@@ -158,7 +158,7 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
-))->setHelp("Peer description for administrative reference (not parsed)");
+))->setHelp("Peer description for administrative reference (not parsed).");
 
 $section->addInput(new Form_Checkbox(
 	'dynamic',
@@ -242,14 +242,14 @@ $group->add(new Form_Checkbox(
 	'Protocol',
 	'IPv4',
 	$pconfig['all_ipv4']
-))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0)");
+))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0).");
 
 $group->add(new Form_Checkbox(
 	'all_ipv6',
 	'Protocol',
 	'IPv6',
 	$pconfig['all_ipv6']
-))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0)");
+))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0).");
 
 $section->add($group);
 
