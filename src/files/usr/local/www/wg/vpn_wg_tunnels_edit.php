@@ -287,7 +287,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$group->add(new Form_Button(
 		'addrow',
-		'Add Address',
+		'Add',
 		null,
 		'fa-plus'
 	))->addClass('btn-success btn-sm addbtn');
