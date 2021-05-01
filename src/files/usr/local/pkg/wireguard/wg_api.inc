@@ -90,9 +90,14 @@ function wg_status() {
 		} else {
 
 			foreach ($peer_keys as $index => $key) {
+		
+					if ( strcmp("allowed_ips",$key) == 0 ) {
+						foreach( explode(",",$a_device[$index + 1])  as $ip => $addr) {
+							$tmp_peer["allowed_ips"]["item"][$ip]["addr"] = $addr;
+						}
 
-				$tmp_peer[$key] = $a_device[$index + 1];
-
+					} else 
+						$tmp_peer[$key] = $a_device[$index + 1];
 			}
 
 			// Gets some extra information about peers not returned by `wg show all dump`

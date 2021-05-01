@@ -105,12 +105,13 @@ if (!empty($a_devices)):
 			<tbody>
 <?php
 		foreach($device['peers'] as $peer):
+			
 ?>
 				<tr>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
+					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
 					<td>
 						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
 						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>
