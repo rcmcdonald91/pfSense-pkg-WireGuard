@@ -215,7 +215,7 @@ $group->add(new Form_Input(
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp("Public key for this tunnel (<a id=\"copypubkey\" href=\"#\"></a>")->setReadonly();
+))->setHelp("Public key for this tunnel (<a id=\"copypubkey\" href=\"#\">Copy</a>)")->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
