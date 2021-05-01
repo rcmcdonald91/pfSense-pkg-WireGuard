@@ -253,13 +253,6 @@ endforeach;
     </div>
 </div>
 
-<?php
-else:
-
-	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
-
-endif;
-?>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -305,6 +298,15 @@ endif;
 	</div>
 
 </div>
+
+
+<?php
+else:
+
+	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
+
+endif;
+?>
 
 
 <div class="panel panel-default">
