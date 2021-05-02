@@ -101,6 +101,8 @@ function wg_status() {
 			$tmp_peer['descr'] = $a_peer_info['descr'];
 
 			$tmp_peer['id'] = $a_peer_info['id'];
+
+			$tmp_peer['allowed_ips_array'] = $a_peer_info['allowedips'];
 			
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
@@ -122,7 +124,7 @@ function wg_get_peer_info($public_key, $tunnel) {
 
 		if ($public_key == $peer['publickey'] && $tunnel = $peer['tun']) {
 
-			$ret_val = array('descr' => $peer['descr'], 'id' => $peer_id);
+			$ret_val = array('descr' => $peer['descr'], 'id' => $peer_id, 'allowedips' => $peer['allowedips']['item']);
 
 			return $ret_val;
 
