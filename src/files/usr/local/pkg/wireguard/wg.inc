@@ -684,7 +684,7 @@ function make_wg_conf($tunnel) {
 
 				if (is_array($peer['allowedips'])) {
 
-					$allowedips = implode(',', array_map(fn($item) => $item['addr'], $tunnel['allowedips']['item']));
+					$allowedips = implode(',', array_map(fn($item) => $item['addr'], $peer['allowedips']['item']));
 
 					$txt .= "AllowedIPs = {$allowedips}\n";
 
