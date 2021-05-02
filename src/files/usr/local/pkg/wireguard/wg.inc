@@ -505,12 +505,6 @@ function wg_do_tunnel_post($post) {
 
 }
 
-function wg_gen_tunnel_address($post) {
-
-	$
-
-}
-
 function wg_resync($verbose = false) {
 	global $config, $g, $wgg;
 
