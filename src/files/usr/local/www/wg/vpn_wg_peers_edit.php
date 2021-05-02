@@ -266,7 +266,7 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 		->setWidth(4);
 
 	$group->add(new Form_Input(
-		"addrdescr{$counter}",
+		"address_descr{$counter}",
 		'Description',
 		'text',
 		$item['descr']
