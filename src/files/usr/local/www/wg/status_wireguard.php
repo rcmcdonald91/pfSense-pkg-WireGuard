@@ -70,6 +70,88 @@ if (!empty($a_devices)):
 
 ?>
 
+<script type="text/javascript">
+//<![CDATA[
+function update_routes(section) {
+	$.ajax(
+		'/diag_routes.php',
+		{
+			type: 'post',
+			data: 'isAjax=true&filter=<?=$wgg['if_prefix']?>' +'&'+ section +'=true',
+			success: update_routes_callback,
+	});
+}
+
+function update_routes_callback(html) {
+	// First line contains section
+	var responseTextArr = html.split("\n");
+	var section = responseTextArr.shift();
+	var tbody = '';
+	var field = '';
+	var tr_class = '';
+	var thead = '<tr>';
+	var columns  = 0;
+
+	for (var i = 0; i < responseTextArr.length; i++) {
+
+		if (responseTextArr[i] == "") {
+			continue;
+		}
+
+		if (i == 0) {
+			var tmp = '';
+		} else {
+			var tmp = '<tr>';
+		}
+
+		var j = 0;
+		var entry = responseTextArr[i].split(" ");
+		columns = entry.length;
+		for (var k = 0; k < entry.length; k++) {
+			if (entry[k] == "") {
+				continue;
+			}
+			if (i == 0) {
+				tmp += '<th>' + entry[k] + '<\/th>';
+			} else {
+				tmp += '<td>' + entry[k] + '<\/td>';
+			}
+			j++;
+		}
+
+		if (i == 0) {
+			thead += tmp;
+		} else {
+			tmp += '<td><\/td>'
+			tbody += tmp;
+		}
+	}
+
+	// if no routes found  ignore the sections and remove them the dom
+	if (tbody == "") {
+		$('#' + section + ' > thead').remove();
+		$('#' + section + ' > tbody').remove();
+		$('#' + section + '_parent').remove();
+	} else {
+		$('#' + section + ' > thead').html(thead);
+		$('#' + section + ' > tbody').html(tbody);
+	}
+}
+
+function update_all_routes() {
+	update_routes("IPv4");
+	update_routes("IPv6");
+}
+
+events.push(function() {
+	setInterval('update_all_routes()', 30000);
+	update_all_routes();
+
+});
+//]]>
+</script>
+
+
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Connection Status')?></h2>
@@ -124,18 +206,95 @@ if (!empty($a_devices)):
 	endforeach;
 ?>
 		</table>
+
+
+
     	</div>
+
+
 </div>
+
+<div class="panel panel-default ">
+	<div class="panel-heading">
+		<h2 class="panel-title"><?=gettext('Interface Status')?>
+		
+
+
+	</div>
+	
+	<div class="table-responsive panel-body">
+		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
+	<thead>
+				<th><?=gettext("Interface")?></th>
+				<th><?=gettext("IPs")?></th>
+				<th><?=gettext("MTU")?></th>
+				<th><?=gettext("Flags")?></th>
+				<th><?=gettext("Description")?></th>
+			</thead>
+			<tbody>
+<?php
+$a_intefaces = wg_interface_status();
+foreach ($a_intefaces as $key => $a_interface):
+?>
+				<tr>
+					<td><?=htmlspecialchars(($a_interface['interface']))?></td>
+					<td><?=wg_generate_addresses_popup_link($a_interface['ips'],gettext("IPs"),"vpn_wg_tunnels_edit.php?tun=${a_interface['interface']}")?></td>
+					<td><?=htmlspecialchars(($a_interface['mtu']))?></td>
+					<td><?=htmlspecialchars(($a_interface['flags']))?></td>
+					<td><?=htmlspecialchars(($a_interface['descr']))?></td>
+				<tr>
+<?
+endforeach;
+?>
+			</tbody>	
+		</table>
+    </div>
+</div>
+
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Interface Status')?></h2>
+		<h2 class="panel-title"><?=gettext('Routes Status')?>
+			<span class="widget-heading-icon">
+				<a data-toggle="collapse" href="#wg_routes_status">
+					<!--  actual icon is determined in css based on state of body -->
+					<i class="fa fa-plus-circle"></i>
+				</a>
+			</span>
+		</h2>
 	</div>
-	<div class="panel-body">
-		<dl class="dl-horizontal">
-			<pre><?=htmlspecialchars(wg_interface_status())?></pre>
-		</dl>
-    </div>
+
+	<div id="wg_routes_status" class="table-responsive panel-body collapse" aria-expanded="false">
+
+			<div id="IPv4_parent" class="panel-heading"><h2 class="panel-title"><?=gettext("IPv4")?></h2></div>
+				<table class="table table-striped table-hover table-condensed sortable-theme-bootstrap" id="IPv4">
+				<thead>
+					<tr>
+						<th><!-- filled by xhr --></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><?=gettext("Gathering data, please wait...")?></td>
+					</tr>
+				</tbody>
+				</table>
+		
+			<div id="IPv6_parent" class="panel-heading"><h2 class="panel-title"><?=gettext("IPv6")?></h2></div>
+				<table class="table table-striped table-hover table-condensed sortable-theme-bootstrap" id="IPv6">
+				<thead>
+					<tr>
+						<th><!-- filled by xhr --></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><?=gettext("Gathering data, please wait...")?></td>
+					</tr>
+				</tbody>
+				</table>
+	</div>
+
 </div>
 
 <?php
@@ -146,11 +305,21 @@ else:
 endif;
 ?>
 
+
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
+		<h2 class="panel-title"><?=gettext('Package Versions')?>
+		<span class="widget-heading-icon">
+				<a data-toggle="collapse" href="#panel_package_status">
+					<!--  actual icon is determined in css based on state of body -->
+					<i class="fa fa-plus-circle"></i>
+				</a>
+			</span>
+		</h2>
+		</h2>
 	</div>
-	<div class="table-responsive panel-body">
+
+	<div id="panel_package_status" class="table-responsive panel-body collapse" aria-expanded="false">
 		<table class="table table-hover table-striped table-condensed">
 			<thead>
 				<tr>
@@ -168,8 +337,8 @@ endif;
 
 ?>
     				<tr>
-        				<td><?=htmlspecialchars($package[0])?></td>
-    					<td><?=htmlspecialchars($package[1])?></td>
+					<td><?=htmlspecialchars($package[0])?></td>
+					<td><?=htmlspecialchars($package[1])?></td>
 					<td><?=htmlspecialchars($package[2])?></td>
 
 				</tr>
