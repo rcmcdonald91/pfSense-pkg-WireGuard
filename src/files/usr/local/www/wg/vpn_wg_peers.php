@@ -108,8 +108,6 @@ display_top_tabs($tab_array);
 
 			$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
 
-			$icon_toggle = ($peer['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
-
 ?>
 					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>';" class="<?=$entryStatus?>">
 						<td><?=htmlspecialchars($peer['descr'])?></td>
@@ -120,7 +118,7 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>"></a>
-							<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer_id}"?>" usepost></a>
+							<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_id}")?>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer_id}"?>" usepost></a>
 						</td>
 					</tr>

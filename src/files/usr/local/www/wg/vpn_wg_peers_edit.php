@@ -257,7 +257,7 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 	list($address, $address_subnet) = explode("/", $item['addr']);
 
-	$group = new Form_Group('Allowed IPs');
+	$group = new Form_Group($counter == 0 ? 'Allowed IPs' : null);
 
 	$group->addClass('repeatable allowedips');
 

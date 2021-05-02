@@ -118,6 +118,24 @@ function wg_secret_input_type() {
 	
 }
 
+function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'check-square-o') {
+
+	if (isset($target)) {
+	
+		$s_icon = (isset($target['enabled']) && $target['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
+
+		$s_title = gettext($title);
+
+		$s_usepost = $usepost ? 'usepost' : '';
+
+		return "<a class=\"fa {$s_icon}\" title=\"{$s_title}\" href=\"{$href}\" {$s_usepost}></a>";
+
+	}
+
+	return null;
+
+}
+
 function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
 
 	$extras = count($a_addresses) - 1;

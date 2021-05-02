@@ -191,11 +191,11 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
-))->setHelp('Tunnel description for administrative reference (not parsed)');
+))->setHelp('Description for administrative reference (not parsed)');
 
 $section->addInput(new Form_Input(
 	'listenport',
-	'Listen Port',
+	'*Listen Port',
 	'text',
 	$pconfig['listenport'],
 	['placeholder' => next_wg_port()]
@@ -244,16 +244,11 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
-	$section->addInput(new Form_StaticText(
-		'Hint',
-		'A list of IPv4 or IPv6 addresses assigned to the tunnel interface.'
-	));
-
 	foreach ($pconfig['addresses']['item'] as $counter => $item) {
 
 		list($address, $address_subnet) = explode("/", $item['addr']);
 	
-		$group = new Form_Group('Interface Addresses');
+		$group = new Form_Group($counter == 0 ? 'Interface Addresses' : '');
 	
 		$group->addClass('repeatable');
 
@@ -263,14 +258,16 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			$address,
 			'BOTH'
 		))->addMask("address_subnet{$counter}", $address_subnet)
-			->setWidth(4);
+			->setWidth(4)
+->setHelp('IPv4 or IPv6 address assigned to the tunnel interface');
 		
 		$group->add(new Form_Input(
 			"addrdescr{$counter}",
 			'Description',
 			'text',
 			$item['descr']
-		))->setWidth(4);
+		))->setWidth(4)
+->setHelp('Description for administrative reference (not parsed)');
 
 		$group->add(new Form_Button(
 			"deleterow{$counter}",
@@ -279,20 +276,16 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'fa-trash'
 		))->addClass('btn-warning btn-sm');
 	
-		$section->add($group);
+		$section->add($group);		
 
 	}
 
-	$group = new Form_Group(null);
-
-	$group->add(new Form_Button(
+	$section->addInput(new Form_Button(
 		'addrow',
-		'Add',
+		'Add Address',
 		null,
 		'fa-plus'
 	))->addClass('btn-success btn-sm addbtn');
-
-	$section->add($group);
 
 } else {
 
@@ -371,8 +364,6 @@ else:
 
 			foreach ($peers as $peer):
 
-				$icon_toggle = ($peer['enabled'] == 'yes') ? 'ban' : 'check-square-o';
-
 				$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
 
 ?>
@@ -384,7 +375,7 @@ else:
 					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
-						<a class="fa fa-<?=$icon_toggle?>" title="<?=gettext("Click to toggle enabled/disabled status")?>" href="<?="?act=toggle&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
+						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer['index']}&tun={$tun}")?>
 						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
 					</td>
 				</tr>
@@ -404,7 +395,7 @@ endif;
 
 <nav class="action-buttons">
 <?php
-// We cheat here and show a disabled buttons for a better user experience
+// We cheat here and show disabled buttons for a better user experience
 if ($is_new):
 ?>
 	<button class="btn btn-success btn-sm" title="<?=gettext('Add Peer')?>" disabled>
@@ -431,7 +422,6 @@ endif;
 
 <?php $genkeywarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
 
-<!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {

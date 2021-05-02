@@ -338,7 +338,7 @@ function wg_allowed_ips_filtered($a_allowedips) {
 
 }
 
-// This converts a raw form post containing repeatable like addresses, subnets, and descriptions and returns an array for saving to conf
+// This converts a raw form post containing repeatables like addresses, subnets, and descriptions and returns an array for saving to conf
 function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 'address_subnet', $descr_prefix = 'addrdescr') {
 
 	$a_ret = array();
