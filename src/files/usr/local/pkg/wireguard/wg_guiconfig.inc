@@ -118,7 +118,7 @@ function wg_secret_input_type() {
 	
 }
 
-function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'check-square-o') {
+function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
 
 	if (isset($target)) {
 	
