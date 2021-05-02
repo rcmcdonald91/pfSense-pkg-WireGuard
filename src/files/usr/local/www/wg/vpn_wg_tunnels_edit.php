@@ -164,14 +164,14 @@ $tun_enable = new Form_Checkbox(
 	$pconfig['enabled'] == 'yes'
 );
 
-$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to a pfSense interface');	
+$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to a pfSense interface.');	
 
 // Disable the tunnel enabled button if interface is assigned
 if (is_wg_tunnel_assigned($pconfig)) {
 
 	$tun_enable->setDisabled();
 
-	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to a pfSense interface');
+	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to a pfSense interface.');
 
 	// We still want to POST this field, make a a hidden field now
 	$form->addGlobal(new Form_Input(
@@ -191,7 +191,7 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
-))->setHelp('Description for administrative reference (not parsed)');
+))->setHelp('Description for administrative reference (not parsed).');
 
 $section->addInput(new Form_Input(
 	'listenport',
@@ -199,7 +199,7 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['listenport'],
 	['placeholder' => next_wg_port()]
-))->setHelp('Port used by this tunnel to communicate with peers');
+))->setHelp('Port used by this tunnel to communicate with peers.');
 
 $group = new Form_Group('*Interface Keys');
 
@@ -215,7 +215,7 @@ $group->add(new Form_Input(
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp("Public key for this tunnel (<a id=\"copypubkey\" href=\"#\">Copy</a>)")->setReadonly();
+))->setHelp("Public key for this tunnel. (<a id=\"copypubkey\" href=\"#\">Copy</a>)")->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
@@ -257,17 +257,17 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'Interface Address',
 			$address,
 			'BOTH'
-		))->addMask("address_subnet{$counter}", $address_subnet)
-			->setWidth(4)
-->setHelp('IPv4 or IPv6 address assigned to the tunnel interface');
+		))->setHelp('IPv4 or IPv6 address assigned to the tunnel interface.')
+			->addMask("address_subnet{$counter}", $address_subnet)
+			->setWidth(4);
 		
 		$group->add(new Form_Input(
-			"addrdescr{$counter}",
+			"address_descr{$counter}",
 			'Description',
 			'text',
 			$item['descr']
-		))->setWidth(4)
-->setHelp('Description for administrative reference (not parsed)');
+		))->setHelp('Description for administrative reference (not parsed).')
+			->setWidth(4);
 
 		$group->add(new Form_Button(
 			"deleterow{$counter}",

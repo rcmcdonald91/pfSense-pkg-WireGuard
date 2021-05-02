@@ -338,24 +338,56 @@ function wg_allowed_ips_filtered($a_allowedips) {
 
 }
 
-// This converts a raw form post containing repeatables like addresses, subnets, and descriptions and returns an array for saving to conf
-function wg_parse_post_addresses($post, $addr_prefix = 'address', $net_prefix = 'address_subnet', $descr_prefix = 'addrdescr') {
+function wg_tunnel_addresses($post) {
 
-	$a_ret = array();
+	// Convert the post into proper arrays
+	$addresses = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
 
-	$x = 0;
+	$ret_array = array();
 
-	while (!empty($post["{$addr_prefix}{$x}"]) && !empty($post["{$net_prefix}{$x}"])) {
+	// Loop through each address entry
+	foreach ($addresses as $address) {
 
-		$s_address = "{$post["{$addr_prefix}{$x}"]}/{$post["{$net_prefix}{$x}"]}";
+		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
 
-		$a_ret[] = array('addr' => $s_address, 'descr' => $post["{$descr_prefix}{$x}"]);
+		// Ignore if entry is not a valid CIDR-masked subnet
+		if (is_subnet($tmp_subnet)) {
 
-		$x++;
+			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
+		}
 
 	}
-	
-	return !empty($a_ret) ? $a_ret : false;
+
+	return $ret_array;
+
+}
+
+// This converts a raw form post containing repeatables like addresses, subnets, and descriptions and returns an actual array
+function wg_parse_post_repeatables($post, $fields = null) {
+
+	if (is_array($fields)) {
+
+		$ret_array = array();
+
+		foreach (fields as $field) {
+
+			$x = 0;
+
+			while (!is_null($post["{$field}{$x}"])) {
+
+				$ret_array[$x][$field] = $post["{$field}{$x}"];
+
+				$x++;
+
+			}
+
+		}
+
+		return $ret_array;
+
+	}
+
+	return false;
 
 }
 
@@ -370,7 +402,7 @@ function wg_do_peer_post($post) {
 
 	$pconfig = $wgg['peers'][$index];
 
-	// Looks like we have a dynamic endpoint, sp clear endpoint or port variables before saving
+	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
 	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
 
 		unset($post['endpoint']);
@@ -395,9 +427,7 @@ function wg_do_peer_post($post) {
 	
 	$pconfig['presharedkey']	= $post['presharedkey'];
 
-	$a_allowedips			= wg_parse_post_addresses($post);
-
-	$pconfig['allowedips']['item'] 	= wg_parse_post_addresses($post);
+	//$pconfig['allowedips']['item'] 	= wg_parse_post_addresses($post);
 
 	$input_errors = wg_validate_peer_post($pconfig);
 
@@ -445,25 +475,21 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig = $wgg['tunnels'][$index];
 
-	if (empty($pconfig['name'])) {
-
-		$pconfig['name'] = next_wg_if();
-
-	}
+	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 
 	$pconfig['descr'] 		= $post['descr'];
 
-	$pconfig['listenport'] 		= !empty($post['listenport']) ? $post['listenport'] : next_wg_port();
+	$pconfig['listenport'] 		= empty($post['listenport']) ? next_wg_port() : $post['listenport'];
 
 	$pconfig['privatekey'] 		= $post['privatekey'];
 
 	$pconfig['publickey'] 		= wg_gen_publickey($post['privatekey']);
 
-	$pconfig['addresses']['item'] 	= wg_parse_post_addresses($post);
+	$pconfig['addresses']['item'] 	= wg_tunnel_addresses($post);
 
-	$pconfig['mtu'] 		= !empty($post['mtu']) ? $post['mtu'] : $wgg['default_mtu'];
+	$pconfig['mtu'] 		= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
 
 	$input_errors = wg_validate_post($pconfig);
 
@@ -479,7 +505,11 @@ function wg_do_tunnel_post($post) {
 
 }
 
+function wg_gen_tunnel_address($post) {
 
+	$
+
+}
 
 function wg_resync($verbose = false) {
 	global $config, $g, $wgg;

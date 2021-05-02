@@ -230,11 +230,6 @@ $form->add($section);
 
 $section = new Form_Section('Address Configuration');
 
-$section->addInput(new Form_StaticText(
-	'Hint',
-	'IPv4 or IPv6 subnets or hosts reachable via this peer.'
-));
-
 $group = new Form_Group("Allow All");
 
 $group->add(new Form_Checkbox(
@@ -266,7 +261,8 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 		'Allowed Subnet or Host',
 		$address,
 		'BOTH'
-	))->addMask("address_subnet{$counter}", $address_subnet, 128, 1)
+	))->setHelp('IPv4 or IPv6 subnet or host reachable via this peer.')
+		->addMask("address_subnet{$counter}", $address_subnet, 128, 1)
 		->setWidth(4);
 
 	$group->add(new Form_Input(
@@ -274,7 +270,8 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 		'Description',
 		'text',
 		$item['descr']
-	))->setWidth(4);
+	))->setHelp('Description for administrative reference (not parsed).')
+		->setWidth(4);
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
@@ -287,13 +284,13 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 }
 
-$group = new Form_Group(null);
+$group = new Form_Group('Add Allowed IP');
 
 $group->addClass('allowedips');
 
 $group->add(new Form_Button(
 	'addrow',
-	'Add',
+	'Add Allowed IP',
 	null,
 	'fa-plus'
 ))->addClass('btn-success btn-sm addbtn');
