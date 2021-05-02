@@ -256,13 +256,6 @@ endforeach;
     </div>
 </div>
 
-<?php
-else:
-
-	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
-
-endif;
-?>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -309,44 +302,13 @@ endif;
 
 </div>
 
+<?php
+else:
 
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
-	</div>
+	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
 
-	<div id="wg_routes_status" class="table-responsive panel-body collapse" aria-expanded="false">
-
-			<div id="IPv4_parent" class="panel-heading"><h2 class="panel-title"><?=gettext("IPv4")?></h2></div>
-				<table class="table table-striped table-hover table-condensed sortable-theme-bootstrap" id="IPv4">
-				<thead>
-					<tr>
-						<th><!-- filled by xhr --></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><?=gettext("Gathering data, please wait...")?></td>
-					</tr>
-				</tbody>
-				</table>
-		
-			<div id="IPv6_parent" class="panel-heading"><h2 class="panel-title"><?=gettext("IPv6")?></h2></div>
-				<table class="table table-striped table-hover table-condensed sortable-theme-bootstrap" id="IPv6">
-				<thead>
-					<tr>
-						<th><!-- filled by xhr --></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><?=gettext("Gathering data, please wait...")?></td>
-					</tr>
-				</tbody>
-				</table>
-	</div>
-
-</div>
+endif;
+?>
 
 
 <div class="panel panel-default">

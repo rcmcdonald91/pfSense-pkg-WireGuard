@@ -168,9 +168,12 @@ function wg_interface_status() {
 		$ret_val[$if]["flags"] = $flags_match[1];
 		$ret_val[$if]["mtu"] = $mtu_match[1];
 		$ret_val[$if]["descr"] = $descr_match[1];
-		$ret_val[$if]["ips"] = implode(",",$ip_match[1]);
-	
+
+		foreach( $ip_match[1] as $key => $addr) {
+			$ret_val[$if]["ips"][$key]['addr'] = $addr;	
 		}
+
+	}
 
     return $ret_val;
 
