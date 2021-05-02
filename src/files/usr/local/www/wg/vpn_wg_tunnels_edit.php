@@ -370,7 +370,7 @@ else:
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=$entryStatus?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
-					<td><?=htmlspecialchars($peer['peerwgaddr'])?></td>
+					<td></td>
 					<td><?=wg_generate_addresses_popup_link($peer['allowedips'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 					<td style="cursor: pointer;">

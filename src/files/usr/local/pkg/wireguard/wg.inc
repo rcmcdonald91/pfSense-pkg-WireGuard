@@ -310,31 +310,27 @@ function build_tun_list() {
 
 }
 
-function wg_allowed_ips_filtered($a_allowedips) {
+function wg_peer_addresses($post) {
 
-	$a_all = array('0.0.0.0/0', '::/0');
+	// Convert the post into proper arrays
+	$addresses = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
 
-	$all_ipv4 = $all_ipv6 = false;
+	$ret_array = array();
 
-	$a_ret = array();
+	// Loop through each address entry
+	foreach ($addresses as $address) {
 
-	foreach ($a_allowedips as $item) {
+		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
 
-		if (!in_array($item['addr'], $a_all)) {
+		// Ignore if entry is not a valid CIDR-masked subnet
+		if (is_subnet($tmp_subnet)) {
 
-			$a_ret[] = $ip;
-
-		} elseif (in_array($item['addr'], $a_all)) {
-
-			$all_ipv4 = is_v4($item['addr']) ? true : $all_ipv4;
-
-			$all_ipv6 = is_v6($item['addr']) ? true : $all_ipv6;
-
+			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
 		}
 
 	}
 
-	return array('allowedips' => $a_ret, 'all_ipv4' => $all_ipv4, 'all_ipv6' => $all_ipv6);
+	return $ret_array;
 
 }
 
@@ -369,7 +365,7 @@ function wg_parse_post_repeatables($post, $fields = null) {
 
 		$ret_array = array();
 
-		foreach (fields as $field) {
+		foreach ($fields as $field) {
 
 			$x = 0;
 
@@ -396,7 +392,7 @@ function wg_do_peer_post($post) {
 
 	wg_globals();
 
-	$input_errors = array();
+	$pconfig = $input_errors = array();
 
 	$index = $post['index'];
 
@@ -405,9 +401,7 @@ function wg_do_peer_post($post) {
 	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
 	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
 
-		unset($post['endpoint']);
-
-		unset($post['port']);
+		unset($post['endpoint'], $post['port']);
 
 	}
 
@@ -427,7 +421,9 @@ function wg_do_peer_post($post) {
 	
 	$pconfig['presharedkey']	= $post['presharedkey'];
 
-	//$pconfig['allowedips']['item'] 	= wg_parse_post_addresses($post);
+	wg_init_config_arr($pconfig, array('allowedips', 'item'));
+
+	$pconfig['allowedips']['item'] 	= wg_peer_addresses($post);
 
 	$input_errors = wg_validate_peer_post($pconfig);
 
@@ -443,33 +439,13 @@ function wg_do_peer_post($post) {
 
 }
 
-function wg_generate_allow_all_ips($all_ipv4 = false, $all_ipv6 = false) {
-
-	$ret_array = array();
-
-	if ($all_ipv4) {
-
-		$ret_array[] = array('addr' => '0.0.0.0/0', 'descr' => null);
-
-	}
-
-	if ($all_ipv6) {
-
-		$ret_array[] = array('addr' => '::/0', 'descr' => null);
-
-	}
-
-	return ($all_ipv4 || $all_ipv6) ? $ret_array : false;
-
-}
-
 // Write new tunnel values to the configuration system
 function wg_do_tunnel_post($post) {
 	global $wgg;
 
 	wg_globals();
 
-	$input_errors = array();
+	$pconfig = $input_errors = array();
 
 	$index = $post['index'];
 
@@ -487,9 +463,11 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['publickey'] 		= wg_gen_publickey($post['privatekey']);
 
-	$pconfig['addresses']['item'] 	= wg_tunnel_addresses($post);
-
 	$pconfig['mtu'] 		= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
+
+	wg_init_config_arr($pconfig, array('addresses', 'item'));
+
+	$pconfig['addresses']['item'] 	= wg_tunnel_addresses($post);
 
 	$input_errors = wg_validate_post($pconfig);
 
