@@ -108,15 +108,8 @@ display_top_tabs($tab_array);
 				<tbody>
 <?php
 		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
-
-			$peers = wg_get_tunnel_peers($tunnel['name']);
-
-			$entryStatus = ($tunnel['enabled'] == 'yes') ? 'enabled':'disabled';
-
-			$icon_toggle = ($tunnel['enabled'] == 'yes') ? 'ban' : 'check-square-o';	
-
 ?>
-					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=wg_entrystatus_class($tunnel)?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
@@ -136,7 +129,7 @@ display_top_tabs($tab_array);
 					<tr class="peer-entries peerbg_color">
 						<td><?=gettext("Peers")?></td>
 <?php
-	$peers = wg_get_tunnel_peers($tunnel['name']);
+			$peers = wg_get_tunnel_peers($tunnel['name']);
 
 			if (count($peers) > 0):
 ?>

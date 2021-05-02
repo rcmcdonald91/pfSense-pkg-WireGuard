@@ -105,11 +105,8 @@ display_top_tabs($tab_array);
 				<tbody>
 <?php
 		foreach ($wgg['peers'] as $peer_id => $peer):
-
-			$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
-
 ?>
-					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>';" class="<?=$entryStatus?>">
+					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 						<td><?=htmlspecialchars($peer['descr'])?></td>
 						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>

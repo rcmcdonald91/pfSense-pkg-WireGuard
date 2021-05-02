@@ -40,6 +40,7 @@ wg_globals();
 
 $pconfig = array();
 
+// Always assume we are creating a new tunnel
 $is_new = true;
 
 if (isset($_REQUEST['tun'])) {
@@ -108,6 +109,7 @@ if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 
 	$pconfig = &$wgg['tunnels'][$tun_id];
 
+	// Supress warning and allow peers to be added via the 'Add Peer' link
 	$is_new = false;
 
 // Looks like we are creating a new tunnel
@@ -166,14 +168,14 @@ $tun_enable = new Form_Checkbox(
 
 $tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to a pfSense interface.');	
 
-// Disable the tunnel enabled button if interface is assigned
+// Disable the tunnel enabled button if interface is assigned in pfSense
 if (is_wg_tunnel_assigned($pconfig)) {
 
 	$tun_enable->setDisabled();
 
 	$tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel cannot be <b>disabled</b> when assigned to a pfSense interface.');
 
-	// We still want to POST this field, make a a hidden field now
+	// We still want to POST this field, make it a hidden field now
 	$form->addGlobal(new Form_Input(
 		'enabled',
 		'',
@@ -315,7 +317,6 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 $form->add($section);
 
-// We still need to keep track of this otherwise wg-quick and pfSense will fight
 $form->addGlobal(new Form_Input(
 	'mtu',
 	'',
@@ -363,11 +364,8 @@ else:
 		if (!empty($peers)):
 
 			foreach ($peers as $peer):
-
-				$entryStatus = ($peer['enabled'] == 'yes') ? 'enabled' : 'disabled';
-
 ?>
-				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=$entryStatus?>">
+				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td></td>

@@ -23,6 +23,7 @@
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
+// Truncates a given string if if necessary and formats it to make it look good
 function wg_truncate_pretty($str, $length) {
 
 	$s_truncated = substr($str, 0, $length);
@@ -63,6 +64,7 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 
 }
 
+// Formats a given time difference in a human-friendly way
 function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) {
 	
 	// If end time is not supplied, use the current time instead
@@ -103,6 +105,7 @@ function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) 
 
 }
 
+// Returns the appropriate text input field type for secrets
 function wg_secret_input_type() {
 	global $wgg;
 
@@ -118,6 +121,14 @@ function wg_secret_input_type() {
 	
 }
 
+// Gets the appropriate class based on whether or not the target is enabled or disabled
+function wg_entrystatus_class($target) {
+
+	return (isset($target) && $target['enabled'] == 'yes') ? 'enabled' : 'disabled';
+
+}
+
+// Generates a toggle icon link based on the status of the target
 function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
 
 	if (isset($target)) {
@@ -136,6 +147,7 @@ function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepos
 
 }
 
+// Generates an addresses link with a popup
 function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
 
 	$extras = count($a_addresses) - 1;

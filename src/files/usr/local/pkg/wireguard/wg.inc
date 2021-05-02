@@ -636,8 +636,11 @@ function make_wg_conf($tunnel) {
 		$txt .= "ListenPort = {$tunnel['listenport']}\n";
 	}
 
-	if (!empty($tunnel['addresses'])) {
-		$txt .= "Address = {$tunnel['addresses']}\n";
+	if (is_array($tunnel['addresses']['item'])) {
+
+		$addresses = implode(',', array_map(fn($item) => $item['addr'], $tunnel['addresses']['item']));
+
+		$txt .= "Address = {$addresses}\n";
 	}
 
 	if (!empty($tunnel['mtu'])) {
@@ -679,9 +682,11 @@ function make_wg_conf($tunnel) {
 
 				}
 
-				if (!empty($peer['allowedips'])) {
+				if (is_array($peer['allowedips'])) {
 
-					$txt .= "AllowedIPs = {$peer['allowedips']}\n";
+					$allowedips = implode(',', array_map(fn($item) => $item['addr'], $tunnel['allowedips']['item']));
+
+					$txt .= "AllowedIPs = {$allowedips}\n";
 
 				}
 
