@@ -334,6 +334,13 @@ $form->addGlobal(new Form_Input(
 ));
 
 $form->addGlobal(new Form_Input(
+	'is_new',
+	'',
+	'hidden',
+	$is_new
+));
+
+$form->addGlobal(new Form_Input(
 	'act',
 	'',
 	'hidden',

@@ -150,22 +150,6 @@ function wg_toggle_tunnel($tun_id) {
 
 }
 
-function wg_format_endpoint($peer, $endpoint_key = 'endpoint', $port_key = 'port') {
-
-	if (!empty($peer[$endpoint_key])) {
-
-		$ret_str = "{$peer[$endpoint_key]} : {$peer[$port_key]}";
-
-	} else {
-
-		$ret_str = "Dynamic";
-
-	}
-
-	return $ret_str;
-
-}
-
 function wg_toggle_peer($peer_id) {
 	global $config, $wgg;
 
@@ -289,23 +273,6 @@ function wg_get_tunnel_peers($tunnel) {
 	}
 
 	// Return the list of filtered peers
-	return $a_ret;
-
-}
-
-function build_tun_list() {
-	global $config, $wgg;
-
-	$a_ret = array();
-
-	$a_ret['unassigned'] = 'Unassigned';
-
-	foreach ($wgg['tunnels'] as $tunnel) {
-
-		$a_ret[$tunnel['name']] = "{$tunnel['name']} ({$tunnel['descr']})";	
-
-	}
-
 	return $a_ret;
 
 }
@@ -650,7 +617,6 @@ function make_wg_conf($tunnel) {
 		$txt .= "MTU = {$tunnel['mtu']}\n";
 	}
 
-	// We need to address this at some point
 	$txt .= "Table = off\n";
 
 	$txt .= "\n";

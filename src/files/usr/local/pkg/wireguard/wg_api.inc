@@ -116,7 +116,7 @@ function wg_status() {
 
 }
 
-// Returns WireGuard peer name from a public key and tunnel name
+// Returns WireGuard peer name from a given public key and tunnel name
 function wg_get_peer_info($public_key, $tunnel) {
 	global $wgg;
 
@@ -183,7 +183,7 @@ function wg_interface_status() {
 		foreach( $ip_match[1] as $key => $addr) {
 
 			$ret_val[$if]["ips"][$key]['addr'] = $addr;
-				
+
 		}
 
 	}

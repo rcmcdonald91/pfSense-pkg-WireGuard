@@ -82,7 +82,7 @@ if (!empty($a_devices)):
 
 ?>
 			<thead>
-				<th><?=gettext("Interface")?></th>
+				<th><?=gettext("Tunnel")?></th>
 				<th colspan="1"><?=gettext("Public Key")?></th>
 				<th colspan="6"><?=gettext("Listen Port")?></th>
 			</thead>
@@ -357,6 +357,7 @@ events.push(function() {
 
 include('foot.inc');
 
+// Must be included last
 include('wireguard/wg_foot.inc');
 
 ?>

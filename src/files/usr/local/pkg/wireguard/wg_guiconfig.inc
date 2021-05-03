@@ -23,6 +23,46 @@
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
+// Formats peer endpoint address and port for the UI
+function wg_format_endpoint($peer, $endpoint_key = 'endpoint', $port_key = 'port') {
+
+	if (!empty($peer[$endpoint_key])) {
+
+		$ret_str = "{$peer[$endpoint_key]} : {$peer[$port_key]}";
+
+	} else {
+
+		$ret_str = "Dynamic";
+
+	}
+
+	return $ret_str;
+
+}
+
+// Gets a list of available tunnels in a format suitable for input selection boxes
+function wg_get_tun_list() {
+	global $config, $wgg;
+
+	$a_ret = array();
+
+	// Always include the unassigned option first
+	$a_ret['unassigned'] = 'Unassigned';
+
+	if (is_array($wgg['tunnels'])) {
+
+		foreach ($wgg['tunnels'] as $tunnel) {
+
+			$a_ret[$tunnel['name']] = "{$tunnel['name']} ({$tunnel['descr']})";	
+
+		}
+	
+	}
+
+	return $a_ret;
+
+}
+
 // Truncates a given string if if necessary and formats it to make it look good
 function wg_truncate_pretty($str, $length) {
 
