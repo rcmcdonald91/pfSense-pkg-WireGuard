@@ -161,7 +161,9 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		foreach ($addresses_to_remove as $address) {
 
-			pfSense_interface_deladdress($wg_ifname, $address);
+			list($addr, $addr_subnet) = explode('/', $address);
+
+			pfSense_interface_deladdress($wg_ifname, $addr);
 
 		}
 
