@@ -106,8 +106,6 @@ if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
 
 }
 
-wg_init_config_arr($pconfig, array('allowedips', 'item', 0));
-
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), gettext("Edit"));
@@ -230,23 +228,16 @@ $form->add($section);
 
 $section = new Form_Section('Address Configuration');
 
-$group = new Form_Group("Allow All");
+// Hack to ensure empty lists default to /128 mask
+if (!is_array($pconfig['allowedips']['item'])) {
 
-$group->add(new Form_Checkbox(
-	'all_ipv4',
-	'Protocol',
-	'IPv4',
-	$pconfig['all_ipv4']
-))->setWidth(3)->setHelp("Allow all IPv4 addresses (0.0.0.0/0).");
+	wg_init_config_arr($pconfig, array('allowedips', 'item', 0));
+	
+	$pconfig['allowedips']['item'][0]['addr'] = '/128';
+	
+}
 
-$group->add(new Form_Checkbox(
-	'all_ipv6',
-	'Protocol',
-	'IPv6',
-	$pconfig['all_ipv6']
-))->setWidth(3)->setHelp("Allow all IPv6 addresses (::/0).");
-
-$section->add($group);
+$last = count($pconfig['allowedips']['item']) - 1;
 
 foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
@@ -254,14 +245,14 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 	$group = new Form_Group($counter == 0 ? 'Allowed IPs' : null);
 
-	$group->addClass('repeatable allowedips');
+	$group->addClass('repeatable');
 
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
 		'Allowed Subnet or Host',
 		$address,
 		'BOTH'
-	))->setHelp('IPv4 or IPv6 subnet or host reachable via this peer.')
+	))->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
 		->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
 		->setWidth(4);
 
@@ -270,7 +261,7 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 		'Description',
 		'text',
 		$item['descr']
-	))->setHelp('Description for administrative reference (not parsed).')
+	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 		->setWidth(4);
 
 	$group->add(new Form_Button(
@@ -284,18 +275,12 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
 }
 
-$group = new Form_Group('Add Allowed IP');
-
-$group->addClass('allowedips');
-
-$group->add(new Form_Button(
+$section->addInput(new Form_Button(
 	'addrow',
 	'Add Allowed IP',
 	null,
 	'fa-plus'
 ))->addClass('btn-success btn-sm addbtn');
-
-$section->add($group);
 
 $form->add($section);
 
@@ -357,23 +342,11 @@ events.push(function() {
 		$(form).submit();
 	});
 
-	$('#all_ipv4, #all_ipv6').click(function () {
-
-		updateAllowedIPsSection($('#all_ipv4').prop('checked'), $('#all_ipv6').prop('checked'));
-
-	});
-
 	$('#dynamic').click(function () {
 
 		updateDynamicSection(this.checked);
 
 	});
-
-	function updateAllowedIPsSection(ipv4, ipv6) {
-
-		hideClass('allowedips', (ipv4 && ipv6));
-
-	}
 
 	function updateDynamicSection(hide) {
 
@@ -381,20 +354,17 @@ events.push(function() {
 
 	}
 
-	updateAllowedIPsSection($('#all_ipv4').prop('checked'), $('#all_ipv6').prop('checked'));
-
 	updateDynamicSection($('#dynamic').prop('checked'));
 
 });
 //]]>
 </script>
 
-
-
 <?php
 
 include('foot.inc');
 
+// Must be included last
 include('wireguard/wg_foot.inc');
 
 ?>
