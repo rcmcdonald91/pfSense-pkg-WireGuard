@@ -142,6 +142,53 @@ function wg_get_peer_info($public_key, $tunnel) {
 
 }
 
+function wg_ifconfig_del_addresses($ifname, $address) {
+	global $wgg;
+
+	$ifname_safe = escapeshellarg($ifname);
+
+	list($address, address_subnet) = explode('/', $address);
+
+	$address_family_safe = (is_v4($address) ? 'inet' : null;
+
+	$address_family_safe = (is_v6($address) ? 'inet6' : null;
+
+	if (is_null($address_family)) { 
+		
+		return false;
+	
+	}
+
+	$address_safe = escapeshellarg($address);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} delete");
+
+
+}
+
+function wg_ifconfig_set_address($ifname, $addresses) {
+	global $wgg;
+
+	$ifname_safe = escapeshellarg($ifname);
+
+	$address_family_safe = (is_v4($address) ? 'inet' : null;
+
+	$address_family_safe = (is_v6($address) ? 'inet6' : null;
+
+	if (is_null($address_family)) { 
+		
+		return false;
+	
+	}
+
+	$address_safe = escapeshellarg($address);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} add");
+
+	return ($ret_val <> 0) ? false : true;
+
+}
+
 function wg_interface_update_addresses($wg_ifname) {
 	global $wgg;
 
@@ -162,9 +209,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		// Now remove them
 		foreach ($addresses_to_remove as $address) {
 
-			list($addr, $addr_subnet) = explode('/', $address);
-
-			pfSense_interface_deladdress($wg_ifname, $addr);
+			wg_ifconfig_delete_address($wg_ifname, $address);
 
 		}
 
@@ -174,7 +219,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		// Now add them
 		foreach ($addresses_to_add as $address) {
 
-			pfSense_interface_setaddress($wg_ifname, $address);
+			wg_ifconfig_set_address($wg_ifname, $address);
 
 		}
 	
