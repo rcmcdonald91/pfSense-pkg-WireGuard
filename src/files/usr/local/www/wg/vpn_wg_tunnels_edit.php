@@ -253,7 +253,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	}
 
-	$last = count($pconfig['allowedips']['item']) - 1;
+	$last = count($pconfig['addresses']['item']) - 1;
 
 	foreach ($pconfig['addresses']['item'] as $counter => $item) {
 
