@@ -147,7 +147,7 @@ $section->addInput($input = new Form_Select(
 	'tun',
 	'Tunnel',
 	$pconfig['tun'],
-	build_tun_list()
+	wg_get_tun_list()
 ))->setHelp("WireGuard tunnel for this peer. (<a href='vpn_wg_tunnels_edit.php'>Create a New Tunnel</a>)");
 
 $section->addInput(new Form_Input(
