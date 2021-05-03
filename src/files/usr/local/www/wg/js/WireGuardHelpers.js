@@ -2,8 +2,8 @@
  * WireGuardHelpers.js
  *
  * part of pfSense (https://www.pfsense.org)
- * Copyright (c) 2021 R. Christian McDonald
- * Copyright (c) 2020 Ascrod
+ * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
+ * Copyright (c) 2021 Vajonam (https://github.com/vajonam)
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,8 @@
 
 /*
  * fixed version of bump_input_id(newGroup) 
- * https://github.com/pfsense/pfsense/pull/4517
- * https://redmine.pfsense.org/issues/11880
+ * Ref: https://github.com/pfsense/pfsense/pull/4517
+ * Ref: https://redmine.pfsense.org/issues/11880
  */
 
 function bump_input_id(newGroup) {

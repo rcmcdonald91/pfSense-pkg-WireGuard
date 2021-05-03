@@ -125,8 +125,6 @@ if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
 // Save the MTU settings prior to re(saving)
 $pconfig['mtu'] = get_interface_mtu($pconfig['name']);
 
-wg_init_config_arr($pconfig, array('addresses', 'item', 0));
-
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext("Edit"));
@@ -246,6 +244,17 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
+	// Hack to ensure empty lists default to /128 mask
+	if (!is_array($pconfig['addresses']['item'])) {
+
+		wg_init_config_arr($pconfig, array('addresses', 'item', 0));
+
+		$pconfig['addresses']['item'][0]['addr'] = '/128';
+
+	}
+
+	$last = count($pconfig['allowedips']['item']) - 1;
+
 	foreach ($pconfig['addresses']['item'] as $counter => $item) {
 
 		list($address, $address_subnet) = explode("/", $item['addr']);
@@ -259,7 +268,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'Interface Address',
 			$address,
 			'BOTH'
-		))->setHelp('IPv4 or IPv6 address assigned to the tunnel interface.')
+		))->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
 			->addMask("address_subnet{$counter}", $address_subnet)
 			->setWidth(4);
 		
@@ -268,7 +277,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'Description',
 			'text',
 			$item['descr']
-		))->setHelp('Description for administrative reference (not parsed).')
+		))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 			->setWidth(4);
 
 		$group->add(new Form_Button(
@@ -482,6 +491,7 @@ events.push(function() {
 
 include('foot.inc');
 
+// Must be included last
 include('wireguard/wg_foot.inc');
 
 ?>

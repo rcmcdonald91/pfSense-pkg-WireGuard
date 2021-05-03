@@ -3,7 +3,7 @@
  * wg_foot.inc
  *
  * part of pfSense (https://www.pfsense.org)
- * Copyright (c) 2021 R. Christian McDonald
+ * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/*
- * We put jquery in the footer; it is the preferred position for speed
- * and helps developers to use events[] instead of executing scripts directly.
  */
 ?>
 
