@@ -12,6 +12,7 @@ www/wg/vpn_wg_peers_edit.php
 www/wg/vpn_wg_settings.php
 www/wg/vpn_wg_tunnels.php
 www/wg/vpn_wg_tunnels_edit.php
+www/wg/js/WireGuardHelpers.js
 /etc/inc/priv/wireguard.priv.inc
 %%DATADIR%%/info.xml
 @dir /etc/inc/priv

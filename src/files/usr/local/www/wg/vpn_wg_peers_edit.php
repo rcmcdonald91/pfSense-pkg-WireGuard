@@ -393,44 +393,8 @@ events.push(function() {
 
 <?php
 
-include("foot.inc");
+include('foot.inc');
+
+include('wireguard/wg_foot.inc');
 
 ?>
-
-<script type="text/javascript">
-
-// fixed version of bump_input_id(newGroup) 
-
-function bump_input_id(newGroup) {
-	$(newGroup).find('input').each(function() {
-		$(this).prop("id", bumpStringInt(this.id));
-		$(this).prop("name", bumpStringInt(this.name));
-		if (!$(this).is('[id^=delete]'))
-			$(this).val('');
-	});
-
-	// Increment the suffix number for the deleterow button element in the new group
-	$(newGroup).find('[id^=deleterow]').each(function() {
-		$(this).prop("id", bumpStringInt(this.id));
-		$(this).prop("name", bumpStringInt(this.name));
-	});
-
-	// Do the same for selectors
-	$(newGroup).find('select').each(function() {
-		$(this).prop("id", bumpStringInt(this.id));
-		$(this).prop("name", bumpStringInt(this.name));
-		// If this selector lists mask bits, we need it to be reset to all 128 options
-		// and no items selected, so that automatic v4/v6 selection still works
-		if ($(this).is('[id^=address_subnet]')) {
-			$(this).empty();
-			for (idx=128; idx>=0; idx--) {
-				$(this).append($('<option>', {
-					value: idx,
-					text: idx
-				}));
-			}
-		}
-	});
-}
-
-</script>

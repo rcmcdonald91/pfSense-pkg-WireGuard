@@ -115,7 +115,7 @@ display_top_tabs($tab_array);
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td><?=htmlspecialchars(substr($tunnel['publickey'], 0, 16).'...')?></td>
+						<td><?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?></td>
 						<td><?=wg_generate_addresses_popup_link($tunnel['addresses']['item'], 'Tunnel Addresses', "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}")?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
@@ -152,9 +152,9 @@ display_top_tabs($tab_array);
 ?>
 									<tr class="peerbg_color">
 										<td><?=htmlspecialchars($peer['descr'])?></td>
-										<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
+										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 										<td><?=htmlspecialchars($peer['peeraddresses'])?></td>
-										<td><?=htmlspecialchars($peer['allowedips']['item'])?></td>
+										<td><?=wg_generate_addresses_popup_link($peer['allowedips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
 										<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 									</tr>
 <?php
@@ -212,6 +212,10 @@ events.push(function() {
 //]]>
 </script>
 
-<?php
-include("foot.inc");
+<?php 
+
+include('foot.inc');
+
+include('wireguard/wg_foot.inc');
+
 ?>

@@ -108,7 +108,7 @@ display_top_tabs($tab_array);
 ?>
 					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 						<td><?=htmlspecialchars($peer['descr'])?></td>
-						<td><?=htmlspecialchars(substr($peer['publickey'],0,16).'...')?></td>
+						<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
 						<td></td>
 						<td><?=wg_generate_addresses_popup_link($peer['allowedips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer_id}")?></td>
@@ -142,7 +142,7 @@ display_top_tabs($tab_array);
 </form>
 
 <script type="text/javascript">
-//<![CDATA[
+//<![CDATA[,
 
 events.push(function() {
 
@@ -150,6 +150,10 @@ events.push(function() {
 //]]>
 </script>
 
-<?php
-include("foot.inc");
+<?php 
+
+include('foot.inc');
+
+include('wireguard/wg_foot.inc');
+
 ?>

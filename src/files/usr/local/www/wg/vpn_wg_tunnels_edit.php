@@ -478,8 +478,10 @@ events.push(function() {
 //]]>
 </script>
 
-<?php
+<?php 
 
-include("foot.inc");
+include('foot.inc');
+
+include('wireguard/wg_foot.inc');
 
 ?>

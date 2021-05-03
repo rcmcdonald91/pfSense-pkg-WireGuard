@@ -70,91 +70,9 @@ if (!empty($a_devices)):
 
 ?>
 
-<script type="text/javascript">
-//<![CDATA[
-function update_routes(section) {
-	$.ajax(
-		'/diag_routes.php',
-		{
-			type: 'post',
-			data: 'isAjax=true&filter=<?=$wgg['if_prefix']?>' +'&'+ section +'=true',
-			success: update_routes_callback,
-	});
-}
-
-function update_routes_callback(html) {
-	// First line contains section
-	var responseTextArr = html.split("\n");
-	var section = responseTextArr.shift();
-	var tbody = '';
-	var field = '';
-	var tr_class = '';
-	var thead = '<tr>';
-	var columns  = 0;
-
-	for (var i = 0; i < responseTextArr.length; i++) {
-
-		if (responseTextArr[i] == "") {
-			continue;
-		}
-
-		if (i == 0) {
-			var tmp = '';
-		} else {
-			var tmp = '<tr>';
-		}
-
-		var j = 0;
-		var entry = responseTextArr[i].split(" ");
-		columns = entry.length;
-		for (var k = 0; k < entry.length; k++) {
-			if (entry[k] == "") {
-				continue;
-			}
-			if (i == 0) {
-				tmp += '<th>' + entry[k] + '<\/th>';
-			} else {
-				tmp += '<td>' + entry[k] + '<\/td>';
-			}
-			j++;
-		}
-
-		if (i == 0) {
-			thead += tmp;
-		} else {
-			tmp += '<td><\/td>'
-			tbody += tmp;
-		}
-	}
-
-	// if no routes found  ignore the sections and remove them the dom
-	if (tbody == "") {
-		$('#' + section + ' > thead').remove();
-		$('#' + section + ' > tbody').remove();
-		$('#' + section + '_parent').remove();
-	} else {
-		$('#' + section + ' > thead').html(thead);
-		$('#' + section + ' > tbody').html(tbody);
-	}
-}
-
-function update_all_routes() {
-	update_routes("IPv4");
-	update_routes("IPv6");
-}
-
-events.push(function() {
-	setInterval('update_all_routes()', 30000);
-	update_all_routes();
-
-});
-//]]>
-</script>
-
-
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Connection Status')?></h2>
+		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
 		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
@@ -170,7 +88,10 @@ events.push(function() {
 			</thead>
 			<tbody>	
 				<tr>
-					<td><a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?></td>
+					<td>
+						<i class="fa fa-ethernet text-success" style="vertical-align: middle;"></i>
+						<a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?>
+					</td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
 				<tr>
@@ -178,7 +99,7 @@ events.push(function() {
 			<thead>
 				<th><?=gettext("Peer")?></th>
 				<th><?=gettext("Public Key")?></th>
-				<th><?=gettext("Endpoint")?></th>
+				<th><?=gettext("Endpoint : Port")?></th>
 				<th><?=gettext("Allowed IPs")?></th>
 				<th><?=gettext("Latest Handshake")?></th>
 				<th><?=gettext("RX")?></th>
@@ -189,12 +110,14 @@ events.push(function() {
 		foreach($device['peers'] as $peer):
 ?>
 				<tr>
-					<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
+					<td>
+						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
+						<?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?>
+					</td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips_array'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
 					<td>
-						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
 						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>
 					</td>
 					<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
@@ -217,9 +140,6 @@ events.push(function() {
 <div class="panel panel-default ">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Interface Status')?>
-		
-
-
 	</div>
 	
 	<div class="table-responsive panel-body">
@@ -233,7 +153,9 @@ events.push(function() {
 			</thead>
 			<tbody>
 <?php
+
 $a_intefaces = wg_interface_status();
+
 foreach ($a_intefaces as $key => $a_interface):
 ?>
 				<tr>
@@ -351,6 +273,91 @@ endif;
 	</div>
 </div>
 
+<script type="text/javascript">
+//<![CDATA[
+function update_routes(section) {
+	$.ajax(
+		'/diag_routes.php',
+		{
+			type: 'post',
+			data: 'isAjax=true&filter=<?=$wgg['if_prefix']?>' +'&'+ section +'=true',
+			success: update_routes_callback,
+	});
+}
+
+function update_routes_callback(html) {
+	// First line contains section
+	var responseTextArr = html.split("\n");
+	var section = responseTextArr.shift();
+	var tbody = '';
+	var field = '';
+	var tr_class = '';
+	var thead = '<tr>';
+	var columns  = 0;
+
+	for (var i = 0; i < responseTextArr.length; i++) {
+
+		if (responseTextArr[i] == "") {
+			continue;
+		}
+
+		if (i == 0) {
+			var tmp = '';
+		} else {
+			var tmp = '<tr>';
+		}
+
+		var j = 0;
+		var entry = responseTextArr[i].split(" ");
+		columns = entry.length;
+		for (var k = 0; k < entry.length; k++) {
+			if (entry[k] == "") {
+				continue;
+			}
+			if (i == 0) {
+				tmp += '<th>' + entry[k] + '<\/th>';
+			} else {
+				tmp += '<td>' + entry[k] + '<\/td>';
+			}
+			j++;
+		}
+
+		if (i == 0) {
+			thead += tmp;
+		} else {
+			tmp += '<td><\/td>'
+			tbody += tmp;
+		}
+	}
+
+	// if no routes found  ignore the sections and remove them the dom
+	if (tbody == "") {
+		$('#' + section + ' > thead').remove();
+		$('#' + section + ' > tbody').remove();
+		$('#' + section + '_parent').remove();
+	} else {
+		$('#' + section + ' > thead').html(thead);
+		$('#' + section + ' > tbody').html(tbody);
+	}
+}
+
+function update_all_routes() {
+	update_routes("IPv4");
+	update_routes("IPv6");
+}
+
+events.push(function() {
+	setInterval('update_all_routes()', 30000);
+	update_all_routes();
+
+});
+//]]>
+</script>
+
 <?php 
-include("foot.inc"); 
+
+include('foot.inc');
+
+include('wireguard/wg_foot.inc');
+
 ?>
