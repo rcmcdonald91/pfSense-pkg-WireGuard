@@ -384,6 +384,28 @@ function wg_do_tunnel_post($post) {
 
 }
 
+function wg_get_enabled_tunnels() {
+	global $wgg;
+
+	wg_globals();
+
+	$ret_tunnels = array();
+
+	foreach ($wgg['tunnels'] as $tunnel) {
+
+		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+
+			$ret_tunnels[] = $tunnel;
+
+		}
+
+	}
+
+	return $ret_tunnels;
+
+}
+
+
 /*
  * (Re)creates configuration files based on the current configuration
  */
@@ -413,17 +435,23 @@ function wg_create_config_files($clean = true) {
 
 		}
 
-		foreach ($wgg['tunnels'] as $tunnel) {
+		$tunnels = wg_get_enabled_tunnels();
 
-			if (!empty($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+		foreach ($tunnels as $tunnel) {
 
-				make_wg_conf($tunnel);
-
-			}
+			make_wg_conf($tunnel);
 
 		}
 
 	}
+
+}
+
+function wg_get_pfSense_interface_name($wg_ifname) {
+
+	$iflist = get_configured_interface_list_by_realif(true);
+
+	return (isset($iflist[$wg_ifname])) ? $iflist[$wg_ifname] : false; 
 
 }
 

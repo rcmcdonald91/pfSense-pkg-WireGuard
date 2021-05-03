@@ -209,7 +209,7 @@ function wg_interface_update_addresses($wg_ifname) {
 
 	$index = wg_get_tunnel_id($wg_ifname);
 
-	// Assigned tunnel interfaces are handled by pfSense and should be ignored
+	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
 
 		// Get an array of the current addresses assigned to the tunnel interface
@@ -238,9 +238,33 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		}
 	
+	// Now, we need to let pfSense handle these accordingly
+	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
+
+		if ($wg_pfsense_ifname = wg_get_pfSense_interface_name($wg_ifname)) {
+
+			interface_configure($wg_pfsense_ifname, true);
+
+		}
+
 	}
 
 	return false;
+
+}
+
+function wg_interface_create_all() {
+	global $wgg;
+
+	$tunnels = wg_get_enabled_tunnels();
+
+	foreach ($tunnels as $tunnel) {
+		
+		wg_interface_create($tunnel['name']);
+
+		wg_interface_update_addresses($tunnel['name']);
+
+	}
 
 }
 
