@@ -79,6 +79,12 @@ function wg_status() {
 			// Gets some extra information about tunnels not returned by `wg show all dump`
 			$a_ret[$current_device]['descr'] = $wgg['tunnels'][wg_get_tunnel_id($current_device)];
 
+			$a_tunnel_info = pfSense_get_interface_stats($current_device))
+
+			$a_ret[$current_device]['transfer_rx'] = $a_tunnel_info['inbytes'];
+
+			$a_ret[$current_device]['transfer_tx'] = $a_tunnel_info['outbytes'];
+
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
 			
@@ -133,6 +139,55 @@ function wg_get_peer_info($public_key, $tunnel) {
 	}
 
 	return false;
+
+}
+
+function wg_interface_update_addresses($wg_ifname) {
+	global $wgg;
+
+	$index = wg_get_tunnel_id($wg_ifname);
+
+	// We only want to modify unassigned tunnels
+	if (!is_wg_tunnel_assigned($wg_ifname)) {
+
+		// Get an array of the current addresses assigned to the interface
+		$assigned_addresses = pfSense_getall_interface_addresses($wg_ifname);
+
+		// Get an array of the addresses to be assigned to the interface
+		$configuration_addresses = array_map(fn(&$x) => $x['addr'], $wgg['tunnels'][$index]['addresses']['item']);
+
+		// Determine the addresses to remove
+		$addresses_to_remove = array_diff($assigned_addresses, array_intersect($assigned_addresses, $configuration_addresses));
+
+		foreach ($addresses_to_remove as $address) {
+
+			pfSense_interface_deladdress($wg_ifname, $address);
+
+		}
+
+		// Determine the addresses to add
+		$addresses_to_add = array_diff($configuration_addresses, array_intersect($assigned_addresses, $configuration_addresses));
+
+		foreach ($addresses_to_add as $address) {
+
+			pfSense_interface_addaddress($wg_ifname, $address);
+
+		}
+	
+	}
+
+}
+
+function wg_interface_create($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig'] wg create name {$wg_ifname_safe");
+	
+	interface_group_add_member($wg_ifname, $wgg['if_group']);
+		
+	return ($ret_val <> 0) ? false : true;
 
 }
 
