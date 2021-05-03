@@ -110,13 +110,14 @@ display_top_tabs($tab_array);
 		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
 
 			$peers = wg_get_tunnel_peers($tunnel['name']);
+				var_dump(count($tunnel['addresses']['item']));
 ?>
 					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=wg_entrystatus_class($tunnel)?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td><?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?></td>
-						<td><?=wg_generate_addresses_popup_link($tunnel['addresses']['item'], 'Tunnel Addresses', "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}")?></td>
+						<td><?=((!is_array($tunnel['addresses']['item'])) ? wg_get_assinged_if($tunnel['name']) : wg_generate_addresses_popup_link($tunnel['addresses']['item'], 'Tunnel Addresses', "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"))?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 
