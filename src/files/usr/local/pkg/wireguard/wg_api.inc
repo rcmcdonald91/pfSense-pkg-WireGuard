@@ -149,9 +149,9 @@ function wg_ifconfig_del_addresses($ifname, $address) {
 
 	list($address, address_subnet) = explode('/', $address);
 
-	$address_family_safe = (is_v4($address) ? 'inet' : null;
+	$address_family_safe = (s_v4($address) ? 'inet' : null;
 
-	$address_family_safe = (is_v6($address) ? 'inet6' : null;
+	$address_family_safe = is_v6($address) ? 'inet6' : null;
 
 	if (is_null($address_family)) { 
 		
