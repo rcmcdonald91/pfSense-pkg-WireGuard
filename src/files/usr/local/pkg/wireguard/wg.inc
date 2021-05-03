@@ -531,6 +531,9 @@ function wg_resync($verbose = false) {
 		}
 
 	}
+	
+
+
 
 	if ($g['wireguard_installing']) {
 
