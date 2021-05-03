@@ -171,9 +171,9 @@ function wg_ifconfig_set_address($ifname, $addresses) {
 
 	$ifname_safe = escapeshellarg($ifname);
 
-	$address_family_safe = (is_v4($address) ? 'inet' : null;
+	$address_family_safe = is_v4($address) ? 'inet' : null;
 
-	$address_family_safe = (is_v6($address) ? 'inet6' : null;
+	$address_family_safe = is_v6($address) ? 'inet6' : null;
 
 	if (is_null($address_family)) { 
 		
