@@ -192,6 +192,8 @@ function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "
 
 	$extras = count($a_addresses) - 1;
 
+	sort($a_addresses);
+
 	if ($extras > 0) {
 
 		$data_html = "<table><thead><th>Value</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
