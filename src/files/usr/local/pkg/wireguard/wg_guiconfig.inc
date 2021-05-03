@@ -197,6 +197,7 @@ function wg_get_assinged_if($tun_if) {
 	$ifname = $iflist[$tun_if];
 	$iffriendly = $ifdescr[$ifname];
 
+	
 	return $iffriendly;
 
 }
