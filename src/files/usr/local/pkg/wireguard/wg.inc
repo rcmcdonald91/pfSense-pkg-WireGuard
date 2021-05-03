@@ -485,7 +485,7 @@ function make_wg_conf($tunnel) {
 	$txt .= "\n";
 
 	// Process peers section
-	$peers = wg_get_tunnel_peers($tunnel);
+	$peers = wg_get_tunnel_peers($tunnel['name']);
 
 	if (is_array($peers) && count($peers) > 0) {
 
