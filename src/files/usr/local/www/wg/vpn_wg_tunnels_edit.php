@@ -68,7 +68,6 @@ if ($_POST) {
 
 		$pconfig = $res['pconfig'];
 
-		// This neeeds to be rewritten, not a fan...
 		if (!$input_errors) {
 
 			// Save was successful

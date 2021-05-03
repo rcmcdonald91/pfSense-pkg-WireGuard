@@ -50,6 +50,5 @@
 	<custom_php_validation_command>
 	</custom_php_validation_command>
 	<custom_php_resync_config_command>
-		wg_resync();
 	</custom_php_resync_config_command>
 </packagegui>

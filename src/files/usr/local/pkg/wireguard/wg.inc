@@ -40,6 +40,9 @@ require_once('wireguard/wg_validate.inc');
 
 global $wgg;
 
+/*
+ * This toggles a given tunnel based on index
+ */
 function wg_toggle_tunnel($tun_id) {
 	global $wgg;
 
@@ -59,15 +62,10 @@ function wg_toggle_tunnel($tun_id) {
 
 			// Write the configuration to disk
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
-		
-			// Regenerate conf files
-			wg_globals();
 
+			// Create new configuration files
 			wg_create_config_files();
 
-			wg_ifgroup_install();
-
-		
 		} else {
 
 			$action_txt = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'disable' : 'enable';
@@ -82,6 +80,9 @@ function wg_toggle_tunnel($tun_id) {
 
 }
 
+/*
+ * This toggles a given peer based on index
+ */
 function wg_toggle_peer($peer_id) {
 	global $config, $wgg;
 
@@ -91,16 +92,24 @@ function wg_toggle_peer($peer_id) {
 	// Make sure we have a valid peer
 	if (isset($wgg['peers'][$peer_id])) {
 
+		// Toggle the peer
 		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id]['enabled'] == 'yes') ? 'no' : 'yes';
 
+		// Write the configuration to disk
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} toggled.");
+
+		// Create new configuration files
+		wg_create_config_files();
 
 	}
 
 }
 
+/*
+ * This deletes a given peer based on index
+ */
 function wg_delete_peer($peer_id) {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
@@ -110,26 +119,29 @@ function wg_delete_peer($peer_id) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
+		// Create new configuration files
+		wg_create_config_files();
+
 
 	}
 
 }
 
+/*
+ * This deletes a given tunnel based on index
+ */
 function wg_delete_tunnel($tun_id) {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
+	unset($ifname, $conf_path);
+
+	// Make sure we have a valid tunnel
 	if (isset($wgg['tunnels'][$tun_id])) {
 
-		// We can't disable tunnels if they are assigned
+		// We can't delete assigned tunnels
 		if (!is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
-
-			$tmp_tunnel = $wgg['tunnels'][$tun_id];
-
-			unset($ifname);
-
-			unset($conf_path);
 
 			if (isset($wgg['tunnels'][$tun_id]['name'])) {
 
@@ -146,18 +158,14 @@ function wg_delete_tunnel($tun_id) {
 			// Delete the tunnel configuration entry
 			unset($wgg['tunnels'][$tun_id]);
 
-			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tmp_tunnel['name']} deleted.");
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$ifname} deleted.");
 
-			// Delete the wg?.conf file
-			if (isset($conf_path) && is_file($conf_path)) {
-
-				unlink($conf_path);
-
-			}
+			// Create the new configuration files
+			wg_create_config_files();
 		
 		} else {
 
-			$input_errors[] = "Cannot delete a WireGuard tunnel while it is assigned as an interface.";
+			$input_errors[] = "Cannot delete a WireGuard tunnel assigned to a pfSense interface.";
 
 		}
 
@@ -167,27 +175,18 @@ function wg_delete_tunnel($tun_id) {
 
 }
 
-// This returns an array of peer structs for a given tunnel
-function wg_get_tunnel_peers($tunnel) {
-	global $config, $wgg;
+/*
+ * This returns an array of peers for a given tunnel
+ */
+function wg_get_tunnel_peers($tunnel_name) {
+	global $wgg;
 
 	$a_ret = array();
-
-	// Assume we have a tunnel name first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
-
-	}
 
 	// Look through array of peers for matching tunnel name
 	foreach ($wgg['peers'] as $peer_id => $peer) {
 
-		if ($peer['tun'] == $wg_ifname) {
+		if ($peer['tun'] == $tunnel_name) {
 
 			// We need the array index for future manipulations
 			$peer['index'] = $peer_id;
@@ -203,6 +202,9 @@ function wg_get_tunnel_peers($tunnel) {
 
 }
 
+/*
+ * This transforms a raw peer post consisting of repeatables 
+ */
 function wg_peer_addresses($post) {
 
 	// Convert the post into proper arrays
@@ -215,11 +217,7 @@ function wg_peer_addresses($post) {
 
 		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
 
-		// Ignore if entry is not a valid CIDR-masked subnet
-		if (is_subnet($tmp_subnet)) {
-
-			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
-		}
+		$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
 
 	}
 
@@ -227,6 +225,9 @@ function wg_peer_addresses($post) {
 
 }
 
+/*
+ * This transforms a raw tunnel post consisting of repeatables 
+ */
 function wg_tunnel_addresses($post) {
 
 	// Convert the post into proper arrays
@@ -239,11 +240,7 @@ function wg_tunnel_addresses($post) {
 
 		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
 
-		// Ignore if entry is not a valid CIDR-masked subnet
-		if (is_subnet($tmp_subnet)) {
-
-			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
-		}
+		$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
 
 	}
 
@@ -251,7 +248,9 @@ function wg_tunnel_addresses($post) {
 
 }
 
-// This converts a raw form post containing repeatables like addresses, subnets, and descriptions and returns an actual array
+/*
+ * This converts a raw form post containing any repeatables like addresses, subnets, and descriptions and returns an actual array
+ */
 function wg_parse_post_repeatables($post, $fields = null) {
 
 	if (is_array($fields)) {
@@ -280,8 +279,11 @@ function wg_parse_post_repeatables($post, $fields = null) {
 
 }
 
+/*
+ * Takes a raw post for a peer, validates it, and saves it to the configuration system
+ */
 function wg_do_peer_post($post) {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
@@ -326,13 +328,17 @@ function wg_do_peer_post($post) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
 
+		wg_create_config_files();
+
 	}
 
 	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
 
 }
 
-// Write new tunnel values to the configuration system
+/*
+ * Takes a raw post for a tunnel, validates it, and saves it to the configuration system
+ */
 function wg_do_tunnel_post($post) {
 	global $wgg;
 
@@ -343,6 +349,8 @@ function wg_do_tunnel_post($post) {
 	$index = $post['index'];
 
 	$pconfig = $wgg['tunnels'][$index];
+
+	wg_init_config_arr($pconfig, array('addresses', 'item'));
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
@@ -358,11 +366,9 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['mtu'] 		= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
 
-	wg_init_config_arr($pconfig, array('addresses', 'item'));
-
 	$pconfig['addresses']['item'] 	= wg_tunnel_addresses($post);
 
-	$input_errors = wg_validate_post($pconfig);
+	$input_errors 			= wg_validate_post($pconfig);
 
 	if (!$input_errors) {
 
@@ -370,49 +376,17 @@ function wg_do_tunnel_post($post) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
+		wg_create_config_files();
+
 	}
 
 	return array('input_errors' => $input_errors, 'pconfig' => $pconfig);
 
 }
 
-function wg_resync($verbose = false) {
-	global $config, $g, $wgg;
-
-	// Read latest settings
-	wg_globals();
-
-	if ($g['wireguard_installing']) {
-
-		// Performing any upgrades to the XML structure for existing configs
-
-		update_status("\n  Upgrading any existing configuration...");
-
-		wg_upgrade_addresses();
-
-		wg_upgrade_allowedips();
-
-		update_status(" done.\n  Configuring WireGuard tunnels...");
-
-	}
-
-	// Write out configuration files to disk
-	wg_create_config_files();
-
-	// Attempt to reinstall the interface group to keep things clean
-	wg_ifgroup_install();
-
-	if ($g['wireguard_installing']) {
-
-		update_status(" done.\n");
-
-		// We are no longer installing
-		unset($g['wireguard_installing']);
-
-	}
-
-}
-
+/*
+ * (Re)creates configuration files based on the current configuration
+ */
 function wg_create_config_files($clean = true) {
 	global $wgg;
 
@@ -486,7 +460,9 @@ function wg_remove_config_settings() {
 
 }
 
-// Write each file
+/*
+ * Writes a WireGuard configuration file for a given tunnel to the configuration path
+ */
 function make_wg_conf($tunnel) {
 	global $wgg;
 
@@ -509,7 +485,6 @@ function make_wg_conf($tunnel) {
 	$txt .= "\n";
 
 	// Process peers section
-
 	$peers = wg_get_tunnel_peers($tunnel);
 
 	if (is_array($peers) && count($peers) > 0) {
