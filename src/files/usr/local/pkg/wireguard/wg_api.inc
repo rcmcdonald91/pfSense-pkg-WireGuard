@@ -41,7 +41,7 @@ function wg_status_json($pretty = false) {
 
 }
 
-// Returns an associative array of current wg status
+// Returns a massive associative array of current wg status
 function wg_status() {
 	global $wgg;
 
@@ -122,13 +122,13 @@ function wg_status() {
 
 }
 
-// Returns WireGuard peer name from a given public key and tunnel name
-function wg_get_peer_info($public_key, $tunnel) {
+// Returns WireGuard peer info from a given public key and tunnel name
+function wg_get_peer_info($public_key, $tunnel_name) {
 	global $wgg;
 
 	foreach ($wgg['peers'] as $peer_id => $peer){
 
-		if ($public_key == $peer['publickey'] && $tunnel = $peer['tun']) {
+		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
 
 			$ret_val = array('descr' => $peer['descr'], 'id' => $peer_id, 'allowedips' => $peer['allowedips']['item']);
 
@@ -202,7 +202,7 @@ function wg_ifconfig_set_address($ifname, $address) {
 }
 
 /*
- * This updates the addresses of the specified interface without tearing it down first
+ * This updates the addresses of the specified interface without tearing it down
  */
 function wg_interface_update_addresses($wg_ifname) {
 	global $wgg;
@@ -241,7 +241,7 @@ function wg_interface_update_addresses($wg_ifname) {
 	// Now, we need to let pfSense handle these accordingly
 	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
 
-		if ($wg_pfsense_ifname = wg_get_pfSense_interface_name($wg_ifname)) {
+		if ($wg_pfsense_ifname = wg_get_pfsense_interface_name($wg_ifname)) {
 
 			interface_configure($wg_pfsense_ifname, true);
 
@@ -250,6 +250,17 @@ function wg_interface_update_addresses($wg_ifname) {
 	}
 
 	return false;
+
+}
+
+function wg_interface_syncconf($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$wg_conf_path_safe = escapeshellarg("{$wgg['conf_path']}/{$wg_ifname}");
+
+	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe}");
 
 }
 
@@ -262,6 +273,8 @@ function wg_interface_create_all() {
 		
 		wg_interface_create($tunnel['name']);
 
+		wg_interface_group_add($tunnel['name']);
+
 		wg_interface_update_addresses($tunnel['name']);
 
 	}
@@ -272,13 +285,27 @@ function wg_interface_create_all() {
  * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
  */
 function wg_interface_create($wg_ifname) {
-	global $wgg;
+	global $interface_arr_cache, $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe}");
-	
-	interface_group_add_member($wg_ifname, $wgg['if_group']);
+		
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+/*
+ * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ */
+function wg_interface_group_add($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$wg_ifgroup_safe = escapeshellarg($wgg['if_group']);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe}");
 		
 	return ($ret_val <> 0) ? false : true;
 

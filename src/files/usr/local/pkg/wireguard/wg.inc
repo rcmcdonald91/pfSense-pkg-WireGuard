@@ -447,11 +447,14 @@ function wg_create_config_files($clean = true) {
 
 }
 
-function wg_get_pfSense_interface_name($wg_ifname) {
+/* 
+ * Translates WireGuard interface names to pfSense interface names
+ */
+function wg_get_pfsense_interface_name($tunnel_name) {
 
 	$iflist = get_configured_interface_list_by_realif(true);
 
-	return (isset($iflist[$wg_ifname])) ? $iflist[$wg_ifname] : false; 
+	return (isset($iflist[$tunnel_name])) ? $iflist[$tunnel_name] : false; 
 
 }
 
