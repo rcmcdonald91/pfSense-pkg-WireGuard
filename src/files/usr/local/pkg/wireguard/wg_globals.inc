@@ -34,7 +34,7 @@ $wgg = array(
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',
-					'wireguard-tools'),
+					'wireguard-tools-lite'),
 	'conf_path'		=> '/usr/local/etc/wireguard',
 	'xml_path'		=> array('installedpackages', 'wireguard'),
 	'conf_paths_to_clean'	=> array(
