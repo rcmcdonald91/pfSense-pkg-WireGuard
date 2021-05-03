@@ -147,10 +147,10 @@ function wg_interface_update_addresses($wg_ifname) {
 
 	$index = wg_get_tunnel_id($wg_ifname);
 
-	// We only want to modify unassigned tunnels
+	// Assigned tunnel interfaces are handled by pfSense
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
 
-		// Get an array of the current addresses assigned to the interface
+		// Get an array of the current addresses assigned to the tunnel interface
 		$assigned_addresses = pfSense_getall_interface_addresses($wg_ifname);
 
 		// Get an array of the addresses to be assigned to the interface
@@ -159,6 +159,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		// Determine the addresses to remove
 		$addresses_to_remove = array_diff($assigned_addresses, array_intersect($assigned_addresses, $configuration_addresses));
 
+		// Now remove them
 		foreach ($addresses_to_remove as $address) {
 
 			list($addr, $addr_subnet) = explode('/', $address);
@@ -170,6 +171,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		// Determine the addresses to add
 		$addresses_to_add = array_diff($configuration_addresses, array_intersect($assigned_addresses, $configuration_addresses));
 
+		// Now add them
 		foreach ($addresses_to_add as $address) {
 
 			pfSense_interface_setaddress($wg_ifname, $address);
