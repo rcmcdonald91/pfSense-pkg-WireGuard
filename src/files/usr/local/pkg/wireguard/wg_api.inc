@@ -147,7 +147,7 @@ function wg_ifconfig_del_addresses($ifname, $address) {
 
 	$ifname_safe = escapeshellarg($ifname);
 
-	list($addr, addr_subnet) = explode('/', $address);
+	list($addr, $addr_subnet) = explode('/', $address);
 
 	$address_family_safe = is_v4($address) ? 'inet' : null;
 
