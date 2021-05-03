@@ -71,8 +71,6 @@ if ($_POST) {
 		// This neeeds to be rewritten, not a fan...
 		if (!$input_errors) {
 
-			wg_resync();
-
 			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels.php");
 

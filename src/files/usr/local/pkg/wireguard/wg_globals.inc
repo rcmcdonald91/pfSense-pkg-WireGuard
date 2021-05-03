@@ -28,10 +28,7 @@ global $wgg;
 
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
-	'wg_quick'		=> '/usr/local/bin/wg-quick',
-	'bash'			=> '/usr/local/bin/bash',
 	'ifconfig'		=> '/sbin/ifconfig',
-	'kldstat'		=> '/sbin/kldstat',
 	'pkg'			=> '/usr/sbin/pkg',
 	'kmod'			=> 'if_wg',
 	'pkg_names'		=> array(

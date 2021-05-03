@@ -64,8 +64,6 @@ if ($_POST) {
 		$pconfig = $res['pconfig'];
 
 		if (!$input_errors) {
-
-			wg_resync();
 			
 			// Save was successful
 			header("Location: /wg/vpn_wg_peers.php");

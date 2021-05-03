@@ -252,58 +252,6 @@ function wg_is_valid_key($key) {
 
 }
 
-// This soft resyncs a given WireGuard Tunnel (i.e. wg syncconf wgX <(wg-quick strip wgX))
-function wg_syncconf($tunnel) {
-	global $wgg;
-
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
-
-	}
-
-	// Escape the inner arguments
-	$wg_ifname = escapeshellarg($wg_ifname);
-
-	// Pass the stripped configuration to wg(8)
-	$syncconf_command ="{$wgg['wg']} syncconf {$wg_ifname} <({$wgg['wg_quick']} strip {$wg_ifname})";
-
-	// Escape the outer arguments
-	$syncconf_command = escapeshellarg($syncconf_command);
-
-	exec("{$wgg['bash']} -c {$syncconf_command}");
-
-}
-
-// Executes a wg-quick(8) action using a specified tunnel or interface
-function exec_wg_quick_action($tunnel, $action, $verbose = false) {
-	global $wgg;
-
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
-
-	}
-
-	$action = escapeshellarg($action);
-
-	$wg_ifname = escapeshellarg($wg_ifname);
-
-	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));
-
-}
-
 // Generate a pre-shared key
 function wg_gen_psk() {
 	global $wgg;
