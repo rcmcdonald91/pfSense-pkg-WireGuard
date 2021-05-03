@@ -187,12 +187,26 @@ function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepos
 
 }
 
+// returns the assigned interface for a tunnel interface
+function wg_get_assinged_if($tun_if) {
+
+
+	$iflist = get_configured_interface_list_by_realif(true);
+	$ifdescr = get_configured_interface_with_descr(true);
+	
+	$ifname = $iflist[$tun_if];
+	$iffriendly = $ifdescr[$ifname];
+
+	return $iffriendly;
+
+}
+
 // Generates an addresses link with a popup
 function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
 
 	$extras = count($a_addresses) - 1;
 
-	sort($a_addresses);
+	// sort($a_addresses);
 
 	if ($extras > 0) {
 
