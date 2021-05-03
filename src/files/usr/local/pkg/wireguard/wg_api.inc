@@ -170,7 +170,7 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		foreach ($addresses_to_add as $address) {
 
-			pfSense_interface_addaddress($wg_ifname, $address);
+			pfSense_interface_setaddress($wg_ifname, $address);
 
 		}
 	
