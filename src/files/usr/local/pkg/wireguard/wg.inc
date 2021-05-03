@@ -217,7 +217,7 @@ function wg_peer_addresses($post) {
 
 		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
 
-		is_subnet($tmp_subnet) {
+		if (is_subnet($tmp_subnet)) {
 
 			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
 
@@ -244,7 +244,7 @@ function wg_tunnel_addresses($post) {
 
 		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
 
-		if is_subnet($tmp_subnet) {
+		if (is_subnet($tmp_subnet)) {
 
 			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
 
