@@ -79,7 +79,7 @@ function wg_status() {
 			// Gets some extra information about tunnels not returned by `wg show all dump`
 			$a_ret[$current_device]['descr'] = $wgg['tunnels'][wg_get_tunnel_id($current_device)];
 
-			$a_tunnel_info = pfSense_get_interface_stats($current_device))
+			$a_tunnel_info = pfSense_get_interface_stats($current_device);
 
 			$a_ret[$current_device]['transfer_rx'] = $a_tunnel_info['inbytes'];
 
