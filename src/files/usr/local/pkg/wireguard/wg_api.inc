@@ -183,7 +183,7 @@ function wg_interface_create($wg_ifname) {
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig'] wg create name {$wg_ifname_safe");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe}");
 	
 	interface_group_add_member($wg_ifname, $wgg['if_group']);
 		
