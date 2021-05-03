@@ -147,7 +147,7 @@ function wg_ifconfig_del_addresses($ifname, $address) {
 
 	$ifname_safe = escapeshellarg($ifname);
 
-	list($address, address_subnet) = explode('/', $address);
+	list($addr, addr_subnet) = explode('/', $address);
 
 	$address_family_safe = is_v4($address) ? 'inet' : null;
 
@@ -159,7 +159,7 @@ function wg_ifconfig_del_addresses($ifname, $address) {
 	
 	}
 
-	$address_safe = escapeshellarg($address);
+	$address_safe = escapeshellarg($addr);
 
 	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} delete");
 
