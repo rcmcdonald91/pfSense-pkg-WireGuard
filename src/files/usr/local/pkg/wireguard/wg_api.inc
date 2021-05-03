@@ -142,79 +142,94 @@ function wg_get_peer_info($public_key, $tunnel) {
 
 }
 
-function wg_ifconfig_del_addresses($ifname, $address) {
-	global $wgg;
+function wg_get_address_family($address) {
 
-	$ifname_safe = escapeshellarg($ifname);
+	if (is_v4($address)) {
 
-	list($addr, $addr_subnet) = explode('/', $address);
+		return 'inet';
 
-	$address_family_safe = is_v4($address) ? 'inet' : null;
+	} elseif (is_v6($address)) {
 
-	$address_family_safe = is_v6($address) ? 'inet6' : null;
+		return 'inet6';
 
-	if (is_null($address_family)) { 
-		
+	} else {
+
 		return false;
-	
+
 	}
-
-	$address_safe = escapeshellarg($addr);
-
-	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} delete");
-
 
 }
 
-function wg_ifconfig_set_address($ifname, $addresses) {
+function wg_ifconfig_del_address($ifname, $address) {
 	global $wgg;
 
-	$ifname_safe = escapeshellarg($ifname);
-
-	$address_family_safe = is_v4($address) ? 'inet' : null;
-
-	$address_family_safe = is_v6($address) ? 'inet6' : null;
-
-	if (is_null($address_family)) { 
+	// Gets the ifconfig address family while also validating the input
+	if ($family = wg_get_address_family($address)) {
 		
-		return false;
-	
+		$ifname_safe = escapeshellarg($ifname);
+
+		list($addr, $addr_subnet) = explode('/', $address);
+
+		$address_safe = escapeshellarg($addr);
+
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} delete");
+
+		return ($ret_val <> 0) ? false : true;
+
 	}
 
-	$address_safe = escapeshellarg($address);
-
-	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} add");
-
-	return ($ret_val <> 0) ? false : true;
+	return false;
 
 }
 
+function wg_ifconfig_set_address($ifname, $address) {
+	global $wgg;
+
+	// Gets the ifconfig address family while also validating the input
+	if ($family = wg_get_address_family($address)) {
+		
+		$ifname_safe = escapeshellarg($ifname);
+
+		$address_safe = escapeshellarg($address);
+
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} add");
+
+		return ($ret_val <> 0) ? false : true;
+
+	}
+
+	return false;
+}
+
+/*
+ * This updates the addresses of the specified interface without tearing it down first
+ */
 function wg_interface_update_addresses($wg_ifname) {
 	global $wgg;
 
 	$index = wg_get_tunnel_id($wg_ifname);
 
-	// Assigned tunnel interfaces are handled by pfSense
+	// Assigned tunnel interfaces are handled by pfSense and should be ignored
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
 
 		// Get an array of the current addresses assigned to the tunnel interface
-		$assigned_addresses = pfSense_getall_interface_addresses($wg_ifname);
+		$current = pfSense_getall_interface_addresses($wg_ifname);
 
 		// Get an array of the addresses to be assigned to the interface
-		$configuration_addresses = array_map(fn(&$x) => $x['addr'], $wgg['tunnels'][$index]['addresses']['item']);
+		$desired = array_map(fn(&$x) => $x['addr'], $wgg['tunnels'][$index]['addresses']['item']);
 
 		// Determine the addresses to remove
-		$addresses_to_remove = array_diff($assigned_addresses, array_intersect($assigned_addresses, $configuration_addresses));
+		$addresses_to_remove = array_diff($current, array_intersect($current, $desired));
 
 		// Now remove them
 		foreach ($addresses_to_remove as $address) {
 
-			wg_ifconfig_delete_address($wg_ifname, $address);
+			wg_ifconfig_del_address($wg_ifname, $address);
 
 		}
 
 		// Determine the addresses to add
-		$addresses_to_add = array_diff($configuration_addresses, array_intersect($assigned_addresses, $configuration_addresses));
+		$addresses_to_add = array_diff($desired, array_intersect($current, $desired));
 
 		// Now add them
 		foreach ($addresses_to_add as $address) {
@@ -225,8 +240,13 @@ function wg_interface_update_addresses($wg_ifname) {
 	
 	}
 
+	return false;
+
 }
 
+/*
+ * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ */
 function wg_interface_create($wg_ifname) {
 	global $wgg;
 
