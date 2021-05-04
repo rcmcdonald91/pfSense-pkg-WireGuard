@@ -116,7 +116,7 @@ function wg_delete_peer($peer_id) {
 	if (isset($wgg['peers'][$peer_id])) {
 
 		// We need to save this because we are about to unset it
-		$tmp_peer = $wgg['peers'][$peer_id]
+		$tmp_peer = $wgg['peers'][$peer_id];
 
 		unset($wgg['peers'][$peer_id]);
 
