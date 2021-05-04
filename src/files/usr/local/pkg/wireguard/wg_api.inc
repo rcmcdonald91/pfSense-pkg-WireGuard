@@ -199,7 +199,7 @@ function wg_ifconfig_set_address($ifname, $address) {
 	}
 
 	return false;
-	
+
 }
 
 function wg_ifconfig_down_interface($ifname) {
@@ -335,7 +335,7 @@ function wg_interface_group_add($wg_ifname) {
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} && {$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe}");
 		
 	return ($ret_val <> 0) ? false : true;
-f
+
 }
 
 // Get WireGuard interface status
