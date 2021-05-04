@@ -281,7 +281,7 @@ function wg_interface_syncconf($wg_ifname) {
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
-	$wg_conf_path_safe = escapeshellarg("{$wgg['conf_path']}/{$wg_ifname}");
+	$wg_conf_path_safe = escapeshellarg("{$wgg['conf_path']}/{$wg_ifname}.conf");
 
 	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe}");
 
