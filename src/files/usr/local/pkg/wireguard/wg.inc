@@ -413,20 +413,33 @@ function wg_resync_peer($peer) {
 // This resyncs a specific tunnel interface
 function wg_resync_tunnel($tunnel) {
 
+	$tun_name = $tunnel['name'];
+
 	// Create new configuration files
 	wg_create_config_files();
 
 	// Create the tunnel interface if it does not yet exist
-	wg_interface_create($tunnel['name']);
+	wg_interface_create($tun_name);
 
 	// Add the tunnel interface to the WireGuard interface group
-	wg_interface_group_add($tunnel['name']);
+	wg_interface_group_add($tun_name);
 
 	// Update the addresses on the tunnel interface
-	wg_interface_update_addresses($tunnel['name']);
+	wg_interface_update_addresses($tun_name);
+
+	// Toggle the interface accordingly instead of tearing it down completely
+	if (isset($tunnel['enabled']) && $tunnel['enabeld'] == 'yes') {
+
+		wg_ifconfig_up_interface($tun_name);
+
+	} else {
+
+		wg_ifconfig_down_interface($tun_name)
+
+	}
 
 	// Sync the configuration with the tunnel interface
-	wg_interface_syncconf($tunnel['name']);
+	wg_interface_syncconf($tun_name);
 
 }
 
