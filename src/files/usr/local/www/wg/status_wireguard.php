@@ -79,7 +79,7 @@ if (!empty($a_devices)):
 <?php
 
 	foreach ($a_devices as $device_name => $device):
-
+		
 ?>
 			<thead>
 				<th><?=gettext("Tunnel")?></th>
@@ -128,26 +128,20 @@ if (!empty($a_devices)):
 	endforeach;
 ?>
 		</table>
-
-
-
-    	</div>
-
-
+    </div>
 </div>
 
 <div class="panel panel-default ">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Interface Status')?>
 	</div>
-	
+
 	<div class="table-responsive panel-body">
 		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
 	<thead>
 				<th><?=gettext("Interface")?></th>
 				<th><?=gettext("IPs")?></th>
 				<th><?=gettext("MTU")?></th>
-				<th><?=gettext("Flags")?></th>
 				<th><?=gettext("Description")?></th>
 			</thead>
 			<tbody>
@@ -161,7 +155,6 @@ foreach ($a_intefaces as $key => $a_interface):
 					<td><?=htmlspecialchars(($a_interface['interface']))?></td>
 					<td><?=wg_generate_addresses_popup_link($a_interface['ips'],gettext("IPs"),"vpn_wg_tunnels_edit.php?tun=${a_interface['interface']}")?></td>
 					<td><?=htmlspecialchars(($a_interface['mtu']))?></td>
-					<td><?=htmlspecialchars(($a_interface['flags']))?></td>
 					<td><?=htmlspecialchars(($a_interface['descr']))?></td>
 				<tr>
 <?
@@ -186,7 +179,6 @@ endforeach;
 	</div>
 
 	<div id="wg_routes_status" class="table-responsive panel-body collapse" aria-expanded="false">
-
 			<div id="IPv4_parent" class="panel-heading"><h2 class="panel-title"><?=gettext("IPv4")?></h2></div>
 				<table class="table table-striped table-hover table-condensed sortable-theme-bootstrap" id="IPv4">
 				<thead>
@@ -215,14 +207,11 @@ endforeach;
 				</tbody>
 				</table>
 	</div>
-
 </div>
 
 <?php
 else:
-
 	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
-
 endif;
 ?>
 
@@ -251,22 +240,17 @@ endif;
 			</thead>
 			<tbody>
 <?php
-
 			$a_packages = wg_pkg_info();
-
 			foreach ($a_packages as $package):
-
 ?>
     				<tr>
 					<td><?=htmlspecialchars($package[0])?></td>
 					<td><?=htmlspecialchars($package[1])?></td>
 					<td><?=htmlspecialchars($package[2])?></td>
-
 				</tr>
 <?php
 			endforeach;
 ?>
-
 			</tbody>
 		</table>
 	</div>
@@ -328,7 +312,6 @@ function update_routes_callback(html) {
 			tbody += tmp;
 		}
 	}
-
 	// if no routes found  ignore the sections and remove them the dom
 	if (tbody == "") {
 		$('#' + section + ' > thead').remove();
