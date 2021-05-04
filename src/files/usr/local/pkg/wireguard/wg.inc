@@ -434,7 +434,7 @@ function wg_resync_tunnel($tunnel) {
 
 	} else {
 
-		wg_ifconfig_down_interface($tun_name)
+		wg_ifconfig_down_interface($tun_name);
 
 	}
 
