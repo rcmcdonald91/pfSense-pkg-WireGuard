@@ -54,19 +54,17 @@ function wg_toggle_tunnel($tun_id) {
 	// Make sure we have a valid tunnel
 	if (isset($wgg['tunnels'][$tun_id])) {
 
-		$tunnel = $wgg['tunnels'][$tun_id];
-
 		// We can't disable tunnels if they are assigned
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
 
 			// Now we toggle the tunnel
-			$wgg['tunnels'][$tun_id]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
+			$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} toggled.");
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
 
 			// Sync with WireGuard backend
-			wg_resync_tunnel($tunnel);
+			wg_resync_tunnel($wgg['tunnels'][$tun_id]);
 
 		} else {
 
@@ -86,7 +84,7 @@ function wg_toggle_tunnel($tun_id) {
  * This toggles a given peer based on index
  */
 function wg_toggle_peer($peer_id) {
-	global $config, $wgg;
+	global $wgg;
 
 	// Make sure we have the latest info
 	wg_globals();
@@ -94,16 +92,14 @@ function wg_toggle_peer($peer_id) {
 	// Make sure we have a valid peer
 	if (isset($wgg['peers'][$peer_id])) {
 
-		$peer = $wgg['peers'][$peer_id];
-
 		// Toggle the peer
-		$wgg['peers'][$peer_id]['enabled'] = ($peer['enabled'] == 'yes') ? 'no' : 'yes';
+		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id] == 'yes') ? 'no' : 'yes';
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
 		// Sync with the WireGuard backend
-		wg_resync_peer($peer);
+		wg_resync_peer($wgg['peers'][$peer_id]);
 
 	}
 
