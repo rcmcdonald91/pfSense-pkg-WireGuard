@@ -313,7 +313,53 @@ function wg_interface_create($wg_ifname) {
 
 }
 
-// Gets various package infos and returns an associative array
+/*
+ * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ */
+function wg_interface_group_add($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$wg_ifgroup_safe = escapeshellarg($wgg['if_group']);
+
+	// We first check to see if the desired interface exists, then we add it to the group if it does
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} && {$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe}");
+		
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+function wg_interface_status($wg_ifname) {
+
+	return in_array("UP", wg_ifconfig_interface_flags($wg_conf_path_safe));
+
+}
+
+function wg_ifconfig_interface_flags($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	exec("{$wgg['ifconfig']} {$wg_ifname_safe}", $output, $ret_code);
+
+	if ($ret_code <> 0) {
+
+		return false;
+
+	}
+
+	if (preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
+
+		return explode(',', $matches['flags']);
+
+	}
+
+	return false;
+
+}
+
+// Get various package infos and return an associative array
 function wg_pkg_info() {
 	global $wgg;
 
