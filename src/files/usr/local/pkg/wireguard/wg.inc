@@ -408,13 +408,46 @@ function wg_resync_peer($peer) {
 
 }
 
+function wg_resync_all() {
+	global $g, $wgg;
+
+	wg_create_config_files();
+
+	if ($g['wireguard_installing']) {
+
+		update_status("\n  Configuring existing WireGuard tunnels...");
+
+	}
+
+	foreach ($wgg['tunnels'] as $tunnel) {
+		
+		wg_resync_tunnel($tunnel, true);
+
+	}
+
+	if ($g['wireguard_installing']) {
+
+		update_status("done.\n");
+
+		// We are no longer installing
+		unset($g['wireguard_installing']);
+
+	}
+
+}
+
+
 // This resyncs a specific tunnel interface
-function wg_resync_tunnel($tunnel) {
+function wg_resync_tunnel($tunnel, $quick = false) {
 
 	$tun_name = $tunnel['name'];
 
-	// Create new configuration files
-	wg_create_config_files();
+	if (!$quick) {
+
+		// Create new configuration files
+		wg_create_config_files();
+
+	}
 
 	// Create the tunnel interface if it does not yet exist
 	wg_interface_create($tun_name);

@@ -171,13 +171,13 @@ function wg_get_address_family($address) {
 
 }
 
-function wg_ifconfig_del_address($ifname, $address) {
+function wg_ifconfig_del_address($wg_ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family_safe = wg_get_address_family($address)) {
 		
-		$ifname_safe = escapeshellarg($ifname);
+		$ifname_safe = escapeshellarg($wg_ifname);
 
 		list($addr, $addr_subnet) = explode('/', $address);
 
@@ -193,13 +193,13 @@ function wg_ifconfig_del_address($ifname, $address) {
 
 }
 
-function wg_ifconfig_set_address($ifname, $address) {
+function wg_ifconfig_set_address($wg_ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family_safe = wg_get_address_family($address)) {
 		
-		$ifname_safe = escapeshellarg($ifname);
+		$ifname_safe = escapeshellarg($wg_ifname);
 
 		$address_safe = escapeshellarg($address);
 
@@ -213,10 +213,10 @@ function wg_ifconfig_set_address($ifname, $address) {
 
 }
 
-function wg_ifconfig_down_interface($ifname) {
+function wg_ifconfig_down_interface($wg_ifname) {
 	global $wgg;
 
-	$ifname_safe = escapeshellarg($ifname);
+	$ifname_safe = escapeshellarg($wg_ifname);
 
 	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down");
 
@@ -224,10 +224,10 @@ function wg_ifconfig_down_interface($ifname) {
 
 }
 
-function wg_ifconfig_up_interface($ifname) {
+function wg_ifconfig_up_interface($wg_ifname) {
 	global $wgg;
 
-	$ifname_safe = escapeshellarg($ifname);
+	$ifname_safe = escapeshellarg($wg_ifname);
 
 	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up");
 
@@ -295,23 +295,6 @@ function wg_interface_syncconf($wg_ifname) {
 	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe}");
 
 	return ($ret_val <> 0) ? false : true;
-
-}
-
-function wg_interface_create_all() {
-	global $wgg;
-
-	$enabled_tunnels = wg_get_enabled_tunnels();
-
-	foreach ($enabled_tunnels as $tunnel) {
-		
-		wg_interface_create($tunnel['name']);
-
-		wg_interface_group_add($tunnel['name']);
-
-		wg_interface_update_addresses($tunnel['name']);
-
-	}
 
 }
 
