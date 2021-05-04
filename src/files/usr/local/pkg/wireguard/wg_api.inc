@@ -405,27 +405,40 @@ function wg_interface_status() {
 
 }
 
-// Get various package infos and return an array
+// Get various package infos and return an associative array
 function wg_pkg_info() {
 	global $wgg;
 
+	$ret_val = array();
+
+	$a_fields = array('name'=> '%n', 'version' => '%v', 'comment' => '%c');
+
+	$a_return_keys = array_values(array_flip($a_fields));
+
+	$fields_safe = escapeshellarg(implode("\t", $a_fields));
+
 	$a_packages = $wgg['pkg_names'];
 
-	// Escape each package element
 	array_walk($a_packages, function(&$x) { $x = escapeshellarg($x); });
 	
-	// Construct an escaped sequence of packages to query
-	$packages = implode(" ", $a_packages);
+	$packages_safe = implode(" ", $a_packages);
 
-	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
+	exec("{$wgg['pkg']} query {$fields_safe} {$packages_safe}", $packages, $ret_code);
 
-	foreach ($output as $key => $package) {
+	foreach ($packages as $pkg_index => $package) {
 
-		$output[$key] = explode("\t", $package);
+		$fields = explode("\t", $package);
+
+		foreach ($fields as $field_index => $field) {
+
+			$ret_val[$pkg_index][$a_return_keys[$field_index]] = $field;
+
+
+		}
 
 	}
 
-	return $output;
+	return ($ret_code <> 0) ? false : $ret_val;
 
 }
 

@@ -58,7 +58,7 @@ include("head.inc");
 if (!is_module_loaded($wgg['kmod'])) {
 
 	// Warn the user if the kernel module is not loaded
-	print_info_box(gettext("The WireGuard kernel module is not loaded!"), 'danger', null);
+	print_info_box(gettext('The WireGuard kernel module is not loaded!'), 'danger', null);
 
 }
 
@@ -221,7 +221,7 @@ endforeach;
 <?php
 else:
 
-	print_info_box("No WireGuard tunnels have been configured.", 'warning', null);
+	print_info_box('No WireGuard tunnels have been configured.', 'warning', null);
 
 endif;
 ?>
@@ -229,18 +229,9 @@ endif;
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Package Versions')?>
-		<span class="widget-heading-icon">
-				<a data-toggle="collapse" href="#panel_package_status">
-					<!--  actual icon is determined in css based on state of body -->
-					<i class="fa fa-plus-circle"></i>
-				</a>
-			</span>
-		</h2>
-		</h2>
+		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
 	</div>
-
-	<div id="panel_package_status" class="table-responsive panel-body collapse" aria-expanded="false">
+	<div class="table-responsive panel-body">
 		<table class="table table-hover table-striped table-condensed">
 			<thead>
 				<tr>
@@ -258,9 +249,9 @@ endif;
 
 ?>
     				<tr>
-					<td><?=htmlspecialchars($package[0])?></td>
-					<td><?=htmlspecialchars($package[1])?></td>
-					<td><?=htmlspecialchars($package[2])?></td>
+					<td><?=htmlspecialchars($package['name'])?></td>
+					<td><?=htmlspecialchars($package['version'])?></td>
+					<td><?=htmlspecialchars($package['comment'])?></td>
 
 				</tr>
 <?php
