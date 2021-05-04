@@ -101,6 +101,9 @@ function wg_toggle_peer($peer_id) {
 		// Create new configuration files
 		wg_create_config_files();
 
+		// Sync the configuration with the tunnel interface
+		wg_interface_syncconf($wgg['peers'][$peer_id]['tun']);
+
 	}
 
 }
@@ -122,6 +125,8 @@ function wg_delete_peer($peer_id) {
 		// Create new configuration files
 		wg_create_config_files();
 
+		// Sync the configuration with the tunnel interface
+		wg_interface_syncconf($wgg['peers'][$peer_id]['tun']);
 
 	}
 
@@ -162,6 +167,9 @@ function wg_delete_tunnel($tun_id) {
 
 			// Create the new configuration files
 			wg_create_config_files();
+
+			// Destroy the interface
+			pfSense_interface_destroy($ifname);
 		
 		} else {
 
@@ -336,7 +344,11 @@ function wg_do_peer_post($post) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
 
+		// Create new configuration files
 		wg_create_config_files();
+
+		// Sync the configuration with the tunnel interface
+		wg_interface_syncconf($pconfig['tun']);
 
 	}
 
@@ -384,7 +396,11 @@ function wg_do_tunnel_post($post) {
 
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
+		// Create new configuration files
 		wg_create_config_files();
+
+		// Sync the configuration with the tunnel interface
+		wg_interface_syncconf($pconfig['name']);
 
 	}
 

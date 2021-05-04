@@ -32,15 +32,6 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
-// Wrapper for wg_status to output json
-function wg_status_json($pretty = false) {
-
-	$a_json = wg_status();
-
-	return(json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES));
-
-}
-
 // Returns a massive associative array of current wg status
 function wg_status() {
 	global $wgg;
@@ -122,6 +113,15 @@ function wg_status() {
 
 }
 
+// Wrapper for wg_status to output json
+function wg_status_json($pretty = false) {
+
+	$a_json = wg_status();
+
+	return json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES);
+
+}
+
 // Returns WireGuard peer info from a given public key and tunnel name
 function wg_get_peer_info($public_key, $tunnel_name) {
 	global $wgg;
@@ -163,7 +163,7 @@ function wg_get_address_family($address) {
 function wg_ifconfig_del_address($ifname, $address) {
 	global $wgg;
 
-	// Gets the ifconfig address family while also validating the input
+	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family = wg_get_address_family($address)) {
 		
 		$ifname_safe = escapeshellarg($ifname);
@@ -185,7 +185,7 @@ function wg_ifconfig_del_address($ifname, $address) {
 function wg_ifconfig_set_address($ifname, $address) {
 	global $wgg;
 
-	// Gets the ifconfig address family while also validating the input
+	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family = wg_get_address_family($address)) {
 		
 		$ifname_safe = escapeshellarg($ifname);
@@ -199,6 +199,29 @@ function wg_ifconfig_set_address($ifname, $address) {
 	}
 
 	return false;
+	
+}
+
+function wg_ifconfig_down_interface($ifname) {
+	global $wgg;
+
+	$ifname_safe = escapeshellarg($ifname);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down");
+
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+function wg_ifconfig_up_interface($ifname) {
+	global $wgg;
+
+	$ifname_safe = escapeshellarg($ifname);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up");
+
+	return ($ret_val <> 0) ? false : true;
+
 }
 
 /*
@@ -262,14 +285,16 @@ function wg_interface_syncconf($wg_ifname) {
 
 	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe}");
 
+	return ($ret_val <> 0) ? false : true;
+
 }
 
 function wg_interface_create_all() {
 	global $wgg;
 
-	$tunnels = wg_get_enabled_tunnels();
+	$enabled_tunnels = wg_get_enabled_tunnels();
 
-	foreach ($tunnels as $tunnel) {
+	foreach ($enabled_tunnels as $tunnel) {
 		
 		wg_interface_create($tunnel['name']);
 
@@ -289,6 +314,7 @@ function wg_interface_create($wg_ifname) {
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
+	// We first check to see if the desired interface already exists, then we create it if it does not
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe}");
 		
 	return ($ret_val <> 0) ? false : true;
@@ -305,10 +331,11 @@ function wg_interface_group_add($wg_ifname) {
 
 	$wg_ifgroup_safe = escapeshellarg($wgg['if_group']);
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe}");
+	// We first check to see if the desired interface exists, then we add it to the group if it does
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} && {$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe}");
 		
 	return ($ret_val <> 0) ? false : true;
-
+f
 }
 
 // Get WireGuard interface status
