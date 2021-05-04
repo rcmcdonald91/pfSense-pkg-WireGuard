@@ -399,6 +399,15 @@ function wg_do_tunnel_post($post) {
 		// Create new configuration files
 		wg_create_config_files();
 
+		// Create the tunnel interface if it doesn't exist
+		wg_interface_create($pconfig['name']);
+
+		// Add the tunnel interface to the WireGuard interface group
+		wg_interface_group_add($pconfig['name']);
+
+		// Update the addresses on the tunnel interface
+		wg_interface_update_addresses($pconfig['name']);
+
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($pconfig['name']);
 
