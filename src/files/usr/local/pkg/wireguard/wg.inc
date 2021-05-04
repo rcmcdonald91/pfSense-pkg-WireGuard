@@ -500,10 +500,6 @@ function wg_resync($verbose = false) {
 	}
 	
 
-	filter_configure();
-	setup_gateways_monitor();
-	services_unbound_configure();
-
 
 	if ($g['wireguard_installing']) {
 
