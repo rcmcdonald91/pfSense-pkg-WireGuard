@@ -54,17 +54,19 @@ function wg_toggle_tunnel($tun_id) {
 	// Make sure we have a valid tunnel
 	if (isset($wgg['tunnels'][$tun_id])) {
 
+		$tunnel = $wgg['tunnels'][$tun_id];
+
 		// We can't disable tunnels if they are assigned
-		if (!is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
+		if (!is_wg_tunnel_assigned($tunnel['name'])) {
 
 			// Now we toggle the tunnel
-			$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
+			$wgg['tunnels'][$tun_id]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} toggled.");
 
 			// Sync with WireGuard backend
-			wg_resync_tunnel($wgg['tunnels'][$tun_id]);
+			wg_resync_tunnel($tunnel);
 
 		} else {
 
@@ -92,14 +94,16 @@ function wg_toggle_peer($peer_id) {
 	// Make sure we have a valid peer
 	if (isset($wgg['peers'][$peer_id])) {
 
+		$peer = $wgg['peers'][$peer_id]
+
 		// Toggle the peer
-		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id]['enabled'] == 'yes') ? 'no' : 'yes';
+		$wgg['peers'][$peer_id]['enabled'] = ($peer['enabled'] == 'yes') ? 'no' : 'yes';
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
 		// Sync with the WireGuard backend
-		wg_resync_peer($tmp_peer);
+		wg_resync_peer($peer);
 
 	}
 
@@ -146,28 +150,19 @@ function wg_delete_tunnel($tun_id) {
 		// We can't delete assigned tunnels
 		if (!is_wg_tunnel_assigned($wgg['tunnels'][$tun_id]['name'])) {
 
-			if (isset($wgg['tunnels'][$tun_id]['name'])) {
-
-				$ifname = $wgg['tunnels'][$tun_id]['name'];
-
-			}
-		
-			if (isset($ifname)) {
-
-				$conf_path = "{$wgg['conf_path']}/{$ifname}.conf";
-
-			}
+			// We need to save this because we are about to unset it
+			$tmp_tunnel = $wgg['tunnels'][$tun_id];
 
 			unset($wgg['tunnels'][$tun_id]);
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$ifname} deleted.");
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tmp_tunnel['name']} deleted.");
 
 			// Create the new configuration files
 			wg_create_config_files();
 
 			// Destroy the interface
-			pfSense_interface_destroy($ifname);
+			pfSense_interface_destroy($tmp_tunnel['name']);
 		
 		} else {
 

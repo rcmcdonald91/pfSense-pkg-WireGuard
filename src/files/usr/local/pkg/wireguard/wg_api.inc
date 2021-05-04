@@ -175,7 +175,7 @@ function wg_ifconfig_del_address($ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
-	if ($family = wg_get_address_family($address)) {
+	if ($family_safe = wg_get_address_family($address)) {
 		
 		$ifname_safe = escapeshellarg($ifname);
 
@@ -183,7 +183,7 @@ function wg_ifconfig_del_address($ifname, $address) {
 
 		$address_safe = escapeshellarg($addr);
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} delete");
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} delete");
 
 		return ($ret_val <> 0) ? false : true;
 
@@ -197,13 +197,13 @@ function wg_ifconfig_set_address($ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
-	if ($family = wg_get_address_family($address)) {
+	if ($family_safe = wg_get_address_family($address)) {
 		
 		$ifname_safe = escapeshellarg($ifname);
 
 		$address_safe = escapeshellarg($address);
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$address_family_safe} {$address_safe} add");
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add");
 
 		return ($ret_val <> 0) ? false : true;
 
@@ -271,7 +271,7 @@ function wg_interface_update_addresses($wg_ifname) {
 			wg_ifconfig_set_address($wg_ifname, $address);
 
 		}
-	
+
 	// Now, we need to let pfSense handle assigned WireGuard tunnel interfaces
 	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
 
@@ -583,12 +583,6 @@ function next_wg_if() {
 
 	return -1;
 	
-}
-
-function verbose_pipe($verbose) {
-
-	return $verbose ? "" : " > /dev/null 2>&1";
-
 }
 
 ?>
