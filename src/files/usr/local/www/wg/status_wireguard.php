@@ -94,7 +94,7 @@ if (!empty($a_devices)):
 					</td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
-				<tr>
+				</tr>
 			</tbody>	
 			<thead>
 				<th><?=gettext("Peer")?></th>
@@ -126,12 +126,12 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
 					<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
 				</tr>
-			</tbody>
 <?php	
 			endforeach;
 		endif;
 	endforeach;
 ?>
+			</tbody>
 		</table>
 
 
