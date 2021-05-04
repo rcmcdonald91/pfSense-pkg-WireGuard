@@ -330,6 +330,35 @@ function wg_interface_group_add($wg_ifname) {
 
 }
 
+function wg_interface_status($wg_ifname) {
+
+	return in_array("UP", wg_ifconfig_interface_flags($wg_conf_path_safe));
+
+}
+
+function wg_ifconfig_interface_flags($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	exec("{$wgg['ifconfig']} {$wg_ifname_safe}", $output, $ret_code);
+
+	if ($ret_code <> 0) {
+
+		return false;
+
+	}
+
+	if (preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
+
+		return explode(',', $matches['flags']);
+
+	}
+
+	return false;
+
+}
+
 // Get WireGuard interface status
 function wg_interface_status() {
 	global $wgg;
