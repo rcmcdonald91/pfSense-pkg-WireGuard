@@ -60,11 +60,11 @@ function wg_toggle_tunnel($tun_id) {
 			// Now we toggle the tunnel
 			$wgg['tunnels'][$tun_id]['enabled'] = ($wgg['tunnels'][$tun_id]['enabled'] == 'yes') ? 'no' : 'yes';
 
-			// Write the configuration to disk
+			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$wgg['tunnels'][$tun_id]['name']} toggled.");
 
-			// Create new configuration files
-			wg_create_config_files();
+			// Sync with WireGuard backend
+			wg_resync_tunnel($wgg['tunnels'][$tun_id]);
 
 		} else {
 
@@ -95,14 +95,11 @@ function wg_toggle_peer($peer_id) {
 		// Toggle the peer
 		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id]['enabled'] == 'yes') ? 'no' : 'yes';
 
-		// Write the configuration to disk
-		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} toggled.");
+		// Sync with configuration backend
+		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
-		// Create new configuration files
-		wg_create_config_files();
-
-		// Sync the configuration with the tunnel interface
-		wg_interface_syncconf($wgg['peers'][$peer_id]['tun']);
+		// Sync with the WireGuard backend
+		wg_resync_peer($tmp_peer);
 
 	}
 
@@ -118,10 +115,16 @@ function wg_delete_peer($peer_id) {
 
 	if (isset($wgg['peers'][$peer_id])) {
 
+		// We need to save this because we are about to unset it
+		$tmp_peer = $wgg['peers'][$peer_id]
+
 		unset($wgg['peers'][$peer_id]);
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
+
+		// Sync with the WireGuard backend
+		wg_resync_peer($tmp_peer);
 
 	}
 
@@ -402,11 +405,11 @@ function wg_do_tunnel_post($post) {
 function wg_resync_peer($peer) {
 	global $wgg;
 
-	$tun_id = wg_get_tunnel_id($peer['tun']);
+	// Create new configuration files
+	wg_create_config_files();
 
-	$tunnel = $wgg['tunnels'][$tun_id];
-
-	wg_resync_tunnel($tunnel);
+	// Sync the configuration with the tunnel interface
+	wg_interface_syncconf($peer['tun']);
 
 }
 
@@ -428,7 +431,7 @@ function wg_resync_tunnel($tunnel) {
 	wg_interface_update_addresses($tun_name);
 
 	// Toggle the interface accordingly instead of tearing it down completely
-	if (isset($tunnel['enabled']) && $tunnel['enabeld'] == 'yes') {
+	if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
 		wg_ifconfig_up_interface($tun_name);
 
