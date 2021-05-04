@@ -139,53 +139,18 @@ function wg_get_peer_info($public_key, $tunnel) {
 // Get WireGuard interface status
 function wg_interface_status() {
 	global $wgg;
-
-	$if_group = escapeshellarg($wgg['if_group']);
-
-	$status = array();
-
-	exec("{$wgg['ifconfig']} -f inet:cidr,inet6:cidr -a -g {$if_group}", $status);
-
-	$output = implode("\n", $status);
-
-	$a_raw_interfaces = preg_split("/^(?![[:blank:]])/m", $output, 0, PREG_SPLIT_NO_EMPTY);
-
 	$ret_val = array();
 
-	foreach($a_raw_interfaces as $index => $raw_interface) {
-        
-		// match (tun_wg0)
-		preg_match("/^(.*)\:\ flags/",$raw_interface,$interface_match);
+	$ifdescr = get_configured_interface_with_descr(true);
 
-		// flags=<(UP,etc)>		
-		preg_match("/.*flags.*\<(.*)>.*/",$raw_interface,$flags_match);
+	foreach($wgg["tunnels"] as $index => $tunnel) {
 
-		// match mtu: (1420)
-		preg_match("/.*mtu\ ([0-9].*)/",$raw_interface,$mtu_match);
-
-		// match description: (blah)
-		preg_match("/.*description:\ (.*)/",$raw_interface,$descr_match);
-
-		// match inet (0.0.0.0/0)
-		preg_match_all("/.*inet\ (.*)/m",$raw_interface,$ip_match);
-
-		$if = $index;
-		
-		$ret_val[$if]["interface"] = $interface_match[1];
-
-		$ret_val[$if]["flags"] = $flags_match[1];
-
-		$ret_val[$if]["mtu"] = $mtu_match[1];
-
-		$ret_val[$if]["descr"] = $descr_match[1];
-
-
-		foreach( $ip_match[1] as $key => $addr) {
-
-			$ret_val[$if]["ips"][$key]['addr'] = $addr;
-
+		$ret_val[$index]["interface"] = $tunnel['name'];
+		$ret_val[$index]["descr"] = wg_get_assinged_if($tunnel['name']);
+		$ret_val[$index]["mtu"] = pfSense_interface_getmtu($tunnel['name'])["mtu"];
+		foreach (pfSense_getall_interface_addresses($tunnel['name']) as $key => $addr) {
+			$ret_val[$index]["ips"][$key]['addr'] = $addr;
 		}
-
 	}
 
     return $ret_val;
