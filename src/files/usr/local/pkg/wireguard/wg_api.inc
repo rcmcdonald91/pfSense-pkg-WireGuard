@@ -72,9 +72,11 @@ function wg_status() {
 
 			$a_tunnel_info = pfSense_get_interface_stats($current_device);
 
-			$a_ret[$current_device]['transfer_rx'] = $a_tunnel_info['inbytes'];
+			$tmp_tunnel['transfer_rx'] = $a_tunnel_info['inbytes'];
 
-			$a_ret[$current_device]['transfer_tx'] = $a_tunnel_info['outbytes'];
+			$tmp_tunnel['transfer_tx'] = $a_tunnel_info['outbytes'];
+
+			$tmp_tunnel['status'] = wg_interface_status($current_device) ? 'up' : 'down';
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
@@ -332,7 +334,7 @@ function wg_interface_group_add($wg_ifname) {
 
 function wg_interface_status($wg_ifname) {
 
-	return in_array("UP", wg_ifconfig_interface_flags($wg_conf_path_safe));
+	return in_array("UP", wg_ifconfig_interface_flags($wg_ifname)) ? true : false;
 
 }
 

@@ -89,6 +89,7 @@ if (!empty($a_devices)):
 			<tbody>	
 				<tr>
 					<td>
+						<?=wg_interface_status_icon($device['status'])?>
 						<a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?>
 					</td>
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
@@ -106,17 +107,20 @@ if (!empty($a_devices)):
 			</thead>
 			<tbody>
 <?php
-		foreach($device['peers'] as $peer):
+
+		if ($device['status'] == 'up'):
+
+			foreach($device['peers'] as $peer):
 ?>
 				<tr>
 					<td>
+						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
 						<?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?>
 					</td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($peer['endpoint'])?></td>
 					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips_array'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
 					<td>
-						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
 						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>
 					</td>
 					<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
@@ -124,7 +128,8 @@ if (!empty($a_devices)):
 				</tr>
 			</tbody>
 <?php	
-		endforeach;
+			endforeach;
+		endif;
 	endforeach;
 ?>
 		</table>

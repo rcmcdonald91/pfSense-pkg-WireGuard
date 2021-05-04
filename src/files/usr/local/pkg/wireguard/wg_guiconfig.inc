@@ -74,6 +74,17 @@ function wg_truncate_pretty($str, $length) {
 
 }
 
+function wg_interface_status_icon($status, $fa_icon = "fa-ethernet") {
+	global $wgg;
+
+	$ret_class = ($status == "up") ? 'text-success' : '';
+
+	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$status}\"></i>";
+
+	return $ret_html;
+
+}
+
 // Returns the appropriate fa icon class for handshake status icon
 function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshake") {
 	global $wgg;
