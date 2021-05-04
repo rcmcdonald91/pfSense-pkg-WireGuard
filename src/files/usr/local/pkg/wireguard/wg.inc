@@ -93,7 +93,7 @@ function wg_toggle_peer($peer_id) {
 	if (isset($wgg['peers'][$peer_id])) {
 
 		// Toggle the peer
-		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id] == 'yes') ? 'no' : 'yes';
+		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id]['enabled'] == 'yes') ? 'no' : 'yes';
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");

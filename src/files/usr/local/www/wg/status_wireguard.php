@@ -95,7 +95,7 @@ if (!empty($a_devices)):
 				</tr>
 			</tbody>
 <?php
-		if ($device['status'] == 'up'):
+		if ($device['status'] == 'up' && count($device['peers']) > 0):
 ?>
 			<thead>
 				<th><?=gettext("Peer")?></th>
