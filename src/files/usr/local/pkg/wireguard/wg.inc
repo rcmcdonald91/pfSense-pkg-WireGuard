@@ -94,7 +94,7 @@ function wg_toggle_peer($peer_id) {
 	// Make sure we have a valid peer
 	if (isset($wgg['peers'][$peer_id])) {
 
-		$peer = $wgg['peers'][$peer_id]
+		$peer = $wgg['peers'][$peer_id];
 
 		// Toggle the peer
 		$wgg['peers'][$peer_id]['enabled'] = ($peer['enabled'] == 'yes') ? 'no' : 'yes';
