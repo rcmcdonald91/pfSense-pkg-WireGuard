@@ -120,13 +120,8 @@ function wg_delete_peer($peer_id) {
 
 		unset($wgg['peers'][$peer_id]);
 
+		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
-
-		// Create new configuration files
-		wg_create_config_files();
-
-		// Sync the configuration with the tunnel interface
-		wg_interface_syncconf($wgg['peers'][$peer_id]['tun']);
 
 	}
 
@@ -160,9 +155,9 @@ function wg_delete_tunnel($tun_id) {
 
 			}
 
-			// Delete the tunnel configuration entry
 			unset($wgg['tunnels'][$tun_id]);
 
+			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$ifname} deleted.");
 
 			// Create the new configuration files
@@ -342,13 +337,11 @@ function wg_do_peer_post($post) {
 
 		$wgg['peers'][$index] = $pconfig;
 
+		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
 
-		// Create new configuration files
-		wg_create_config_files();
-
-		// Sync the configuration with the tunnel interface
-		wg_interface_syncconf($pconfig['tun']);
+		// Sync with WireGuard backend
+		wg_resync_peer($pconfig);
 
 	}
 
@@ -394,26 +387,46 @@ function wg_do_tunnel_post($post) {
 
 		$wgg['tunnels'][$index] = $pconfig;
 
+		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
-		// Create new configuration files
-		wg_create_config_files();
-
-		// Create the tunnel interface if it doesn't exist
-		wg_interface_create($pconfig['name']);
-
-		// Add the tunnel interface to the WireGuard interface group
-		wg_interface_group_add($pconfig['name']);
-
-		// Update the addresses on the tunnel interface
-		wg_interface_update_addresses($pconfig['name']);
-
-		// Sync the configuration with the tunnel interface
-		wg_interface_syncconf($pconfig['name']);
+		// Sync with WireGuard backend
+		wg_resync_tunnel($pconfig);
 
 	}
 
 	return array('input_errors' => $input_errors, 'pconfig' => $pconfig);
+
+}
+
+function wg_resync_peer($peer) {
+	global $wgg;
+
+	$tun_id = wg_get_tunnel_id($peer['tun']);
+
+	$tunnel = $wgg['tunnels'][$tun_id];
+
+	wg_resync_tunnel($tunnel);
+
+}
+
+// This resyncs a specific tunnel interface
+function wg_resync_tunnel($tunnel) {
+
+	// Create new configuration files
+	wg_create_config_files();
+
+	// Create the tunnel interface if it does not yet exist
+	wg_interface_create($tunnel['name']);
+
+	// Add the tunnel interface to the WireGuard interface group
+	wg_interface_group_add($tunnel['name']);
+
+	// Update the addresses on the tunnel interface
+	wg_interface_update_addresses($tunnel['name']);
+
+	// Sync the configuration with the tunnel interface
+	wg_interface_syncconf($tunnel['name']);
 
 }
 

@@ -142,6 +142,17 @@ function wg_get_peer_info($public_key, $tunnel_name) {
 
 }
 
+function wg_get_tunnel($peer) {
+	global $wgg;
+
+	$tun_name = $peer['tun'];
+
+	$tun_index = wg_get_tunnel_id($tun_name);
+
+	return $wgg['tunnels'][$tun_index];
+
+}
+
 function wg_get_address_family($address) {
 
 	if (is_v4($address)) {
