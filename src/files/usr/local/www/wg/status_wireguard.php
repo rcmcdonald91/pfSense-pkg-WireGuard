@@ -77,9 +77,7 @@ if (!empty($a_devices)):
 	<div class="table-responsive panel-body">
 		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
 <?php
-
 	foreach ($a_devices as $device_name => $device):
-
 ?>
 			<thead>
 				<th><?=gettext("Tunnel")?></th>
@@ -95,7 +93,10 @@ if (!empty($a_devices)):
 					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
 				</tr>
-			</tbody>	
+			</tbody>
+<?php
+		if ($device['status'] == 'up'):
+?>
 			<thead>
 				<th><?=gettext("Peer")?></th>
 				<th><?=gettext("Public Key")?></th>
@@ -107,9 +108,6 @@ if (!empty($a_devices)):
 			</thead>
 			<tbody>
 <?php
-
-		if ($device['status'] == 'up'):
-
 			foreach($device['peers'] as $peer):
 ?>
 				<tr>
@@ -128,7 +126,9 @@ if (!empty($a_devices)):
 				</tr>
 <?php	
 			endforeach;
+
 		endif;
+
 	endforeach;
 ?>
 			</tbody>
