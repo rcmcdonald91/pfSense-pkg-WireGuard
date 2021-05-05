@@ -78,6 +78,12 @@ function wg_status() {
 
 			$tmp_tunnel['transfer_tx'] 	= $tunnel_if_stats['outbytes'];
 
+			$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
+
+			$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
+
+			$tmp_tunnel['mtu']		=$tunnel_if_stats['mtu'];
+
 			$tmp_tunnel['config']		= $wgg['tunnels'][$tunnel_ids['xml']];
 
 			// Add the tunnel to the array

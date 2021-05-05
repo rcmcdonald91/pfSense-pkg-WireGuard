@@ -99,7 +99,7 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td><?=wg_generate_tunnel_addresses_popup_link($device['config'])?></td>
-					<td><?=htmlspecialchars($device['config']['mtu'])?></td>
+					<td><?=htmlspecialchars($device['mtu'])?></td>
 					<td><?=htmlspecialchars($device['listen_port'])?></td>
 					<td><?=count($device['peers'])?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
@@ -110,7 +110,7 @@ if (!empty($a_devices)):
 <?php
 		if ($device['status'] == 'up' && count($device['peers']) > 0):
 ?>
-					<td colspan="8">
+					<td colspan="9">
 						<table class="table table-hover table-condensed">
 							<thead>
 								<th><?=gettext("Peer")?></th>
