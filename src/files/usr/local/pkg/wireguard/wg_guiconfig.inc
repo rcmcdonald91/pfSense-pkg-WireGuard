@@ -198,20 +198,6 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 
 }
 
-function wg_generate_peer_allowedips_popup_link($peer_idx) {
-	$global $wgg;
-
-
-	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][[$peer_idx]])) {
-
-		$peer = $wgg['peers'][$peer_idx];
-
-
-
-	}
-
-}
-
 function wg_generate_tunnel_address_popup_link($tunnel_name) {
 	global $wgg;
 
