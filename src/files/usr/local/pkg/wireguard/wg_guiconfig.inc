@@ -232,7 +232,7 @@ function wg_generate_tunnel_addresses_popup_link($tunnel) {
 		
 			} else {
 		
-				$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}</a>";
+				$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
 		
 				return $ret_html;
 		
