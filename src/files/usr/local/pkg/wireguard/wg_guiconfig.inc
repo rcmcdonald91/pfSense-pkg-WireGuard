@@ -262,7 +262,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
 
-		$peer = $wgg['tunnels'][$peer_idx];
+		$peer = $wgg['peer'][$peer_idx];
 
 		$allowedips = $peer['allowedips']['row'];
 			
