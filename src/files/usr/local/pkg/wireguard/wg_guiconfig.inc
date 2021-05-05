@@ -242,7 +242,7 @@ function wg_generate_tunnel_addresses_popup_link($tunnel) {
 
 			$wg_pfsense_if = wg_get_pfsense_interface_name($tunnel['name']);
 
-			return "<i class=\"fa fa-network-wired\"></i><a href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>";
+			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 5px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>";
 
 		}
 
