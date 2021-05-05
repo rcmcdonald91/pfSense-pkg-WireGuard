@@ -81,6 +81,7 @@ if (!empty($a_devices)):
 				<th><?=gettext('Description')?></th>
 				<th><?=gettext('Public Key')?></th>
 				<th><?=gettext('Address / Assignment')?></th>
+				<th><?=gettext('MTU')?></th>
 				<th><?=gettext('Listen Port')?></th>
 				<th><?=gettext('# Peers')?></th>
 				<th><?=gettext('RX')?></th>
@@ -98,6 +99,7 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td><?=wg_generate_tunnel_addresses_popup_link($device['config'])?></td>
+					<td><?=htmlspecialchars($device['config']['mtu'])?></td>
 					<td><?=htmlspecialchars($device['listen_port'])?></td>
 					<td><?=count($device['peers'])?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
