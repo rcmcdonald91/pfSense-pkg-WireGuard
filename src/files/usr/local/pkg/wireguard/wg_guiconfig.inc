@@ -240,7 +240,7 @@ function wg_generate_tunnel_addresses_popup_link($tunnel) {
 
 		} else {
 
-			$wg_pfsense_if = wg_get_pfsense_interface_name($tunnel['name']);
+			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
 
 			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 3px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>";
 

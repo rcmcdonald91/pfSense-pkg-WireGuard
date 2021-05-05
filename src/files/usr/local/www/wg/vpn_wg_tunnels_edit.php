@@ -47,7 +47,7 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun = $_REQUEST['tun'];
 
-	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
+	$tun_idx = wg_get_tunnel_array_index($_REQUEST['tun']);
 
 }
 
@@ -102,9 +102,9 @@ if ($_POST) {
 }
 
 // Looks like we are editing an existing tunnel
-if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
 
-	$pconfig = &$wgg['tunnels'][$tun_id];
+	$pconfig = &$wgg['tunnels'][$tun_idx];
 
 	// Supress warning and allow peers to be added via the 'Add Peer' link
 	$is_new = false;
@@ -151,7 +151,7 @@ $form->addGlobal(new Form_Input(
 	'index',
 	'',
 	'hidden',
-	$tun_id
+	$tun_idx
 ));
 
 $tun_enable = new Form_Checkbox(
@@ -296,7 +296,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 } else {
 
 	// We want all configured interfaces, including disabled ones
-	$wg_pfsense_if = wg_get_pfsense_interface_name($pconfig['name']);
+	$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',

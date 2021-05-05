@@ -42,15 +42,15 @@ if ($_POST) {
 
 	if (isset($_POST['tun'])) {
 
-		$tun_id = wg_get_tunnel_id($_POST['tun']);
+		$tun_name = $_POST['tun'];
 
 		if ($_POST['act'] == 'toggle') {
 
-			$input_errors = wg_toggle_tunnel($tun_id);
+			$input_errors = wg_toggle_tunnel($tun_name);
 
 		} elseif ($_POST['act'] == 'delete') { 
 
-			$input_errors = wg_delete_tunnel($tun_id);
+			$input_errors = wg_delete_tunnel($tun_name);
 
 		}
 
@@ -107,7 +107,7 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
-		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
+		foreach ($wgg['tunnels'] as $tunnel):
 
 			$peers = wg_get_tunnel_peers($tunnel['name']);
 ?>

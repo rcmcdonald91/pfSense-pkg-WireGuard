@@ -70,7 +70,7 @@ function wg_status() {
 			// Gets some extra information about tunnels not returned by `wg show all dump`
 			$tunnel_if_stats 		= pfSense_get_interface_stats($current_device);
 
-			$tunnel_id			= wg_get_tunnel_id($current_device);
+			$tunnel_ids			= wg_get_tunnel_ids($current_device);
 
 			$tmp_tunnel['status'] 		= wg_interface_status($current_device) ? 'up' : 'down';
 
@@ -78,7 +78,7 @@ function wg_status() {
 
 			$tmp_tunnel['transfer_tx'] 	= $tunnel_if_stats['outbytes'];
 
-			$tmp_tunnel['config']		= $wgg['tunnels'][$tunnel_id];
+			$tmp_tunnel['config']		= $wgg['tunnels'][$tunnel_ids['xml']];
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
@@ -129,24 +129,13 @@ function wg_get_peer_id($public_key, $tunnel_name) {
 
 		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
 
-			return $peer_id;
+			return array('config' = > $peer['peerid'], 'xml' => $peer_id)
 
 		}
 
 	}
 
-	return false;
-
-}
-
-function wg_get_tunnel($peer) {
-	global $wgg;
-
-	$tun_name = $peer['tun'];
-
-	$tun_index = wg_get_tunnel_id($tun_name);
-
-	return $wgg['tunnels'][$tun_index];
+	return array('config' => -1, 'xml' => - 1);
 
 }
 
@@ -238,7 +227,7 @@ function wg_ifconfig_up_interface($wg_ifname) {
 function wg_interface_update_addresses($wg_ifname) {
 	global $wgg;
 
-	$index = wg_get_tunnel_id($wg_ifname);
+	$tun_ids = wg_get_tunnel_ids($wg_ifname);
 
 	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
@@ -247,7 +236,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		$current = pfSense_getall_interface_addresses($wg_ifname);
 
 		// Get an array of the addresses to be assigned to the interface
-		$desired = array_map(fn(&$x) => $x['addr'], $wgg['tunnels'][$index]['addresses']['item']);
+		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $wgg['tunnels'][$tun_ids['xml']]['addresses']['row']);
 
 		// Determine the addresses to remove
 		$addresses_to_remove = array_diff($current, array_intersect($current, $desired));
@@ -272,11 +261,9 @@ function wg_interface_update_addresses($wg_ifname) {
 	// Now, we need to let pfSense handle assigned WireGuard tunnel interfaces
 	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
 
-		if ($wg_pfsense_if = wg_get_pfsense_interface_name($wg_ifname)) {
+		$wg_pfsense_if = wg_get_pfsense_interface_info($wg_ifname);
 
-			interface_configure($wg_pfsense_if['name'], true);
-
-		}
+		interface_configure($wg_pfsense_if['name'], true);
 
 	}
 
@@ -475,28 +462,40 @@ function next_wg_port() {
 
 }
 
-// Returns the array index of the given tunnel in the config, this isn't necessarily the interface number
-function wg_get_tunnel_id($tunnel) {
-	global $config, $wgg;
+// Wrapper to return just the config id
+function wg_get_tunnel_config_id($tunnel_name) {
 
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
+	$tun_ids = wg_get_tunnel_ids($tunnel_name);
 
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
+	return $tun_ids['config'];
 
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
+}
 
-	}
+// Wrapper to return just the xml array index
+function wg_get_tunnel_array_index($tunnel_name) {
 
-	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
+	$tun_ids = wg_get_tunnel_ids($tunnel_name);
 
-		foreach ($wgg['tunnels'] as $index => $tunnel) {
+	return $tun_ids['xml'];
 
-			if ($tunnel['name'] == $wg_ifname) {
-				
-				return $index;
+}
+
+/*
+ * Returns the tunnel id and array index of a given tunnel, these are not necessarily the interface number
+ * 'config' is the value of <tunid></tunid> and 'xml' is the position in the XML structure. Both are useful but for different purposes.
+ */
+function wg_get_tunnel_ids($tunnel_name) {
+	global $wgg;
+
+	$ret_val = array();
+
+	if (is_array($wgg['tunnels'])) {
+
+		foreach ($wgg['tunnels'] as $t_index => $tunnel) {
+
+			if ($tunnel['name'] == $tunnel_name) {
+
+				return array('config' => $tunnel['tunid'], 'xml' => $t_index);
 
 			}
 
@@ -504,7 +503,7 @@ function wg_get_tunnel_id($tunnel) {
 
 	}
 
-	return -1;
+	return array('config' => -1, 'xml' => -1);
 
 }
 
