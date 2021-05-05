@@ -218,7 +218,7 @@ function wg_generate_tunnel_addresses_popup_link($tunnel) {
 		
 				foreach ($addresses as $address) {
 		
-					$data_html .= "<tr><td>{$address['address']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
 		
 				}
 		
