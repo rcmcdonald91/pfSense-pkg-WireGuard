@@ -95,7 +95,7 @@ if (!empty($a_devices)):
 						<?=wg_interface_status_icon($device['status'])?>
 						<a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?>
 					</td>
-					<td><!-- Description --></td>
+					<td><?=htmlspecialchars(wg_truncate_pretty($device['descr'], 16))?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td><?=htmlspecialchars($device['listen_port'])?></td>
 					<td><!-- Addresses --></td>
@@ -109,7 +109,7 @@ if (!empty($a_devices)):
 		if ($device['status'] == 'up' && count($device['peers']) > 0):
 ?>
 					<td colspan="8">
-						<table class="table table-hover">
+						<table class="table table-hover table-condensed">
 							<thead>
 								<th><?=gettext("Peer")?></th>
 								<th><?=gettext("Latest Handshake")?></th>

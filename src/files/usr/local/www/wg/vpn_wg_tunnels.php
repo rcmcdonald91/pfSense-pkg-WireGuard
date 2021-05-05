@@ -184,7 +184,7 @@ display_top_tabs($tab_array);
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
-			<?=gettext("Show peers")?>
+			<?=gettext("Show Peers")?>
 		</a>
 
 		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
