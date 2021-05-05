@@ -296,25 +296,21 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 } else {
 
 	// We want all configured interfaces, including disabled ones
-	$iflist = get_configured_interface_list_by_realif(true);
-	$ifdescr = get_configured_interface_with_descr(true);
-	
-	$ifname = $iflist[$pconfig['name']];
-	$iffriendly = $ifdescr[$ifname];
+	$wg_pfsense_if = wg_get_pfsense_interface_name($tunnel['name']);
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<a href='../../interfaces_assign.php'>{$iffriendly} ({$ifname})</a>"
+		"<a href='../../interfaces_assign.php'>{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Interface',
-		"<a href='../../interfaces.php?if={$ifname}'>Interface Configuration</a>"
+		"<a href='../../interfaces.php?if={$wg_pfsense_if['name']}'>Interface Configuration</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<a href='../../firewall_rules.php?if={$ifname}'>Firewall Configuration</a>"
+		"<a href='../../firewall_rules.php?if={$wg_pfsense_if['name']}'>Firewall Configuration</a>"
 	));
 
 }
