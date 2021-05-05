@@ -471,11 +471,11 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			wg_ifconfig_up_interface($tun_name);
+			wg_ifconfig_up_interface($tunnel['name']);
 
 		} else {
 
-			wg_ifconfig_down_interface($tun_name);
+			wg_ifconfig_down_interface($tunnel['name']);
 
 		}
 
