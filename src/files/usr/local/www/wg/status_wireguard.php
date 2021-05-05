@@ -79,11 +79,11 @@ if (!empty($a_devices)):
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
+				<th><?=gettext('# Peers')?></th>
 				<th><?=gettext('Public Key')?></th>
 				<th><?=gettext('Address / Assignment')?></th>
 				<th><?=gettext('MTU')?></th>
 				<th><?=gettext('Listen Port')?></th>
-				<th><?=gettext('# Peers')?></th>
 				<th><?=gettext('RX')?></th>
 				<th><?=gettext('TX')?></th>
 			</thead>
@@ -97,11 +97,11 @@ if (!empty($a_devices)):
 						<a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?>
 					</td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
+					<td><?=count($device['peers'])?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
 					<td><?=wg_generate_tunnel_address_popup_link($device['config'])?></td>
 					<td><?=htmlspecialchars($device['mtu'])?></td>
 					<td><?=htmlspecialchars($device['listen_port'])?></td>
-					<td><?=count($device['peers'])?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>

@@ -33,7 +33,11 @@ if (platform_booting()) {
 
 }
 
+exec('conscontrol mute on');
+
 wg_resync_all();
+
+exec('conscontrol mute off');
 
 if (platform_booting()) {
 
