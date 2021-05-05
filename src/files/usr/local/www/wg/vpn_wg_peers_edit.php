@@ -227,17 +227,17 @@ $form->add($section);
 $section = new Form_Section('Address Configuration');
 
 // Hack to ensure empty lists default to /128 mask
-if (!is_array($pconfig['allowedips']['item'])) {
+if (!is_array($pconfig['allowedips']['row'])) {
 
-	wg_init_config_arr($pconfig, array('allowedips', 'item', 0));
+	wg_init_config_arr($pconfig, array('allowedips', 'row', 0));
 	
-	$pconfig['allowedips']['item'][0]['addr'] = '/128';
+	$pconfig['allowedips']['row'][0]['mask'] = '128';
 	
 }
 
-$last = count($pconfig['allowedips']['item']) - 1;
+$last = count($pconfig['allowedips']['row']) - 1;
 
-foreach ($pconfig['allowedips']['item'] as $counter => $item) {
+foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group = new Form_Group($counter == 0 ? 'Allowed IPs' : null);
 

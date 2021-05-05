@@ -242,17 +242,17 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	));
 
 	// Hack to ensure empty lists default to /128 mask
-	if (!is_array($pconfig['addresses']['item'])) {
+	if (!is_array($pconfig['addresses']['row'])) {
 
-		wg_init_config_arr($pconfig, array('addresses', 'item', 0));
+		wg_init_config_arr($pconfig, array('addresses', 'row', 0));
 
-		$pconfig['addresses']['item'][0]['addr'] = '/128';
+		$pconfig['addresses']['row'][0]['mask'] = '128';
 
 	}
 
-	$last = count($pconfig['addresses']['item']) - 1;
+	$last = count($pconfig['addresses']['row']) - 1;
 
-	foreach ($pconfig['addresses']['item'] as $counter => $item) {
+	foreach ($pconfig['addresses']['row'] as $counter => $item) {
 	
 		$group = new Form_Group($counter == 0 ? 'Interface Addresses' : '');
 	
@@ -380,7 +380,7 @@ else:
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td></td>
-					<td><?=wg_generate_addresses_popup_link($peer['allowedips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
+					<td><?=wg_generate_addresses_popup_link($peer['allowedips']['row'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
