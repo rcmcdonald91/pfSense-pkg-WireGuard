@@ -266,7 +266,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 		$allowedips = $peer['allowedips']['row'];
 			
-		if (count($addresses) > 0) {
+		if (count($allowedips) > 0) {
 
 			$href = "vpn_wg_peers_edit.php?peer={$peer_idx}";
 
