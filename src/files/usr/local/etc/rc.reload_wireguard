@@ -27,19 +27,23 @@ require_once('config.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
+global $wgg;
+
+wg_globals();
+
 if (platform_booting()) {
 
 	print_message("Configuring WireGuard tunnels...");
 
-}
+	mwexec("{$wgg['conscontrol']} mute on");
 
-exec('conscontrol mute on');
+}
 
 wg_resync_all();
 
-exec('conscontrol mute off');
-
 if (platform_booting()) {
+
+	mwexec("{$wgg['conscontrol']} mute off");
 
 	print_message("done. \n");
 

@@ -30,6 +30,7 @@ $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
 	'ifconfig'		=> '/sbin/ifconfig',
 	'pkg'			=> '/usr/sbin/pkg',
+	'conscontrol'		=> '/sbin/conscontrol',
 	'kmod'			=> 'if_wg',
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
