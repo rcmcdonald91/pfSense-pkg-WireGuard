@@ -69,7 +69,7 @@ function wg_toggle_tunnel($tunnel_name) {
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} toggled.");
 
 			// Sync with WireGuard backend
-			wg_resync_tunnel($tunnel);
+			wg_resync_tunnel($tunnel['name']);
 
 		} else {
 
@@ -394,7 +394,7 @@ function wg_do_tunnel_post($post) {
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
 		// Sync with WireGuard backend
-		wg_resync_tunnel($pconfig);
+		wg_resync_tunnel($pconfig['name']);
 
 	}
 
@@ -426,7 +426,7 @@ function wg_resync_all() {
 
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
-		wg_resync_tunnel($tunnel, true);
+		wg_resync_tunnel($tunnel['name'], true);
 
 	}
 
