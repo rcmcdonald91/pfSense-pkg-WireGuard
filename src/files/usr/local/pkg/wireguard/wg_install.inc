@@ -138,7 +138,7 @@ function wg_upgrade_addidtags() {
 
 	foreach ($wgg['tunnels'] as $t_index => $tunnel) {
 
-		if (is_array($tunnel) && !isset($tunnel['tunid']) {
+		if (is_array($tunnel) && !isset($tunnel['tunid'])) {
 
 			$wgg['tunnels'][$t_index]['tunid'] = $t_index;
 
