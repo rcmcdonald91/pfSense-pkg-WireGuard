@@ -80,6 +80,9 @@ function wg_upgrade_allowedips() {
 
 	}
 
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+
 	// Read latest settings
 	wg_globals();
 
@@ -151,6 +154,9 @@ function wg_upgrade_addresses() {
 	
 
 	}
+
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
 
 	// Read latest settings
 	wg_globals();
