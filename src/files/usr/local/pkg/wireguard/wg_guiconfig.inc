@@ -211,7 +211,7 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
 			
-			if (count($addresses) > 0) {
+			if (is_array($addresses) && count($addresses) > 0) {
 
 				$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
 
@@ -243,6 +243,10 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 				
 				}
 		
+			} else {
+
+				return '(none)';
+
 			}
 
 		} else {
@@ -266,7 +270,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 		$allowedips = $peer['allowedips']['row'];
 			
-		if (count($allowedips) > 0) {
+		if (is_array($allowedips) && count($allowedips) > 0) {
 
 			$href = "vpn_wg_peers_edit.php?peer={$peer_idx}";
 
