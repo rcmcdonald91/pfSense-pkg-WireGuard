@@ -253,7 +253,7 @@ function wg_deinstall() {
 	update_status("  Removing WireGuard early shell commands... ");
 
 	// Removes the WireGuard earlyshellcmds
-	wg_earlyshellcmd_install();
+	wg_earlyshellcmd_deinstall();
 
 	update_status(" done.\n  Removing WireGuard interface group... ");
 
