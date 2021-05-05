@@ -233,7 +233,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<a href='../../interfaces_assign.php'>Interface Assignments</a>"
+		"<i class='fa fa-network-wired'><a href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
@@ -300,7 +300,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<a href='../../interfaces_assign.php'>{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>"
+		"<i class='fa fa-network-wired'></i><a href='../../interfaces_assign.php'>{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
