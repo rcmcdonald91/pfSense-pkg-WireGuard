@@ -168,7 +168,7 @@ endif;
 <nav class="action-buttons">
 	<a href="#" class="btn btn-info btn-sm" id="showpeers">
 		<i class="fa fa-info icon-embed-btn"></i>
-		<?=gettext("Show peers")?>
+		<?=gettext("Show Peers")?>
 	</a>
 </nav>
 

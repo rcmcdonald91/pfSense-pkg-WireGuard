@@ -198,7 +198,59 @@ function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepos
 
 }
 
-// Generates an addresses link with a popup
+function wg_generate_tunnel_addresses_popup_link($tunnel) {
+
+	$a_headers = array('Address', 'Description');
+
+	if (is_array($tunnel)) {
+
+		if (!is_wg_tunnel_assigned($tunnel['name']) {
+
+			$addresses = $tunnel['addresses']['row'];
+
+			$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
+
+			$extras = count($addresses) - 1;
+
+			if ($extras > 0) {
+
+				$data_html = "<table><thead><th>Address</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+		
+				foreach ($addresses as $address) {
+		
+					$data_html .= "<tr><td>{$address['address']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+		
+				}
+		
+				$data_html .= '</tbody></table>';
+		
+				$hint = "{$addresses[0]['address']} (+{$extras})";
+		
+				$ret_html = "<a href=\"{$href}\" title=\"Tunnel Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+		
+				return $ret_html;
+		
+			} else {
+		
+				$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}</a>";
+		
+				return $ret_html;
+		
+			}
+
+		} else {
+
+			$ifname = wg_get_pfsense_interface_name($tunnel['name']);
+
+			return "({$ifname})";
+
+		}
+
+	}
+
+}
+
+// Generates an addresses link with a popup of extras
 function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
 
 	$extras = count($a_addresses) - 1;
@@ -209,13 +261,13 @@ function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "
 
 		foreach ($a_addresses as $address) {
 
-			$data_html .= "<tr><td>{$address['addr']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
+			$data_html .= "<tr><td>{$address['address']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
 
 		}
 
 		$data_html .= '</tbody></table>';
 
-		$hint = "{$a_addresses[0]['addr']} (+{$extras})";
+		$hint = "{$a_addresses[0]['address']} (+{$extras})";
 
 		$ret_html = "<a href=\"{$href}\" title=\"{$title}\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
 
@@ -223,7 +275,7 @@ function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "
 
 	} else {
 
-		$ret_html = "<a href=\"{$href}\" title=\"{$a_addresses[0]['descr']}\">{$a_addresses[0]['addr']}</a>";
+		$ret_html = "<a href=\"{$href}\" title=\"{$a_addresses[0]['description']}\">{$a_addresses[0]['address']}</a>";
 
 		return $ret_html;
 
