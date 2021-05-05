@@ -216,7 +216,7 @@ function wg_peer_addresses($post) {
 
 		if (is_subnet($tmp_subnet)) {
 
-			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
+			$ret_array[] = array('addr' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
 
 		}
 
@@ -243,7 +243,7 @@ function wg_tunnel_addresses($post) {
 
 		if (is_subnet($tmp_subnet)) {
 
-			$ret_array[] = array('addr' => $tmp_subnet, 'descr' => $address['address_descr']);
+			$ret_array[] = array('addr' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
 
 		}
 
@@ -298,6 +298,8 @@ function wg_do_peer_post($post) {
 
 	$pconfig = $wgg['peers'][$index];
 
+	wg_init_config_arr($pconfig, array('allowedips', 'row'));
+
 	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
 	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
 
@@ -321,9 +323,7 @@ function wg_do_peer_post($post) {
 	
 	$pconfig['presharedkey']	= $post['presharedkey'];
 
-	wg_init_config_arr($pconfig, array('allowedips', 'item'));
-
-	$pconfig['allowedips']['item'] 	= wg_peer_addresses($post);
+	$pconfig['allowedips']['row'] 	= wg_peer_addresses($post);
 
 	$input_errors = wg_validate_peer_post($pconfig);
 
@@ -357,7 +357,7 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig = $wgg['tunnels'][$index];
 
-	wg_init_config_arr($pconfig, array('addresses', 'item'));
+	wg_init_config_arr($pconfig, array('addresses', 'row'));
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
@@ -373,7 +373,7 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['mtu'] 		= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
 
-	$pconfig['addresses']['item'] 	= wg_tunnel_addresses($post);
+	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
 	$input_errors 			= wg_validate_post($pconfig);
 
@@ -626,9 +626,9 @@ function make_wg_conf($tunnel) {
 				}
 
 				
-				if (is_array($peer['allowedips'])) {
+				if (is_array($peer['allowedips']['row'])) {
 
-					$allowedips = implode(',', array_map(fn($item) => $item['addr'], $peer['allowedips']['item']));
+					$allowedips = implode(',', array_map(fn($x) => "{$x['address']}/{$x['mask']}", $peer['allowedips']['row']));
 
 					$txt .= "AllowedIPs = {$allowedips}\n";
 
@@ -662,6 +662,24 @@ function make_wg_conf($tunnel) {
 	file_put_contents($conf_path, $txt);
 
 	chmod($conf_path, 0600);
+
+}
+
+function wg_addresses_condense($a_addresses) {
+
+	$ret_val = array();
+
+	if (is_array($a_addresses)) {
+
+		$ret_val['addr'] 	= array_map(fn($item) => "{$item['address']}/{$item['mask']}", $a_addresses);
+		
+		$ret_val['descr']	= $a_addresses['descr'];
+
+		return $ret_val;
+
+	}
+
+	return false;
 
 }
 

@@ -195,7 +195,7 @@ function wg_ifconfig_del_address($wg_ifname, $address) {
 
 }
 
-function wg_ifconfig_set_address($wg_ifname, $address) {
+function wg_ifconfig_set_address($wg_ifname, $address, $mask) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -203,7 +203,7 @@ function wg_ifconfig_set_address($wg_ifname, $address) {
 		
 		$ifname_safe = escapeshellarg($wg_ifname);
 
-		$address_safe = escapeshellarg($address);
+		$address_safe = escapeshellarg("{$address}/{$mask}");
 
 		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add");
 
