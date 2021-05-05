@@ -209,7 +209,7 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 		$addresses = $tunnel['addresses']['row'];
 
-		if (!is_wg_tunnel_assigned($tunnel['name']) {
+		if (!is_wg_tunnel_assigned($tunnel['name'])) {
 			
 			if (count($addresses) > 0) {
 
