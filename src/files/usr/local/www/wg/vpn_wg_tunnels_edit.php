@@ -212,7 +212,7 @@ $group->add(new Form_Input(
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp("Public key for this tunnel. (<a id=\"copypubkey\" href=\"#\">Copy</a>)")->setReadonly();
+))->setHelp('Public key for this tunnel. (<a id="copypubkey" href="#">Copy</a>)')->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
@@ -233,7 +233,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 5px' href='../../interfaces_assign.php'>Interface Assignments</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
@@ -300,7 +300,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<i class='fa fa-sitemap' style='vertical-align: middle;'><a style='padding-left: 5px' href='../../interfaces_assign.php'>{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
