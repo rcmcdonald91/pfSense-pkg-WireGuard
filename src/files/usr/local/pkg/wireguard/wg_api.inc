@@ -135,7 +135,7 @@ function wg_get_peer_id($public_key, $tunnel_name) {
 
 	}
 
-	return -1
+	return -1;
 
 }
 
