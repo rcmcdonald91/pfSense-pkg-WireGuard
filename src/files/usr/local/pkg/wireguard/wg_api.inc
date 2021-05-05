@@ -68,15 +68,15 @@ function wg_status() {
 			}
 
 			// Gets some extra information about tunnels not returned by `wg show all dump`
-			$a_tunnel_info = pfSense_get_interface_stats($current_device);
+			$tunnel_if_stats = pfSense_get_interface_stats($current_device);
 
-			$tmp_tunnel['descr'] = $wgg['tunnels'][wg_get_tunnel_id($current_device)];
+			$tmp_tunnel['descr'] 		= $wgg['tunnels'][wg_get_tunnel_id($current_device)]['descr'];
 
-			$tmp_tunnel['status'] = wg_interface_status($current_device) ? 'up' : 'down';
+			$tmp_tunnel['status'] 		= wg_interface_status($current_device) ? 'up' : 'down';
 
-			$tmp_tunnel['transfer_rx'] = $a_tunnel_info['inbytes'];
+			$tmp_tunnel['transfer_rx'] 	= $tunnel_if_stats['inbytes'];
 
-			$tmp_tunnel['transfer_tx'] = $a_tunnel_info['outbytes'];
+			$tmp_tunnel['transfer_tx'] 	= $tunnel_if_stats['outbytes'];
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
