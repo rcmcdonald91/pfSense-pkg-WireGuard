@@ -226,7 +226,7 @@ function wg_generate_tunnel_addresses_popup_link($tunnel) {
 		
 				$hint = "{$addresses[0]['address']} (+{$extras})";
 		
-				$ret_html = "<a href=\"{$href}\" title=\"Tunnel Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+				$ret_html = "<a href=\"{$href}\" title=\"Interface Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
 		
 				return $ret_html;
 		

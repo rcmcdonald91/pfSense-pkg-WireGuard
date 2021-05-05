@@ -68,15 +68,17 @@ function wg_status() {
 			}
 
 			// Gets some extra information about tunnels not returned by `wg show all dump`
-			$tunnel_if_stats = pfSense_get_interface_stats($current_device);
+			$tunnel_if_stats 		= pfSense_get_interface_stats($current_device);
 
-			$tmp_tunnel['descr'] 		= $wgg['tunnels'][wg_get_tunnel_id($current_device)]['descr'];
+			$tunnel_id			= wg_get_tunnel_id($current_device);
 
 			$tmp_tunnel['status'] 		= wg_interface_status($current_device) ? 'up' : 'down';
 
 			$tmp_tunnel['transfer_rx'] 	= $tunnel_if_stats['inbytes'];
 
 			$tmp_tunnel['transfer_tx'] 	= $tunnel_if_stats['outbytes'];
+
+			$tmp_tunnel['config']		= $wgg['tunnels'][$tunnel_id];
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
@@ -95,13 +97,9 @@ function wg_status() {
 			}
 
 			// Gets some extra information about peers not returned by `wg show all dump`
-			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device);
+			$peer_id = wg_get_peer_id($tmp_peer['public_key'], $last_device);
 
-			$tmp_peer['descr'] = $a_peer_info['descr'];
-
-			$tmp_peer['id'] = $a_peer_info['id'];
-
-			$tmp_peer['allowed_ips_array'] = $a_peer_info['allowedips'];
+			$tmp_peer['config']		= $wgg['peers'][$peer_id];
 			
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
@@ -124,17 +122,14 @@ function wg_status_json($pretty = false) {
 
 }
 
-// Returns WireGuard peer info from a given public key and tunnel name
-function wg_get_peer_info($public_key, $tunnel_name) {
+function wg_get_peer_id($public_key, $tunnel_name) {
 	global $wgg;
 
 	foreach ($wgg['peers'] as $peer_id => $peer){
 
 		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
 
-			$ret_val = array('descr' => $peer['descr'], 'id' => $peer_id, 'allowedips' => $peer['allowedips']['item']);
-
-			return $ret_val;
+			return $peer_id;
 
 		}
 
