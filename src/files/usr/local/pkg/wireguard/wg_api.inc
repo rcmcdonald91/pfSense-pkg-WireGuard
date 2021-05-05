@@ -129,13 +129,13 @@ function wg_get_peer_id($public_key, $tunnel_name) {
 
 		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
 
-			return array('config' = > $peer['peerid'], 'xml' => $peer_id)
+			return $peer_id;
 
 		}
 
 	}
 
-	return array('config' => -1, 'xml' => - 1);
+	return -1
 
 }
 
