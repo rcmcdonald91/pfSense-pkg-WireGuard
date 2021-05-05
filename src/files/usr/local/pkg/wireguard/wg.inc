@@ -550,7 +550,7 @@ function wg_get_pfsense_interface_name($tunnel_name) {
 
 		$ret_val['name'] = $tmp_name;
 
-		$ret_val['description'] =  $ifdescr[$tmp_name]
+		$ret_val['description'] =  $ifdescr[$tmp_name];
 
 		return $ret_val;
 
