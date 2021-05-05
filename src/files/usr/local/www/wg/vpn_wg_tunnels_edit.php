@@ -253,8 +253,6 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 	$last = count($pconfig['addresses']['item']) - 1;
 
 	foreach ($pconfig['addresses']['item'] as $counter => $item) {
-
-		list($address, $address_subnet) = explode("/", $item['addr']);
 	
 		$group = new Form_Group($counter == 0 ? 'Interface Addresses' : '');
 	
@@ -263,17 +261,17 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		$group->add(new Form_IpAddress(
 			"address{$counter}",
 			'Interface Address',
-			$address,
+			$item['address'],
 			'BOTH'
 		))->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
-			->addMask("address_subnet{$counter}", $address_subnet)
+			->addMask("address_subnet{$counter}", $item['mask'])
 			->setWidth(4);
 		
 		$group->add(new Form_Input(
 			"address_descr{$counter}",
 			'Description',
 			'text',
-			$item['descr']
+			$item['description']
 		))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 			->setWidth(4);
 

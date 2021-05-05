@@ -239,8 +239,6 @@ $last = count($pconfig['allowedips']['item']) - 1;
 
 foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 
-	list($address, $address_subnet) = explode("/", $item['addr']);
-
 	$group = new Form_Group($counter == 0 ? 'Allowed IPs' : null);
 
 	$group->addClass('repeatable');
@@ -248,17 +246,17 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
 		'Allowed Subnet or Host',
-		$address,
+		$item['address'],
 		'BOTH'
 	))->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
-		->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
+		->addMask("address_subnet{$counter}", $item['mask'], 128, 0)
 		->setWidth(4);
 
 	$group->add(new Form_Input(
 		"address_descr{$counter}",
 		'Description',
 		'text',
-		$item['descr']
+		$item['description']
 	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 		->setWidth(4);
 
