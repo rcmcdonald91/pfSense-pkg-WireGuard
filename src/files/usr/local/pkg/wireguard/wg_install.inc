@@ -43,6 +43,8 @@ function wg_install() {
 
 	update_status("  Upgrading XML structure as necessary...");
 
+	wg_upgrade_addidtags();
+
 	wg_upgrade_addresses();
 
 	wg_upgrade_allowedips();
