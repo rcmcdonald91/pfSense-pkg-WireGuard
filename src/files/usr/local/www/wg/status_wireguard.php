@@ -126,12 +126,12 @@ if (!empty($a_devices)):
 								<tr>
 									<td>
 										<?=wg_handshake_status_icon($peer['latest_handshake'])?>
-										<?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?>
+										<?=htmlspecialchars(wg_truncate_pretty($peer['config']['descr'], 16))?>
 									</td>
 									<td><?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?></td>
 									<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 									<td><?=htmlspecialchars($peer['endpoint'])?></td>
-									<td><?=wg_generate_addresses_popup_link($peer['allowed_ips_array'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
+									<td></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
 								</tr>
