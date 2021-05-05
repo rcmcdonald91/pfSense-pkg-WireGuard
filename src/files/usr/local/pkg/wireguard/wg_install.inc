@@ -349,3 +349,16 @@ function wg_ifgroup_deinstall() {
 	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
 
 }
+
+// This is a hack to get text onto the console during booting
+function print_message($message) {
+
+	$message = gettext($message);
+
+    	$message = escapeshellarg($message);
+
+	mwexec("printf {$message} >&2");
+
+}
+
+?>
