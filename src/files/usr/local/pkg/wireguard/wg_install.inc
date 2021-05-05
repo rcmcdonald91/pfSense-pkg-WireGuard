@@ -284,15 +284,11 @@ function wg_deinstall() {
 function wg_earlyshellcmd_install() {
 	global $config, $wgg;
 
-	init_config_arr(array('system', 'earlyshellcmd'));
-
 	wg_earlyshellcmd_deinstall();
 
-	$current_earlyshellcmds = &$config['system']['earlyshellcmd'];
+	init_config_arr(array('system', 'earlyshellcmd'));
 
-	$current_earlyshellcmds = array_merge($wgg['earlyshellcmds'], $current_earlyshellcmds);
-
-	$output = implode(',', $wgg['earlyshellcmds']);
+	$config['system']['earlyshellcmd'] = array_merge($wgg['earlyshellcmds'], $config['system']['earlyshellcmd']);
 
 	write_config("[WireGuard] Earlyshellcmds installed.");
 
@@ -306,9 +302,7 @@ function wg_earlyshellcmd_deinstall() {
 
         init_config_arr(array('system', 'earlyshellcmd'));
 
-	$current_earlyshellcmds = &$config['system']['earlyshellcmd'];
-
-	$current_earlyshellcmds = array_diff($current_earlyshellcmds, $wgg['earlyshellcmds']);
+	$config['system']['earlyshellcmd'] = array_diff($config['system']['earlyshellcmd'], $wgg['earlyshellcmds']);
 
 	write_config("[WireGuard] Earlyshellcmds de-installed.");
 	
