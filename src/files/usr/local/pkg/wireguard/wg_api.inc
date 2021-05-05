@@ -163,7 +163,7 @@ function wg_get_address_family($address) {
 
 }
 
-function wg_ifconfig_del_address($wg_ifname, $address, $verbose = false) {
+function wg_ifconfig_del_address($wg_ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -175,9 +175,7 @@ function wg_ifconfig_del_address($wg_ifname, $address, $verbose = false) {
 
 		$address_safe = escapeshellarg($addr);
 
-		$verbose_str = $verbose ? '' : '> /dev/null 2>&1';
-
-		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} delete {$verbose_str}");
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} delete");
 
 		return ($ret_val <> 0) ? false : true;
 
@@ -187,7 +185,7 @@ function wg_ifconfig_del_address($wg_ifname, $address, $verbose = false) {
 
 }
 
-function wg_ifconfig_set_address($wg_ifname, $address, $verbose = false) {
+function wg_ifconfig_set_address($wg_ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -197,9 +195,7 @@ function wg_ifconfig_set_address($wg_ifname, $address, $verbose = false) {
 
 		$address_safe = escapeshellarg($address);
 
-		$verbose_str = $verbose ? '' : '> /dev/null 2>&1';
-
-		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add {$verbose_str}");
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add");
 
 		return ($ret_val <> 0) ? false : true;
 
@@ -209,27 +205,23 @@ function wg_ifconfig_set_address($wg_ifname, $address, $verbose = false) {
 
 }
 
-function wg_ifconfig_down_interface($wg_ifname, $verbose = false) {
+function wg_ifconfig_down_interface($wg_ifname) {
 	global $wgg;
 
 	$ifname_safe = escapeshellarg($wg_ifname);
 
-	$verbose_str = $verbose ? '' : '> /dev/null 2>&1';
-
-	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down {$verbose_str}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down");
 
 	return ($ret_val <> 0) ? false : true;
 
 }
 
-function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
+function wg_ifconfig_up_interface($wg_ifname) {
 	global $wgg;
 
 	$ifname_safe = escapeshellarg($wg_ifname);
 
-	$verbose_str = $verbose ? '' : '> /dev/null 2>&1';
-
-	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up {$verbose_str}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up");
 
 	return ($ret_val <> 0) ? false : true;
 
@@ -283,16 +275,14 @@ function wg_interface_update_addresses($wg_ifname) {
 
 }
 
-function wg_interface_syncconf($wg_ifname, $verbose = false) {
+function wg_interface_syncconf($wg_ifname) {
 	global $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
 	$wg_conf_path_safe = escapeshellarg("{$wgg['conf_path']}/{$wg_ifname}.conf");
 
-	$verbose_str = $verbose ? '' : '> /dev/null 2>&1';
-
-	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe} {$verbose_str}");
+	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe}");
 
 	return ($ret_val <> 0) ? false : true;
 
@@ -301,15 +291,13 @@ function wg_interface_syncconf($wg_ifname, $verbose = false) {
 /*
  * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
  */
-function wg_interface_create($wg_ifname, $verbose = false) {
+function wg_interface_create($wg_ifname) {
 	global $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
-	$verbose_str = $verbose ? '' : '> /dev/null 2>&1';
-
 	// We first check to see if the desired interface already exists, then we create it if it does not
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} {$verbose_str} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe} {$verbose_str}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe}");
 		
 	return ($ret_val <> 0) ? false : true;
 
