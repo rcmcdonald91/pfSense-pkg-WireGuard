@@ -179,7 +179,7 @@ function wg_ifconfig_del_address($wg_ifname, $address) {
 
 }
 
-function wg_ifconfig_set_address($wg_ifname, $address, $mask) {
+function wg_ifconfig_set_address($wg_ifname, $address) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -187,7 +187,7 @@ function wg_ifconfig_set_address($wg_ifname, $address, $mask) {
 		
 		$ifname_safe = escapeshellarg($wg_ifname);
 
-		$address_safe = escapeshellarg("{$address}/{$mask}");
+		$address_safe = escapeshellarg($address);
 
 		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add");
 
@@ -227,7 +227,7 @@ function wg_ifconfig_up_interface($wg_ifname) {
 function wg_interface_update_addresses($wg_ifname) {
 	global $wgg;
 
-	$tun_ids = wg_get_tunnel_ids($wg_ifname);
+	$tun_idx = wg_get_tunnel_array_index($wg_ifname);
 
 	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
@@ -236,7 +236,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		$current = pfSense_getall_interface_addresses($wg_ifname);
 
 		// Get an array of the addresses to be assigned to the interface
-		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $wgg['tunnels'][$tun_ids['xml']]['addresses']['row']);
+		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $wgg['tunnels'][$tun_idx]['addresses']['row']);
 
 		// Determine the addresses to remove
 		$addresses_to_remove = array_diff($current, array_intersect($current, $desired));
@@ -286,7 +286,7 @@ function wg_interface_syncconf($wg_ifname) {
  * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
  */
 function wg_interface_create($wg_ifname) {
-	global $interface_arr_cache, $wgg;
+	global $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 

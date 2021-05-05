@@ -29,7 +29,7 @@ require_once('wireguard/wg.inc');
 
 if (platform_booting()) {
 
-	print_message("Configuring WireGuard tunnels... ");
+	print_message("Configuring WireGuard tunnels...");
 
 }
 
