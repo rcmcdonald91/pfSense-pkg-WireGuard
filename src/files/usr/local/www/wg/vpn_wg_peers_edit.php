@@ -40,15 +40,13 @@ wg_globals();
 
 if (isset($_REQUEST['tun'])) {
 
-	$tun = $_REQUEST['tun'];
-
-	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
+	$tun_name = $_REQUEST['tun'];
 
 }
 
 if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
 
-	$peer_id = $_REQUEST['peer'];
+	$peer_idx = $_REQUEST['peer'];
 
 }
 
@@ -83,10 +81,10 @@ if ($_POST) {
 
 $pconfig = array();
 
-if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
+if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
 
-	// Looks like we are editing an existing tunnel
-	$pconfig = &$wgg['peers'][$peer_id];
+	// Looks like we are editing an existing peer
+	$pconfig = &$wgg['peers'][$peer_idx];
 
 } else {
 
@@ -97,7 +95,7 @@ if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
 	$pconfig['enabled'] = 'yes';
 
 	// Automatically choose a tunnel based on the request 
-	$pconfig['tun'] = $tun;
+	$pconfig['tun'] = $tun_name;
 
 	// Default to a dynamic tunnel, so hide the endpoint form group
 	$is_dynamic = true;
@@ -131,7 +129,7 @@ $form->addGlobal(new Form_Input(
 	'index',
 	'',
 	'hidden',
-	$peer_id
+	$peer_idx
 ));
 
 $section->addInput(new Form_Checkbox(

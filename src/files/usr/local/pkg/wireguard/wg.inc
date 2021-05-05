@@ -303,9 +303,9 @@ function wg_do_peer_post($post) {
 
 	$pconfig = $input_errors = array();
 
-	$index = $post['index'];
+	$peer_idx = $post['index'];
 
-	$pconfig = $wgg['peers'][$index];
+	$pconfig = $wgg['peers'][$peer_idx];
 
 	wg_init_config_arr($pconfig, array('allowedips', 'row'));
 
@@ -338,7 +338,7 @@ function wg_do_peer_post($post) {
 
 	if (!$input_errors) {
 
-		$wgg['peers'][$index] = $pconfig;
+		$wgg['peers'][$peer_idx] = $pconfig;
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");

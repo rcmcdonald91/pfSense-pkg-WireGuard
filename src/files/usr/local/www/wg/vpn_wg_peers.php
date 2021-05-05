@@ -42,15 +42,15 @@ if ($_POST) {
 
 	if (isset($_POST['peer'])) {
 
-		$peer_id = $_POST['peer'];
+		$peer_idx = $_POST['peer'];
 
 		if ($_POST['act'] == 'toggle') {
 
-			wg_toggle_peer($peer_id);
+			wg_toggle_peer($peer_idx);
 
 		} elseif ($_POST['act'] == 'delete') { 
 		
-			wg_delete_peer($peer_id);
+			wg_delete_peer($peer_idx);
 
 		}
 
@@ -104,19 +104,19 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
-		foreach ($wgg['peers'] as $peer_id => $peer):
+		foreach ($wgg['peers'] as $peer_idx => $peer):
 ?>
-					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>';" class="<?=wg_entrystatus_class($peer)?>">
-						<td><?=htmlspecialchars($peer['descr'])?></td>
+					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>';" class="<?=wg_entrystatus_class($peer)?>">
+						<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 						<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
-						<td></td>
-						<td><?=wg_generate_addresses_popup_link($peer['allowedips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer_id}")?></td>
+						<td><!-- Peer Addresses --></td>
+						<td><?=wg_generate_addresses_popup_link($peer['allowedips']['row'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer_idx}")?></td>
 						<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_id}"?>"></a>
-							<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_id}")?>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer_id}"?>" usepost></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit eer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+							<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_idx}")?>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer_idx}"?>" usepost></a>
 						</td>
 					</tr>
 
