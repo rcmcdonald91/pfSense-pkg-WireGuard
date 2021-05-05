@@ -41,6 +41,14 @@ function wg_install() {
 
 	update_status(" done.\n");
 
+	update_status("  Upgrading XML structure as necessary...");
+
+	wg_upgrade_addresses();
+
+	wg_upgrade_allowedips();
+
+	update_status(" done.\n");
+
 	// The first organic resync called by pfSense package manager will finish the installation process
 
 }
