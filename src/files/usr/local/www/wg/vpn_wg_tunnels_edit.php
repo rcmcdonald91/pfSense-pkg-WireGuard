@@ -376,7 +376,7 @@ else:
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
 					<td><!--Peer Addresses--></td>
-					<td><?=wg_generate_addresses_popup_link($peer['allowedips']['row'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
+					<td><!--Allowed IPs--></td>
 					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>

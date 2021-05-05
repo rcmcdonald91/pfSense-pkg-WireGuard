@@ -70,7 +70,7 @@ function wg_status() {
 			// Gets some extra information about tunnels not returned by `wg show all dump`
 			$tunnel_if_stats 		= pfSense_get_interface_stats($current_device);
 
-			$tunnel_ids			= wg_get_tunnel_ids($current_device);
+			$tun_idx			= wg_get_tunnel_array_index($current_device);
 
 			$tmp_tunnel['status'] 		= wg_interface_status($current_device) ? 'up' : 'down';
 
@@ -84,7 +84,7 @@ function wg_status() {
 
 			$tmp_tunnel['mtu']		=$tunnel_if_stats['mtu'];
 
-			$tmp_tunnel['config']		= $wgg['tunnels'][$tunnel_ids['xml']];
+			$tmp_tunnel['config']		= $wgg['tunnels'][$tun_idx];
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
