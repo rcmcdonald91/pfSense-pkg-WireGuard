@@ -233,7 +233,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<i class='fa fa-sitemap' style='vertical-align: middle;'><a style='padding-left: 5px' href='../../interfaces_assign.php'>Interface Assignments</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 5px' href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
