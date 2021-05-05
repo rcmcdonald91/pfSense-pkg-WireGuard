@@ -296,7 +296,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 } else {
 
 	// We want all configured interfaces, including disabled ones
-	$wg_pfsense_if = wg_get_pfsense_interface_name($tunnel['name']);
+	$wg_pfsense_if = wg_get_pfsense_interface_name($pconfig['name']);
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
