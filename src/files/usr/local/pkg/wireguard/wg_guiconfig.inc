@@ -253,6 +253,4 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 }
 
-/
-
 ?>
