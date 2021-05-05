@@ -174,7 +174,7 @@ function wg_upgrade_addresses() {
 
 				$tmp_addrs['row'][$a_index]['mask'] = $addr_mask;
 
-				$tmp_addrs['row'][$a_index['description'] = $item['descr'];
+				$tmp_addrs['row'][$a_index]['description'] = $item['descr'];
 
 			}
 
