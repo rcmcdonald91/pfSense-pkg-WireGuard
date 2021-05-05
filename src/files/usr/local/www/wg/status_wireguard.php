@@ -99,7 +99,7 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
 					<td><?=count($device['peers'])?></td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
-					<td><?=wg_generate_tunnel_address_popup_link($device['config'])?></td>
+					<td><<?=wg_generate_tunnel_address_popup_link($device_name)?></td>
 					<td><?=htmlspecialchars($device['mtu'])?></td>
 					<td><?=htmlspecialchars($device['listen_port'])?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>

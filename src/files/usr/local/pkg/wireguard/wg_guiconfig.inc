@@ -209,35 +209,39 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 		$addresses = $tunnel['addresses']['row'];
 
-		if (!is_wg_tunnel_assigned($tunnel['name']) && count($addresses) > 0) {
+		if (!is_wg_tunnel_assigned($tunnel['name']) {
+			
+			if (count($addresses) > 0) {
 
-			$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
+				$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
 
-			$extras = count($addresses) - 1;
+				$extras = count($addresses) - 1;
 
-			if ($extras > 0) {
+				if ($extras > 0) {
 
-				$data_html = "<table><thead><th>Address</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+					$data_html = "<table><thead><th>Address</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
 		
-				foreach ($addresses as $address) {
+					foreach ($addresses as $address) {
 		
-					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
 		
+					}
+		
+					$data_html .= '</tbody></table>';
+		
+					$hint = "{$addresses[0]['address']} (+{$extras})";
+		
+					$ret_html = "<a href=\"{$href}\" title=\"Interface Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+		
+					return $ret_html;
+		
+				} else {
+		
+					$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
+		
+					return $ret_html;
+				
 				}
-		
-				$data_html .= '</tbody></table>';
-		
-				$hint = "{$addresses[0]['address']} (+{$extras})";
-		
-				$ret_html = "<a href=\"{$href}\" title=\"Interface Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
-		
-				return $ret_html;
-		
-			} else {
-		
-				$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
-		
-				return $ret_html;
 		
 			}
 
