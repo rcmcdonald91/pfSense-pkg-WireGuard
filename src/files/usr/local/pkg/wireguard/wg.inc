@@ -216,7 +216,7 @@ function wg_peer_addresses($post) {
 
 		if (is_subnet($tmp_subnet)) {
 
-			$ret_array[] = array('addr' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
+			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
 
 		}
 
@@ -243,7 +243,7 @@ function wg_tunnel_addresses($post) {
 
 		if (is_subnet($tmp_subnet)) {
 
-			$ret_array[] = array('addr' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
+			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
 
 		}
 
