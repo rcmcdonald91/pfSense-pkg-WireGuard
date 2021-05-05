@@ -34,19 +34,21 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("\n  Creating WireGuard interface group...");
+	update_status("\n  Creating WireGuard early shell commands... ");
+
+	// Installs the WireGuard earlyshellcmds
+	wg_earlyshellcmd_install();
+
+	update_status(" done.\n  Creating WireGuard interface group... ");
 
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status(" done.\n");
+	update_status(" done.\n  Upgrading WireGuard XML structure as necessary... ");
 
-	update_status("  Upgrading XML structure as necessary...");
-
+	// Things to upgrade
 	wg_upgrade_addidtags();
-
 	wg_upgrade_addresses();
-
 	wg_upgrade_allowedips();
 
 	update_status(" done.\n");
@@ -248,32 +250,68 @@ function wg_deinstall() {
 
 	wg_globals();
 
-	update_status("  Removing WireGuard interface group... ");
+	update_status("  Removing WireGuard early shell commands... ");
 
+	// Removes the WireGuard earlyshellcmds
+	wg_earlyshellcmd_install();
+
+	update_status(" done.\n  Removing WireGuard interface group... ");
+
+	// Removes the 'WireGuard' interface group
 	wg_ifgroup_deinstall();
 
-	update_status("done.\n  Removing WireGuard temporary files... ");
+	update_status(" done.\n  Removing WireGuard temporary files... ");
 
+	// Removes WireGuard temporary configuration files
 	wg_delete_config_files();
 
-	update_status("done.\n");
+	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'no') {
 
-	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'yes') {
+		update_status(" done.\n  Removing WireGuard configuration settings... ");
 
-		update_status("  Keeping WireGuard configuration settings... ");
-
-		update_status("done.\n");
-
-	} else {
-
-		update_status("  Removing WireGuard configuration settings... ");
-
+		// Removes WireGuard configuration
 		wg_remove_config_settings();
-
-		update_status("done.\n");
 
 	}
 
+	update_status(" done.\n");
+
+}
+
+/*
+ * This function creates earlyshellcmd entries in the config
+ */
+function wg_earlyshellcmd_install() {
+	global $config, $wgg;
+
+	init_config_arr(array('system', 'earlyshellcmd'));
+
+	wg_earlyshellcmd_deinstall();
+
+	$current_earlyshellcmds = &$config['system']['earlyshellcmd'];
+
+	$current_earlyshellcmds = array_merge($wgg['earlyshellcmds'], $current_earlyshellcmds);
+
+	$output = implode(',', $wgg['earlyshellcmds']);
+
+	write_config("[WireGuard] Earlyshellcmds installed.");
+
+}
+
+/*
+ * This function removes earlyshellcmd entries in the config
+ */
+function wg_earlyshellcmd_deinstall() {
+	global $config, $wgg;
+
+        init_config_arr(array('system', 'earlyshellcmd'));
+
+	$current_earlyshellcmds = &$config['system']['earlyshellcmd'];
+
+	$current_earlyshellcmds = array_diff($current_earlyshellcmds, $wgg['earlyshellcmds']);
+
+	write_config("[WireGuard] Earlyshellcmds de-installed.");
+	
 }
 
 /*

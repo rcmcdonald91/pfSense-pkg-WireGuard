@@ -41,6 +41,7 @@ $wgg = array(
 					'/usr/local/etc/wireguard', 
 					'/etc/wireguard', 
 					'/etc/wg'),
+	'earlyshellcmds'	=> array('/usr/local/etc/rc.reload_wireguard'),
 	'xml_paths_to_clean'	=> array(
 					array('wireguard'), 
 					array('installedpackages', 'wireguard')),
