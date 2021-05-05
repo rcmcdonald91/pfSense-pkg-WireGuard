@@ -468,29 +468,8 @@ function next_wg_port() {
 
 }
 
-// Wrapper to return just the config id
-function wg_get_tunnel_config_id($tunnel_name) {
-
-	$tun_ids = wg_get_tunnel_ids($tunnel_name);
-
-	return $tun_ids['config'];
-
-}
-
 // Wrapper to return just the xml array index
 function wg_get_tunnel_array_index($tunnel_name) {
-
-	$tun_ids = wg_get_tunnel_ids($tunnel_name);
-
-	return $tun_ids['xml'];
-
-}
-
-/*
- * Returns the tunnel id and array index of a given tunnel, these are not necessarily the interface number
- * 'config' is the value of <tunid></tunid> and 'xml' is the position in the XML structure. Both are useful but for different purposes.
- */
-function wg_get_tunnel_ids($tunnel_name) {
 	global $wgg;
 
 	$ret_val = array();
@@ -501,7 +480,7 @@ function wg_get_tunnel_ids($tunnel_name) {
 
 			if ($tunnel['name'] == $tunnel_name) {
 
-				return array('config' => $tunnel['tunid'], 'xml' => $t_index);
+				return $t_index;
 
 			}
 
@@ -509,7 +488,7 @@ function wg_get_tunnel_ids($tunnel_name) {
 
 	}
 
-	return array('config' => -1, 'xml' => -1);
+	return -1;
 
 }
 

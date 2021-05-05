@@ -173,18 +173,18 @@ function wg_secret_input_type() {
 }
 
 // Gets the appropriate class based on whether or not the target is enabled or disabled
-function wg_entrystatus_class($target) {
+function wg_entrystatus_class($target_device) {
 
-	return (isset($target) && $target['enabled'] == 'yes') ? 'enabled' : 'disabled';
+	return (isset($target_device) && $target_device['enabled'] == 'yes') ? 'enabled' : 'disabled';
 
 }
 
 // Generates a toggle icon link based on the status of the target
-function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
+function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
 
-	if (isset($target)) {
+	if (isset($target_device)) {
 	
-		$s_icon = (isset($target['enabled']) && $target['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
+		$s_icon = (isset($target_device['enabled']) && $target_device['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
 
 		$s_title = gettext($title);
 
@@ -198,15 +198,32 @@ function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepos
 
 }
 
-function wg_generate_tunnel_addresses_popup_link($tunnel) {
+function wg_generate_peer_allowedips_popup_link($peer_idx) {
+	$global $wgg;
 
-	$a_headers = array('Address', 'Description');
 
-	if (is_array($tunnel)) {
+	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][[$peer_idx]])) {
 
-		if (!is_wg_tunnel_assigned($tunnel['name'])) {
+		$peer = $wgg['peers'][$peer_idx];
 
-			$addresses = $tunnel['addresses']['row'];
+
+
+	}
+
+}
+
+function wg_generate_tunnel_address_popup_link($tunnel_name) {
+	global $wgg;
+
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+
+	if (isset($wgg['tunnels'][$tun_idx]) && is_array($wgg['tunnels'][$tun_idx])) {
+
+		$tunnel = $wgg['tunnels'][$tun_idx];
+
+		$addresses = $tunnel['addresses']['row'];
+
+		if (!is_wg_tunnel_assigned($tunnel['name']) && count($addresses) > 0) {
 
 			$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
 
@@ -250,37 +267,6 @@ function wg_generate_tunnel_addresses_popup_link($tunnel) {
 
 }
 
-// Generates an addresses link with a popup of extras
-function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
-
-	$extras = count($a_addresses) - 1;
-
-	if ($extras > 0) {
-
-		$data_html = "<table><thead><th>Value</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
-
-		foreach ($a_addresses as $address) {
-
-			$data_html .= "<tr><td>{$address['address']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
-
-		}
-
-		$data_html .= '</tbody></table>';
-
-		$hint = "{$a_addresses[0]['address']} (+{$extras})";
-
-		$ret_html = "<a href=\"{$href}\" title=\"{$title}\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
-
-		return $ret_html;
-
-	} else {
-
-		$ret_html = "<a href=\"{$href}\" title=\"{$a_addresses[0]['description']}\">{$a_addresses[0]['address']}</a>";
-
-		return $ret_html;
-
-	}
-
-}
+/
 
 ?>
