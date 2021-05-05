@@ -41,7 +41,7 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
 		${STAGEDIR}${PREFIX}/pkg
 
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/etc/rc.* \
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/etc/rc.* \
 		${STAGEDIR}${PREFIX}/etc
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/*.inc \
