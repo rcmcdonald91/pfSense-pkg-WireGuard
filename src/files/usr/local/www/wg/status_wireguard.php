@@ -135,7 +135,7 @@ if (!empty($a_devices)):
 									<td><?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?></td>
 									<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
 									<td><?=htmlspecialchars($peer['endpoint'])?></td>
-									<td></td>
+									<td><?=wg_generate_peer_allowedips_popup_link(wg_get_peer_id($peer['config']['publickey'], $peer['config']['tun'])?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
 								</tr>

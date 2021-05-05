@@ -154,7 +154,7 @@ display_top_tabs($tab_array);
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 										<td><!--Peer Addresses--></td>
-										<td><!--Allowed IPs--></td>
+										<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
 										<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
 									</tr>
 <?php

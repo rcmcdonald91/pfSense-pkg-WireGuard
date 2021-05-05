@@ -257,4 +257,55 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 }
 
+function wg_generate_peer_allowedips_popup_link($peer_idx) {
+	global $wgg;
+
+	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
+
+		$peer = $wgg['tunnels'][$peer_idx];
+
+		$allowedips = $peer['allowedips']['row'];
+			
+		if (count($addresses) > 0) {
+
+			$href = "vpn_wg_peers_edit.php?peer={$peer_idx}";
+
+			$extras = count($allowedips) - 1;
+
+			if ($extras > 0) {
+
+				$data_html = "<table><thead><th>Subnet</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+	
+				foreach ($allowedips as $address) {
+	
+					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+	
+				}
+	
+				$data_html .= '</tbody></table>';
+	
+				$hint = "{$allowedips[0]['address']} (+{$extras})";
+	
+				$ret_html = "<a href=\"{$href}\" title=\"Allowed IPs\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+	
+				return $ret_html;
+	
+			} else {
+	
+				$ret_html = "<a href=\"{$href}\" title=\"{$allowedips[0]['description']}\">{$allowedips[0]['address']}/{$allowedips[0]['mask']}</a>";
+	
+				return $ret_html;
+			
+			}
+
+		} else {
+
+			return '(none)';
+		}
+
+
+	}
+
+}
+
 ?>
