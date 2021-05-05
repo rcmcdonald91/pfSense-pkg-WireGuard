@@ -163,7 +163,7 @@ function wg_get_address_family($address) {
 
 }
 
-function wg_ifconfig_del_address($wg_ifname, $address) {
+function wg_ifconfig_del_address($wg_ifname, $address, $verbose = false) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -175,7 +175,9 @@ function wg_ifconfig_del_address($wg_ifname, $address) {
 
 		$address_safe = escapeshellarg($addr);
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} delete");
+		$redirect = wg_verbosity_redirect($verbose);
+
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} delete {$redirect}");
 
 		return ($ret_val <> 0) ? false : true;
 
@@ -185,7 +187,7 @@ function wg_ifconfig_del_address($wg_ifname, $address) {
 
 }
 
-function wg_ifconfig_set_address($wg_ifname, $address) {
+function wg_ifconfig_set_address($wg_ifname, $address, $verbose = false) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -195,7 +197,9 @@ function wg_ifconfig_set_address($wg_ifname, $address) {
 
 		$address_safe = escapeshellarg($address);
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add");
+		$redirect = wg_verbosity_redirect($verbose);
+
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add {$redirect}");
 
 		return ($ret_val <> 0) ? false : true;
 
@@ -205,23 +209,27 @@ function wg_ifconfig_set_address($wg_ifname, $address) {
 
 }
 
-function wg_ifconfig_down_interface($wg_ifname) {
+function wg_ifconfig_down_interface($wg_ifname, $verbose = false) {
 	global $wgg;
 
 	$ifname_safe = escapeshellarg($wg_ifname);
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down");
+	$redirect = wg_verbosity_redirect($verbose);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down {$redirect}");
 
 	return ($ret_val <> 0) ? false : true;
 
 }
 
-function wg_ifconfig_up_interface($wg_ifname) {
+function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
 	global $wgg;
 
 	$ifname_safe = escapeshellarg($wg_ifname);
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up");
+	$redirect = wg_verbosity_redirect($verbose);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up {$redirect}");
 
 	return ($ret_val <> 0) ? false : true;
 
@@ -275,14 +283,16 @@ function wg_interface_update_addresses($wg_ifname) {
 
 }
 
-function wg_interface_syncconf($wg_ifname) {
+function wg_interface_syncconf($wg_ifname, $verbose = false) {
 	global $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
 	$wg_conf_path_safe = escapeshellarg("{$wgg['conf_path']}/{$wg_ifname}.conf");
 
-	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe}");
+	$redirect = wg_verbosity_redirect($verbose);
+
+	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe} {$redirect}");
 
 	return ($ret_val <> 0) ? false : true;
 
@@ -291,13 +301,15 @@ function wg_interface_syncconf($wg_ifname) {
 /*
  * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
  */
-function wg_interface_create($wg_ifname) {
+function wg_interface_create($wg_ifname, $verbose = false) {
 	global $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
+	$redirect = wg_verbosity_redirect($verbose);
+
 	// We first check to see if the desired interface already exists, then we create it if it does not
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} {$redirect} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe} {$redirect}");
 		
 	return ($ret_val <> 0) ? false : true;
 
@@ -306,15 +318,17 @@ function wg_interface_create($wg_ifname) {
 /*
  * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
  */
-function wg_interface_group_add($wg_ifname) {
+function wg_interface_group_add($wg_ifname, $verbose = false) {
 	global $wgg;
 
 	$wg_ifname_safe = escapeshellarg($wg_ifname);
 
 	$wg_ifgroup_safe = escapeshellarg($wgg['if_group']);
 
+	$redirect = wg_verbosity_redirect($verbose);
+
 	// We first check to see if the desired interface exists, then we add it to the group if it does
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} && {$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} {$redirect} && {$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe} {$redirect}");
 		
 	return ($ret_val <> 0) ? false : true;
 
@@ -520,6 +534,12 @@ function next_wg_if() {
 
 	return -1;
 	
+}
+
+function wg_verbosity_redirect($verbose = false) {
+
+	return $verbose ? '' : '> /dev/null 2>&1';
+
 }
 
 ?>
