@@ -75,70 +75,86 @@ if (!empty($a_devices)):
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
-		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'"> 
+		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
+			<thead>
+				<th><?=gettext('Tunnel')?></th>
+				<th><?=gettext('Description')?></th>
+				<th><?=gettext('Public Key')?></th>
+				<th><?=gettext('Listen Port')?></th>
+				<th><?=gettext('Address')?></th>
+				<th><?=gettext('# Peers')?></th>
+				<th><?=gettext('RX')?></th>
+				<th><?=gettext('TX')?></th>
+			</thead>
 <?php
 	foreach ($a_devices as $device_name => $device):
 ?>
-			<thead>
-				<th><?=gettext("Tunnel")?></th>
-				<th colspan="1"><?=gettext("Public Key")?></th>
-				<th colspan="6"><?=gettext("Listen Port")?></th>
-			</thead>
 			<tbody>	
 				<tr>
 					<td>
 						<?=wg_interface_status_icon($device['status'])?>
 						<a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?>
 					</td>
-					<td colspan="1"><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
-					<td colspan="6"><?=htmlspecialchars($device['listen_port'])?></td>
+					<td><!-- Description --></td>
+					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
+					<td><?=htmlspecialchars($device['listen_port'])?></td>
+					<td><!-- Addresses --></td>
+					<td><?=count($device['peers'])?></td>
+					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
+					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
-			</tbody>
+				<tr class="peer-entries">
+	
 <?php
 		if ($device['status'] == 'up' && count($device['peers']) > 0):
 ?>
-			<thead>
-				<th><?=gettext("Peer")?></th>
-				<th><?=gettext("Public Key")?></th>
-				<th><?=gettext("Endpoint : Port")?></th>
-				<th><?=gettext("Allowed IPs")?></th>
-				<th><?=gettext("Latest Handshake")?></th>
-				<th><?=gettext("RX")?></th>
-				<th><?=gettext("TX")?></th>
-			</thead>
-			<tbody>
+					<td colspan="8">
+						<table class="table table-hover">
+							<thead>
+								<th><?=gettext("Peer")?></th>
+								<th><?=gettext("Latest Handshake")?></th>
+								<th><?=gettext("Public Key")?></th>
+								<th><?=gettext("Endpoint : Port")?></th>
+								<th><?=gettext("Allowed IPs")?></th>
+								<th><?=gettext("RX")?></th>
+								<th><?=gettext("TX")?></th>
+							</thead>
+							<tbody>
 <?php
 			foreach($device['peers'] as $peer):
 ?>
-				<tr>
-					<td>
-						<?=wg_handshake_status_icon($peer['latest_handshake'])?>
-						<?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?>
-					</td>
-					<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
-					<td><?=htmlspecialchars($peer['endpoint'])?></td>
-					<td><?=wg_generate_addresses_popup_link($peer['allowed_ips_array'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
-					<td>
-						<?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?>
-					</td>
-					<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
-					<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
-				</tr>
+								<tr>
+									<td>
+										<?=wg_handshake_status_icon($peer['latest_handshake'])?>
+										<?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?>
+									</td>
+									<td><?=htmlspecialchars(wg_human_time_diff($peer['latest_handshake']))?></td>
+									<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
+									<td><?=htmlspecialchars($peer['endpoint'])?></td>
+									<td><?=wg_generate_addresses_popup_link($peer['allowed_ips_array'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['id']}")?></td>
+									<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
+									<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
+								</tr>
 <?php	
 			endforeach;
-
+?>
+							</tbody>
+						</table>
+					</td>
+<?php
+		else:
+?>
+					<td colspan="8"><?=gettext("No peers have been configured")?></td>
+<?php
 		endif;
-
+?>
+				</tr>
+<?php
 	endforeach;
 ?>
 			</tbody>
 		</table>
-
-
-
     	</div>
-
-
 </div>
 
 <?php
@@ -148,6 +164,13 @@ else:
 
 endif;
 ?>
+
+<nav class="action-buttons">
+	<a href="#" class="btn btn-info btn-sm" id="showpeers">
+		<i class="fa fa-info icon-embed-btn"></i>
+		<?=gettext("Show peers")?>
+	</a>
+</nav>
 
 
 <div class="panel panel-default">
@@ -188,80 +211,16 @@ endif;
 
 <script type="text/javascript">
 //<![CDATA[
-function update_routes(section) {
-	$.ajax(
-		'/diag_routes.php',
-		{
-			type: 'post',
-			data: 'isAjax=true&filter=<?=$wgg['if_prefix']?>' +'&'+ section +'=true',
-			success: update_routes_callback,
-	});
-}
-
-function update_routes_callback(html) {
-	// First line contains section
-	var responseTextArr = html.split("\n");
-	var section = responseTextArr.shift();
-	var tbody = '';
-	var field = '';
-	var tr_class = '';
-	var thead = '<tr>';
-	var columns  = 0;
-
-	for (var i = 0; i < responseTextArr.length; i++) {
-
-		if (responseTextArr[i] == "") {
-			continue;
-		}
-
-		if (i == 0) {
-			var tmp = '';
-		} else {
-			var tmp = '<tr>';
-		}
-
-		var j = 0;
-		var entry = responseTextArr[i].split(" ");
-		columns = entry.length;
-		for (var k = 0; k < entry.length; k++) {
-			if (entry[k] == "") {
-				continue;
-			}
-			if (i == 0) {
-				tmp += '<th>' + entry[k] + '<\/th>';
-			} else {
-				tmp += '<td>' + entry[k] + '<\/td>';
-			}
-			j++;
-		}
-
-		if (i == 0) {
-			thead += tmp;
-		} else {
-			tmp += '<td><\/td>'
-			tbody += tmp;
-		}
-	}
-
-	// if no routes found  ignore the sections and remove them the dom
-	if (tbody == "") {
-		$('#' + section + ' > thead').remove();
-		$('#' + section + ' > tbody').remove();
-		$('#' + section + '_parent').remove();
-	} else {
-		$('#' + section + ' > thead').html(thead);
-		$('#' + section + ' > tbody').html(tbody);
-	}
-}
-
-function update_all_routes() {
-	update_routes("IPv4");
-	update_routes("IPv6");
-}
-
 events.push(function() {
-	setInterval('update_all_routes()', 30000);
-	update_all_routes();
+	var peershidden = true;
+
+	hideClass('peer-entries', peershidden);
+
+	// Toggle peer visibility
+	$('#showpeers').click(function () {
+		peershidden = !peershidden;
+		hideClass('peer-entries', peershidden);
+	})
 
 });
 //]]>
