@@ -426,13 +426,15 @@ function wg_gen_publickey($privkey) {
 
 // Checks if a given private or public key is valid
 function wg_is_valid_key($key) {
-	global $wgg;
 
-	$key = escapeshellarg($key);
+	// Reference: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html
 
-	$retval = mwexec("echo {$key} | {$wgg['wg']} pubkey");
+	if (preg_match('/^[A-Za-z0-9+\/]{42}[A|E|I|M|Q|U|Y|c|g|k|o|s|w|4|8|0]=$/', $key)) {
 
-	return ($retval <> 0 ? false : true);
+		return true;
+	}
+
+	return false;
 
 }
 
