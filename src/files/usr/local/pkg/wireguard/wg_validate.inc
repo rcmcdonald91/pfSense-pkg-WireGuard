@@ -130,7 +130,7 @@ function wg_validate_peer_post($post) {
 
 			if ($peer['publickey'] == $post['publickey']) {
 
-				$input_errors[] = gettext("The public key ({$post['publickey']}) is already assigned to a peer on this tunnel ({$post'tun']})");
+				$input_errors[] = gettext("The public key ({$post['publickey']}) is already assigned to a peer on this tunnel ({$post['tun']})");
 				
 				break;
 
