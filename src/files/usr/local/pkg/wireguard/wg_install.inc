@@ -67,7 +67,7 @@ function wg_upgrade_allowedips() {
 
 	foreach ($peers as $peer_idx => $peer) {
 
-		if (is_string($peer['allowedips'])) {
+		if (is_string($peer['allowedips']) && !empty($peer['allowedips'])) {
 
 			unset($wgg['peers'][$peer_idx]['allowedips']);
 
@@ -141,7 +141,7 @@ function wg_upgrade_addresses() {
 
 	foreach ($tunnels as $tun_idx => $tunnel) {
 
-		if (is_string($tunnel['addresses'])) {
+		if (is_string($tunnel['addresses']) && !empty($tunnel['addresses'])) {
 
 			unset($wgg['tunnels'][$tun_idx]['addresses']);
 
