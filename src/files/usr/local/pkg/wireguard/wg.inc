@@ -189,15 +189,21 @@ function wg_get_tunnel_peers($tunnel_name) {
 
 	$a_ret = array();
 
-	// Look through array of peers for matching tunnel name
-	foreach ($wgg['peers'] as $peer_id => $peer) {
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-		if ($peer['tun'] == $tunnel_name) {
+	if (isset($wgg['tunnels'][$tun_idx])) {
 
-			// We need the array index for future manipulations
-			$peer['index'] = $peer_id;
+		// Look through array of peers for matching tunnel name
+		foreach ($wgg['peers'] as $peer_idx => $peer) {
 
-			$a_ret[] = $peer;
+			if ($peer['tun'] == $tunnel_name) {
+
+				// We need the array index for future manipulations
+				$peer['index'] = $peer_idx;
+
+				$a_ret[] = $peer;
+
+			}
 
 		}
 
@@ -257,7 +263,7 @@ function wg_tunnel_addresses($post) {
 			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
 
 		}
-		
+
 	}
 
 	return $ret_array;
