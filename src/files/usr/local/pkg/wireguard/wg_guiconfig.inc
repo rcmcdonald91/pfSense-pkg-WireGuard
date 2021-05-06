@@ -30,7 +30,7 @@ function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpo
 
 		$endpoint = gettext('Endpoint');
 
-		$port gettext('Port');
+		$port = gettext('Port');
 
 		return "{$endpoint} : {$port}";
 
