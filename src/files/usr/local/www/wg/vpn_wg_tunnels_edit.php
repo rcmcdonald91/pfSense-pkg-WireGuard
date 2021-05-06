@@ -358,9 +358,8 @@ else:
 				<tr>
 					<th><?=gettext("Description")?></th>
 					<th><?=gettext("Public key")?></th>
-					<th><?=gettext("Peer Address")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
-					<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+					<th><?=wg_format_endpoint(true)?></th>
 					<th><?=gettext("Actions")?></th>
 				</tr>
 			</thead>
@@ -375,9 +374,8 @@ else:
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
-					<td>(not available)</td>
 					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
-					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
+					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
 						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer['index']}&tun={$tun}")?>

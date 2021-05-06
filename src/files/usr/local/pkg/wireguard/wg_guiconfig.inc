@@ -24,19 +24,31 @@
 require_once('wireguard/wg_globals.inc');
 
 // Formats peer endpoint address and port for the UI
-function wg_format_endpoint($peer, $endpoint_key = 'endpoint', $port_key = 'port') {
+function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
 
-	if (!empty($peer[$endpoint_key])) {
+	if ($header) {
 
-		$ret_str = "{$peer[$endpoint_key]} : {$peer[$port_key]}";
+		$endpoint = gettext('Endpoint');
 
-	} else {
+		$port gettext('Port');
 
-		$ret_str = "Dynamic";
+		return "{$endpoint} : {$port}";
 
 	}
 
-	return $ret_str;
+	if (!is_null($peer)) {
+
+		if (!empty($peer[$endpoint_key])) {
+
+			return "{$peer[$endpoint_key]} : {$peer[$port_key]}";
+
+		} else {
+
+			return gettext('Dynamic');
+
+		}
+
+	}
 
 }
 

@@ -96,9 +96,8 @@ display_top_tabs($tab_array);
 						<th><?=gettext("Description")?></th>
 						<th><?=gettext("Public key")?></th>
 						<th><?=gettext("Tunnel")?></th>
-						<th><?=gettext("Peer Address")?></th>
 						<th><?=gettext("Allowed IPs")?></th>
-						<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+						<th><?=wg_format_endpoint(true)?></th>
 						<th><?=gettext("Actions")?></th>
 					</tr>
 				</thead>
@@ -110,11 +109,10 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 						<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
-						<td>(not available)</td>
 						<td><?=wg_generate_peer_allowedips_popup_link($peer_idx)?></td>
-						<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
+						<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit eer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+							<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
 							<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_idx}")?>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer_idx}"?>" usepost></a>
 						</td>

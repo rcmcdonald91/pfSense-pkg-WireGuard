@@ -140,9 +140,8 @@ display_top_tabs($tab_array);
 									<tr class="peerbg_color">
 										<th><?=gettext("Description")?></th>
 										<th><?=gettext("Public key")?></th>
-										<th><?=gettext("Peer Address")?></th>
 										<th><?=gettext("Allowed IPs")?></th>
-										<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+										<th><?=wg_format_endpoint(true)?></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -153,9 +152,8 @@ display_top_tabs($tab_array);
 									<tr class="peerbg_color">
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
-										<td>(not available)</td>
 										<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
-										<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
+										<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 									</tr>
 <?php
 				endforeach;
