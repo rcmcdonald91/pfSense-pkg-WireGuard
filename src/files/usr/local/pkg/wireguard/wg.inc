@@ -342,7 +342,7 @@ function wg_do_peer_post($post) {
 
 	$pconfig['allowedips']['row'] 	= wg_peer_allowedips($post);
 
-	$input_errors = wg_validate_peer_post($pconfig);
+	$input_errors = wg_validate_peer_post($pconfig, $peer_idx);
 
 	if (!$input_errors) {
 
@@ -392,7 +392,7 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
-	$input_errors 			= wg_validate_post($pconfig);
+	$input_errors 			= wg_validate_post($pconfig, $tun_idx);
 
 	if (!$input_errors) {
 

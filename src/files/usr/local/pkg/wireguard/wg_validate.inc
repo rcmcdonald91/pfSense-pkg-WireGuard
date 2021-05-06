@@ -35,7 +35,7 @@ require_once('wireguard/wg_globals.inc');
 wg_globals();
 
 // Validate the user's input and return error messages if not acceptable
-function wg_validate_post($pconfig) {
+function wg_validate_post($pconfig, $tun_idx) {
 	$input_errors = array();
 
 	// Assigned tunnels don't need these validation checks
@@ -101,7 +101,7 @@ function wg_validate_post($pconfig) {
 }
 
 // Valildate a peer
-function wg_validate_peer_post($post) {
+function wg_validate_peer_post($post, $peer_idx) {
 
 	$input_errors = array();
 
@@ -128,7 +128,8 @@ function wg_validate_peer_post($post) {
 
 		foreach ($peers as $peer) {
 
-			if ($peer['publickey'] == $post['publickey']) {
+			// We don't want to allow duplicate public keys to be assigned on the same tunnel
+			if (($peer['publickey'] == $post['publickey']) && ($peer['index'] != $peer_idx)) {
 
 				$input_errors[] = gettext("The public key ({$post['publickey']}) is already assigned to a peer on this tunnel ({$post['tun']})");
 				
