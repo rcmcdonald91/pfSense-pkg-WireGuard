@@ -47,7 +47,6 @@ function wg_install() {
 	update_status("done.\n  Upgrading WireGuard XML structure as necessary...");
 
 	// Things to upgrade
-	wg_upgrade_addidtags();
 	wg_upgrade_addresses();
 	wg_upgrade_allowedips();
 
@@ -131,43 +130,6 @@ function wg_upgrade_allowedips() {
 	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
 }
-
-function wg_upgrade_addidtags() {
-	global $wgg;
-
-	// Read latest settings
-	wg_globals();
-
-	foreach ($wgg['tunnels'] as $t_index => $tunnel) {
-
-		if (is_array($tunnel) && !isset($tunnel['tunid'])) {
-
-			$wgg['tunnels'][$t_index]['tunid'] = $t_index;
-
-		}
-
-	}
-
-	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded tunnel id tag XML structure.");
-
-	wg_globals();
-
-	foreach ($wgg['peers'] as $p_index => $peer) {
-
-		if (is_array($peer) && !isset($peer['peerid'])) {
-
-			$wgg['peers'][$p_index]['peerid'] = $p_index;
-
-		}
-
-	}
-
-	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded peer id tag XML structure.");
-
-}
-
 function wg_upgrade_addresses() {
 	global $wgg;
 

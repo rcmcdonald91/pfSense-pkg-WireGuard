@@ -115,13 +115,13 @@ if (!empty($a_devices)):
 					<td colspan="9">
 						<table class="table table-hover table-condensed">
 							<thead>
-								<th><?=gettext("Peer")?></th>
-								<th><?=gettext("Latest Handshake")?></th>
-								<th><?=gettext("Public Key")?></th>
-								<th><?=gettext("Endpoint : Port")?></th>
-								<th><?=gettext("Allowed IPs")?></th>
-								<th><?=gettext("RX")?></th>
-								<th><?=gettext("TX")?></th>
+								<th><?=gettext('Peer')?></th>
+								<th><?=gettext('Latest Handshake')?></th>
+								<th><?=gettext('Public Key')?></th>
+								<th><?=wg_format_endpoint(true)?></th>
+								<th><?=gettext('Allowed IPs')?></th>
+								<th><?=gettext('RX')?></th>
+								<th><?=gettext('TX')?></th>
 							</thead>
 							<tbody>
 <?php

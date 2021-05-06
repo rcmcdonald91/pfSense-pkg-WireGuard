@@ -121,10 +121,26 @@ function wg_validate_peer_post($post) {
 	} elseif (!wg_is_valid_key($post['publickey'])) {
 
 		$input_errors[] = gettext("The public key ({$post['publickey']}) is not a valid WireGuard public key.");
+
+	} elseif (!empty($post['tun'])) {
+
+		$peers = wg_get_tunnel_peers($post['tun']);
+
+		foreach ($peers as $peer) {
+
+			if ($peer['publickey'] == $post['publickey']) {
+
+				$input_errors[] = gettext("The public key ({$post['publickey']}) is already assigned to a peer on this tunnel ({$post'tun']})");
+				
+				break;
+
+			}
+
+		}
+
 	}
 
 	// Endpoint
-
 	$ep = trim($post['endpoint']);
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
