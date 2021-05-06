@@ -211,23 +211,20 @@ function wg_get_tunnel_peers($tunnel_name) {
 /*
  * This transforms a raw peer post consisting of repeatables 
  */
-function wg_peer_addresses($post) {
+function wg_peer_allowedips($post) {
 
 	// Convert the post into proper arrays
-	$addresses = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
+	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
 
 	$ret_array = array();
 
 	// Loop through each address entry
-	foreach ($addresses as $address) {
+	foreach ($allowedips as $address) {
 
-		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
+		// Remove any accidental whitespace
+		$address['address'] = trim($address['address']);
 
-		if (is_subnet($tmp_subnet)) {
-
-			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
-
-		}
+		$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
 
 	}
 
@@ -248,13 +245,10 @@ function wg_tunnel_addresses($post) {
 	// Loop through each address entry
 	foreach ($addresses as $address) {
 
-		$tmp_subnet = "{$address['address']}/{$address['address_subnet']}";
+		// Remove any accidental whitespace
+		$address['address'] = trim($address['address']);
 
-		if (is_subnet($tmp_subnet)) {
-
-			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
-
-		}
+		$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
 
 	}
 
@@ -332,7 +326,7 @@ function wg_do_peer_post($post) {
 	
 	$pconfig['presharedkey']	= $post['presharedkey'];
 
-	$pconfig['allowedips']['row'] 	= wg_peer_addresses($post);
+	$pconfig['allowedips']['row'] 	= wg_peer_allowedips($post);
 
 	$input_errors = wg_validate_peer_post($pconfig);
 
