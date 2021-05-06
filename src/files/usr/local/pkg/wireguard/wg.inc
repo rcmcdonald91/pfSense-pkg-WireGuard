@@ -701,11 +701,11 @@ function make_wg_conf($tunnel) {
 
 	$conf_path = "{$wgg['conf_path']}/{$tunnel['name']}.conf";
 
-	umask(600;)
+	$old_mask = umask(077);
 
 	file_put_contents($conf_path, $txt);
 
-	umask();
+	umask($old_mask);
 
 }
 
