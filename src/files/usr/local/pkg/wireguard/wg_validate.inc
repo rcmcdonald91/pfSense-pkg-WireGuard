@@ -34,9 +34,6 @@ require_once('wireguard/wg_globals.inc');
 
 wg_globals();
 
-global $wgpeerdefaultroute;
-$wgpeerdefaultroute = array();
-
 // Validate the user's input and return error messages if not acceptable
 function wg_validate_post($pconfig) {
 	$input_errors = array();
@@ -44,19 +41,20 @@ function wg_validate_post($pconfig) {
 	// Assigned tunnels don't need these validation checks
 	if (!is_wg_tunnel_assigned($pconfig)) {
 
-		foreach ($pconfig['addresses']['item'] as $counter => $item) {
+		foreach ($pconfig['addresses']['row'] as $address) {
 
-			$addr = trim($item['addr']);
+			// Remove any accidental whitespace
+			$address['address'] = trim($address['address']);
 
-			list($address, $address_subnet) = explode("/", $addr);
+			$tmp_subnet = "{$address['address']}/{$address['mask']}";
 
-			if (!empty($address) && !is_subnet($addr)) {
+			if (!empty($address['address']) && !is_subnet($tmp_subnet)) {
 
-				$input_errors[] = gettext("{$addr} is not a valid CIDR address");
+				$input_errors[] = gettext("{$tmp_subnet} is not a valid CIDR address");
 
 			}
 
-			$conflicts = where_is_ipaddr_configured($address, $skip, true, true, $address_subnet);
+			$conflicts = where_is_ipaddr_configured($address['address'], $skip, true, true, $address['mask']);
 
 			if (!empty($conflicts)) {
 
@@ -64,7 +62,7 @@ function wg_validate_post($pconfig) {
 
 					$ifname = strtoupper($conflict['if']);
 
-					$input_errors[] = gettext("{$addr} is already configured on this firewall: {$ifname} ({$conflict['ip_or_subnet']})");
+					$input_errors[] = gettext("{$address['address']} is already configured on this firewall: {$ifname} ({$conflict['ip_or_subnet']})");
 				
 				}
 			}
@@ -83,18 +81,18 @@ function wg_validate_post($pconfig) {
 
 	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
 
-		$input_errors[] = gettext("Invalid interface listen port.");
+		$input_errors[] = gettext('Invalid interface listen port.');
 
 	}
 
 	// Check keys
 	if (empty($pconfig['privatekey'])) {
 
-		$input_errors[] = gettext("A private key must be specified.");
+		$input_errors[] = gettext('A private key must be specified.');
 
 	} elseif (!wg_is_valid_key($pconfig['privatekey'])) {
 
-		$input_errors[] = gettext("The private key specified is not a valid WireGuard private key.");
+		$input_errors[] = gettext('The private key specified is not a valid WireGuard private key.');
 
 	}
 
@@ -118,38 +116,51 @@ function wg_validate_peer_post($post) {
 	// Check key
 	if (empty($post['publickey'])) {
 
-		$input_errors[] = gettext("A public key must be specified.");
+		$input_errors[] = gettext('A public key must be specified.');
 
-	} else {
+	} elseif (!wg_is_valid_key($post['publickey'])) {
 
-		if (!wg_is_valid_key($post['publickey'])) {
+		$input_errors[] = gettext("The public key ({$post['publickey']}) is not a valid WireGuard public key.");
 
-			$input_errors[] = gettext("The public key specified is not a valid WireGuard public key.");
+	} elseif (!empty($post['tun'])) {
+
+		$peers = wg_get_tunnel_peers($post['tun']);
+
+		foreach ($peers as $peer) {
+
+			if ($peer['publickey'] == $post['publickey']) {
+
+				$input_errors[] = gettext("The public key ({$post['publickey']}) is already assigned to a peer on this tunnel ({$post['tun']})");
+				
+				break;
+
+			}
 
 		}
 
 	}
 
 	// Endpoint
-
 	$ep = trim($post['endpoint']);
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
 
-		$input_errors[] = gettext("Endpoint must be a valid IPv4 or IPv6 adress or hostname.");
+		$input_errors[] = gettext('Endpoint must be a valid IPv4 or IPv6 adress or hostname.');
 	}
 
 	// Allowed IPs
-	if (!empty($post['allowedips'])) {
+	foreach ($pconfig['allowedips']['row'] as $address) {
 
-		foreach (explode(",", $post['allowedips']) as $ip) {
+		$address['address'] = trim($address['address']);
 
-			if (!is_subnet(trim($ip))) {
+		$tmp_subnet = "{$address['address']}/{$address['mask']}";
 
-				$input_errors[] =gettext("Address {$ip} is not a valid IPv4 or IPv6 CIDR subnet address.");
+		if (!empty($address['address']) && !is_subnet($tmp_subnet)) {
 
-			}
+			$input_errors[] =gettext("Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.");
+
 		}
+
 	}
 
 	return $input_errors;

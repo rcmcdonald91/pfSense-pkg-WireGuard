@@ -34,12 +34,23 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("\n  Creating WireGuard interface group...");
+	update_status("\n  Creating WireGuard early shell commands...");
+
+	// Installs the WireGuard earlyshellcmds
+	wg_earlyshellcmd_install();
+
+	update_status("done.\n  Creating WireGuard interface group...");
 
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status(" done.\n");
+	update_status("done.\n  Upgrading WireGuard XML structure as necessary...");
+
+	// Things to upgrade
+	wg_upgrade_addresses();
+	wg_upgrade_allowedips();
+
+	update_status("done.\n");
 
 	// The first organic resync called by pfSense package manager will finish the installation process
 
@@ -54,39 +65,71 @@ function wg_upgrade_allowedips() {
 	// Save a copy for manipulation
 	$peers = $wgg['peers'];
 
-	foreach ($peers as $p_index => $peer) {
+	foreach ($peers as $peer_idx => $peer) {
 
-		if (!is_array($wgg['peers'][$p_index]['allowedips'])) {
+		if (is_string($peer['allowedips']) && !empty($peer['allowedips'])) {
 
-			unset($wgg['peers'][$p_index]['allowedips']);
+			unset($wgg['peers'][$peer_idx]['allowedips']);
 
 			$a_allowedips = explode(',', $peer['allowedips']);
 
 			$tmp_addrs = array();
 
-			foreach($a_allowedips as $a_index=> $ip) {
+			foreach($a_allowedips as $a_index => $ip) {
 
-				$tmp_addrs['item'][$a_index]['addr'] = $ip;
+				$tmp_addrs['item'][$a_index]['addr'] 		= $ip;
 
-				$tmp_addrs['item'][$a_index]['descr'] = null;
+				$tmp_addrs['item'][$a_index]['descr'] 		= null;
 
-				$tmp_addrs['item'][$a_index]['peeraddr'] = null;
+				$tmp_addrs['item'][$a_index]['peeraddr'] 	= null;
 
 			}
 
-			$wgg['peers'][$p_index]['allowedips'] = $tmp_addrs;
+			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
 
 		}
-	
 
 	}
 
 	// Write the changes out to disk
 	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
+	// Read latest settings
+	wg_globals();
+
+	// Save a copy for manipulation
+	$peers = $wgg['peers'];
+
+	foreach ($peers as $peer_idx => $peer) {
+
+		if (is_array($peer['allowedips']['item']) && !is_array($peer['allowedips']['row'])) {
+
+			unset($wgg['peers'][$peer_idx]['allowedips']);
+
+			$tmp_addrs = array();
+
+			foreach ($peer['allowedips']['item'] as $a_index => $item) {
+
+				list($addr, $addr_mask) 			= explode('/', $item['addr']);
+
+				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
+
+				$tmp_addrs['row'][$a_index]['mask'] 		= $addr_mask;
+
+				$tmp_addrs['row'][$a_index]['description'] 	= $item['descr'];
+
+			}
+
+			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
+
+		}
+
+	}
+	
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+
 }
-
-
 function wg_upgrade_addresses() {
 	global $wgg;
 
@@ -96,11 +139,11 @@ function wg_upgrade_addresses() {
 	// Save a copy for manipulation
 	$tunnels = $wgg['tunnels'];
 
-	foreach ($tunnels as $t_index => $tunnel) {
+	foreach ($tunnels as $tun_idx => $tunnel) {
 
-		if (!is_array($wgg['tunnels'][$t_index]['addresses'])) {
+		if (is_string($tunnel['addresses']) && !empty($tunnel['addresses'])) {
 
-			unset($wgg['tunnels'][$t_index]['addresses']);
+			unset($wgg['tunnels'][$tun_idx]['addresses']);
 
 			$a_addresses = explode(',', $tunnel['addresses']);
 
@@ -108,13 +151,13 @@ function wg_upgrade_addresses() {
 
 			foreach($a_addresses as $a_index=> $address) {
 
-				$tmp_addrs['item'][$a_index]['addr'] = $address;
+				$tmp_addrs['item'][$a_index]['addr'] 	= $address;
 
-				$tmp_addrs['item'][$a_index]['descr'] = null;
+				$tmp_addrs['item'][$a_index]['descr'] 	= null;
 
 			}
 
-			$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
+			$wgg['tunnels'][$tun_idx]['addresses'] = $tmp_addrs;
 
 		}
 	
@@ -124,6 +167,40 @@ function wg_upgrade_addresses() {
 	// Write the changes out to disk
 	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
 
+	// Read latest settings
+	wg_globals();
+
+	// Save a copy for manipulation
+	$tunnels = $wgg['tunnels'];
+
+	foreach ($tunnels as $t_index => $tunnel) {
+
+		if (is_array($tunnel['addresses']['item']) && !is_array($tunnel['addresses']['row'])) {
+
+			unset($wgg['tunnels'][$t_index]['addresses']);
+
+			$tmp_addrs = array();
+
+			foreach ($tunnel['addresses']['item'] as $a_index => $item) {
+
+				list($addr, $addr_mask) 			= explode('/', $item['addr']);
+
+				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
+
+				$tmp_addrs['row'][$a_index]['mask'] 		= $addr_mask;
+
+				$tmp_addrs['row'][$a_index]['description'] 	= $item['descr'];
+
+			}
+
+			$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
+
+		}
+
+	}
+
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
 
 }
 
@@ -135,32 +212,62 @@ function wg_deinstall() {
 
 	wg_globals();
 
-	update_status("  Removing WireGuard interface group... ");
+	update_status("  Removing WireGuard early shell commands...");
 
+	// Removes the WireGuard earlyshellcmds
+	wg_earlyshellcmd_deinstall();
+
+	update_status("done.\n  Removing WireGuard interface group...");
+
+	// Removes the 'WireGuard' interface group
 	wg_ifgroup_deinstall();
 
-	update_status("done.\n  Removing WireGuard temporary files... ");
+	update_status("done.\n  Removing WireGuard temporary files...");
 
+	// Removes WireGuard temporary configuration files
 	wg_delete_config_files();
 
-	update_status("done.\n");
+	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'no') {
 
-	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'yes') {
+		update_status("done.\n  Removing WireGuard configuration settings...");
 
-		update_status("  Keeping WireGuard configuration settings... ");
-
-		update_status("done.\n");
-
-	} else {
-
-		update_status("  Removing WireGuard configuration settings... ");
-
+		// Removes WireGuard configuration
 		wg_remove_config_settings();
-
-		update_status("done.\n");
 
 	}
 
+	update_status("done.\n");
+
+}
+
+/*
+ * This function creates earlyshellcmd entries in the config
+ */
+function wg_earlyshellcmd_install() {
+	global $config, $wgg;
+
+	wg_earlyshellcmd_deinstall();
+
+	init_config_arr(array('system', 'earlyshellcmd'));
+
+	$config['system']['earlyshellcmd'] = array_merge($wgg['earlyshellcmds'], $config['system']['earlyshellcmd']);
+
+	write_config("[WireGuard] Earlyshellcmds installed.");
+
+}
+
+/*
+ * This function removes earlyshellcmd entries in the config
+ */
+function wg_earlyshellcmd_deinstall() {
+	global $config, $wgg;
+
+        init_config_arr(array('system', 'earlyshellcmd'));
+
+	$config['system']['earlyshellcmd'] = array_diff($config['system']['earlyshellcmd'], $wgg['earlyshellcmds']);
+
+	write_config("[WireGuard] Earlyshellcmds de-installed.");
+	
 }
 
 /*
@@ -204,3 +311,16 @@ function wg_ifgroup_deinstall() {
 	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
 
 }
+
+// This is a hack to get text onto the console during booting
+function print_message($message) {
+
+	$message = gettext($message);
+
+    	$message = escapeshellarg($message);
+
+	mwexec("printf {$message} >&2");
+
+}
+
+?>

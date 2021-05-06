@@ -32,16 +32,7 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
-// Wrapper for wg_status to output json
-function wg_status_json($pretty = false) {
-
-	$a_json = wg_status();
-
-	return(json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES));
-
-}
-
-// Returns an associative array of current wg status
+// Returns a massive associative array of current wg status
 function wg_status() {
 	global $wgg;
 
@@ -77,7 +68,23 @@ function wg_status() {
 			}
 
 			// Gets some extra information about tunnels not returned by `wg show all dump`
-			$a_ret[$current_device]['descr'] = $wgg['tunnels'][wg_get_tunnel_id($current_device)];
+			$tunnel_if_stats 		= pfSense_get_interface_stats($current_device);
+
+			$tun_idx			= wg_get_tunnel_array_index($current_device);
+
+			$tmp_tunnel['status'] 		= wg_interface_status($current_device) ? 'up' : 'down';
+
+			$tmp_tunnel['transfer_rx'] 	= $tunnel_if_stats['inbytes'];
+
+			$tmp_tunnel['transfer_tx'] 	= $tunnel_if_stats['outbytes'];
+
+			$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
+
+			$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
+
+			$tmp_tunnel['mtu']		=$tunnel_if_stats['mtu'];
+
+			$tmp_tunnel['config']		= $wgg['tunnels'][$tun_idx];
 
 			// Add the tunnel to the array
 			$a_ret[$current_device] = $tmp_tunnel;
@@ -96,13 +103,9 @@ function wg_status() {
 			}
 
 			// Gets some extra information about peers not returned by `wg show all dump`
-			$a_peer_info = wg_get_peer_info($tmp_peer['public_key'], $last_device);
+			$peer_id = wg_get_peer_id($tmp_peer['public_key'], $last_device);
 
-			$tmp_peer['descr'] = $a_peer_info['descr'];
-
-			$tmp_peer['id'] = $a_peer_info['id'];
-
-			$tmp_peer['allowed_ips_array'] = $a_peer_info['allowedips'];
+			$tmp_peer['config']		= $wgg['peers'][$peer_id];
 			
 			// Add the peer to the array
 			$a_ret[$last_device]['peers'][$a_device[1]] = $tmp_peer;
@@ -116,19 +119,67 @@ function wg_status() {
 
 }
 
-// Returns WireGuard peer name from a given public key and tunnel name
-function wg_get_peer_info($public_key, $tunnel) {
+// Wrapper for wg_status to output json
+function wg_status_json($pretty = false) {
+
+	$a_json = wg_status();
+
+	return json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES);
+
+}
+
+function wg_get_peer_id($public_key, $tunnel_name) {
 	global $wgg;
 
 	foreach ($wgg['peers'] as $peer_id => $peer){
 
-		if ($public_key == $peer['publickey'] && $tunnel = $peer['tun']) {
+		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
 
-			$ret_val = array('descr' => $peer['descr'], 'id' => $peer_id, 'allowedips' => $peer['allowedips']['item']);
-
-			return $ret_val;
+			return $peer_id;
 
 		}
+
+	}
+
+	return -1;
+
+}
+
+function wg_get_address_family($address) {
+
+	if (is_v4($address)) {
+
+		return 'inet';
+
+	} elseif (is_v6($address)) {
+
+		return 'inet6';
+
+	} else {
+
+		return false;
+
+	}
+
+}
+
+function wg_ifconfig_del_address($wg_ifname, $address, $verbose = false) {
+	global $wgg;
+
+	// Gets the ifconfig address family while also validating the input at the same time
+	if ($family_safe = wg_get_address_family($address)) {
+		
+		$ifname_safe = escapeshellarg($wg_ifname);
+
+		list($addr, $addr_subnet) = explode('/', $address);
+
+		$address_safe = escapeshellarg($addr);
+
+		$redirect = wg_verbosity_redirect($verbose);
+
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} delete {$redirect}");
+
+		return ($ret_val <> 0) ? false : true;
 
 	}
 
@@ -136,48 +187,216 @@ function wg_get_peer_info($public_key, $tunnel) {
 
 }
 
-// Get WireGuard interface status
-function wg_interface_status() {
+function wg_ifconfig_set_address($wg_ifname, $address, $verbose = false) {
 	global $wgg;
-	$ret_val = array();
 
-	$ifdescr = get_configured_interface_with_descr(true);
+	// Gets the ifconfig address family while also validating the input at the same time
+	if ($family_safe = wg_get_address_family($address)) {
+		
+		$ifname_safe = escapeshellarg($wg_ifname);
 
-	foreach($wgg["tunnels"] as $index => $tunnel) {
+		$address_safe = escapeshellarg($address);
 
-		$ret_val[$index]["interface"] = $tunnel['name'];
-		$ret_val[$index]["descr"] = wg_get_assinged_if($tunnel['name']);
-		$ret_val[$index]["mtu"] = pfSense_interface_getmtu($tunnel['name'])["mtu"];
-		foreach (pfSense_getall_interface_addresses($tunnel['name']) as $key => $addr) {
-			$ret_val[$index]["ips"][$key]['addr'] = $addr;
-		}
+		$redirect = wg_verbosity_redirect($verbose);
+
+		$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} {$family_safe} {$address_safe} add {$redirect}");
+
+		return ($ret_val <> 0) ? false : true;
+
 	}
 
-    return $ret_val;
+	return false;
 
 }
 
-// Get various package infos and return an array
-function wg_pkg_info() {
+function wg_ifconfig_down_interface($wg_ifname, $verbose = false) {
 	global $wgg;
 
-	$a_packages = $wgg['pkg_names'];
+	$ifname_safe = escapeshellarg($wg_ifname);
 
-	// Escape each package element
-	array_walk($a_packages, function(&$x) { $x = escapeshellarg($x); });
-	
-	// Construct an escaped sequence of packages to query
-	$packages = implode(" ", $a_packages);
+	$redirect = wg_verbosity_redirect($verbose);
 
-	exec("{$wgg['pkg']} query '%n\t%v\t%c' {$packages}", $output);
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} down {$redirect}");
 
-	foreach ($output as $key => $package) {
+	return ($ret_val <> 0) ? false : true;
 
-		$output[$key] = explode("\t", $package);
+}
+
+function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
+	global $wgg;
+
+	$ifname_safe = escapeshellarg($wg_ifname);
+
+	$redirect = wg_verbosity_redirect($verbose);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up {$redirect}");
+
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+/*
+ * This updates the addresses of the specified interface without tearing it down
+ */
+function wg_interface_update_addresses($wg_ifname) {
+	global $wgg;
+
+	$tun_idx = wg_get_tunnel_array_index($wg_ifname);
+
+	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
+	if (!is_wg_tunnel_assigned($wg_ifname)) {
+
+		// Get an array of the current addresses assigned to the tunnel interface
+		$current = pfSense_getall_interface_addresses($wg_ifname);
+
+		// Get an array of the addresses to be assigned to the interface
+		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $wgg['tunnels'][$tun_idx]['addresses']['row']);
+
+		// Determine the addresses to remove
+		$addresses_to_remove = array_diff($current, array_intersect($current, $desired));
+
+		// Now remove them
+		foreach ($addresses_to_remove as $address) {
+
+			wg_ifconfig_del_address($wg_ifname, $address);
+
+		}
+
+		// Determine the addresses to add
+		$addresses_to_add = array_diff($desired, array_intersect($current, $desired));
+
+		// Now add them
+		foreach ($addresses_to_add as $address) {
+
+			wg_ifconfig_set_address($wg_ifname, $address);
+
+		}
+
+	// Now, we need to let pfSense handle assigned WireGuard tunnel interfaces
+	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
+
+		$wg_pfsense_if = wg_get_pfsense_interface_info($wg_ifname);
+
+		interface_configure($wg_pfsense_if['name'], true);
 
 	}
 
-	return $output;
+}
+
+function wg_interface_syncconf($wg_ifname, $verbose = false) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$wg_conf_path_safe = escapeshellarg("{$wgg['conf_path']}/{$wg_ifname}.conf");
+
+	$redirect = wg_verbosity_redirect($verbose);
+
+	$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname_safe} {$wg_conf_path_safe} {$redirect}");
+
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+/*
+ * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ */
+function wg_interface_create($wg_ifname, $verbose = false) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$redirect = wg_verbosity_redirect($verbose);
+
+	// We first check to see if the desired interface already exists, then we create it if it does not
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} {$redirect} || {$wgg['ifconfig']} wg create name {$wg_ifname_safe} {$redirect}");
+		
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+/*
+ * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ */
+function wg_interface_group_add($wg_ifname, $verbose = false) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	$wg_ifgroup_safe = escapeshellarg($wgg['if_group']);
+
+	$redirect = wg_verbosity_redirect($verbose);
+
+	// We first check to see if the desired interface exists, then we add it to the group if it does
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname_safe} {$redirect} && {$wgg['ifconfig']} {$wg_ifname_safe} group {$wg_ifgroup_safe} {$redirect}");
+		
+	return ($ret_val <> 0) ? false : true;
+
+}
+
+function wg_interface_status($wg_ifname) {
+
+	return in_array("UP", wg_ifconfig_interface_flags($wg_ifname)) ? true : false;
+
+}
+
+function wg_ifconfig_interface_flags($wg_ifname) {
+	global $wgg;
+
+	$wg_ifname_safe = escapeshellarg($wg_ifname);
+
+	exec("{$wgg['ifconfig']} {$wg_ifname_safe}", $output, $ret_code);
+
+	if ($ret_code <> 0) {
+
+		return false;
+
+	}
+
+	if (preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
+
+		return explode(',', $matches['flags']);
+
+	}
+
+	return false;
+
+}
+
+// Get various package infos and return an associative array
+function wg_pkg_info() {
+	global $wgg;
+
+	$ret_val = array();
+
+	$a_fields = array('name'=> '%n', 'version' => '%v', 'comment' => '%c');
+
+	$a_return_keys = array_values(array_flip($a_fields));
+
+	$fields_safe = escapeshellarg(implode("\t", $a_fields));
+
+	$a_packages = $wgg['pkg_names'];
+
+	array_walk($a_packages, function(&$x) { $x = escapeshellarg($x); });
+	
+	$packages_safe = implode(" ", $a_packages);
+
+	exec("{$wgg['pkg']} query {$fields_safe} {$packages_safe}", $packages, $ret_code);
+
+	foreach ($packages as $pkg_index => $package) {
+
+		$fields = explode("\t", $package);
+
+		foreach ($fields as $field_index => $field) {
+
+			$ret_val[$pkg_index][$a_return_keys[$field_index]] = $field;
+
+
+		}
+
+	}
+
+	return ($ret_code <> 0) ? false : $ret_val;
 
 }
 
@@ -207,65 +426,15 @@ function wg_gen_publickey($privkey) {
 
 // Checks if a given private or public key is valid
 function wg_is_valid_key($key) {
-	global $wgg;
 
-	$key = escapeshellarg($key);
+	// Reference: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html
 
-	$retval = mwexec("echo {$key} | {$wgg['wg']} pubkey");
+	if (preg_match('/^[A-Za-z0-9+\/]{42}[A|E|I|M|Q|U|Y|c|g|k|o|s|w|4|8|0]=$/', $key)) {
 
-	return ($retval <> 0 ? false : true);
-
-}
-
-// This soft resyncs a given WireGuard Tunnel (i.e. wg syncconf wgX <(wg-quick strip wgX))
-function wg_syncconf($tunnel) {
-	global $wgg;
-
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
-
+		return true;
 	}
 
-	// Escape the inner arguments
-	$wg_ifname = escapeshellarg($wg_ifname);
-
-	// Pass the stripped configuration to wg(8)
-	$syncconf_command ="{$wgg['wg']} syncconf {$wg_ifname} <({$wgg['wg_quick']} strip {$wg_ifname})";
-
-	// Escape the outer arguments
-	$syncconf_command = escapeshellarg($syncconf_command);
-
-	exec("{$wgg['bash']} -c {$syncconf_command}");
-
-}
-
-// Executes a wg-quick(8) action using a specified tunnel or interface
-function exec_wg_quick_action($tunnel, $action, $verbose = false) {
-	global $wgg;
-
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
-
-	}
-
-	$action = escapeshellarg($action);
-
-	$wg_ifname = escapeshellarg($wg_ifname);
-
-	// Execute wg-quick(8) on the interface using the provided action 
-	exec("{$wgg['wg_quick']} {$action} {$wg_ifname}" . verbose_pipe($verbose));
+	return false;
 
 }
 
@@ -315,28 +484,19 @@ function next_wg_port() {
 
 }
 
-// Returns the array index of the given tunnel in the config, this isn't necessarily the interface number
-function wg_get_tunnel_id($tunnel) {
-	global $config, $wgg;
+// Wrapper to return just the xml array index
+function wg_get_tunnel_array_index($tunnel_name) {
+	global $wgg;
 
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
+	$ret_val = array();
 
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
+	if (is_array($wgg['tunnels'])) {
 
-		// Transform to an interface name
-		$wg_ifname = $tunnel['name'];
+		foreach ($wgg['tunnels'] as $t_index => $tunnel) {
 
-	}
+			if ($tunnel['name'] == $tunnel_name) {
 
-	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
-
-		foreach ($wgg['tunnels'] as $index => $tunnel) {
-
-			if ($tunnel['name'] == $wg_ifname) {
-				
-				return $index;
+				return $t_index;
 
 			}
 
@@ -378,9 +538,9 @@ function next_wg_if() {
 	
 }
 
-function verbose_pipe($verbose) {
+function wg_verbosity_redirect($verbose = false) {
 
-	return $verbose ? "" : " > /dev/null 2>&1";
+	return $verbose ? '' : '> /dev/null 2>&1';
 
 }
 

@@ -47,7 +47,7 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun = $_REQUEST['tun'];
 
-	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
+	$tun_idx = wg_get_tunnel_array_index($_REQUEST['tun']);
 
 }
 
@@ -68,10 +68,7 @@ if ($_POST) {
 
 		$pconfig = $res['pconfig'];
 
-		// This neeeds to be rewritten, not a fan...
 		if (!$input_errors) {
-
-			wg_resync();
 
 			// Save was successful
 			header("Location: /wg/vpn_wg_tunnels.php");
@@ -105,9 +102,9 @@ if ($_POST) {
 }
 
 // Looks like we are editing an existing tunnel
-if (isset($tun_id) && is_array($wgg['tunnels'][$tun_id])) {
+if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
 
-	$pconfig = &$wgg['tunnels'][$tun_id];
+	$pconfig = &$wgg['tunnels'][$tun_idx];
 
 	// Supress warning and allow peers to be added via the 'Add Peer' link
 	$is_new = false;
@@ -154,7 +151,7 @@ $form->addGlobal(new Form_Input(
 	'index',
 	'',
 	'hidden',
-	$tun_id
+	$tun_idx
 ));
 
 $tun_enable = new Form_Checkbox(
@@ -215,7 +212,7 @@ $group->add(new Form_Input(
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp("Public key for this tunnel. (<a id=\"copypubkey\" href=\"#\">Copy</a>)")->setReadonly();
+))->setHelp('Public key for this tunnel. (<a id="copypubkey" href="#">Copy</a>)')->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
@@ -236,28 +233,26 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<a href='../../interfaces_assign.php'>Interface Assignments</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<a href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
+		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$wgg['if_group']}'>WireGuard Interface Group</a>"
 	));
 
 	// Hack to ensure empty lists default to /128 mask
-	if (!is_array($pconfig['addresses']['item'])) {
+	if (!is_array($pconfig['addresses']['row'])) {
 
-		wg_init_config_arr($pconfig, array('addresses', 'item', 0));
+		wg_init_config_arr($pconfig, array('addresses', 'row', 0));
 
-		$pconfig['addresses']['item'][0]['addr'] = '/128';
+		$pconfig['addresses']['row'][0]['mask'] = '128';
 
 	}
 
-	$last = count($pconfig['addresses']['item']) - 1;
+	$last = count($pconfig['addresses']['row']) - 1;
 
-	foreach ($pconfig['addresses']['item'] as $counter => $item) {
-
-		list($address, $address_subnet) = explode("/", $item['addr']);
+	foreach ($pconfig['addresses']['row'] as $counter => $item) {
 	
 		$group = new Form_Group($counter == 0 ? 'Interface Addresses' : '');
 	
@@ -266,17 +261,17 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 		$group->add(new Form_IpAddress(
 			"address{$counter}",
 			'Interface Address',
-			$address,
+			$item['address'],
 			'BOTH'
 		))->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
-			->addMask("address_subnet{$counter}", $address_subnet)
+			->addMask("address_subnet{$counter}", $item['mask'])
 			->setWidth(4);
 		
 		$group->add(new Form_Input(
 			"address_descr{$counter}",
 			'Description',
 			'text',
-			$item['descr']
+			$item['description']
 		))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 			->setWidth(4);
 
@@ -301,25 +296,21 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 } else {
 
 	// We want all configured interfaces, including disabled ones
-	$iflist = get_configured_interface_list_by_realif(true);
-	$ifdescr = get_configured_interface_with_descr(true);
-	
-	$ifname = $iflist[$pconfig['name']];
-	$iffriendly = $ifdescr[$ifname];
+	$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<a href='../../interfaces_assign.php'>{$iffriendly} ({$ifname})</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Interface',
-		"<a href='../../interfaces.php?if={$ifname}'>Interface Configuration</a>"
+		"<i class='fa fa-ethernet' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces.php?if={$wg_pfsense_if['name']}'>Interface Configuration</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<a href='../../firewall_rules.php?if={$ifname}'>Firewall Configuration</a>"
+		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$wg_pfsense_if['name']}'>Firewall Configuration</a>"
 	));
 
 }
@@ -367,9 +358,8 @@ else:
 				<tr>
 					<th><?=gettext("Description")?></th>
 					<th><?=gettext("Public key")?></th>
-					<th><?=gettext("Peer Address")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
-					<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+					<th><?=wg_format_endpoint(true)?></th>
 					<th><?=gettext("Actions")?></th>
 				</tr>
 			</thead>
@@ -384,9 +374,8 @@ else:
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
-					<td></td>
-					<td><?=wg_generate_addresses_popup_link($peer['allowedips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
-					<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
+					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
+					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
 						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer['index']}&tun={$tun}")?>

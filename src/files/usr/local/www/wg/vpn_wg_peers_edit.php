@@ -40,15 +40,13 @@ wg_globals();
 
 if (isset($_REQUEST['tun'])) {
 
-	$tun = $_REQUEST['tun'];
-
-	$tun_id = wg_get_tunnel_id($_REQUEST['tun']);
+	$tun_name = $_REQUEST['tun'];
 
 }
 
 if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
 
-	$peer_id = $_REQUEST['peer'];
+	$peer_idx = $_REQUEST['peer'];
 
 }
 
@@ -64,8 +62,6 @@ if ($_POST) {
 		$pconfig = $res['pconfig'];
 
 		if (!$input_errors) {
-
-			wg_resync();
 			
 			// Save was successful
 			header("Location: /wg/vpn_wg_peers.php");
@@ -85,10 +81,10 @@ if ($_POST) {
 
 $pconfig = array();
 
-if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
+if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
 
-	// Looks like we are editing an existing tunnel
-	$pconfig = &$wgg['peers'][$peer_id];
+	// Looks like we are editing an existing peer
+	$pconfig = &$wgg['peers'][$peer_idx];
 
 } else {
 
@@ -99,7 +95,7 @@ if (isset($peer_id) && is_array($wgg['peers'][$peer_id])) {
 	$pconfig['enabled'] = 'yes';
 
 	// Automatically choose a tunnel based on the request 
-	$pconfig['tun'] = $tun;
+	$pconfig['tun'] = $tun_name;
 
 	// Default to a dynamic tunnel, so hide the endpoint form group
 	$is_dynamic = true;
@@ -133,7 +129,7 @@ $form->addGlobal(new Form_Input(
 	'index',
 	'',
 	'hidden',
-	$peer_id
+	$peer_idx
 ));
 
 $section->addInput(new Form_Checkbox(
@@ -229,19 +225,17 @@ $form->add($section);
 $section = new Form_Section('Address Configuration');
 
 // Hack to ensure empty lists default to /128 mask
-if (!is_array($pconfig['allowedips']['item'])) {
+if (!is_array($pconfig['allowedips']['row'])) {
 
-	wg_init_config_arr($pconfig, array('allowedips', 'item', 0));
+	wg_init_config_arr($pconfig, array('allowedips', 'row', 0));
 	
-	$pconfig['allowedips']['item'][0]['addr'] = '/128';
+	$pconfig['allowedips']['row'][0]['mask'] = '128';
 	
 }
 
-$last = count($pconfig['allowedips']['item']) - 1;
+$last = count($pconfig['allowedips']['row']) - 1;
 
-foreach ($pconfig['allowedips']['item'] as $counter => $item) {
-
-	list($address, $address_subnet) = explode("/", $item['addr']);
+foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group = new Form_Group($counter == 0 ? 'Allowed IPs' : null);
 
@@ -250,17 +244,17 @@ foreach ($pconfig['allowedips']['item'] as $counter => $item) {
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
 		'Allowed Subnet or Host',
-		$address,
+		$item['address'],
 		'BOTH'
 	))->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
-		->addMask("address_subnet{$counter}", $address_subnet, 128, 0)
+		->addMask("address_subnet{$counter}", $item['mask'], 128, 0)
 		->setWidth(4);
 
 	$group->add(new Form_Input(
 		"address_descr{$counter}",
 		'Description',
 		'text',
-		$item['descr']
+		$item['description']
 	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 		->setWidth(4);
 

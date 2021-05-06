@@ -24,19 +24,31 @@
 require_once('wireguard/wg_globals.inc');
 
 // Formats peer endpoint address and port for the UI
-function wg_format_endpoint($peer, $endpoint_key = 'endpoint', $port_key = 'port') {
+function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
 
-	if (!empty($peer[$endpoint_key])) {
+	if ($header) {
 
-		$ret_str = "{$peer[$endpoint_key]} : {$peer[$port_key]}";
+		$endpoint = gettext('Endpoint');
 
-	} else {
+		$port = gettext('Port');
 
-		$ret_str = "Dynamic";
+		return "{$endpoint} : {$port}";
 
 	}
 
-	return $ret_str;
+	if (!is_null($peer)) {
+
+		if (!empty($peer[$endpoint_key])) {
+
+			return "{$peer[$endpoint_key]} : {$peer[$port_key]}";
+
+		} else {
+
+			return gettext('Dynamic');
+
+		}
+
+	}
 
 }
 
@@ -71,6 +83,17 @@ function wg_truncate_pretty($str, $length) {
 	$s_pretty_dots = (strlen($str) > $length) ? '...' : '';
 
 	return "{$s_truncated}{$s_pretty_dots}";
+
+}
+
+function wg_interface_status_icon($status, $fa_icon = "fa-ethernet") {
+	global $wgg;
+
+	$ret_class = ($status == "up") ? 'text-success' : '';
+
+	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$status}\"></i>";
+
+	return $ret_html;
 
 }
 
@@ -162,18 +185,18 @@ function wg_secret_input_type() {
 }
 
 // Gets the appropriate class based on whether or not the target is enabled or disabled
-function wg_entrystatus_class($target) {
+function wg_entrystatus_class($target_device) {
 
-	return (isset($target) && $target['enabled'] == 'yes') ? 'enabled' : 'disabled';
+	return (isset($target_device) && $target_device['enabled'] == 'yes') ? 'enabled' : 'disabled';
 
 }
 
 // Generates a toggle icon link based on the status of the target
-function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
+function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
 
-	if (isset($target)) {
+	if (isset($target_device)) {
 	
-		$s_icon = (isset($target['enabled']) && $target['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
+		$s_icon = (isset($target_device['enabled']) && $target_device['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
 
 		$s_title = gettext($title);
 
@@ -187,51 +210,115 @@ function wg_generate_toggle_icon_link($target, $title = '', $href = '#', $usepos
 
 }
 
-// returns the assigned interface for a tunnel interface
-function wg_get_assinged_if($tun_if) {
+function wg_generate_tunnel_address_popup_link($tunnel_name) {
+	global $wgg;
 
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-	$iflist = get_configured_interface_list_by_realif(true);
-	$ifdescr = get_configured_interface_with_descr(true);
-	
-	$ifname = $iflist[$tun_if];
-	$iffriendly = $ifdescr[$ifname];
+	if (isset($wgg['tunnels'][$tun_idx]) && is_array($wgg['tunnels'][$tun_idx])) {
 
-	
-	return $iffriendly;
+		$tunnel = $wgg['tunnels'][$tun_idx];
 
-}
+		$addresses = $tunnel['addresses']['row'];
 
-// Generates an addresses link with a popup
-function wg_generate_addresses_popup_link($a_addresses, $title = null, $href = "#") {
+		if (!is_wg_tunnel_assigned($tunnel['name'])) {
+			
+			if (is_array($addresses) && count($addresses) > 0) {
 
-	$extras = count($a_addresses) - 1;
+				$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
 
-	sort($a_addresses);
+				$extras = count($addresses) - 1;
 
-	if ($extras > 0) {
+				if ($extras > 0) {
 
-		$data_html = "<table><thead><th>Value</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+					$data_html = "<table><thead><th>Address</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+		
+					foreach ($addresses as $address) {
+		
+						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+		
+					}
+		
+					$data_html .= '</tbody></table>';
+		
+					$hint = "{$addresses[0]['address']} (+{$extras})";
+		
+					$ret_html = "<a href=\"{$href}\" title=\"Interface Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+		
+					return $ret_html;
+		
+				} else {
+		
+					$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
+		
+					return $ret_html;
+				
+				}
+		
+			} else {
 
-		foreach ($a_addresses as $address) {
+				return '(none)';
 
-			$data_html .= "<tr><td>{$address['addr']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
+			}
+
+		} else {
+
+			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 3px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>";
 
 		}
 
-		$data_html .= '</tbody></table>';
+	}
 
-		$hint = "{$a_addresses[0]['addr']} (+{$extras})";
+}
 
-		$ret_html = "<a href=\"{$href}\" title=\"{$title}\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+function wg_generate_peer_allowedips_popup_link($peer_idx) {
+	global $wgg;
 
-		return $ret_html;
+	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
 
-	} else {
+		$peer = $wgg['peers'][$peer_idx];
 
-		$ret_html = "<a href=\"{$href}\" title=\"{$a_addresses[0]['descr']}\">{$a_addresses[0]['addr']}</a>";
+		$allowedips = $peer['allowedips']['row'];
+			
+		if (is_array($allowedips) && count($allowedips) > 0) {
 
-		return $ret_html;
+			$href = "vpn_wg_peers_edit.php?peer={$peer_idx}";
+
+			$extras = count($allowedips) - 1;
+
+			if ($extras > 0) {
+
+				$data_html = "<table><thead><th>Subnet</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+	
+				foreach ($allowedips as $address) {
+	
+					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+	
+				}
+	
+				$data_html .= '</tbody></table>';
+	
+				$hint = "{$allowedips[0]['address']} (+{$extras})";
+	
+				$ret_html = "<a href=\"{$href}\" title=\"Allowed IPs\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
+	
+				return $ret_html;
+	
+			} else {
+	
+				$ret_html = "<a href=\"{$href}\" title=\"{$allowedips[0]['description']}\">{$allowedips[0]['address']}/{$allowedips[0]['mask']}</a>";
+	
+				return $ret_html;
+			
+			}
+
+		} else {
+
+			return '(none)';
+		}
+
 
 	}
 

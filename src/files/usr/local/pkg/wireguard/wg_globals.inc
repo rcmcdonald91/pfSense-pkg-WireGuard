@@ -28,22 +28,21 @@ global $wgg;
 
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
-	'wg_quick'		=> '/usr/local/bin/wg-quick',
-	'bash'			=> '/usr/local/bin/bash',
 	'ifconfig'		=> '/sbin/ifconfig',
-	'kldstat'		=> '/sbin/kldstat',
 	'pkg'			=> '/usr/sbin/pkg',
+	'conscontrol'		=> '/sbin/conscontrol',
 	'kmod'			=> 'if_wg',
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',
-					'wireguard-tools'),
+					'wireguard-tools-lite'),
 	'conf_path'		=> '/usr/local/etc/wireguard',
 	'xml_path'		=> array('installedpackages', 'wireguard'),
 	'conf_paths_to_clean'	=> array(
 					'/usr/local/etc/wireguard', 
 					'/etc/wireguard', 
 					'/etc/wg'),
+	'earlyshellcmds'	=> array('/usr/local/etc/rc.reload_wireguard'),
 	'xml_paths_to_clean'	=> array(
 					array('wireguard'), 
 					array('installedpackages', 'wireguard')),

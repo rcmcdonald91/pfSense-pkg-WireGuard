@@ -42,15 +42,15 @@ if ($_POST) {
 
 	if (isset($_POST['tun'])) {
 
-		$tun_id = wg_get_tunnel_id($_POST['tun']);
+		$tun_name = $_POST['tun'];
 
 		if ($_POST['act'] == 'toggle') {
 
-			$input_errors = wg_toggle_tunnel($tun_id);
+			$input_errors = wg_toggle_tunnel($tun_name);
 
 		} elseif ($_POST['act'] == 'delete') { 
 
-			$input_errors = wg_delete_tunnel($tun_id);
+			$input_errors = wg_delete_tunnel($tun_name);
 
 		}
 
@@ -107,17 +107,16 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
-		foreach ($wgg['tunnels'] as $tun_id => $tunnel):
+		foreach ($wgg['tunnels'] as $tunnel):
 
 			$peers = wg_get_tunnel_peers($tunnel['name']);
-				
 ?>
 					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=wg_entrystatus_class($tunnel)?>">
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td><?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?></td>
-						<td><?=((!is_array($tunnel['addresses']['item'])) ? wg_get_assinged_if($tunnel['name']) : wg_generate_addresses_popup_link($tunnel['addresses']['item'], 'Tunnel Addresses', "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"))?></td>
+						<td><?=wg_generate_tunnel_address_popup_link($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 
@@ -141,9 +140,8 @@ display_top_tabs($tab_array);
 									<tr class="peerbg_color">
 										<th><?=gettext("Description")?></th>
 										<th><?=gettext("Public key")?></th>
-										<th><?=gettext("Peer Address")?></th>
 										<th><?=gettext("Allowed IPs")?></th>
-										<th><?=gettext("Endpoint").' : '.gettext("Port")?></th>
+										<th><?=wg_format_endpoint(true)?></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -152,11 +150,10 @@ display_top_tabs($tab_array);
 				foreach ($peers as $peer):
 ?>
 									<tr class="peerbg_color">
-										<td><?=htmlspecialchars($peer['descr'])?></td>
+										<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
-										<td><?=htmlspecialchars($peer['peeraddresses'])?></td>
-										<td><?=wg_generate_addresses_popup_link($peer['allowedips']['item'], 'Allowed IPs', "vpn_wg_peers_edit.php?peer={$peer['index']}")?></td>
-										<td><?=htmlspecialchars(wg_format_endpoint($peer))?></td>
+										<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
+										<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 									</tr>
 <?php
 				endforeach;
@@ -185,7 +182,7 @@ display_top_tabs($tab_array);
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
-			<?=gettext("Show peers")?>
+			<?=gettext("Show Peers")?>
 		</a>
 
 		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
