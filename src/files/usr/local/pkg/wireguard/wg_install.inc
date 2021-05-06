@@ -65,11 +65,11 @@ function wg_upgrade_allowedips() {
 	// Save a copy for manipulation
 	$peers = $wgg['peers'];
 
-	foreach ($peers as $p_index => $peer) {
+	foreach ($peers as $peer_idx => $peer) {
 
-		if (!is_array($wgg['peers'][$p_index]['allowedips'])) {
+		if (is_string($peer['allowedips'])) {
 
-			unset($wgg['peers'][$p_index]['allowedips']);
+			unset($wgg['peers'][$peer_idx]['allowedips']);
 
 			$a_allowedips = explode(',', $peer['allowedips']);
 
@@ -77,15 +77,15 @@ function wg_upgrade_allowedips() {
 
 			foreach($a_allowedips as $a_index => $ip) {
 
-				$tmp_addrs['item'][$a_index]['addr'] = $ip;
+				$tmp_addrs['item'][$a_index]['addr'] 		= $ip;
 
-				$tmp_addrs['item'][$a_index]['descr'] = null;
+				$tmp_addrs['item'][$a_index]['descr'] 		= null;
 
-				$tmp_addrs['item'][$a_index]['peeraddr'] = null;
+				$tmp_addrs['item'][$a_index]['peeraddr'] 	= null;
 
 			}
 
-			$wgg['peers'][$p_index]['allowedips'] = $tmp_addrs;
+			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
 
 		}
 
@@ -100,27 +100,27 @@ function wg_upgrade_allowedips() {
 	// Save a copy for manipulation
 	$peers = $wgg['peers'];
 
-	foreach ($peers as $p_index => $peer) {
+	foreach ($peers as $peer_idx => $peer) {
 
-		if (!is_array($wgg['peers'][$p_index]['allowedips']['row'])) {
+		if (is_array($peer['allowedips']['item']) && !is_array($peer['allowedips']['row'])) {
 
-			unset($wgg['peers'][$p_index]['allowedips']);
+			unset($wgg['peers'][$peer_idx]['allowedips']);
 
 			$tmp_addrs = array();
 
 			foreach ($peer['allowedips']['item'] as $a_index => $item) {
 
-				list($addr, $addr_mask) = explode('/', $item['addr']);
+				list($addr, $addr_mask) 			= explode('/', $item['addr']);
 
-				$tmp_addrs['row'][$a_index]['address'] = $addr;
+				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
 
-				$tmp_addrs['row'][$a_index]['mask'] = $addr_mask;
+				$tmp_addrs['row'][$a_index]['mask'] 		= $addr_mask;
 
-				$tmp_addrs['row'][$a_index]['description'] = $item['descr'];
+				$tmp_addrs['row'][$a_index]['description'] 	= $item['descr'];
 
 			}
 
-			$wgg['peers'][$p_index]['allowedips'] = $tmp_addrs;
+			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
 
 		}
 
@@ -139,11 +139,11 @@ function wg_upgrade_addresses() {
 	// Save a copy for manipulation
 	$tunnels = $wgg['tunnels'];
 
-	foreach ($tunnels as $t_index => $tunnel) {
+	foreach ($tunnels as $tun_idx => $tunnel) {
 
-		if (!is_array($wgg['tunnels'][$t_index]['addresses'])) {
+		if (is_string($tunnel['addresses'])) {
 
-			unset($wgg['tunnels'][$t_index]['addresses']);
+			unset($wgg['tunnels'][$tun_idx]['addresses']);
 
 			$a_addresses = explode(',', $tunnel['addresses']);
 
@@ -151,13 +151,13 @@ function wg_upgrade_addresses() {
 
 			foreach($a_addresses as $a_index=> $address) {
 
-				$tmp_addrs['item'][$a_index]['addr'] = $address;
+				$tmp_addrs['item'][$a_index]['addr'] 	= $address;
 
-				$tmp_addrs['item'][$a_index]['descr'] = null;
+				$tmp_addrs['item'][$a_index]['descr'] 	= null;
 
 			}
 
-			$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
+			$wgg['tunnels'][$tun_idx]['addresses'] = $tmp_addrs;
 
 		}
 	
@@ -175,7 +175,7 @@ function wg_upgrade_addresses() {
 
 	foreach ($tunnels as $t_index => $tunnel) {
 
-		if (!is_array($wgg['tunnels'][$t_index]['addresses']['row'])) {
+		if (is_array($tunnel['addresses']['item']) && !is_array($tunnel['addresses']['row'])) {
 
 			unset($wgg['tunnels'][$t_index]['addresses']);
 
@@ -183,13 +183,13 @@ function wg_upgrade_addresses() {
 
 			foreach ($tunnel['addresses']['item'] as $a_index => $item) {
 
-				list($addr, $addr_mask) = explode('/', $item['addr']);
+				list($addr, $addr_mask) 			= explode('/', $item['addr']);
 
-				$tmp_addrs['row'][$a_index]['address'] = $addr;
+				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
 
-				$tmp_addrs['row'][$a_index]['mask'] = $addr_mask;
+				$tmp_addrs['row'][$a_index]['mask'] 		= $addr_mask;
 
-				$tmp_addrs['row'][$a_index]['description'] = $item['descr'];
+				$tmp_addrs['row'][$a_index]['description'] 	= $item['descr'];
 
 			}
 
