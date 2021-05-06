@@ -224,7 +224,11 @@ function wg_peer_allowedips($post) {
 		// Remove any accidental whitespace
 		$address['address'] = trim($address['address']);
 
-		$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
+		if (!empty($address['address'])) {
+
+			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
+
+		}
 
 	}
 
@@ -248,8 +252,12 @@ function wg_tunnel_addresses($post) {
 		// Remove any accidental whitespace
 		$address['address'] = trim($address['address']);
 
-		$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
+		if (!empty($address['address'])) {
 
+			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
+
+		}
+		
 	}
 
 	return $ret_array;
