@@ -340,7 +340,7 @@ function wg_unbound_acl_update($quick = true) {
 
 	if (!$quick) {
 
-		servies_unbound_configure();
+		services_unbound_configure();
 
 	}
 
