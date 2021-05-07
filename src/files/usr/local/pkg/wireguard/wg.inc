@@ -465,12 +465,6 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 	}
 
-	if (!$quick) {
-
-		wg_unbound_acl_update();
-
-	}
-
 }
 
 function wg_get_enabled_tunnels() {
