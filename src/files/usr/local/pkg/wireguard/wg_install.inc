@@ -360,6 +360,8 @@ function wg_earlyshellcmd_install() {
 
 	$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
 
+	$test = wg_get_tunnel_networks();
+
 	$a_shellcmdsettings = &$config['installedpackages']['shellcmdsettings']['config'];
 
 	$shellcmd_pkg_cmds = array_map(fn($x) => $x['cmd'], $a_shellcmdsettings);
