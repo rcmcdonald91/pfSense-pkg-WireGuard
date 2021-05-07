@@ -22,19 +22,11 @@
  */
 
 // pfSense includes
-require_once('config.inc');
-require_once('globals.inc');
-require_once('interfaces.inc');
-require_once('pfsense-utils.inc');
-require_once('pkg-utils.inc');
-require_once('service-utils.inc');
-require_once('system.inc');
+require_once('config.gui.inc');
 require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_api.inc');
-require_once('wireguard/wg_globals.inc');
-require_once('wireguard/wg_guiconfig.inc');
 require_once('wireguard/wg_install.inc');
 require_once('wireguard/wg_validate.inc');
 
@@ -323,7 +315,7 @@ function wg_do_peer_post($post) {
 
 	}
 
-	return(array('input_errors' => $input_errors, 'pconfig' => $pconfig));
+	return array('input_errors' => $input_errors, 'pconfig' => $pconfig);
 
 }
 

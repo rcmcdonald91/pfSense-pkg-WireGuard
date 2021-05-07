@@ -4,7 +4,7 @@
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
- * Copyright (c) 2021 R. Christian McDonald
+ * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,7 @@
  */
 
 // pfSense includes 
-require_once('globals.inc');
-require_once('config.inc');
 require_once('pfsense-utils.inc');	// where_is_ipaddr_configured
-require_once('system.inc');
-require_once('pkg-utils.inc');
-require_once('service-utils.inc');
 require_once('util.inc'); 		// is_subnet, is_port, is_hostname, is_ipaddr
 
 // WireGuard includes

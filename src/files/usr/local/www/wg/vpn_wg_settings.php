@@ -28,11 +28,12 @@
 ##|-PRIV
 
 // pfSense includes
-require_once('guiconfig.inc');
 require_once('functions.inc');
+require_once('guiconfig.inc');
 
 // WireGuard includes
 require_once('wireguard/wg.inc');
+require_once('wireguard/wg_guiconfig.inc');
 
 global $wgg;
 

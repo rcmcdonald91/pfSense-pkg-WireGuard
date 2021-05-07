@@ -29,12 +29,11 @@
 
 // pfSense includes
 require_once('guiconfig.inc');
-require_once('functions.inc');
-require_once('shortcuts.inc');
 require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg.inc');
+require_once('wireguard/wg_guiconfig.inc');
 
 // Grab the latest info
 wg_globals();
