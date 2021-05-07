@@ -406,6 +406,11 @@ function wg_resync_all($platform_booting = false) {
 
 	}
 
+	if (!$platform_booting) {
+
+		wg_unbound_acl_update(false);
+	}
+
 }
 
 

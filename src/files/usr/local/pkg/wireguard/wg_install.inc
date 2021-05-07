@@ -55,7 +55,7 @@ function wg_install() {
 
 	wg_unbound_acl_install();
 
-	wg_unbound_acl_update();
+	wg_unbound_acl_update(false);
 
 	update_status("done.\n");
 
