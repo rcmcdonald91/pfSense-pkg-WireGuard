@@ -237,6 +237,10 @@ function wg_deinstall() {
 
 	}
 
+	update_status("done.\n  Removing WireGuard Unbound ACL...");
+
+	wg_unbound_acl_deinstall();
+
 	update_status("done.\n");
 
 }
