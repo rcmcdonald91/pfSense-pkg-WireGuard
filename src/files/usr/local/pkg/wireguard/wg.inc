@@ -397,6 +397,12 @@ function wg_resync_all($platform_booting = false) {
 
 	}
 
+	if ($g['wirguard_installing']) {
+
+		update_status("done.\n  Updating Unbound ACL and restarting Unbound service...");
+
+	}
+
 	if (!$platform_booting) {
 
 		wg_unbound_acl_update();
