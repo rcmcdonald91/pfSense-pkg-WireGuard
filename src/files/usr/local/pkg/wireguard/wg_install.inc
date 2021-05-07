@@ -19,6 +19,9 @@
  * limitations under the License.
  */
 
+// pfSense includes
+require_once('services.inc');
+
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
@@ -302,6 +305,7 @@ function wg_unbound_acl_update() {
 
 	$a_ubound_acls = &$config['unbound']['acls'];
 
+	services_unbound_configure();
 
 }
 
