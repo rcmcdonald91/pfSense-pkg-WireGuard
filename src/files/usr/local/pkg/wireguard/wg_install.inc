@@ -308,9 +308,9 @@ function wg_unbound_acl_install($clean = true) {
 function wg_unbound_acl_update($quick = true) {
 	global $config, $wgg;
 
-	$tunnel_networks = wg_get_tunnel_networks();
-
 	init_config_arr(array('unbound', 'acls'));
+
+	$tunnel_networks = wg_get_tunnel_networks();
 
 	$a_unbound_acls = &$config['unbound']['acls'];
 
@@ -322,7 +322,7 @@ function wg_unbound_acl_update($quick = true) {
 
 		$unbound_acl_rows[$net_idx]['mask'] = $network['mask'];
 
-		$unbound_acl_rows[$net_idx]['description'] = null;
+		$unbound_acl_rows[$net_idx]['description'] = "{$network['tun']} ({$network['descr']})";
 
 	}
 

@@ -669,7 +669,11 @@ function wg_get_tunnel_networks($family = 'both') {
 
 					$network = gen_subnet($address['address'], $address['mask']);
 
-					$wg_tunnel_networks[] 	= array('network' => $network, 'mask' => $address['mask']);
+					$wg_tunnel_networks[] 	= array(
+									'network' => $network, 
+									'mask' => $address['mask'],
+									'tun' => $tunnel['name'],
+									'descr' => $tunnel['descr']);
 
 				}
 
