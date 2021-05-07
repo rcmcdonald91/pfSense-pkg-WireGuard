@@ -59,7 +59,7 @@ $wgg = array(
 	'unboundaclentry'	=> array(
 					'aclname' => 'WireGuard',
 					'aclaction' => 'allow',
-					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)'),
+					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)',
 					'rows' => array()),
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => 'Greater than 1 day'),
