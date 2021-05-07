@@ -48,7 +48,7 @@ $wgg = array(
 	'shellcmdsettings'	=> array(
 					array(
 						'cmd' => '/usr/local/etc/rc.reload_wireguard',
-						'cmdtype' = > 'earlyshellcmd',
+						'cmdtype' => 'earlyshellcmd',
 						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)'),
 	'if_prefix'		=> 'tun_wg',
 	'if_group'		=> 'WireGuard',
