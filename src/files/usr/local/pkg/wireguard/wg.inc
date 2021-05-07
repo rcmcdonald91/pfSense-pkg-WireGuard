@@ -387,7 +387,11 @@ function wg_resync_all() {
 
 	if ($g['wireguard_installing']) {
 
-		update_status("\n  Configuring existing WireGuard tunnels...");
+		update_status("\n  Creating WireGuard Unbound ACL...");
+
+		wg_unbound_acl_install();
+
+		update_status("done.\n  Creating any existing WireGuard tunnels...");
 
 	}
 
@@ -397,12 +401,14 @@ function wg_resync_all() {
 
 	}
 
-	if ($g['wireguard_installing']) {
+	wg_unbound_update_acl();
 
-		update_status("done.\n");
+	if ($g['wireguard_installing']) {
 
 		// We are no longer installing
 		unset($g['wireguard_installing']);
+
+		exit();
 
 	}
 
@@ -450,6 +456,12 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($tunnel['name']);
+
+	}
+
+	if (!$quick) {
+
+		wg_unbound_acl_update();
 
 	}
 

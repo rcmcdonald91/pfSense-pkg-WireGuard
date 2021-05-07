@@ -45,17 +45,21 @@ $wgg = array(
 	'xml_paths_to_clean'	=> array(
 					array('wireguard'), 
 					array('installedpackages', 'wireguard')),
-	'shellcmdsettings'	=> array(
-					array(
-						'cmd' => '/usr/local/etc/rc.reload_wireguard',
-						'cmdtype' => 'earlyshellcmd',
-						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)')),
 	'if_prefix'		=> 'tun_wg',
 	'if_group'		=> 'WireGuard',
 	'ifgroupentry'		=> array(
 					'ifname' => 'WireGuard', 
 					'descr' => 'WireGuard Interface Group (DO NOT EDIT/DELETE!)', 
 					'members' => null),
+	'shellcmdentries'	=> array(
+					array(
+						'cmd' => '/usr/local/etc/rc.reload_wireguard',
+						'cmdtype' => 'earlyshellcmd',
+						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)')),
+	'unboundaclentry'	=> array(
+					'aclname' => 'WireGuard',
+					'aclaction' => 'action',
+					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)')),
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => 'Greater than 1 day'),
 					300 => array('class' => 'text-warning', 'title' => 'Greater than 5 minutes'),

@@ -30,7 +30,14 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("\n  Creating WireGuard early shell commands...");
+	update_status("\n  Upgrading existing WireGuard XML configuration if necessary...");
+
+	// Things to potentially upgrade
+	wg_upgrade_addresses();
+
+	wg_upgrade_allowedips();
+
+	update_status("done.\n  Creating WireGuard early shell commands...");
 
 	// Installs the WireGuard earlyshellcmds
 	wg_earlyshellcmd_install();
@@ -39,12 +46,6 @@ function wg_install() {
 
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
-
-	update_status("done.\n  Upgrading WireGuard XML structure as necessary...");
-
-	// Things to upgrade
-	wg_upgrade_addresses();
-	wg_upgrade_allowedips();
 
 	update_status("done.\n");
 
@@ -240,6 +241,62 @@ function wg_deinstall() {
 
 }
 
+function wg_unbound_acl_deinstall() {
+	global $config, $wgg;
+
+	init_config_arr(array('unbound', 'acls'));
+
+	$a_unbound_acls = &$config['unbound']['acls'];
+
+	$unbound_acl_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
+
+	// Install a blank ACL entry if necessary
+	if ($acls = preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $unbound_acl_names)) {
+
+		foreach ($acls as $acl_idx => $acl) {
+
+			unset($a_unbound_acls[$acl_idx]);
+
+		}
+
+	}
+
+	write_config("[WireGuard] Unbound ACL de-installed.");
+
+}
+
+function wg_unbound_acl_install() {
+	global $config, $wgg;
+
+	init_config_arr(array('unbound', 'acls'));
+
+	$a_unbound_acls = &$config['unbound']['acls'];
+
+	$unbound_acl_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
+
+	// Install a blank ACL entry if necessary
+	if (!preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $unbound_acl_names)) {
+
+		$a_unbound_acls[] = $wgg['unboundaclentry'];
+
+	}
+
+	write_config("[WireGuard] Unbound ACL installed.");
+
+	wg_unbound_acl_update();
+
+}
+
+function wg_unbound_acl_update() {
+	global $config, $wgg;
+
+	init_config_arr(array('unbound', 'acls'));
+
+	$a_ubound_acls = &$config['unbound']['acls'];
+
+
+}
+
 /*
  * This function creates earlyshellcmd entries in the config
  */
@@ -258,7 +315,7 @@ function wg_earlyshellcmd_install() {
 
 	$shellcmd_pkg_cmds = array_map(fn($x) => $x['cmd'], $a_shellcmdsettings);
 
-	foreach ($wgg['shellcmdsettings'] as $shellcmd) {
+	foreach ($wgg['shellcmdentries'] as $shellcmd) {
 
 		// Need to escape slashes from the path
 		$escaped_cmd = preg_quote($shellcmd['cmd'], '/');
