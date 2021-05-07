@@ -30,6 +30,17 @@ global $wgg;
 
 wg_globals();
 
+// This is a hack to get text onto the console during booting
+function print_message($message) {
+
+	$message = gettext($message);
+
+    	$message = escapeshellarg($message);
+
+	mwexec("printf {$message} >&2");
+
+}
+
 if (platform_booting()) {
 
 	print_message("Configuring WireGuard tunnels...");

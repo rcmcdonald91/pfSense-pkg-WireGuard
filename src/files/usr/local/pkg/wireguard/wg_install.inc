@@ -230,6 +230,10 @@ function wg_deinstall() {
 		// Removes WireGuard configuration
 		wg_remove_config_settings();
 
+	} else {
+
+		update_status("done.\n  Keeping WireGuard configuration settings...");
+
 	}
 
 	update_status("done.\n");
@@ -332,7 +336,7 @@ function wg_earlyshellcmd_deinstall() {
  * This function creates the WireGuard interface group
  */
 function wg_ifgroup_install() {
-	global $g, $config, $wgg;
+	global $config, $wgg;
 
 	wg_ifgroup_deinstall();
 
@@ -340,9 +344,15 @@ function wg_ifgroup_install() {
 
 	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
 
-	$a_ifgroups[] = $wgg['ifgroupentry'];
+	$ifgroup_names = array_map(fn($x) => $x['ifname'], $a_ifgroups);
 
-	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) (re)installed.");
+	if (!preg_grep("/{$wgg['ifgroupentry']['ifname']}/", $ifgroup_names)) {
+
+		$a_ifgroups[] = $wgg['ifgroupentry'];
+
+	}
+
+	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) installed.");
 
 }
 
@@ -350,34 +360,24 @@ function wg_ifgroup_install() {
  * This function removes the WireGuard interface group
  */
 function wg_ifgroup_deinstall() {
-	global $g, $config, $wgg;
+	global $config, $wgg;
 
 	init_config_arr(array('ifgroups', 'ifgroupentry'));
 
 	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];
 
-	foreach ($a_ifgroups as $index => $ifg) {
+	$ifgroup_names = array_map(fn($x) => $x['ifname'], $a_ifgroups);
 
-		if ($ifg['ifname'] == $wgg['ifgroupentry']['ifname']) {
+	if ($groups = preg_grep("/{$wgg['ifgroupentry']['ifname']}/", $ifgroup_names)) {
 
-			unset($a_ifgroups[$index]);
+		foreach ($groups as $group_idx => $group) {
+
+			unset($a_ifgroups[$group_idx]);
 
 		}
-		
+
 	}
-
 	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
-
-}
-
-// This is a hack to get text onto the console during booting
-function print_message($message) {
-
-	$message = gettext($message);
-
-    	$message = escapeshellarg($message);
-
-	mwexec("printf {$message} >&2");
 
 }
 
