@@ -588,15 +588,19 @@ function is_wg_enabled() {
 
 	wg_globals();
 
-	foreach ($wgg['tunnels'] as $tunnel) {
+	if (is_array($wgg['tunnels'])) {
 
-		if (empty($tunnel['enabled'])) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
-			continue;
+			if (empty($tunnel['enabled'])) {
+
+				continue;
+
+			}
+
+			return true;
 
 		}
-
-		return true;
 
 	}
 
@@ -635,6 +639,49 @@ function wg_get_tunnel_peers($tunnel_name) {
 
 	// Return the list of filtered peers
 	return $a_ret;
+
+}
+
+/* 
+ * Return WireGuard tunnel networks for a given address family
+ */
+function wg_get_tunnel_networks($family = 'both') {
+	global $wgg;
+
+	$wg_tunnel_networks = array();
+
+	if (is_wg_enabled()) {
+
+		foreach ($wgg['tunnels'] as $tunnel) {
+
+			foreach ($tunnel['addresses']['row'] as $address) {
+
+				$masked_address = "{$address['address']}/{$address['mask']}";
+
+				if ((is_ipaddrv6($masked_address) && ($family == 'ipv4')) ||
+					(is_ipaddrv4($masked_address) && ($family == 'ipv6'))) {
+
+					continue;
+
+				}
+
+				if (is_subnet($masked_address)) {
+
+					$network = gen_subnet($address['address'], $address['mask']);
+
+					$wg_tunnel_networks[] = "{$network}/{$address['mask']}";
+
+				}
+
+			}
+
+		}
+
+		return $wg_tunnel_networks;
+
+	}
+
+	return false;
 
 }
 

@@ -90,7 +90,7 @@ if (!empty($a_devices)):
 	foreach ($a_devices as $device_name => $device):
 ?>
 			<tbody>	
-				<tr>
+				<tr class="tunnel-entry">
 					<td>
 						<?=wg_interface_status_icon($device['status'])?>
 						<a href="vpn_wg_tunnels_edit.php?tun=<?=$device_name?>"><?=htmlspecialchars($device_name)?>
@@ -224,7 +224,11 @@ events.push(function() {
 	$('#showpeers').click(function () {
 		peershidden = !peershidden;
 		hideClass('peer-entries', peershidden);
-	})
+	});
+
+	$('.tunnel-entry').click(function () {
+		$(this).next().toggle();
+	});
 
 });
 //]]>
