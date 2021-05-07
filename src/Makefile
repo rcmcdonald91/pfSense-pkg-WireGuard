@@ -38,6 +38,9 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/wireguard.priv.inc \
 		${STAGEDIR}/etc/inc/priv
 
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/parse_config/*.inc \
+		${STAGEDIR}${PREFIX}/pkg/parse_config
+
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
 		${STAGEDIR}${PREFIX}/pkg
 
