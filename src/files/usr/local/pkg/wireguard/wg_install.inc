@@ -308,11 +308,11 @@ function wg_unbound_acl_install($clean = true) {
 function wg_unbound_acl_update($quick = true) {
 	global $config, $wgg;
 
+	$tunnel_networks = wg_get_tunnel_networks();
+
 	init_config_arr(array('unbound', 'acls'));
 
 	$a_unbound_acls = &$config['unbound']['acls'];
-
-	$tunnel_networks = wg_get_tunnel_networks();
 
 	$unbound_acl_rows = array();
 
