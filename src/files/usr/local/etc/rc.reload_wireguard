@@ -41,10 +41,7 @@ function print_message($message) {
 
 }
 
-// Are we booting?
-$booting = platform_booting();
-
-if ($booting) {
+if (platform_booting()) {
 
 	print_message("Configuring WireGuard tunnels...");
 
@@ -53,10 +50,9 @@ if ($booting) {
 
 }
 
-// We don't need to resync unbound because the boot process will handle it if we are booting
-wg_resync_all($booting);
+wg_resync_all();
 
-if ($booting) {
+if (platform_booting()) {
 
 	// Unmute the kernel output now that we are done
 	mwexec("{$wgg['conscontrol']} mute off");

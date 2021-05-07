@@ -51,10 +51,6 @@ function wg_install() {
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status("done.\n  Creating blank WireGuard Unbound ACL...");
-
-	wg_unbound_acl_install();
-
 	update_status("done.\n");
 
 	// The first organic resync called by pfSense package manager will finish the installation process
@@ -245,102 +241,7 @@ function wg_deinstall() {
 
 	}
 
-	update_status("done.\n  Removing WireGuard Unbound ACL...");
-
-	wg_unbound_acl_deinstall();
-
 	update_status("done.\n");
-
-}
-
-function wg_unbound_acl_deinstall() {
-	global $config, $wgg;
-
-	init_config_arr(array('unbound', 'acls'));
-
-	$a_unbound_acls = &$config['unbound']['acls'];
-
-	$unbound_acl_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
-
-	// Install a blank ACL entry if necessary
-	if ($acls = preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $unbound_acl_names)) {
-
-		foreach ($acls as $acl_idx => $acl) {
-
-			unset($a_unbound_acls[$acl_idx]);
-
-		}
-
-	}
-
-	write_config("[WireGuard] Unbound ACL de-installed.");
-
-}
-
-function wg_unbound_acl_install($clean = true) {
-	global $config, $wgg;
-
-	if ($clean) {
-
-		wg_unbound_acl_deinstall();
-
-	}
-
-	init_config_arr(array('unbound', 'acls'));
-
-	$a_unbound_acls = &$config['unbound']['acls'];
-
-	$unbound_acl_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
-
-	// Install a blank ACL entry if necessary
-	if (!preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $unbound_acl_names)) {
-
-		$a_unbound_acls[] = $wgg['unboundaclentry'];
-
-	}
-
-	write_config("[WireGuard] Unbound ACL installed.");
-
-}
-
-function wg_unbound_acl_update($quick = true) {
-	global $config, $wgg;
-
-	init_config_arr(array('unbound', 'acls'));
-
-	$tunnel_networks = wg_get_tunnel_networks();
-
-	$a_unbound_acls = &$config['unbound']['acls'];
-
-	$unbound_acl_rows = array();
-
-	foreach ($tunnel_networks as $net_idx => $network) {
-
-		$unbound_acl_rows[$net_idx]['acl_network'] = $network['network'];
-
-		$unbound_acl_rows[$net_idx]['mask'] = $network['mask'];
-
-		$unbound_acl_rows[$net_idx]['description'] = "{$network['tun']} ({$network['descr']})";
-
-	}
-
-	foreach ($a_unbound_acls as $acl_idx => $acl) {
-
-		if ($acl['aclname'] == $wgg['unboundaclentry']['aclname']) {
-
-			$a_unbound_acls[$acl_idx]['row'] = $unbound_acl_rows;
-
-		}
-
-	}
-
-	write_config("[WireGuard] Unbound ACL updated.");
-
-	if (!$quick) {
-
-		services_unbound_configure();
-
-	}
 
 }
 

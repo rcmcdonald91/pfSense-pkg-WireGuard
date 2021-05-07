@@ -380,7 +380,7 @@ function wg_resync_peer($peer) {
 
 }
 
-function wg_resync_all($platform_booting = false) {
+function wg_resync_all() {
 	global $g, $wgg;
 
 	wg_create_config_files();
@@ -399,21 +399,11 @@ function wg_resync_all($platform_booting = false) {
 
 	if ($g['wireguard_installing']) {
 
-		update_status("done.\n  Updating Unbound ACL and restarting service...");
-
-		wg_unbound_acl_update(true);
-
 		update_status("done.\n");
 
 		// We are no longer installing
 		unset($g['wireguard_installing']);
 
-	}
-
-	if (!$platform_booting) {
-
-		wg_unbound_acl_update(false);
-		
 	}
 
 }
@@ -460,9 +450,6 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($tunnel['name']);
-
-		// Update Unbound ACL
-		wg_unbound_acl_update(true);
 
 	}
 

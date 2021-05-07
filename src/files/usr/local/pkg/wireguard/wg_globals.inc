@@ -60,6 +60,7 @@ $wgg = array(
 					'aclname' => 'WireGuard',
 					'aclaction' => 'allow',
 					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)'),
+					'rows' => array()),
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => 'Greater than 1 day'),
 					300 => array('class' => 'text-warning', 'title' => 'Greater than 5 minutes'),
