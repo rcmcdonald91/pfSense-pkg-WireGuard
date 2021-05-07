@@ -380,7 +380,7 @@ function wg_resync_peer($peer) {
 
 }
 
-function wg_resync_all() {
+function wg_resync_all($platform_booting = false) {
 	global $g, $wgg;
 
 	wg_create_config_files();
@@ -397,7 +397,11 @@ function wg_resync_all() {
 
 	}
 
-	wg_unbound_acl_update();
+	if (!$platform_booting) {
+
+		wg_unbound_acl_update();
+
+	}
 
 	if ($g['wireguard_installing']) {
 

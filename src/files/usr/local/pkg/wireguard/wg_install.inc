@@ -294,8 +294,6 @@ function wg_unbound_acl_install() {
 
 	write_config("[WireGuard] Unbound ACL installed.");
 
-	wg_unbound_acl_update();
-
 }
 
 function wg_unbound_acl_update() {
