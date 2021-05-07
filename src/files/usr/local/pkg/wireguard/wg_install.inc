@@ -328,9 +328,9 @@ function wg_unbound_acl_update($quick = true) {
 
 	foreach ($a_unbound_acls as $acl_idx => $acl) {
 
-		if ($acl['name'] == $wgg['unboundaclentry']['aclname']) {
+		if ($acl['aclname'] == $wgg['unboundaclentry']['aclname']) {
 
-			$a_unbound_acls[$acl_idx]['rows'] = $unbound_acl_rows;
+			$a_unbound_acls[$acl_idx]['row'] = $unbound_acl_rows;
 
 		}
 

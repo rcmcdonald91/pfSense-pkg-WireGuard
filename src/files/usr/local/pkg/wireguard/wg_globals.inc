@@ -178,9 +178,9 @@ function wg_globals() {
 	// Need to initialize these config paths as arrays and then assign by reference to $wgg
 	foreach ($conf_paths as $key => $path) {
 
-		wg_init_config_arr($config, $path);
+		wg_init_config_arr(&$config, $path);
 
-		$wgg[$key] = &array_get_value($config, $path);
+		$wgg[$key] = &array_get_value(&$config, $path);
 
 	}
 
