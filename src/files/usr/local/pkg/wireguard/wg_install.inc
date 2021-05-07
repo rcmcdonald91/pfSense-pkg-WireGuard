@@ -54,7 +54,7 @@ function wg_install() {
 	update_status("done.\n  Creating and Updating WireGuard Unbound ACL...");
 
 	wg_unbound_acl_install();
-	
+
 	wg_unbound_acl_update();
 
 	update_status("done.\n");
@@ -310,7 +310,7 @@ function wg_unbound_acl_update($quick = true) {
 
 	init_config_arr(array('unbound', 'acls'));
 
-	$a_ubound_acls = &$config['unbound']['acls'];
+	$a_unbound_acls = &$config['unbound']['acls'];
 
 	$tunnel_networks = wg_get_tunnel_networks();
 
