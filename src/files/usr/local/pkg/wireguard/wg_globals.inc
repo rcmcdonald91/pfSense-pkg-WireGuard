@@ -168,11 +168,8 @@ function wg_globals() {
 	// An array of configuration paths we need
 	$conf_paths 	= array(
 				'config' => array_merge($wgg['xml_path'], array('config', 0)),
-
 				'tunnels' => array_merge($wgg['xml_path'], array('tunnels', 'item')),
-				
-				'peers' => array_merge($wgg['xml_path'], array('peers', 'item'))
-				);
+				'peers' => array_merge($wgg['xml_path'], array('peers', 'item')));
 
 
 	// Need to initialize these config paths as arrays and then assign by reference to $wgg
