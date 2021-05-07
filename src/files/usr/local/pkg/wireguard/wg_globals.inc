@@ -21,8 +21,7 @@
 
 // Global defines
 
-require_once('config.inc');
-require_once('globals.inc');
+require_once('config.gui.inc');
 
 global $wgg;
 
@@ -157,20 +156,25 @@ function wg_globals() {
 	// Reload config.xml to get any recent changes
 	$config = parse_config(true);
 
-	// Construct array paths relative to the package root xml_path
-	$a_config_path = array_merge($wgg['xml_path'], array('config', 0));
-	$a_tunnels_path = array_merge($wgg['xml_path'], array('tunnels', 'item'));
-	$a_peers_path = array_merge($wgg['xml_path'], array('peers', 'item'));
+	// An array of configuration paths we need
+	$conf_paths 	= array(
+				'config' => array_merge($wgg['xml_path'], array('config', 0)),
 
-	// Need to initialize these config paths as arrays first
-	init_config_arr($a_config_path);
-	init_config_arr($a_tunnels_path);
-	init_config_arr($a_peers_path);
+				'tunnels' => array_merge($wgg['xml_path'], array('tunnels', 'item')),
+				
+				'peers' => array_merge($wgg['xml_path'], array('peers', 'item'))
+				);
 
-	// By reference assignment for reading and writing back to the configure at xml_path through $wgg
-	$wgg['config'] = &array_get_value($config, $a_config_path);
-	$wgg['tunnels'] = &array_get_value($config, $a_tunnels_path);
-	$wgg['peers'] = &array_get_value($config, $a_peers_path);
+
+	// Need to initialize these config paths as arrays and then assign by reference to $wgg
+	foreach ($conf_paths as $key => $path) {
+
+		wg_init_config_arr($config, $path);
+
+		$wgg[$key] = &array_get_value($config, $path);
+
+	}
+
 
 }
 

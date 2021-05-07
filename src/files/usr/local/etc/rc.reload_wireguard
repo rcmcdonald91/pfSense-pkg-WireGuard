@@ -21,8 +21,7 @@
  */
 
 // pfSense includes
-require_once('globals.inc');
-require_once('config.inc');
+require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg.inc');
@@ -35,6 +34,7 @@ if (platform_booting()) {
 
 	print_message("Configuring WireGuard tunnels...");
 
+	// Temporarily mutes kernel output to surpress ifconfig verbosity
 	mwexec("{$wgg['conscontrol']} mute on");
 
 }
@@ -43,6 +43,7 @@ wg_resync_all();
 
 if (platform_booting()) {
 
+	// Unmute the kernel output now that we are done
 	mwexec("{$wgg['conscontrol']} mute off");
 
 	print_message("done. \n");

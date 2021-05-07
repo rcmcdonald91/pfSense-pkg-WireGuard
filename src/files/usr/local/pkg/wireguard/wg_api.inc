@@ -21,13 +21,9 @@
  */
 
 // pfSense includes
-require_once('globals.inc');
-require_once('config.inc');
-require_once('pfsense-utils.inc');
-require_once('system.inc');
-require_once('pkg-utils.inc');
-require_once('service-utils.inc');
-require_once('util.inc');
+require_once('globals.inc');		// *
+require_once('interfaces.inc');		// interface_configure
+require_once('util.inc');		// get_configured_interface_list_by_realif, mwexec
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
@@ -82,7 +78,7 @@ function wg_status() {
 
 			$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
 
-			$tmp_tunnel['mtu']		=$tunnel_if_stats['mtu'];
+			$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
 
 			$tmp_tunnel['config']		= $wgg['tunnels'][$tun_idx];
 
@@ -405,9 +401,11 @@ function wg_gen_keypair($json = false) {
 	global $wgg;
 
 	$privkey = exec("{$wgg['wg']} genkey");
+
 	$pubkey = wg_gen_publickey($privkey);
 
 	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
+
 	return $json ? json_encode($res) : $res;
 
 }
@@ -450,7 +448,7 @@ function wg_gen_psk() {
 
 // Return the next available WireGuard port
 function next_wg_port() {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
@@ -510,7 +508,7 @@ function wg_get_tunnel_array_index($tunnel_name) {
 
 // Return the next available WireGuard interface
 function next_wg_if() {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
@@ -536,6 +534,109 @@ function next_wg_if() {
 
 	return -1;
 	
+}
+
+// Check if wg tunnel is assigned to an interface
+function is_wg_tunnel_assigned($tunnel, $disabled = true) {
+
+	// Assume we have an interface first
+	$wg_ifname = $tunnel;
+
+	// Looks like we have a tunnel structure
+	if (is_array($tunnel) && isset($tunnel['name'])) {
+
+		$wg_ifname = $tunnel['name'];
+
+	}
+
+	$if_list = get_configured_interface_list_by_realif($disabled);
+
+	$is_assigned = array_key_exists($wg_ifname, $if_list);
+
+	return $is_assigned;
+	
+}
+
+// Check if at least one tunnel is assigned
+function is_wg_assigned($disabled = true) {
+	global $wgg;
+
+	// Assume that no tunnels are assigned
+	$is_assigned = false;
+
+	$if_list = get_configured_interface_list_by_realif($disabled);
+
+	foreach ($if_list as $realif => $name) {
+
+		// We found one, no need to keep checking
+		if (substr($realif, 0, strlen($wgg['if_prefix'])) == $wgg['if_prefix']) {
+	
+			$is_assigned = true;
+
+			break;
+	
+		}
+	    
+	    }
+
+	return $is_assigned;
+
+}
+
+// Check if at least one tunnel is enabled
+function is_wg_enabled() {
+	global $wgg;
+
+	wg_globals();
+
+	foreach ($wgg['tunnels'] as $tunnel) {
+
+		if (empty($tunnel['enabled'])) {
+
+			continue;
+
+		}
+
+		return true;
+
+	}
+
+	return false;
+}
+
+/*
+ * This returns an array of peers for a given tunnel
+ */
+function wg_get_tunnel_peers($tunnel_name) {
+	global $wgg;
+
+	wg_globals();
+
+	$a_ret = array();
+
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+
+	if (isset($wgg['tunnels'][$tun_idx])) {
+
+		// Look through array of peers for matching tunnel name
+		foreach ($wgg['peers'] as $peer_idx => $peer) {
+
+			if ($peer['tun'] == $tunnel_name) {
+
+				// We need the array index for future manipulations
+				$peer['index'] = $peer_idx;
+
+				$a_ret[] = $peer;
+
+			}
+
+		}
+
+	}
+
+	// Return the list of filtered peers
+	return $a_ret;
+
 }
 
 function wg_verbosity_redirect($verbose = false) {

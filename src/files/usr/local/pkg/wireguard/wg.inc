@@ -182,39 +182,6 @@ function wg_delete_tunnel($tunnel_name) {
 }
 
 /*
- * This returns an array of peers for a given tunnel
- */
-function wg_get_tunnel_peers($tunnel_name) {
-	global $wgg;
-
-	$a_ret = array();
-
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
-	if (isset($wgg['tunnels'][$tun_idx])) {
-
-		// Look through array of peers for matching tunnel name
-		foreach ($wgg['peers'] as $peer_idx => $peer) {
-
-			if ($peer['tun'] == $tunnel_name) {
-
-				// We need the array index for future manipulations
-				$peer['index'] = $peer_idx;
-
-				$a_ret[] = $peer;
-
-			}
-
-		}
-
-	}
-
-	// Return the list of filtered peers
-	return $a_ret;
-
-}
-
-/*
  * This transforms a raw peer post consisting of repeatables 
  */
 function wg_peer_allowedips($post) {
