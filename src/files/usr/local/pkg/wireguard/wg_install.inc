@@ -19,10 +19,6 @@
  * limitations under the License.
  */
 
-// pfSense includes
-require_once('config.inc');
-require_once('globals.inc');
-
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
 
@@ -250,9 +246,36 @@ function wg_earlyshellcmd_install() {
 
 	init_config_arr(array('system', 'earlyshellcmd'));
 
-	$config['system']['earlyshellcmd'] = array_merge($wgg['earlyshellcmds'], $config['system']['earlyshellcmd']);
+	init_config_arr(array('installedpackages', 'shellcmdsettings', 'config'));
 
-	write_config("[WireGuard] Earlyshellcmds installed.");
+	$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
+
+	$a_shellcmdsettings = &$config['installedpackages']['shellcmdsettings']['config'];
+
+	$shellcmd_pkg_cmds = array_map(fn($x) => $x['cmd'], $a_shellcmdsettings);
+
+	foreach ($wgg['shellcmdsettings'] as $shellcmd) {
+
+		// Need to escape slashes from the path
+		$escaped_cmd = preg_quote($shellcmd['cmd'], '/');
+
+		// Install the earlyshellcmd
+		if (!preg_grep("/{$escaped_cmd}/", $a_earlyshellcmd)) {
+
+			$a_earlyshellcmd[] = "{$shellcmd['cmd']}";
+
+		}
+
+		// Update the shellcmd package too
+		if (!preg_grep("/{$escaped_cmd}/", $shellcmd_pkg_cmds)) {
+
+			$a_shellcmdsettings[] = $shellcmd;
+
+		}
+
+	}
+
+	write_config("[WireGuard] earlyshellcmd(s) installed.");
 
 }
 
@@ -262,11 +285,46 @@ function wg_earlyshellcmd_install() {
 function wg_earlyshellcmd_deinstall() {
 	global $config, $wgg;
 
-        init_config_arr(array('system', 'earlyshellcmd'));
+	init_config_arr(array('system', 'earlyshellcmd'));
+	
+	init_config_arr(array('installedpackages', 'shellcmdsettings', 'config'));
 
-	$config['system']['earlyshellcmd'] = array_diff($config['system']['earlyshellcmd'], $wgg['earlyshellcmds']);
+	$a_earlyshellcmd = &$config['system']['earlyshellcmd'];
 
-	write_config("[WireGuard] Earlyshellcmds de-installed.");
+	$a_shellcmdsettings = &$config['installedpackages']['shellcmdsettings']['config'];
+
+	$shellcmd_pkg_cmds = array_map(fn($x) => $x['cmd'], $a_shellcmdsettings);
+
+	foreach ($wgg['shellcmdsettings'] as $shellcmd) {
+
+		// Need to escape slashes from the path
+		$escaped_cmd = preg_quote($shellcmd['cmd'], '/');
+
+		// Deinstall the earlyshellcmd
+		if ($cmds = preg_grep("/{$escaped_cmd}/", $a_earlyshellcmd)) {
+
+			foreach ($cmds as $cmd_idx => $cmd) {
+
+				unset($a_earlyshellcmd[$cmd_idx]);
+
+			}
+
+		}
+
+		// Update the shellcmd package too
+		if ($cmds = preg_grep("/{$escaped_cmd}/", $shellcmd_pkg_cmds)) {
+
+			foreach ($cmds as $cmd_idx => $cmd) {
+
+				unset($a_shellcmdsettings[$cmd_idx]);
+
+			}
+
+		}
+
+	}
+
+	write_config("[WireGuard] earlyshellcmd(s) de-installed.");
 	
 }
 

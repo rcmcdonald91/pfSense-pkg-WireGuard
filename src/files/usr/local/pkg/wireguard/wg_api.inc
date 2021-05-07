@@ -21,7 +21,6 @@
  */
 
 // pfSense includes
-require_once('globals.inc');		// *
 require_once('interfaces.inc');		// interface_configure
 require_once('util.inc');		// get_configured_interface_list_by_realif, mwexec
 
