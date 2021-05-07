@@ -1,4 +1,4 @@
-etc/rc.reload_wireguard
+pkg/parse_config/wg_start.inc
 pkg/wireguard.xml
 pkg/wireguard/wg_api.inc
 pkg/wireguard/wg_foot.inc
