@@ -584,7 +584,7 @@ function is_wg_assigned($disabled = true) {
 
 // Check if at least one tunnel is enabled
 function is_wg_enabled() {
-	global $wgg;
+	global $config, $wgg;
 
 	wg_globals();
 
@@ -646,7 +646,7 @@ function wg_get_tunnel_peers($tunnel_name) {
  * Return WireGuard tunnel networks for a given address family
  */
 function wg_get_tunnel_networks($family = 'both') {
-	global $wgg;
+	global $config, $wgg;
 
 	$wg_tunnel_networks = array();
 

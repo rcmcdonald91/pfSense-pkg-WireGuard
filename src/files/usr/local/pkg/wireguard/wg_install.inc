@@ -312,6 +312,8 @@ function wg_unbound_acl_update($quick = true) {
 
 	$a_unbound_acls = &$config['unbound']['acls'];
 
+	$tunnel_networks = wg_get_tunnel_networks();
+
 	$unbound_acl_rows = array();
 
 	foreach ($tunnel_networks as $net_idx => $network) {
