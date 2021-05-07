@@ -24,6 +24,7 @@ require_once('services.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
+require_once('wireguard/wg_api.inc');
 
 /*
  * This is the main install hook
@@ -50,9 +51,11 @@ function wg_install() {
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status("done.\n  Creating WireGuard Unbound ACL...");
+	update_status("done.\n  Creating and Updating WireGuard Unbound ACL...");
 
 	wg_unbound_acl_install();
+	
+	wg_unbound_acl_update();
 
 	update_status("done.\n");
 
@@ -276,8 +279,14 @@ function wg_unbound_acl_deinstall() {
 
 }
 
-function wg_unbound_acl_install() {
+function wg_unbound_acl_install($clean = true) {
 	global $config, $wgg;
+
+	if ($clean) {
+
+		wg_unbound_acl_deinstall();
+
+	}
 
 	init_config_arr(array('unbound', 'acls'));
 
@@ -296,14 +305,44 @@ function wg_unbound_acl_install() {
 
 }
 
-function wg_unbound_acl_update() {
+function wg_unbound_acl_update($quick = true) {
 	global $config, $wgg;
 
 	init_config_arr(array('unbound', 'acls'));
 
 	$a_ubound_acls = &$config['unbound']['acls'];
 
-	services_unbound_configure();
+	$tunnel_networks = wg_get_tunnel_networks();
+
+	$unbound_acl_rows = array();
+
+	foreach ($tunnel_networks as $net_idx => $network) {
+
+		$unbound_acl_rows[$net_idx]['acl_network'] = $network['network'];
+
+		$unbound_acl_rows[$net_idx]['mask'] = $network['mask'];
+
+		$unbound_acl_rows[$net_idx]['description'] = null;
+
+	}
+
+	foreach ($a_unbound_acls as $acl_idx => $acl) {
+
+		if ($acl['name'] == $wgg['unboundaclentry']['aclname']) {
+
+			$a_unbound_acls[$acl_idx]['rows'] = $unbound_acl_rows;
+
+		}
+
+	}
+
+	write_config("[WireGuard] Unbound ACL updated.");
+
+	if (!$quick) {
+
+		servies_unbound_configure();
+
+	}
 
 }
 
