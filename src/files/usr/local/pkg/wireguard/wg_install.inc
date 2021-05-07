@@ -51,11 +51,9 @@ function wg_install() {
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status("done.\n  Creating and Updating WireGuard Unbound ACL...");
+	update_status("done.\n  Creating blank WireGuard Unbound ACL...");
 
 	wg_unbound_acl_install();
-
-	wg_unbound_acl_update(false);
 
 	update_status("done.\n");
 
