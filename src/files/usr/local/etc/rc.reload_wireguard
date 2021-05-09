@@ -52,7 +52,6 @@ if ($booting) {
 
 }
 
-
 wg_resync_all();
 
 if ($booting) {
