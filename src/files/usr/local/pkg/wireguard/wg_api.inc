@@ -310,6 +310,9 @@ function wg_interface_create($wg_ifname, $verbose = false) {
 
 }
 
+/*
+ * Returns an array of the current WireGuard tunnel interfaces running as per ifconfig
+ */
 function wg_get_real_ifs() {
 	global $wgg;
 
