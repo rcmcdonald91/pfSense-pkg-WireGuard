@@ -392,15 +392,7 @@ function wg_resync_all() {
 
 	}
 
-	foreach ($wgg['tunnels'] as $tunnel) {
-		
-		wg_resync_tunnel($tunnel['name'], true);
-
-	}
-
-	interface_configure('lan');
-
-	setup_gateways_monitor();
+	mwexec_bg('/usr/local/etc/rc.reload_wireguard');
 
 	if ($g['wireguard_installing']) {
 

@@ -21,6 +21,7 @@
  */
 
 // pfSense includes
+require_once('globals.inc');
 require_once('util.inc');
 
 // WireGuard includes
@@ -38,6 +39,16 @@ function print_message($message) {
     	$message = escapeshellarg($message);
 
 	mwexec("printf {$message} >&2");
+
+}
+
+if ($g['wireguard_installing']) {
+
+	while ($g['wireguard_installing']) {
+
+		sleep(1);
+
+	}
 
 }
 
@@ -60,5 +71,6 @@ if (platform_booting()) {
 	print_message("done. \n");
 
 }
+
 
 ?>
