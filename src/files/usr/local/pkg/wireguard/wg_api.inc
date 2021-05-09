@@ -267,14 +267,7 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		}
 
-	// Now, we need to let pfSense handle assigned WireGuard tunnel interfaces
-	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
-
-		$wg_pfsense_if = wg_get_pfsense_interface_info($wg_ifname);
-
-		interface_configure($wg_pfsense_if['name'], true);
-
-	}
+	} 
 
 }
 
