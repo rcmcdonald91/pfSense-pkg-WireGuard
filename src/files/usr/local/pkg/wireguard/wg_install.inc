@@ -244,6 +244,7 @@ function wg_deinstall() {
 
 	update_status("done.\n  Destroying WireGuard tunnels...");
 
+	// Teardown any WireGuard tunnel interfaces
 	wg_destroy_tunnels();
 
 	update_status("done.\n");
