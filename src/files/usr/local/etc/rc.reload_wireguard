@@ -72,6 +72,8 @@ foreach ($wgg['tunnels'] as $tunnel) {
 
 if (!$booting) {
 
+	interface_configure('lan');
+
 	setup_gateways_monitor();
 
 }
