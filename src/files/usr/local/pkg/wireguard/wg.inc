@@ -409,7 +409,7 @@ function wg_resync_all() {
 
 	}
 
-	print_r(get_included_files());
+	sleep(180);
 
 	setup_gateways_monitor();
 
