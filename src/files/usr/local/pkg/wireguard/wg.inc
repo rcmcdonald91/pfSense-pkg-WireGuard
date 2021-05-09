@@ -392,7 +392,7 @@ function wg_resync_all() {
 
 	}
 
-	mwexec_bg('/usr/local/etc/rc.reload_wireguard');
+	mwexec_bg('sleep 5 && /usr/local/etc/rc.reload_wireguard');
 
 	if ($g['wireguard_installing']) {
 
