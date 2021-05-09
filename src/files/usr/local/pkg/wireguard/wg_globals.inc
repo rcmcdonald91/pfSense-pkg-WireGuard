@@ -30,7 +30,8 @@ $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
 	'ifconfig'		=> '/sbin/ifconfig',
 	'pkg'			=> '/usr/sbin/pkg',
-	'kmod'			=> 'if_wg',
+	'kldunload'		=> '/sbin/kldunload',
+	'kmod'			=> 'if_wg.ko',
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',
