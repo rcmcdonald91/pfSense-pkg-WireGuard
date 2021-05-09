@@ -271,6 +271,7 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		if ($pfsense_if_name = wg_get_pfsense_interface_info($wg_ifname)) {
 
+			
 			interface_reconfigure($pfsense_if_name['name'], true);
 
 		}
