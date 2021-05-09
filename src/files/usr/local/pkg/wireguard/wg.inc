@@ -398,6 +398,10 @@ function wg_resync_all() {
 
 	}
 
+	interface_configure('lan');
+
+	setup_gateways_monitor();
+
 	if ($g['wireguard_installing']) {
 
 		update_status("done.\n");
