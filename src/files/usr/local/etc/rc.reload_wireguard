@@ -42,6 +42,8 @@ function print_message($message) {
 
 }
 
+$booting = platform_booting();
+
 if ($g['wireguard_installing']) {
 
 	while ($g['wireguard_installing']) {
@@ -52,11 +54,10 @@ if ($g['wireguard_installing']) {
 
 }
 
-if (platform_booting()) {
+if ($booting) {
 
 	print_message("Configuring WireGuard tunnels...");
 
-	// Temporarily mutes kernel output to surpress ifconfig verbosity
 	mute_kernel_msgs();
 
 }
@@ -69,9 +70,14 @@ foreach ($wgg['tunnels'] as $tunnel) {
 
 }
 
-if (platform_booting()) {
+if (!$booting) {
 
-	// Unmute the kernel output now that we are done
+	setup_gateways_monitor();
+
+}
+
+if ($booting) {
+
 	unmute_kernel_msgs();
 
 	print_message("done. \n");
