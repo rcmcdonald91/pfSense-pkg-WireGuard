@@ -310,6 +310,17 @@ function wg_interface_create($wg_ifname, $verbose = false) {
 
 }
 
+function wg_get_real_ifs() {
+	global $wgg;
+
+	$ret_array = array();
+
+	exec("{$wgg['ifconfig']} -g wg", $ret_array);
+	
+	return $ret_array;
+
+}
+
 /*
  * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
  */

@@ -241,7 +241,24 @@ function wg_deinstall() {
 
 	}
 
+	update_status("done.\n  Destroying WireGuard tunnels...");
+
+	wg_destroy_tunnels();
+
 	update_status("done.\n");
+
+}
+
+function wg_destroy_tunnels() {
+	global $wgg;
+
+	$tunnels_to_destroy = wg_get_real_ifs();
+
+	foreach ($tunnels_to_destroy as $tunnel) {
+
+		pfSense_interface_destroy($tunnel);	
+
+	}
 
 }
 
