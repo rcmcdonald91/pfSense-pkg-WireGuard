@@ -5,5 +5,3 @@ if [ "${2}" != "POST-INSTALL" ]; then
 fi
 
 /usr/local/bin/php -f /etc/rc.packages %%PORTNAME%% ${2}
-
-nohup "sleep 30 && /usr/local/etc/rc.reload_wireguard" &

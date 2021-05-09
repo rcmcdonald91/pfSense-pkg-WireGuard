@@ -30,6 +30,7 @@
 	<name>wireguard</name>
 	<version>%%PKGVERSION%%</version>
 	<title>VPN/WireGuard</title>
+	<include>wireguard/wg.inc</include>
 	<menu>
 		<name>WireGuard</name>
 		<section>VPN</section>
@@ -42,19 +43,19 @@
 	</menu>
 	<custom_php_install_command>
 		<![CDATA[
-		//wg_install();
+		wg_install();
 		]]>
 	</custom_php_install_command>
 	<custom_php_pre_deinstall_command>
 		<![CDATA[
-		//wg_deinstall();
+		wg_deinstall();
 		]]>
 	</custom_php_pre_deinstall_command>
 	<custom_php_validation_command>
 	</custom_php_validation_command>
 	<custom_php_resync_config_command>
 		<![CDATA[
-		//wg_resync_all();
+		wg_resync_all();
 		]]>
 	</custom_php_resync_config_command>
 </packagegui>
