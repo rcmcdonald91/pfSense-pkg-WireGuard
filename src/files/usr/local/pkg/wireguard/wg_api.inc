@@ -272,7 +272,7 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		$wg_pfsense_if = wg_get_pfsense_interface_info($wg_ifname);
 
-		interface_configure($wg_pfsense_if['name']);
+		interface_configure($wg_pfsense_if['name'], true);
 
 	}
 
