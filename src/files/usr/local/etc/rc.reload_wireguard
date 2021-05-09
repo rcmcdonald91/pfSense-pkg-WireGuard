@@ -52,21 +52,7 @@ if ($booting) {
 
 }
 
-wg_create_config_files();
-
-foreach ($wgg['tunnels'] as $tunnel) {
-
-	wg_resync_tunnel($tunnel['name'], true);
-
-}
-
-if (!$booting) {
-
-	interface_configure('lan');
-
-	setup_gateways_monitor();
-
-}
+wg_resync_all();
 
 if ($booting) {
 

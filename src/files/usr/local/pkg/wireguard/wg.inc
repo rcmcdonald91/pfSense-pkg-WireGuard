@@ -392,7 +392,13 @@ function wg_resync_all() {
 
 	}
 
-	mwexec_bg('sleep 10 && /usr/local/etc/rc.reload_wireguard', true);
+	wg_create_config_files();
+
+	foreach ($wgg['tunnels'] as $tunnel) {
+	
+		wg_resync_tunnel($tunnel['name'], true);
+	
+	}
 
 	if ($g['wireguard_installing']) {
 
