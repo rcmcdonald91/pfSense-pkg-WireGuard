@@ -42,25 +42,14 @@ function print_message($message) {
 
 }
 
-$booting = platform_booting();
+print_message("Configuring WireGuard tunnels...");
 
-if ($booting) {
-
-	print_message("Configuring WireGuard tunnels...");
-
-	mute_kernel_msgs();
-
-}
+mute_kernel_msgs();
 
 wg_resync_all();
 
-if ($booting) {
+unmute_kernel_msgs();
 
-	unmute_kernel_msgs();
-
-	print_message("done. \n");
-
-}
-
+print_message("done. \n");
 
 ?>
