@@ -53,11 +53,7 @@ if ($booting) {
 
 }
 
-//wg_resync_all();
-
-service_control_restart('unbound', null);
-
-service_control_restart('dpinger', null);
+wg_resync_all();
 
 if ($booting) {
 

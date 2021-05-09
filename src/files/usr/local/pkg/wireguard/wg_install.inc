@@ -36,7 +36,7 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("\n  Upgrading existing WireGuard XML configuration if necessary...");
+	update_status("\n  Upgrading any existing WireGuard XML configuration...");
 
 	// Things to potentially upgrade
 	wg_upgrade_addresses();
