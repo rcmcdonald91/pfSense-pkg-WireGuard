@@ -43,8 +43,6 @@
 	<custom_php_install_command>
 		<![CDATA[
 		//wg_install();
-		setup_gateways_monitor();
-		services_unbound_configure();
 		]]>
 	</custom_php_install_command>
 	<custom_php_pre_deinstall_command>

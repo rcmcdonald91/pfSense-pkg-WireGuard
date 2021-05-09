@@ -22,6 +22,7 @@
 
 // pfSense includes
 require_once('globals.inc');
+require_once('service-utils.inc');
 require_once('util.inc');
 
 // WireGuard includes
@@ -53,6 +54,10 @@ if ($booting) {
 }
 
 wg_resync_all();
+
+service_control_restart('unbound', null);
+
+service_control_restart('dpinger', null);
 
 if ($booting) {
 

@@ -28,8 +28,6 @@ do-install:
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 
-	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/parse_config
-
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
