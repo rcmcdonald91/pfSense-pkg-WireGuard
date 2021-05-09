@@ -55,19 +55,7 @@
 	</custom_php_validation_command>
 	<custom_php_resync_config_command>
 		<![CDATA[
-		global $g;
-		
 		wg_resync_all();
-
-		if ($g['wireguard_installing']) {
-
-			setup_gateways_monitor();
-
-			services_unbound_configure();
-
-			unset($g['wireguard_installing']);
-
-		}
 		]]>
 	</custom_php_resync_config_command>
 </packagegui>
