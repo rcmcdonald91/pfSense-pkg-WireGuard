@@ -407,8 +407,6 @@ function wg_resync_all() {
 
 	}
 
-	setup_gateways_monitor();
-
 }
 
 
