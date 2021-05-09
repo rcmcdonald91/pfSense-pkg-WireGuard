@@ -27,7 +27,7 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
-global $wgg;
+global $wgg, $g;
 
 wg_globals();
 
@@ -61,7 +61,13 @@ if (platform_booting()) {
 
 }
 
-wg_resync_all();
+wg_create_config_files();
+
+foreach ($wgg['tunnels'] as $tunnel) {
+
+	wg_resync_tunnel($tunnel['name'], true);
+
+}
 
 if (platform_booting()) {
 
