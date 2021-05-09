@@ -44,6 +44,8 @@ function print_message($message) {
 
 $booting = platform_booting();
 
+sleep(10);
+
 if ($g['wireguard_installing']) {
 
 	while ($g['wireguard_installing']) {
