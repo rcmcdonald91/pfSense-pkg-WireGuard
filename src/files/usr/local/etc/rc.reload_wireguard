@@ -53,7 +53,7 @@ if ($booting) {
 
 }
 
-wg_resync_all();
+//wg_resync_all();
 
 service_control_restart('unbound', null);
 
