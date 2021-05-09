@@ -435,7 +435,7 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 		wg_interface_group_add($tunnel['name']);
 
 		// Update the addresses on the tunnel interface
-		wg_interface_update_addresses($tunnel['name']);
+		//wg_interface_update_addresses($tunnel['name']);
 
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
