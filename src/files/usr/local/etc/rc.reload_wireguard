@@ -48,7 +48,7 @@ if ($g['wireguard_installing']) {
 
 	while ($g['wireguard_installing']) {
 
-		sleep(1);
+		sleep(5);
 
 	}
 
