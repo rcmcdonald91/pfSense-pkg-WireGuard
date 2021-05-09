@@ -404,12 +404,6 @@ function wg_resync_all() {
 
 		update_status("done.\n");
 
-		sleep(180);
-
-		setup_gateways_monitor();
-	
-		services_unbound_configure();
-
 		// We are no longer installing
 		unset($g['wireguard_installing']);
 
