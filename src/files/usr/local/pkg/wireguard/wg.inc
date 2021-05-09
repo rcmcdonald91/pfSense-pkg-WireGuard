@@ -277,13 +277,6 @@ function wg_do_peer_post($post) {
 
 	wg_init_config_arr($pconfig, array('allowedips', 'row'));
 
-	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
-	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
-
-		unset($post['endpoint'], $post['port']);
-
-	}
-
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 
 	$pconfig['tun'] 		= $post['tun'];
@@ -292,7 +285,7 @@ function wg_do_peer_post($post) {
 
 	$pconfig['endpoint'] 		= $post['endpoint'];
 
-	$pconfig['port'] 		= $post['port'];
+	$pconfig['port'] 		= empty($post['port']) ? $wgg['default_port'] : $post['port'];
 
 	$pconfig['persistentkeepalive']	= $post['persistentkeepalive'];
 
@@ -301,6 +294,13 @@ function wg_do_peer_post($post) {
 	$pconfig['presharedkey']	= $post['presharedkey'];
 
 	$pconfig['allowedips']['row'] 	= wg_peer_allowedips($post);
+
+	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
+	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
+
+		unset($post['endpoint'], $post['port']);
+
+	}
 
 	$input_errors = wg_validate_peer_post($pconfig, $peer_idx);
 
