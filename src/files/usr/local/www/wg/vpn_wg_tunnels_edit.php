@@ -417,7 +417,6 @@ else:
 <?php
 endif;
 ?>
-
 	<button type="submit" id="saveform" name="saveform" class="btn btn-primary btn-sm" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save Tunnel")?>

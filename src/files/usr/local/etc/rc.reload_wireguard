@@ -46,7 +46,7 @@ if (platform_booting()) {
 	print_message("Configuring WireGuard tunnels...");
 
 	// Temporarily mutes kernel output to surpress ifconfig verbosity
-	mwexec("{$wgg['conscontrol']} mute on");
+	mute_kernel_msgs();
 
 }
 
@@ -55,7 +55,7 @@ wg_resync_all();
 if (platform_booting()) {
 
 	// Unmute the kernel output now that we are done
-	mwexec("{$wgg['conscontrol']} mute off");
+	unmute_kernel_msgs();
 
 	print_message("done. \n");
 
