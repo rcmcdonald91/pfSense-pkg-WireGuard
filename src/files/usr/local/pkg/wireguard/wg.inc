@@ -402,6 +402,8 @@ function wg_resync_all() {
 
 		update_status("done.\n  Restarting gateway monitors...");
 
+		system_routing_configure();
+
 		setup_gateways_monitor();
 
 		update_status("done.\n");
