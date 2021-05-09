@@ -55,7 +55,7 @@
 	</custom_php_validation_command>
 	<custom_php_resync_config_command>
 		<![CDATA[
-		wg_resync_all();
+		//wg_resync_all();
 		]]>
 	</custom_php_resync_config_command>
 </packagegui>
