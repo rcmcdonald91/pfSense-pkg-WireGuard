@@ -292,7 +292,7 @@ function wg_do_peer_post($post) {
 
 	$pconfig['endpoint'] 		= $post['endpoint'];
 
-	$pconfig['port'] 		= $post['port'];
+	$pconfig['port'] 		= empty($post['port']) ? $wgg['default_port'] : $post['port'];
 
 	$pconfig['persistentkeepalive']	= $post['persistentkeepalive'];
 

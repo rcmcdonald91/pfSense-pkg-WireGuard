@@ -40,7 +40,7 @@ function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpo
 
 		if (!empty($peer[$endpoint_key])) {
 
-			return "{$peer[$endpoint_key]} : {$peer[$port_key]}";
+			return "{$peer[$endpoint_key]}:{$peer[$port_key]}";
 
 		} else {
 
