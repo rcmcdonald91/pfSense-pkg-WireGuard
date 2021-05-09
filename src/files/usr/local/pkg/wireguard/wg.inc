@@ -22,7 +22,7 @@
  */
 
 // pfSense includes
-require_once('config.gui.inc');
+require_once('config.inc');
 require_once('gwlb.inc');
 require_once('util.inc');
 
@@ -413,7 +413,7 @@ function wg_resync_all() {
 		clear_subsystem_dirty('unbound');
 
 	}
-	
+
 }
 
 

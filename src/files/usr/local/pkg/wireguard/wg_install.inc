@@ -20,6 +20,7 @@
  */
 
 // pfSense includes
+require_once('config.inc');
 require_once('services.inc');
 require_once('util.inc');
 

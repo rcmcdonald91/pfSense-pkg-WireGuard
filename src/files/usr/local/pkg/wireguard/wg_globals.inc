@@ -22,7 +22,7 @@
 // Global defines
 
 // pfSense includes
-require_once('config.gui.inc');
+require_once('config.inc');
 
 global $wgg;
 
