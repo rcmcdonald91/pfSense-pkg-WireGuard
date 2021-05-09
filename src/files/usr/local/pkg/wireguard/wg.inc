@@ -404,9 +404,6 @@ function wg_resync_all() {
 
 		update_status("done.\n");
 
-		// We are no longer installing
-		unset($g['wireguard_installing']);
-
 	}
 
 }
