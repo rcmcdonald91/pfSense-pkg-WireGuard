@@ -23,6 +23,7 @@
 
 // pfSense includes
 require_once('config.gui.inc');
+require_once('gwlb.inc');
 require_once('util.inc');
 
 // WireGuard includes
@@ -398,6 +399,10 @@ function wg_resync_all() {
 	}
 
 	if ($g['wireguard_installing']) {
+
+		update_status("done.\n  Restarting gateway monitors...");
+
+		setup_gateways_monitor();
 
 		update_status("done.\n");
 
