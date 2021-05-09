@@ -413,7 +413,7 @@ function wg_resync_all() {
 function wg_resync_tunnel($tunnel_name, $quick = false) {
 	global $wgg;
 
-	//wg_globals();
+	wg_globals();
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -435,7 +435,7 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 		wg_interface_group_add($tunnel['name']);
 
 		// Update the addresses on the tunnel interface
-		//wg_interface_update_addresses($tunnel['name']);
+		wg_interface_update_addresses($tunnel['name']);
 
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
