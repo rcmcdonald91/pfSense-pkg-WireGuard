@@ -270,13 +270,38 @@ function wg_interface_update_addresses($wg_ifname) {
 	// Now, we need to let pfSense handle assigned WireGuard tunnel interfaces
 	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
 
-		echo("{$wg_ifname}\n");
-
 		$wg_pfsense_if = wg_get_pfsense_interface_info($wg_ifname);
 
 		interface_configure($wg_pfsense_if['name']);
 
 	}
+
+}
+
+/* 
+ * Translates WireGuard interface names to pfSense interface names and descriptions
+ */
+function wg_get_pfsense_interface_info($tunnel_name) {
+
+	$ret_val = array();
+
+	$iflist = get_configured_interface_list_by_realif(true);
+
+	$ifdescr = get_configured_interface_with_descr(true);
+
+	if (isset($iflist[$tunnel_name])) {
+
+		$tmp_name = $iflist[$tunnel_name];
+
+		$ret_val['name'] 	= $tmp_name;
+
+		$ret_val['description']	=  $ifdescr[$tmp_name];
+
+		return $ret_val;
+
+	}
+
+	return false;
 
 }
 

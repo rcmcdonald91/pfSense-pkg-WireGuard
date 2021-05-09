@@ -519,33 +519,6 @@ function wg_create_config_files($clean = true) {
 }
 
 /* 
- * Translates WireGuard interface names to pfSense interface names and descriptions
- */
-function wg_get_pfsense_interface_info($tunnel_name) {
-
-	$ret_val = array();
-
-	$iflist = get_configured_interface_list_by_realif(true);
-
-	$ifdescr = get_configured_interface_with_descr(true);
-
-	if (isset($iflist[$tunnel_name])) {
-
-		$tmp_name = $iflist[$tunnel_name];
-
-		$ret_val['name'] = $tmp_name;
-
-		$ret_val['description'] =  $ifdescr[$tmp_name];
-
-		return $ret_val;
-
-	}
-
-	return false;
-
-}
-
-/* 
  * Remove all wg config files from any potential conf directory
  */
 function wg_delete_config_files() {
