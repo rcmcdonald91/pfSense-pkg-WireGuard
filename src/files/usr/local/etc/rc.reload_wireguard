@@ -44,17 +44,9 @@ function print_message($message) {
 
 $booting = platform_booting();
 
+print_message("Configuring WireGuard tunnels...");
+
 sleep(10);
-
-if ($g['wireguard_installing']) {
-
-	while ($g['wireguard_installing']) {
-
-		sleep(5);
-
-	}
-
-}
 
 if ($booting) {
 
