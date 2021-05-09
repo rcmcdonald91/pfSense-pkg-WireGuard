@@ -402,6 +402,8 @@ function wg_resync_all() {
 
 		update_status("done.\n");
 
+		unset($g['wireguard_installing']);
+
 	}
 
 }
@@ -448,7 +450,6 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($tunnel['name']);
-
 
 	}
 
