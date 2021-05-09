@@ -1,6 +1,9 @@
+etc/rc.reload_wireguard
 pkg/wireguard.xml
 pkg/wireguard/wg_api.inc
+pkg/wireguard/wg_foot.inc
 pkg/wireguard/wg_globals.inc
+pkg/wireguard/wg_guiconfig.inc
 pkg/wireguard/wg_install.inc
 pkg/wireguard/wg_validate.inc
 pkg/wireguard/wg.inc
@@ -11,6 +14,7 @@ www/wg/vpn_wg_peers_edit.php
 www/wg/vpn_wg_settings.php
 www/wg/vpn_wg_tunnels.php
 www/wg/vpn_wg_tunnels_edit.php
+www/wg/js/WireGuardHelpers.js
 /etc/inc/priv/wireguard.priv.inc
 %%DATADIR%%/info.xml
 @dir /etc/inc/priv

@@ -28,11 +28,12 @@
 ##|-PRIV
 
 // pfSense includes
-require_once('guiconfig.inc');
 require_once('functions.inc');
+require_once('guiconfig.inc');
 
 // WireGuard includes
 require_once('wireguard/wg.inc');
+require_once('wireguard/wg_guiconfig.inc');
 
 global $wgg;
 
@@ -157,8 +158,11 @@ events.push(function() {
 //]]>
 </script>
 
-<?php
+<?php 
 
-include("foot.inc");
+include('foot.inc');
+
+// Must be included last
+include('wireguard/wg_foot.inc');
 
 ?>
