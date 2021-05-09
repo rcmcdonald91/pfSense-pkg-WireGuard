@@ -404,10 +404,18 @@ function wg_resync_all() {
 
 		update_status("done.\n");
 
+		update_status("Waiting for 60 seconds...");
+
+		sleep(60);
+
 		// We are no longer installing
 		unset($g['wireguard_installing']);
 
 	}
+
+	setup_gateways_monitor();
+
+	services_unbound_configure();
 
 }
 
