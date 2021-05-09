@@ -21,6 +21,7 @@
 
 // pfSense includes
 require_once('services.inc');
+require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
@@ -262,7 +263,7 @@ function wg_destroy_tunnels() {
 	}
 
 	// Now unload the kernel module if it is still loaded
-	if (is_module_running($wgg['kmod'])) {
+	if (is_module_loaded($wgg['kmod'])) {
 
 		$kmod_safe = escapeshellarg($wgg['kmod']);
 
