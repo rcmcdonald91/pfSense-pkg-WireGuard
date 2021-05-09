@@ -384,7 +384,7 @@ function wg_resync_peer($peer) {
 function wg_resync_all() {
 	global $g, $wgg;
 
-	wg_create_config_files();
+	//wg_create_config_files();
 
 	if ($g['wireguard_installing']) {
 
@@ -392,13 +392,11 @@ function wg_resync_all() {
 
 	}
 
-	wg_create_config_files();
-
-	foreach ($wgg['tunnels'] as $tunnel) {
+	//foreach ($wgg['tunnels'] as $tunnel) {
 	
-		wg_resync_tunnel($tunnel['name'], true);
+		//wg_resync_tunnel($tunnel['name'], true);
 	
-	}
+	//}
 
 	if ($g['wireguard_installing']) {
 
@@ -406,6 +404,16 @@ function wg_resync_all() {
 
 	}
 
+	setup_gateways_monitor();
+
+	$retval = services_unbound_configure();
+
+	if ($retval == 0) {
+
+		clear_subsystem_dirty('unbound');
+
+	}
+	
 }
 
 
