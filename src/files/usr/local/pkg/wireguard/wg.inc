@@ -36,12 +36,17 @@ global $wgg;
 if (isset($argv[1])) {
 
 	if ($argv[1] == 'wg_service_watchdog') {
+
 		ignore_user_abort(TRUE);
+
 		set_time_limit(0);
+
 		wg_service_watchdog();
+
 		exit;
+
 	}
-	
+
 }
 
 /*
@@ -653,10 +658,11 @@ function make_wg_conf($tunnel) {
 }
 
 function wg_service_watchdog() {
+	global $wgg;
 
 	while (TRUE) {
 
-		if (!is_module_loaded('if_wg.ko')) {
+		if (!is_module_loaded($wgg['kmod'])) {
 
 			break;
 
@@ -665,6 +671,8 @@ function wg_service_watchdog() {
 		sleep(1);
 
 	}
+
+	return false;
 
 }
 

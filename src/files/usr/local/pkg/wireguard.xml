@@ -43,7 +43,7 @@
 	</menu>
 	<service>
 		<name>wireguard</name>
-		<rcfile>wireguard_service.sh</rcfile>
+		<rcfile>wireguard.sh</rcfile>
 		<executable>php_wg</executable>
 		<description>WireGuard</description>
 	</service>
