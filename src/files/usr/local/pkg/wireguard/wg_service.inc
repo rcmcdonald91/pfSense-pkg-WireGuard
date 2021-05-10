@@ -49,11 +49,31 @@ if (isset($argv[1])) {
 
 	} elseif ($argv[1] == 'wg_service_start') {
 
-		wg_resync_all();
-		
-		setup_gateways_monitor();
+		if (platform_booting()) {
 
-		services_unbound_configure();
+			print_message("Configuring WireGuard tunnels...");
+
+			mute_kernel_msgs();
+
+		}
+
+		wg_resync_all();
+
+		if (platform_booting()) {
+
+			unmute_kernel_msgs();
+
+			print_message("done. \n");
+
+		}
+
+		if (!platform_booting()) {
+		
+			setup_gateways_monitor();
+
+			services_unbound_configure();
+
+		}
 
 	} else {
 
@@ -103,6 +123,17 @@ function wg_service_deinstall() {
 	stop_service('wireguard');
 
 	unlink_if_exists('/usr/local/bin/php_wg');
+
+}
+
+// This is a hack to get text onto the console during booting
+function print_message($message) {
+
+	$message = gettext($message);
+
+    	$message = escapeshellarg($message);
+
+	mwexec("printf {$message} >&2");
 
 }
 
