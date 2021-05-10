@@ -388,7 +388,9 @@ function wg_resync_all() {
 
 	if ($g['wireguard_installing']) {
 
-		update_status("done.\n  Configuring any existing WireGuard tunnels...");
+		unset($g['wireguard_installing']);
+
+		exit();
 
 	}
 
@@ -396,14 +398,6 @@ function wg_resync_all() {
 	
 		wg_resync_tunnel($tunnel['name'], true);
 	
-	}
-
-	if ($g['wireguard_installing']) {
-
-		update_status("done.\n");
-
-		unset($g['wireguard_installing']);
-
 	}
 
 }
