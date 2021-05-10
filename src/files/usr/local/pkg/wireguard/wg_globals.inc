@@ -53,7 +53,7 @@ $wgg = array(
 					'members' => null),
 	'shellcmdentries'	=> array(
 					array(
-						'cmd' => '/usr/local/etc/rc.reload_wireguard',
+						'cmd' => 'service wireguardd start',
 						'cmdtype' => 'earlyshellcmd',
 						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)')),
 	'unboundaclentry'	=> array(
