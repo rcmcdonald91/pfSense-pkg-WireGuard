@@ -41,6 +41,12 @@
 		<section>Status</section>
 		<url>/wg/status_wireguard.php</url>
 	</menu>
+	<service>
+		<name>wireguard</name>
+		<rcfile>wireguard_service.sh</rcfile>
+		<executable>php_wg</executable>
+		<description>WireGuard</description>
+	</service>
 	<custom_php_install_command>
 		<![CDATA[
 		wg_install();

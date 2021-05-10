@@ -641,4 +641,20 @@ function make_wg_conf($tunnel) {
 
 }
 
+function wg_service_watchdog() {
+
+	while (TRUE) {
+
+		if (!is_module_loaded('if_wg.ko')) {
+
+			break;
+
+		}
+
+		sleep(1);
+
+	}
+
+}
+
 ?>

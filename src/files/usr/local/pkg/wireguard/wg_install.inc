@@ -22,6 +22,7 @@
 // pfSense includes
 require_once('config.inc');
 require_once('services.inc');
+require_once('service-utils.inc');
 require_once('util.inc');
 
 // WireGuard includes
@@ -52,6 +53,10 @@ function wg_install() {
 
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
+
+	update_status("done.\n  Creating WireGuard service...");
+
+	wg_service_install();
 
 	update_status("done.\n");
 
@@ -243,10 +248,16 @@ function wg_deinstall() {
 
 	}
 
+
 	update_status("done.\n  Destroying WireGuard tunnels...");
 
 	// Teardown any WireGuard tunnel interfaces
 	wg_destroy_tunnels();
+
+	update_status("done.\n  Removing WireGuard service...");
+
+	// Remove WireGuard watchdog service
+	wg_service_deinstall();
 
 	update_status("done.\n");
 
@@ -413,6 +424,26 @@ function wg_ifgroup_deinstall() {
 
 	}
 	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
+
+}
+
+function wg_service_install() {
+	global $wgg;
+
+	stop_service('wireguard');
+
+	unlink_if_exists('/usr/local/bin/php_pfb');
+
+	link('/usr/local/bin/php', '/usr/local/bin/php_wg');
+
+}
+
+function wg_service_deinstall() {
+	global $wgg;
+
+	stop_service('wireguard');
+
+	unlink_if_exists('/usr/local/bin/php_wg');
 
 }
 
