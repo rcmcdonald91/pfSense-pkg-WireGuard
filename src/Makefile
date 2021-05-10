@@ -26,7 +26,7 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
-	${MKDIR} ${STAGEDIR}${PREFIX}/etc
+	${MKDIR} ${STAGEDIR}${PREFIX}/etc/rc.d
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
 
@@ -41,7 +41,7 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
 		${STAGEDIR}${PREFIX}/pkg
 
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/etc/rc.* \
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/etc/rc.reload_wireguard \
 		${STAGEDIR}${PREFIX}/etc
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/*.inc \
