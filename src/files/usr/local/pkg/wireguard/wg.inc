@@ -396,11 +396,7 @@ function wg_resync_all() {
 
 	}
 
-	foreach ($wgg['tunnels'] as $tunnel) {
-	
-		wg_resync_tunnel($tunnel['name'], true);
-	
-	}
+	restart_service('wireguard');
 
 }
 

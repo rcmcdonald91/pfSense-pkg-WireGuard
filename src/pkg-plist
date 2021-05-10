@@ -1,4 +1,3 @@
-etc/rc.d/wireguardd
 pkg/wireguard.xml
 pkg/wireguard/wg.inc
 pkg/wireguard/wg_api.inc
