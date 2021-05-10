@@ -22,7 +22,7 @@
 
 // pfSense includes
 require_once('config.inc');
-require_once('utils.inc');
+require_once('util.inc');
 require_once('service-utils.inc');
 
 // WireGuard includes
