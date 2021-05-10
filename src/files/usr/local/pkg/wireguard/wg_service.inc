@@ -75,12 +75,6 @@ if (isset($argv[1])) {
 
 		}
 
-		if ($g['wireguard_installing']) {
-
-			update_status("done.\n  Starting WireGuard service...");
-
-		}
-
 		foreach ($wgg['tunnels'] as $tunnel) {
 		
 			wg_resync_tunnel($tunnel['name'], true);
@@ -91,11 +85,7 @@ if (isset($argv[1])) {
 
 		services_unbound_configure();
 
-		if ($g['wireguard_installing']) {
-
-			update_status("done.\n");
-
-		}
+		print_message("\n\nWOW");
 
 		exit;
 	
