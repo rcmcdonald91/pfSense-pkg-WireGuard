@@ -386,17 +386,11 @@ function wg_resync_all() {
 
 	wg_create_config_files();
 
-	if ($g['wireguard_installing']) {
-
-		start_service('wireguard');
-
-		unset($g['wireguard_installing']);
-
-		return;
-
+	foreach ($wgg['tunnels'] as $tunnel) {
+	
+		wg_resync_tunnel($tunnel['name'], true);
+	
 	}
-
-	restart_service('wireguard');
 
 }
 

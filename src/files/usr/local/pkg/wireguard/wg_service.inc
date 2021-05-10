@@ -47,6 +47,8 @@ if (isset($argv[1])) {
 
 		wg_destroy_tunnels();
 
+		exit;
+
 	} elseif ($argv[1] == 'wg_service_start') {
 
 		if (platform_booting()) {
@@ -55,26 +57,28 @@ if (isset($argv[1])) {
 
 			mute_kernel_msgs();
 
-		}
-
-		wg_resync_all();
-
-		if (platform_booting()) {
+			wg_resync_all();
 
 			unmute_kernel_msgs();
 
 			print_message("done. \n");
 
-		}
-
-		if (!platform_booting()) {
-		
-			setup_gateways_monitor();
-
-			services_unbound_configure();
+			exit;
 
 		}
 
+		update_status("done.\n  Starting WireGuard service...");
+
+		wg_resync_all();
+
+		setup_gateways_monitor();
+
+		services_unbound_configure();
+
+		update_status("done.\n");
+
+		exit;
+	
 	} else {
 
 		exit;
