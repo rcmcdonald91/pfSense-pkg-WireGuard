@@ -33,6 +33,17 @@ require_once('wireguard/wg_validate.inc');
 
 global $wgg;
 
+if (isset($argv[1])) {
+
+	if ($argv[1] == 'wg_service_watchdog') {
+		ignore_user_abort(TRUE);
+		set_time_limit(0);
+		wg_service_watchdog();
+		exit;
+	}
+	
+}
+
 /*
  * This toggles a given tunnel based on index
  */
