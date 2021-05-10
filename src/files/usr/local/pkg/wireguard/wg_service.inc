@@ -22,6 +22,7 @@
 
 // pfSense includes
 require_once('config.inc');
+require_once('globals.inc');
 require_once('gwlb.inc');
 require_once('util.inc');
 require_once('services.inc');
@@ -65,15 +66,19 @@ if (isset($argv[1])) {
 function wg_service_watchdog() {
 	global $wgg;
 
-	while (TRUE) {
+	if (!platform_booting()) {
 
-		if (!is_module_loaded($wgg['kmod'])) {
+		while (TRUE) {
 
-			break;
+			if (!is_module_loaded($wgg['kmod'])) {
+
+				break;
+
+			}
+
+			sleep(1);
 
 		}
-
-		sleep(1);
 
 	}
 
@@ -86,7 +91,7 @@ function wg_service_install() {
 
 	stop_service('wireguard');
 
-	unlink_if_exists('/usr/local/bin/php_pfb');
+	unlink_if_exists('/usr/local/bin/php_wg');
 
 	link('/usr/local/bin/php', '/usr/local/bin/php_wg');
 
