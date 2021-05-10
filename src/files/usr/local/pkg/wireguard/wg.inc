@@ -388,6 +388,8 @@ function wg_resync_all() {
 
 	if ($g['wireguard_installing']) {
 
+		service_start('wireguard');
+
 		unset($g['wireguard_installing']);
 
 		return;

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 rc_start() {
-	/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start &
+	/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start
 	/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_watchdog &
 }
 
