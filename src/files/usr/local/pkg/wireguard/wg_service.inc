@@ -22,7 +22,9 @@
 
 // pfSense includes
 require_once('config.inc');
+require_once('gwlb.inc');
 require_once('util.inc');
+require_once('services.inc');
 require_once('service-utils.inc');
 
 // WireGuard includes
@@ -47,6 +49,10 @@ if (isset($argv[1])) {
 	} elseif ($argv[1] == 'wg_service_start') {
 
 		wg_resync_all();
+		
+		setup_gateways_monitor();
+
+		services_unbound_configure();
 
 	} else {
 
