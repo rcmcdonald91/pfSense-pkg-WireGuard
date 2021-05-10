@@ -384,10 +384,18 @@ function wg_resync_peer($peer) {
 function wg_resync_all() {
 	global $g, $wgg;
 
+	if ($g['wireguard_installing']) {
+
+		unset($g['wireguard_installing']);
+
+		return;
+		
+	}
+
 	wg_create_config_files();
 
 	foreach ($wgg['tunnels'] as $tunnel) {
-	
+		
 		wg_resync_tunnel($tunnel['name'], true);
 	
 	}

@@ -31,6 +31,8 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
+global $g;
+
 if (isset($argv[1])) {
 
 	if ($argv[1] == 'wg_service_watchdog') {
@@ -51,13 +53,19 @@ if (isset($argv[1])) {
 
 	} elseif ($argv[1] == 'wg_service_start') {
 
+		wg_create_config_files();
+
 		if (platform_booting()) {
 
 			print_message("Configuring WireGuard tunnels...");
 
 			mute_kernel_msgs();
 
-			wg_resync_all();
+			foreach ($wgg['tunnels'] as $tunnel) {
+			
+				wg_resync_tunnel($tunnel['name'], true);
+			
+			}
 
 			unmute_kernel_msgs();
 
@@ -67,15 +75,27 @@ if (isset($argv[1])) {
 
 		}
 
-		update_status("done.\n  Starting WireGuard service...");
+		if ($g['wireguard_installing']) {
 
-		wg_resync_all();
+			update_status("done.\n  Starting WireGuard service...");
+
+		}
+
+		foreach ($wgg['tunnels'] as $tunnel) {
+		
+			wg_resync_tunnel($tunnel['name'], true);
+		
+		}
 
 		setup_gateways_monitor();
 
 		services_unbound_configure();
 
-		update_status("done.\n");
+		if ($g['wireguard_installing']) {
+
+			update_status("done.\n");
+
+		}
 
 		exit;
 	

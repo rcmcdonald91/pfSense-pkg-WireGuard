@@ -61,9 +61,11 @@ function wg_install() {
 
 	wg_write_rcfile();
 
-	update_status("done.\n");
+	update_status("done.\n  Starting WireGuard service...");
 
-	// The first organic resync called by pfSense package manager will finish the installation process
+	start_service('wireguard');
+
+	update_status("done.\n");
 
 }
 
