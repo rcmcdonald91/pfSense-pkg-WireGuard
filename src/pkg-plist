@@ -1,5 +1,5 @@
 etc/rc.reload_wireguard
-etc/rc.d/wireguard
+etc/rc.d/wireguardd
 pkg/wireguard.xml
 pkg/wireguard/wg.inc
 pkg/wireguard/wg_api.inc
