@@ -89,7 +89,7 @@ if ($save_success) {
 	
 }
 
-if ($count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
+if (count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
 
 	print_info_box(gettext('The WireGuard kernel module is not loaded!'), 'danger', null);
 

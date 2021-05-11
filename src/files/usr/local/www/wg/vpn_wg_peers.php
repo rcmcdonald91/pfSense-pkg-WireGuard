@@ -72,7 +72,7 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-if ($count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
+if (count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
 
 	print_info_box(gettext('The WireGuard kernel module is not loaded!'), 'danger', null);
 
@@ -81,7 +81,7 @@ if ($count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
 if ($input_errors) {
 
 	print_input_errors($input_errors);
-	
+
 }
 
 display_top_tabs($tab_array);
