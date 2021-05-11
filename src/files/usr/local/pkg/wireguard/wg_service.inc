@@ -33,23 +33,15 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1])) {
 
-	if ($argv[1] == 'wg_service_daemon') {
-
-		ignore_user_abort(TRUE);
-
-		set_time_limit(0);
-
-		wg_service_daemon();
-
-		exit;
-
-	} elseif ($argv[1] == 'wg_service_start') {
+	if ($argv[1] == 'wg_service_start') {
 
 		ignore_user_abort(TRUE);
 
 		set_time_limit(0);
 
 		wg_service_start();
+
+		wg_service_daemon();
 
 		exit;
 
@@ -74,6 +66,8 @@ if (isset($argv[1])) {
 function wg_service_stop() {
 
 	wg_destroy_tunnels();
+
+	killbyname('php_wg');
 
 	return;
 
@@ -116,6 +110,8 @@ function wg_service_start() {
 
 function wg_service_daemon() {
 	global $wgg;
+
+	killbyname('php_wg');
 
 	if (!platform_booting()) {
 

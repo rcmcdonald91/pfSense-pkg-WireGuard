@@ -53,7 +53,7 @@ $wgg = array(
 					'members' => null),
 	'shellcmdentries'	=> array(
 					array(
-						'cmd' => 'service wireguardd start',
+						'cmd' => 'service wireguard.sh start',
 						'cmdtype' => 'earlyshellcmd',
 						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)')),
 	'unboundaclentry'	=> array(

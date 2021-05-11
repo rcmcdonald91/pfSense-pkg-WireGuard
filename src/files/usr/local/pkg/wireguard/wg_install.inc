@@ -435,12 +435,11 @@ function wg_ifgroup_deinstall() {
 function wg_write_rcfile() {
 
 	$start 	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start',
-			'/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_daemon &'
+			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start &'
 	);
 
 	$stop	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_stop'
+			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_stop &'
 	);
 
 	$rcfile['file'] 	= 'wireguard.sh';
