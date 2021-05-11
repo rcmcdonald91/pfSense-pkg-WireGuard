@@ -173,9 +173,9 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_start";
+	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_start &";
 
-	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_stop";
+	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_stop &";
 
 	$rcfile['file'] 	= 'wireguard.sh';
 
