@@ -436,14 +436,14 @@ function wg_write_rcfile() {
 
 	$start 	= array(
 			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start',
-			'/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_watchdog &'
+			'/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_daemon &'
 	);
 
 	$stop	= array(
 			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_stop'
 	);
 
-	$rcfile['file'] 	= 'wireguardd';
+	$rcfile['file'] 	= 'wireguard.sh';
 
 	$rcfile['start'] 	= implode("\n\t", $start);
 

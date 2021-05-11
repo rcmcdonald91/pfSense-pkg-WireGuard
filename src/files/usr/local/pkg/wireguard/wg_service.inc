@@ -31,64 +31,38 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
-global $g;
-
 if (isset($argv[1])) {
 
-	if ($argv[1] == 'wg_service_watchdog') {
+	if ($argv[1] == 'wg_service_daemon') {
 
 		ignore_user_abort(TRUE);
 
 		set_time_limit(0);
 
-		wg_service_watchdog();
-
-		exit;
-
-	} elseif ($argv[1] == 'wg_service_stop') {
-
-		wg_destroy_tunnels();
+		wg_service_daemon();
 
 		exit;
 
 	} elseif ($argv[1] == 'wg_service_start') {
 
-		wg_create_config_files();
+		ignore_user_abort(TRUE);
 
-		if (platform_booting()) {
+		set_time_limit(0);
 
-			print_message("Configuring WireGuard tunnels...");
-
-			mute_kernel_msgs();
-
-			foreach ($wgg['tunnels'] as $tunnel) {
-			
-				wg_resync_tunnel($tunnel['name'], true);
-			
-			}
-
-			unmute_kernel_msgs();
-
-			print_message("done. \n");
-
-			exit;
-
-		}
-
-		foreach ($wgg['tunnels'] as $tunnel) {
-		
-			wg_resync_tunnel($tunnel['name'], true);
-		
-		}
-
-		setup_gateways_monitor();
-
-		services_unbound_configure();
-
-		print_message("\n\nWOW");
+		wg_service_start();
 
 		exit;
-	
+
+	} elseif ($argv[1] == 'wg_service_stop') {
+
+		ignore_user_abort(TRUE);
+
+		set_time_limit(0);
+
+		wg_service_stop();
+
+		exit;
+
 	} else {
 
 		exit;
@@ -97,7 +71,50 @@ if (isset($argv[1])) {
 
 }
 
-function wg_service_watchdog() {
+function wg_service_stop() {
+
+	wg_destroy_tunnels();
+
+	return;
+
+}
+
+function wg_service_start() {
+	global $wgg;
+
+	if (platform_booting()) {
+
+		print_message("Configuring WireGuard tunnels...");
+
+		mute_kernel_msgs();
+
+	}
+
+	wg_create_config_files();
+
+	foreach ($wgg['tunnels'] as $tunnel) {
+	
+		wg_resync_tunnel($tunnel['name'], true);
+	
+	}
+
+	if (platform_booting()) {
+
+		unmute_kernel_msgs();
+
+		print_message("done. \n");
+
+	} elseif (!platform_booting()) {
+
+		send_event('service restart packages');
+
+	}
+
+	return;
+
+}
+
+function wg_service_daemon() {
 	global $wgg;
 
 	if (!platform_booting()) {
@@ -116,7 +133,7 @@ function wg_service_watchdog() {
 
 	}
 
-	return false;
+	return;
 
 }
 
