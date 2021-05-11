@@ -61,10 +61,6 @@ function wg_install() {
 
 	wg_write_rcfile();
 
-	update_status("done.\n  Starting WireGuard service...");
-
-	start_service('wireguard');
-
 	update_status("done.\n");
 
 }
@@ -435,11 +431,12 @@ function wg_ifgroup_deinstall() {
 function wg_write_rcfile() {
 
 	$start 	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start &',
+			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start',
+			'/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_daemon &'
 	);
 
 	$stop	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_stop &'
+			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_stop'
 	);
 
 	$rcfile['file'] 	= 'wireguard.sh';

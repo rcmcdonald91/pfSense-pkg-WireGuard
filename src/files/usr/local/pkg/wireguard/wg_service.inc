@@ -114,8 +114,6 @@ function wg_service_start() {
 
 	}
 
-	mwexec_bg('/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_daemon');
-
 	return;
 
 }
