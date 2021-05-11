@@ -97,15 +97,19 @@ function wg_service_start() {
 		wg_resync_tunnel($tunnel['name'], true);
 	
 	}
-
+ 
 	if (platform_booting()) {
 
 		unmute_kernel_msgs();
 
 		print_message("done. \n");
 
+	} elseif (!platform_booting()) {
+
+		reload_interfaces();
+
 	}
-	
+
 	return;
 
 }
