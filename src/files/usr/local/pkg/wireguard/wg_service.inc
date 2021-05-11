@@ -33,21 +33,29 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1])) {
 
-	if ($argv[1] == 'wg_service_start') {
+	if ($argv[1] == 'wg_service_daemon') {
 
-		ignore_user_abort(TRUE);
+		ignore_user_abort(true);
 
 		set_time_limit(0);
-
-		wg_service_start();
 
 		wg_service_daemon();
 
 		exit;
 
+	} elseif ($argv[1] == 'wg_service_start') {
+
+		ignore_user_abort(true);
+
+		set_time_limit(0);
+
+		wg_service_start();
+
+		exit;
+
 	} elseif ($argv[1] == 'wg_service_stop') {
 
-		ignore_user_abort(TRUE);
+		ignore_user_abort(true);
 
 		set_time_limit(0);
 
@@ -84,6 +92,8 @@ function wg_service_start() {
 
 	}
 
+	wg_service_stop();
+
 	wg_create_config_files();
 
 	foreach ($wgg['tunnels'] as $tunnel) {
@@ -104,14 +114,14 @@ function wg_service_start() {
 
 	}
 
+	mwexec_bg('/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_daemon');
+
 	return;
 
 }
 
 function wg_service_daemon() {
 	global $wgg;
-
-	killbyname('php_wg');
 
 	if (!platform_booting()) {
 

@@ -435,7 +435,7 @@ function wg_ifgroup_deinstall() {
 function wg_write_rcfile() {
 
 	$start 	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start &'
+			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start &',
 	);
 
 	$stop	= array(
