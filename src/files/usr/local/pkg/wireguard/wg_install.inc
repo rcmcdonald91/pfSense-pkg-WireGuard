@@ -59,7 +59,7 @@ function wg_install() {
 
 	wg_service_install();
 
-	wg_write_rcfile();
+	wg_service_rcfile();
 
 	update_status("done.\n");
 
@@ -425,29 +425,6 @@ function wg_ifgroup_deinstall() {
 
 	}
 	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
-
-}
-
-function wg_write_rcfile() {
-
-	$start 	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_start',
-			'/usr/local/bin/php_wg -f /usr/local/pkg/wireguard/wg_service.inc wg_service_daemon &'
-	);
-
-	$stop	= array(
-			'/usr/local/bin/php -f /usr/local/pkg/wireguard/wg_service.inc wg_service_stop'
-	);
-
-	$rcfile['file'] 	= 'wireguard.sh';
-
-	$rcfile['start'] 	= implode("\n\t", $start);
-
-	$rcfile['stop'] 	= implode("\n\t", $stop);
-
-	write_rcfile($rcfile);
-
-	unlink_if_exists("/usr/local/etc/rc.d/wireguard");
 
 }
 

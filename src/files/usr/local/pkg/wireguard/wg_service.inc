@@ -33,23 +33,15 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1])) {
 
-	if ($argv[1] == 'wg_service_daemon') {
-
-		ignore_user_abort(true);
-
-		set_time_limit(0);
-
-		wg_service_daemon();
-
-		exit;
-
-	} elseif ($argv[1] == 'wg_service_start') {
+	if ($argv[1] == 'wg_service_start') {
 
 		ignore_user_abort(true);
 
 		set_time_limit(0);
 
 		wg_service_start();
+
+		wg_service_daemon();
 
 		exit;
 
@@ -72,27 +64,28 @@ if (isset($argv[1])) {
 }
 
 function wg_service_stop() {
+	global $wgg;
 
 	wg_destroy_tunnels();
 
-	killbyname('php_wg');
+	killbyname(basename($wgg['wg_daemon']));
 
 	return;
 
 }
 
 function wg_service_start() {
-	global $wgg;
+	global $g, $wgg;
 
 	if (platform_booting()) {
+
+		$g['wireguard_firststart'] = true;
 
 		print_message("Configuring WireGuard tunnels...");
 
 		mute_kernel_msgs();
 
 	}
-
-	wg_service_stop();
 
 	wg_create_config_files();
 
@@ -108,11 +101,22 @@ function wg_service_start() {
 
 		print_message("done. \n");
 
-	} elseif (!platform_booting()) {
-
-		reload_interfaces();
+		// Let the boot process continue and handle additional service and package invocation
+		return;
 
 	}
+
+	if ($g['wireguard_firststart']) {
+
+		unset($g['wireguard_firststart']);
+
+		return;
+
+	}
+
+	setup_gateways_monitor();
+
+	services_unbound_configure();
 
 	return;
 
@@ -121,7 +125,7 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
-	if (!platform_booting()) {
+	if (!platform_booting() || !is_process_running(basename($wgg['wg_daemon']))) {
 
 		while (TRUE) {
 
@@ -146,9 +150,9 @@ function wg_service_install() {
 
 	stop_service('wireguard');
 
-	unlink_if_exists('/usr/local/bin/php_wg');
+	unlink_if_exists($wgg['wg_daemon']);
 
-	link('/usr/local/bin/php', '/usr/local/bin/php_wg');
+	link($wgg['php'], $wgg['wg_daemon']);
 
 }
 
@@ -157,7 +161,29 @@ function wg_service_deinstall() {
 
 	stop_service('wireguard');
 
-	unlink_if_exists('/usr/local/bin/php_wg');
+	unlink_if_exists($wgg['wg_daemon']);
+
+}
+
+function wg_service_rcfile() {
+	global $wgg;
+
+	// Remove the included rc from wireguard-tools(8)
+	unlink_if_exists("/usr/local/etc/rc.d/wireguard");
+
+	$start = $stop = array();
+
+	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_start";
+
+	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_stop";
+
+	$rcfile['file'] 	= 'wireguard.sh';
+
+	$rcfile['start'] 	= implode("\n\t", $start);
+
+	$rcfile['stop'] 	= implode("\n\t", $stop);
+
+	write_rcfile($rcfile);
 
 }
 
