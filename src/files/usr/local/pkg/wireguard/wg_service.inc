@@ -104,12 +104,8 @@ function wg_service_start() {
 
 		print_message("done. \n");
 
-	} elseif (!platform_booting()) {
-
-		send_event('service restart packages');
-
 	}
-
+	
 	return;
 
 }
