@@ -24,6 +24,8 @@
 require_once('config.inc');
 require_once('interfaces.inc');		// interface_configure
 require_once('util.inc');		// get_configured_interface_list_by_realif, mwexec
+require_once('services.inc');
+require_once('service-utils.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
@@ -232,9 +234,18 @@ function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
 
 }
 
-function wg_unbound_acl_update() {
+/*
+ * Wrapper to update the unbound ACL by recreating it.
+ */
+function wg_unbound_acl_update($restart_unbound = false) {
 
-	return wg_unbound_acl_install();
+	wg_unbound_acl_install();
+
+	if ($restart_unbound) {
+
+		services_unbound_configure();
+
+	}
 
 }
 

@@ -87,15 +87,18 @@ function wg_service_start() {
 
 	}
 
+	// Create WireGuard configuration files
 	wg_create_config_files();
 
+	// Update Unbound ACL
+	wg_unbound_acl_update();
+
+	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 	
 		wg_resync_tunnel($tunnel['name'], true);
 	
 	}
-
-	wg_unbound_acl_update();
  
 	if (platform_booting()) {
 
