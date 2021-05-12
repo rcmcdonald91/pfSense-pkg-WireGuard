@@ -552,17 +552,17 @@ function wg_unbound_acl_install() {
 
 		$wgg['unboundaclentry']['aclid'] = unbound_get_next_id();
 
-		$aclentry = array();
+		$tmp_acls = array();
 
 		foreach ($tun_networks as $network_idx => $network) {
 
-			$aclentry['acl_network'] 	= $network['network'];
+			$tmp_acls[$network_idx]['acl_network'] 	= $network['network'];
 
-			$aclentry['mask']		= $network['mask'];
+			$tmp_acls[$network_idx]['mask']		= $network['mask'];
 
-			$aclentry['description']	= "{$network['tun']} ({$network['descr']})";
+			$tmp_acls[$network_idx]['description']	= "{$network['tun']} ({$network['descr']})";
 
-			$wgg['unboundaclentry']['row'][] = $aclentry;
+			$wgg['unboundaclentry']['row'] = $tmp_acls
 
 		}
 
