@@ -34,7 +34,7 @@ $wgg = array(
 	'kmod'			=> 'if_wg.ko',
 	'php'			=> '/usr/local/bin/php',
 	'wg_daemon'		=> '/usr/local/bin/php_wg',
-	'wg_includes'		=> '/usr/local/pkg/wireguard/',
+	'wg_includes'		=> '/usr/local/pkg/wireguard',
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',
