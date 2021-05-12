@@ -1,5 +1,5 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.0.9.5
+PORTVERSION=	0.1.0
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
