@@ -1,7 +1,5 @@
 # pfSense-pkg-WireGuard
-This is a port of the original WireGuard* UI bits as implemented by [Netgate](https://www.netgate.com/) in [pfSense 2.5.0](https://github.com/pfsense/pfsense/tree/RELENG_2_5_0) to a package suitable for sideloading and more frequent updating on future releases of pfSense.
-
-* "WireGuard" and the "WireGuard" logo are registered trademarks of Jason A. Donenfeld.
+This is a port of the original WireGuard*** UI bits as implemented by [Netgate](https://www.netgate.com/) in [pfSense 2.5.0](https://github.com/pfsense/pfsense/tree/RELENG_2_5_0) to a package suitable for sideloading and more frequent updating on future releases of pfSense.
 
 This also includes some improvments such as a proper status page (found under Status / WireGuard Status) and improved assigned interface handling.
 
@@ -46,3 +44,7 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 ## Configuration
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
+
+## Recognition
+
+\*** "WireGuard" and the "WireGuard" logo are registered trademarks of Jason A. Donenfeld.
