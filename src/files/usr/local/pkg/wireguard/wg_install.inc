@@ -451,7 +451,7 @@ function wg_unbound_acl_deinstall() {
 
 		foreach ($acls as $acl_idx => $acl) {
 
-			unset($a_unbound_acls($acl_idx));
+			unset($a_unbound_acls[$acl_idx]);
 
 		}
 
