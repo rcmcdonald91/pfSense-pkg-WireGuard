@@ -562,7 +562,7 @@ function wg_unbound_acl_install() {
 
 			$tmp_acls[$network_idx]['description']	= "{$network['tun']} ({$network['descr']})";
 
-			$wgg['unboundaclentry']['row'] = $tmp_acls
+			$wgg['unboundaclentry']['row'] = $tmp_acls;
 
 		}
 
