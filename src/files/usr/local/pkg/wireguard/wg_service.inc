@@ -90,8 +90,8 @@ function wg_service_start() {
 	// Create WireGuard configuration files
 	wg_create_config_files();
 
-	// Update Unbound ACL
-	wg_unbound_acl_update();
+	// Update Unbound ACL without restarting Unbound, we will do this once on service start
+	wg_unbound_acl_update(false);
 
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
