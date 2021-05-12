@@ -144,7 +144,37 @@ function wg_upgrade_allowedips() {
 	// Write the changes out to disk
 	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
+	// Read latest settings
+	wg_globals();
+
+	// Save a copy for manipulation
+	$peers = $wgg['peers'];
+
+	foreach ($peers as $peer_idx => $peer) {
+
+		if (is_array($peer['allowedips']['row'])) {
+
+			$tmp_addrs = array();
+
+			foreach ($peer['allowedips']['row'] as $a_index => $item) {
+
+				$tmp_addrs['row'][$a_index]['descr'] = $item['description'];
+
+				unset($tmp_addrs['row'][$a_index]['description'];
+
+			}
+
+			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
+
+		}
+
+	}
+
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+
 }
+
 function wg_upgrade_addresses() {
 	global $wgg;
 
@@ -216,6 +246,35 @@ function wg_upgrade_addresses() {
 
 	// Write the changes out to disk
 	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
+
+	// Read latest settings
+	wg_globals();
+
+	// Save a copy for manipulation
+	$tunnels = $wgg['tunnels'];
+
+	foreach ($tunnels as $tun_idx => $tunnel) {
+
+		if (is_array($tunnel['addresses']['row'])) {
+
+			$tmp_addrs = array();
+
+			foreach ($tunnel['addresses']['row'] as $a_index => $item) {
+
+				$tmp_addrs['row'][$a_index]['descr'] = $item['description'];
+
+				unset($tmp_addrs['row'][$a_index]['description'];
+
+			}
+
+			$wgg['tunnels'][$tun_idx]['addresses'] = $tmp_addrs;
+
+		}
+
+	}
+
+	// Write the changes out to disk
+	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
 
 }
 
@@ -438,6 +497,9 @@ function wg_ifgroup_deinstall() {
 
 }
 
+/*
+ * This function removes the WireGuard Unbound access list
+ */
 function wg_unbound_acl_deinstall() {
 	global $config, $wgg;
 
@@ -461,6 +523,9 @@ function wg_unbound_acl_deinstall() {
 
 }
 
+/*
+ * This function creates the WireGuard Unbound access list
+ */
 function wg_unbound_acl_install() {
 	global $config, $wgg;
 
