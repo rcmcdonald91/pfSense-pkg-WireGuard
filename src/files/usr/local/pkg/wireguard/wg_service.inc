@@ -94,6 +94,8 @@ function wg_service_start() {
 		wg_resync_tunnel($tunnel['name'], true);
 	
 	}
+
+	wg_unbound_acl_update();
  
 	if (platform_booting()) {
 
