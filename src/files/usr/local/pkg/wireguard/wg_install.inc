@@ -160,7 +160,7 @@ function wg_upgrade_allowedips() {
 
 				$tmp_addrs['row'][$a_index]['descr'] = $item['description'];
 
-				unset($tmp_addrs['row'][$a_index]['description'];
+				unset($tmp_addrs['row'][$a_index]['description']);
 
 			}
 
@@ -263,7 +263,7 @@ function wg_upgrade_addresses() {
 
 				$tmp_addrs['row'][$a_index]['descr'] = $item['description'];
 
-				unset($tmp_addrs['row'][$a_index]['description'];
+				unset($tmp_addrs['row'][$a_index]['description']);
 
 			}
 
