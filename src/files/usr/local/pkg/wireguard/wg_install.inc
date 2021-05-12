@@ -538,6 +538,10 @@ function wg_unbound_acl_deinstall() {
 function wg_unbound_acl_install() {
 	global $config, $wgg;
 
+	wg_unbound_acl_deinstall();
+
+	$tun_networks = wg_get_tunnel_networks();
+
 	init_config_arr(array('unbound', 'acls'));
 
 	$a_unbound_acls = &$config['unbound']['acls'];
@@ -547,6 +551,20 @@ function wg_unbound_acl_install() {
 	if (!preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $a_unbound_acls_names)) {
 
 		$wgg['unboundaclentry']['aclid'] = unbound_get_next_id();
+
+		$aclentry = array();
+
+		foreach ($tun_networks as $network_idx => $network) {
+
+			$aclentry['acl_network'] 	= $network['network'];
+
+			$aclentry['mask']		= $network['mask'];
+
+			$aclentry['description']	= "{$network['tun']} ({$network['descr']})";
+
+			$wgg['unboundaclentry']['rows'][] = $aclentry;
+
+		}
 
 		$a_unbound_acls[] = $wgg['unboundaclentry'];
 

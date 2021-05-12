@@ -400,6 +400,8 @@ function wg_resync_all() {
 	
 	}
 
+	wg_unbound_acl_update();
+
 }
 
 

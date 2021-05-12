@@ -27,6 +27,7 @@ require_once('util.inc');		// get_configured_interface_list_by_realif, mwexec
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
+require_once('wireguard/wg_install.inc');
 
 // Returns a massive associative array of current wg status
 function wg_status() {
@@ -228,6 +229,12 @@ function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
 	$ret_val = mwexec("{$wgg['ifconfig']} {$ifname_safe} up {$redirect}");
 
 	return ($ret_val <> 0) ? false : true;
+
+}
+
+function wg_unbound_acl_update() {
+
+	return wg_unbound_acl_install();
 
 }
 
