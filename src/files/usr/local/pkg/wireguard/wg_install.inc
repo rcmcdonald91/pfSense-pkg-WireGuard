@@ -158,7 +158,11 @@ function wg_upgrade_allowedips() {
 
 			foreach ($peer['allowedips']['row'] as $a_index => $item) {
 
-				$tmp_addrs['row'][$a_index]['descr'] = $item['description'];
+				$tmp_addrs['row'][$a_index]['address'] 	= $item['address'];
+
+				$tmp_addrs['row'][$a_index]['mask'] 	= $item['mask'];
+
+				$tmp_addrs['row'][$a_index]['descr'] 	= $item['description'];
 
 				unset($tmp_addrs['row'][$a_index]['description']);
 
@@ -261,7 +265,11 @@ function wg_upgrade_addresses() {
 
 			foreach ($tunnel['addresses']['row'] as $a_index => $item) {
 
-				$tmp_addrs['row'][$a_index]['descr'] = $item['description'];
+				$tmp_addrs['row'][$a_index]['address'] 	= $item['address'];
+
+				$tmp_addrs['row'][$a_index]['mask'] 	= $item['mask'];
+
+				$tmp_addrs['row'][$a_index]['descr'] 	= $item['description'];
 
 				unset($tmp_addrs['row'][$a_index]['description']);
 
