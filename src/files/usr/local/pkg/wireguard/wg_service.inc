@@ -117,6 +117,8 @@ function wg_service_start() {
 	setup_gateways_monitor();
 
 	services_unbound_configure();
+	
+	filter_configure();
 
 	return;
 
