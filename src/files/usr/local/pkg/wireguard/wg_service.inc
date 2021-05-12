@@ -168,16 +168,13 @@ function wg_service_deinstall() {
 function wg_service_rcfile() {
 	global $wgg;
 
-	// Remove the included rc from wireguard-tools(8)
-	unlink_if_exists("/usr/local/etc/rc.d/wireguard");
-
 	$start = $stop = array();
 
 	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_start &";
 
 	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_stop &";
 
-	$rcfile['file'] 	= 'wireguard.sh';
+	$rcfile['file'] 	= 'wireguardd';
 
 	$rcfile['start'] 	= implode("\n\t", $start);
 

@@ -31,10 +31,10 @@ $wgg = array(
 	'ifconfig'		=> '/sbin/ifconfig',
 	'pkg'			=> '/usr/sbin/pkg',
 	'kldunload'		=> '/sbin/kldunload',
-	'kmod'			=> 'if_wg.ko',
 	'php'			=> '/usr/local/bin/php',
 	'wg_daemon'		=> '/usr/local/bin/php_wg',
 	'wg_includes'		=> '/usr/local/pkg/wireguard',
+	'kmod'			=> 'if_wg.ko',
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',
@@ -56,7 +56,7 @@ $wgg = array(
 					'members' => null),
 	'shellcmdentries'	=> array(
 					array(
-						'cmd' => 'service wireguard.sh start',
+						'cmd' => 'service wireguardd start',
 						'cmdtype' => 'earlyshellcmd',
 						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)')),
 	'unboundaclentry'	=> array(
