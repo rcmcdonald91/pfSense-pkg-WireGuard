@@ -562,7 +562,7 @@ function wg_unbound_acl_install() {
 
 			$aclentry['description']	= "{$network['tun']} ({$network['descr']})";
 
-			$wgg['unboundaclentry']['rows'][] = $aclentry;
+			$wgg['unboundaclentry']['row'][] = $aclentry;
 
 		}
 
