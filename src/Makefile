@@ -1,5 +1,5 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.0.9
+PORTVERSION=	0.0.9.5
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -12,7 +12,7 @@ COMMENT=	pfSense package WireGuard
 LICENSE=	APACHE20
 
 RUN_DEPENDS=	wireguard-kmod>0:net/wireguard-kmod \
-		wireguard-tools-lite>0:net/wireguard-tools-lite
+		wireguard-tools-lite>0:net/wireguard-tools@lite
 
 NO_BUILD=	yes
 NO_MTREE=	yes
@@ -26,8 +26,6 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
-	${MKDIR} ${STAGEDIR}${PREFIX}/etc
-
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
@@ -40,9 +38,6 @@ do-install:
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
 		${STAGEDIR}${PREFIX}/pkg
-
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/etc/rc.* \
-		${STAGEDIR}${PREFIX}/etc
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/*.inc \
 		${STAGEDIR}${PREFIX}/pkg/wireguard

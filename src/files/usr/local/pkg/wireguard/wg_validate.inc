@@ -97,37 +97,37 @@ function wg_validate_post($pconfig, $tun_idx) {
 }
 
 // Valildate a peer
-function wg_validate_peer_post($post, $peer_idx) {
+function wg_validate_peer_post($pconfig, $peer_idx) {
 
 	$input_errors = array();
 
 	// Check remote port
-	$rport = $post['port'];
+	$rport = $pconfig['port'];
 
 	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
 
 		$input_errors[] = gettext("Invalid remote port. ({$rport}})");
 	}
 
-	// Check key
-	if (empty($post['publickey'])) {
+	// Check public key
+	if (empty($pconfig['publickey'])) {
 
 		$input_errors[] = gettext('A public key must be specified.');
 
-	} elseif (!wg_is_valid_key($post['publickey'])) {
+	} elseif (!wg_is_valid_key($pconfig['publickey'])) {
 
-		$input_errors[] = gettext("The public key ({$post['publickey']}) is not a valid WireGuard public key.");
+		$input_errors[] = gettext("The public key ({$pconfig['publickey']}) is not a valid WireGuard public key.");
 
-	} elseif (!empty($post['tun'])) {
+	} elseif (!empty($pconfig['tun'])) {
 
-		$peers = wg_get_tunnel_peers($post['tun']);
+		$peers = wg_get_tunnel_peers($pconfig['tun']);
 
 		foreach ($peers as $peer) {
 
 			// We don't want to allow duplicate public keys to be assigned on the same tunnel
-			if (($peer['publickey'] == $post['publickey']) && ($peer['index'] != $peer_idx)) {
+			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $peer_idx)) {
 
-				$input_errors[] = gettext("The public key ({$post['publickey']}) is already assigned to a peer on this tunnel ({$post['tun']})");
+				$input_errors[] = gettext("The public key ({$pconfig['publickey']}) is already assigned to a peer on this tunnel ({$pconfig['tun']}).");
 				
 				break;
 
@@ -137,24 +137,28 @@ function wg_validate_peer_post($post, $peer_idx) {
 
 	}
 
-	// Endpoint
-	$ep = trim($post['endpoint']);
+	$ep = trim($pconfig['endpoint']);
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
 
 		$input_errors[] = gettext('Endpoint must be a valid IPv4 or IPv6 adress or hostname.');
+		
 	}
 
 	// Allowed IPs
-	foreach ($pconfig['allowedips']['row'] as $address) {
+	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 
-		$address['address'] = trim($address['address']);
+		foreach ($pconfig['allowedips']['row'] as $address) {
 
-		$tmp_subnet = "{$address['address']}/{$address['mask']}";
+			$address['address'] = trim($address['address']);
 
-		if (!empty($address['address']) && !is_subnet($tmp_subnet)) {
+			$tmp_subnet = "{$address['address']}/{$address['mask']}";
 
-			$input_errors[] =gettext("Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.");
+			if (!empty($address['address']) && !is_subnet($tmp_subnet)) {
+
+				$input_errors[] =gettext("Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.");
+
+			}
 
 		}
 

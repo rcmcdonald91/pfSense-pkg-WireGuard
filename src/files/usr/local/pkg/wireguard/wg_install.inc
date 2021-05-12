@@ -22,11 +22,13 @@
 // pfSense includes
 require_once('config.inc');
 require_once('services.inc');
+require_once('service-utils.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wireguard/wg_globals.inc');
 require_once('wireguard/wg_api.inc');
+require_once('wireguard/wg_globals.inc');
+require_once('wireguard/wg_service.inc');
 
 /*
  * This is the main install hook
@@ -53,9 +55,13 @@ function wg_install() {
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
-	update_status("done.\n");
+	update_status("done.\n  Creating WireGuard service...");
 
-	// The first organic resync called by pfSense package manager will finish the installation process
+	wg_service_install();
+
+	wg_service_rcfile();
+
+	update_status("done.\n");
 
 }
 
@@ -243,10 +249,16 @@ function wg_deinstall() {
 
 	}
 
+
 	update_status("done.\n  Destroying WireGuard tunnels...");
 
 	// Teardown any WireGuard tunnel interfaces
 	wg_destroy_tunnels();
+
+	update_status("done.\n  Removing WireGuard service...");
+
+	// Remove WireGuard watchdog service
+	wg_service_deinstall();
 
 	update_status("done.\n");
 

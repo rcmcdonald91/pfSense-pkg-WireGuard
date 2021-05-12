@@ -19,6 +19,8 @@
  * limitations under the License.
  */
 
+// pfSense includes
+require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
@@ -186,8 +188,17 @@ function wg_secret_input_type() {
 
 // Gets the appropriate class based on whether or not the target is enabled or disabled
 function wg_entrystatus_class($target_device) {
+	global $wgg;
 
-	return (isset($target_device) && $target_device['enabled'] == 'yes') ? 'enabled' : 'disabled';
+	if (isset($target_device) && 
+		$target_device['enabled'] == 'yes' &&
+			is_module_loaded($wgg['kmod'])) {
+
+		return 'enabled';
+
+	}
+
+	return 'disabled';
 
 }
 

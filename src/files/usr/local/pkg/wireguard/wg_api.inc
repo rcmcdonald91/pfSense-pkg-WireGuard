@@ -268,6 +268,7 @@ function wg_interface_update_addresses($wg_ifname) {
 
 		}
 
+	// Need to let pfSense handle the assigned interfaces
 	} elseif (is_wg_tunnel_assigned($wg_ifname)) {
 
 		if ($pfsense_if_name = wg_get_pfsense_interface_info($wg_ifname)) {
@@ -324,7 +325,7 @@ function wg_interface_syncconf($wg_ifname, $verbose = false) {
 }
 
 /*
- * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ * This creates a WireGuard interface of a specified name
  */
 function wg_interface_create($wg_ifname, $verbose = false) {
 	global $wgg;
@@ -355,7 +356,7 @@ function wg_get_real_ifs() {
 }
 
 /*
- * This creates a WireGuard interface of a specified name and adds it to the WireGuard interface group
+ * This adds a WireGuard interface to the WireGuard interface group
  */
 function wg_interface_group_add($wg_ifname, $verbose = false) {
 	global $wgg;
@@ -533,11 +534,11 @@ function wg_get_tunnel_array_index($tunnel_name) {
 
 	if (is_array($wgg['tunnels'])) {
 
-		foreach ($wgg['tunnels'] as $t_index => $tunnel) {
+		foreach ($wgg['tunnels'] as $tun_idx => $tunnel) {
 
 			if ($tunnel['name'] == $tunnel_name) {
 
-				return $t_index;
+				return $tun_idx;
 
 			}
 
