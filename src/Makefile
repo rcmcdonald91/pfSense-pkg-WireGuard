@@ -1,5 +1,5 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.0.9.4
+PORTVERSION=	0.0.9.5
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -12,7 +12,7 @@ COMMENT=	pfSense package WireGuard
 LICENSE=	APACHE20
 
 RUN_DEPENDS=	wireguard-kmod>0:net/wireguard-kmod \
-		wireguard-tools-lite>0:net/wireguard-tools-lite
+		wireguard-tools-lite>0:net/wireguard-tools@lite
 
 NO_BUILD=	yes
 NO_MTREE=	yes
