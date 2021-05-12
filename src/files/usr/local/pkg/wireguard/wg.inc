@@ -444,6 +444,9 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		}
 
+		// Update Unbound ACL
+		wg_unbound_acl_update();
+
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($tunnel['name']);
 
