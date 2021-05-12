@@ -23,6 +23,7 @@
 require_once('config.inc');
 require_once('services.inc');
 require_once('service-utils.inc');
+require_once('unbound.inc');
 require_once('util.inc');
 
 // WireGuard includes
@@ -544,6 +545,8 @@ function wg_unbound_acl_install() {
 	$a_unbound_acls_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
 
 	if (!preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $a_unbound_acls_names)) {
+
+		$wgg['unboundaclentry']['aclid'] = unbound_get_next_id();
 
 		$a_unbound_acls[] = $wgg['unboundaclentry'];
 
