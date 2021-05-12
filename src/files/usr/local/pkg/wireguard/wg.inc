@@ -192,7 +192,7 @@ function wg_peer_allowedips($post) {
 
 		if (!empty($address['address'])) {
 
-			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
+			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
 
 		}
 
@@ -220,7 +220,7 @@ function wg_tunnel_addresses($post) {
 
 		if (!empty($address['address'])) {
 
-			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'description' => $address['address_descr']);
+			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
 
 		}
 

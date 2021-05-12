@@ -299,7 +299,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 
 		$ret_val['name'] 	= $tmp_name;
 
-		$ret_val['description']	=  $ifdescr[$tmp_name];
+		$ret_val['descr']	=  $ifdescr[$tmp_name];
 
 		return $ret_val;
 
@@ -729,7 +729,7 @@ function wg_get_tunnel_networks($family = 'both') {
 	}
 
 	return $wg_tunnel_networks;
-	
+
 }
 
 function wg_verbosity_redirect($verbose = false) {

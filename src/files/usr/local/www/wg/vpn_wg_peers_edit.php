@@ -263,7 +263,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 		"address_descr{$counter}",
 		'Description',
 		'text',
-		$item['description']
+		$item['descr']
 	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 		->setWidth(4);
 

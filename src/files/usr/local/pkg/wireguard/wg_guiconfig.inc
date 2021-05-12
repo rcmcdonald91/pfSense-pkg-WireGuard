@@ -246,7 +246,7 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 		
 					foreach ($addresses as $address) {
 		
-						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
 		
 					}
 		
@@ -260,7 +260,7 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 		
 				} else {
 		
-					$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['description']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
+					$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['descr']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
 		
 					return $ret_html;
 				
@@ -276,7 +276,7 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
 
-			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 3px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['description']} ({$wg_pfsense_if['name']})</a>";
+			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 3px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})</a>";
 
 		}
 
@@ -305,7 +305,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	
 				foreach ($allowedips as $address) {
 	
-					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['description']}</td></tr>";
+					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
 	
 				}
 	
@@ -319,7 +319,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	
 			} else {
 	
-				$ret_html = "<a href=\"{$href}\" title=\"{$allowedips[0]['description']}\">{$allowedips[0]['address']}/{$allowedips[0]['mask']}</a>";
+				$ret_html = "<a href=\"{$href}\" title=\"{$allowedips[0]['descr']}\">{$allowedips[0]['address']}/{$allowedips[0]['mask']}</a>";
 	
 				return $ret_html;
 			
