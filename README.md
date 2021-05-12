@@ -3,8 +3,6 @@ This is a port of the original WireGuard UI bits as implemented by [Netgate](htt
 
 This also includes some improvments such as a proper status page (found under Status / WireGuard Status) and improved assigned interface handling.
 
-Under the hood, this implementation relies on `wg-quick(8)` for interacting with WireGuard.
-
 Because of the present limitations with pfSense internals and what packages can (and cannot) do on the system, this package includes several opinionated design changes that attempt to work around these limitations. The goal of this package is to use nothing more than what pfSense gives us and to leave the core codebase untouched. This will (should) greatly accelerate the review and testing required for consideration in the offical package repository.
 
 These changes include: 
@@ -46,13 +44,3 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 ## Configuration
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
-
-## Screenshots (as of v0.0.2_2)
-
-![1](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/extra/images/screen1.PNG)
-
-![2](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/extra/images/screen2.PNG)
-
-![3](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/extra/images/screen3.PNG)
-
-![4](https://github.com/theonemcdonald/pfSense-pkg-WireGuard/blob/main/extra/images/screen4.PNG)
