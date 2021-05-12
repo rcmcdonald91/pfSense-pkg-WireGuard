@@ -278,7 +278,7 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			"address_descr{$counter}",
 			'Description',
 			'text',
-			$item['description']
+			$item['descr']
 		))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
 			->setWidth(4);
 
