@@ -55,8 +55,14 @@ function wg_install() {
 	// Installs the 'WireGuard' interface group
 	wg_ifgroup_install();
 
+	update_status("done.\n Creating WireGuard Unbound access list...");
+
+	// Create Unbound ACL
+	wg_unbound_acl_install();
+
 	update_status("done.\n  Creating WireGuard service...");
 
+	// Creating service
 	wg_service_install();
 
 	wg_service_rcfile();
@@ -249,6 +255,10 @@ function wg_deinstall() {
 
 	}
 
+	update_status("done.\n  Removing WireGuard Unbound access list...")
+
+	// Remove Unbound ACL
+	wg_unbound_acl_deinstall();
 
 	update_status("done.\n  Destroying WireGuard tunnels...");
 
@@ -425,6 +435,48 @@ function wg_ifgroup_deinstall() {
 
 	}
 	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
+
+}
+
+function wg_unbound_acl_deinstall() {
+	global $config, $wgg;
+
+	init_config_arr(array('unbound', 'acls'));
+
+	$a_unbound_acls = &$config['unbound']['acls'];
+
+	$a_unbound_acls_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
+
+	if ($acls = preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $a_unbound_acls_names)) {
+
+		foreach ($acls as $acl_idx => $acl) {
+
+			unset($a_unbound_acls($acl_idx));
+
+		}
+
+	}
+
+	write_config("[WireGuard] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) de-installed.");
+
+}
+
+function wg_unbound_acl_install() {
+	global $config, $wgg;
+
+	init_config_arr(array('unbound', 'acls'));
+
+	$a_unbound_acls = &$config['unbound']['acls'];
+
+	$a_unbound_acls_names = array_map(fn($x) => $x['aclname'], $a_unbound_acls);
+
+	if (!preg_grep("/{$wgg['unboundaclentry']['aclname']}/", $a_unbound_acls_names)) {
+
+		$a_unbound_acls[] = $wgg['unboundaclentry'];
+
+	}
+
+	write_config("[WireGuard] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) installed.");
 
 }
 

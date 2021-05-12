@@ -352,7 +352,7 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
-	$input_errors 			= wg_validate_post($pconfig, $tun_idx);
+	$input_errors 			= wg_validate_tunnel_post($pconfig, $tun_idx);
 
 	if (!$input_errors) {
 

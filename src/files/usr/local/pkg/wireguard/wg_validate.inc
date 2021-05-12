@@ -31,7 +31,7 @@ require_once('wireguard/wg_api.inc');
 wg_globals();
 
 // Validate the user's input and return error messages if not acceptable
-function wg_validate_post($pconfig, $tun_idx) {
+function wg_validate_tunnel_post($pconfig, $tun_idx) {
 	$input_errors = array();
 
 	// Assigned tunnels don't need these validation checks
@@ -142,7 +142,7 @@ function wg_validate_peer_post($pconfig, $peer_idx) {
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
 
 		$input_errors[] = gettext('Endpoint must be a valid IPv4 or IPv6 adress or hostname.');
-		
+
 	}
 
 	// Allowed IPs
