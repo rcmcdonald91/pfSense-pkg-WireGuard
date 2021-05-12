@@ -726,12 +726,10 @@ function wg_get_tunnel_networks($family = 'both') {
 
 		}
 
-		return $wg_tunnel_networks;
-
 	}
 
-	return false;
-
+	return $wg_tunnel_networks;
+	
 }
 
 function wg_verbosity_redirect($verbose = false) {
