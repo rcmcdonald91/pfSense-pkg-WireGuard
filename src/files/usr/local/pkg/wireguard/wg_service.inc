@@ -41,7 +41,11 @@ if (isset($argv[1])) {
 
 		wg_service_start();
 
+		print_message("  Starting daemon...");
+
 		wg_service_daemon();
+
+		print_message("   daemon is dead");
 
 		exit(0);
 
@@ -168,6 +172,8 @@ function wg_service_daemon() {
 	global $wgg;
 
 	if (!platform_booting() || is_pid_running($wgg['pid_path'])) {
+
+		print_message('We are in...');
 
 		while (true) {
 
