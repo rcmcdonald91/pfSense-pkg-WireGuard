@@ -65,7 +65,7 @@ if (isset($argv[1]) && wg_is_cli()) {
 
 }
 
-function wg_is_cli()
+function wg_is_cli() {
 
     return PHP_SAPI == 'cli';
 
