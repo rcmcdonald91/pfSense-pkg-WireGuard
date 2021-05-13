@@ -35,27 +35,13 @@ if (isset($argv[1])) {
 
 	if ($argv[1] == 'wg_service_start') {
 
-		exit(1);
-
 		ignore_user_abort(true);
 
 		set_time_limit(0);
 
-		print_message("\n Step 1 \n");
-
-		sleep(3);
-
 		wg_service_start();
 
-		print_message("\n Step 2 \n");
-
-		sleep(3);
-
 		wg_service_daemon();
-
-		print_message("\n Step 3 \n");
-
-		sleep(3);
 
 		exit(0);
 
@@ -93,9 +79,10 @@ function wg_service_stop() {
 function wg_service_start() {
 	global $g, $wgg;
 
+	// Check if we are already running...
 	if (is_pid_running($wgg['pid_path'])) {
 
-		// We are already running, bail out...
+		// We are already running, so bail out...
 		exit(1);
 
 	}
@@ -105,12 +92,12 @@ function wg_service_start() {
 
 	if ($newpid === - 1) {
 
-		// We could not fork...
+		// We could not fork, so bail out...
 		exit(1);
 
 	} elseif ($newpid) {
 
-		// I'm the parent, and I'm going to self-destruct
+		// I'm the parent, and I'm going to self-destruct...
 		exit(0);
 
 	}
@@ -123,12 +110,12 @@ function wg_service_start() {
 
 	if ($newpid === - 1) {
 
-		// We could not fork...
+		// We could not fork, so bail out...
 		exit(1);
 
 	} elseif ($newpid) {
 
-		// I'm the parent, and I'm going to self-destruct
+		// I'm the parent, and I'm going to self-destruct...
 		exit(0);
 
 	}
@@ -137,6 +124,8 @@ function wg_service_start() {
 	file_put_contents($wgg['pid_path'], getmypid());
 
 	if (platform_booting()) {
+
+		$g['wireguard_firststart'] = true;
 
 		print_message("Configuring WireGuard tunnels...");
 
@@ -164,6 +153,15 @@ function wg_service_start() {
 		print_message("done. \n");
 
 		// Let the boot process continue and handle additional service and package invocation
+		exit(0);
+
+	}
+
+	// We don't need to restart any additional services because we just finished booting...
+	if ($g['wireguard_firststart']) {
+
+		unset($g['wireguard_firststart']);
+
 		return;
 
 	}
@@ -181,34 +179,19 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
-	print_message("\n Step 2.1 \n");
+	while (true) {
 
-	sleep(3);
+		if (!is_module_loaded($wgg['kmod'])) {
 
-	if (!platform_booting() || is_pid_running($wgg['pid_path'])) {
-
-		print_message("\n Step 2.2 \n");
-
-		sleep(3);
-
-		while (true) {
-
-			if (!is_module_loaded($wgg['kmod'])) {
-
-				break;
-
-			}
-
-			sleep(1);
+			break;
 
 		}
 
+		sleep(1);
+
 	}
 
-	print_message("\n Step 2.3 \n");
-
-	sleep(3);
-
+	// We are now dead, so clear the pid file
 	unlink_if_exists($wgg['pid_path']);
 
 	return;
