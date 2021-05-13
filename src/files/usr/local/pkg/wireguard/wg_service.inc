@@ -167,7 +167,7 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
-	if (!platform_booting() || !is_pid_running($wgg['pid_path'])) {
+	if (!platform_booting() || is_pid_running($wgg['pid_path'])) {
 
 		while (true) {
 
@@ -185,7 +185,7 @@ function wg_service_daemon() {
 
 	unlink_if_exists($wgg['pid_path']);
 
-	exit(0);
+	return;
 
 }
 
