@@ -284,8 +284,6 @@ function wg_register_service_env() {
 
 	fflush($h_lock);
 
-	fclose($h_lock);
-
 	fclose(STDIN);
 
 	fclose(STDOUT);
