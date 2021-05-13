@@ -31,8 +31,6 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
-global $running;
-
 if (isset($argv[1]) && wg_is_cli()) {
 
 	if ($argv[1] == 'start') {
@@ -207,12 +205,14 @@ function wg_service_start() {
 }
 
 function wg_service_daemon() {
-	global $running, $wgg;
+	global $wgg;
 
-	$running = true;
+	while (true) {
 
-	while ($running) {
+		// Check if any new signals are waiting for dispatch
+		pcntl_signal_dispatch();
 
+		// The whole point of this daemon...
 		if (!is_module_loaded($wgg['kmod'])) {
 
 			break;
@@ -223,11 +223,8 @@ function wg_service_daemon() {
 
 	}
 
-	// Teardown the tunnels
-	wg_destroy_tunnels();
-
-	// We are now dead, so clear the pid file
-	unlink_if_exists($wgg['pid_path']);
+	// Send a signal to self to terminate
+	posix_kill(getmypid(), SIGTERM);
 
 	return;
 
@@ -258,9 +255,9 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_start &";
+	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc start &";
 
-	$stop[] = "# Nothing here yet";
+	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc stop &";
 
 	$rcfile['file'] 	= 'wireguardd';
 
@@ -273,7 +270,7 @@ function wg_service_rcfile() {
 }
 
 function wg_register_service_env() {
-	global $wgg;
+	global $h_lock, $wgg;
 
 	$h_lock = @fopen($wgg['pid_path'], 'a+');
 
@@ -286,8 +283,6 @@ function wg_register_service_env() {
 	fwrite($h_lock, getmypid());
 
 	fflush($h_lock);
-
-	fclose($h_lock);
 
 	fclose(STDIN);
 
@@ -308,11 +303,29 @@ function wg_register_sig_handler() {
 }
 
 function sig_handler($signo) {
-	global $running, $wgg;
+	global $h_lock, $wgg;
 
-	$running = false;
+	switch ($signo) {
 
-	return;
+		case SIGTERM:
+
+			@fclose($h_lock);
+
+			unlink($wgg['pid_path']); 
+
+			exit;
+
+			break;
+
+		case SIGHUP:
+
+			break;
+
+		default:
+
+			break;
+
+	}
 
 }
 
