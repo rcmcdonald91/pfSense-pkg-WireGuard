@@ -68,6 +68,8 @@ function wg_service_stop() {
 
 	killbypid($wgg['pid_path']);
 
+	unlink_if_exists($wgg['pid_path']);
+
 	wg_destroy_tunnels();
 
 	return;
