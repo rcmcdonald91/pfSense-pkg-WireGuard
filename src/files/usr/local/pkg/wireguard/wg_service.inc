@@ -35,7 +35,7 @@ global $running;
 
 if (isset($argv[1]) && wg_is_cli()) {
 
-	if ($argv[1] == 'wg_service_start') {
+	if ($argv[1] == 'start') {
 
 		ignore_user_abort(true);
 
@@ -47,7 +47,7 @@ if (isset($argv[1]) && wg_is_cli()) {
 
 		exit(0);
 
-	} elseif ($argv[1] == 'wg_service_stop') {
+	} elseif ($argv[1] == 'stop') {
 
 		ignore_user_abort(true);
 
@@ -72,25 +72,43 @@ function wg_is_cli() {
 }
 
 function wg_service_stop() {
-	global $running, $wgg;
+	global $wgg;
 
-	$running = false;
+	killbypid($wgg['pid_path']);
+	
+}
 
-	wg_destroy_tunnels();
+function wg_is_service_running() {
+	global $wgg;
 
-	unlink_if_exists($wgg['pid_path']);
+	if (!($h_lock = @fopen($wgg['pid_path'],'r')) || !file_exists($wgg['pid_path'])) {
 
-	return;
+		return 0;
+
+	}
+
+	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, &$wouldblock);
+
+	if ($not_running) {
+	
+		flock($h_lock, LOCK_UN);
+
+	}
+
+	@fclose($h_lock);
+
+	return !$not_running || $wouldblock;
+
+}
+
 
 }
 
 function wg_service_start() {
 	global $g, $wgg;
 
-	// Check if we are already running...
-	if (is_pid_running($wgg['pid_path'])) {
+	if (wg_is_service_running()) {
 
-		// We are already running, so bail out...
 		exit(1);
 
 	}
@@ -135,7 +153,7 @@ function wg_service_start() {
 
 	}
 
-	// If we've got this far, we are now properly daemonized
+	// If we've gotten this far, we are now properly daemonized
 	wg_register_service_env();
 
 	if (platform_booting()) {
@@ -208,6 +226,9 @@ function wg_service_daemon() {
 
 	}
 
+	// Teardown the tunnels
+	wg_destroy_tunnels();
+
 	// We are now dead, so clear the pid file
 	unlink_if_exists($wgg['pid_path']);
 
@@ -242,7 +263,7 @@ function wg_service_rcfile() {
 
 	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_start &";
 
-	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc wg_service_stop &";
+	$stop[] = "# Nothing here yet";
 
 	$rcfile['file'] 	= 'wireguardd';
 
@@ -255,8 +276,21 @@ function wg_service_rcfile() {
 }
 
 function wg_register_service_env() {
+	global $wgg;
 
-	file_put_contents($wgg['pid_path'], getmypid());
+	$h_lock = @fopen($wgg['pid_path'], 'a+');
+
+	$h_lock($h_lock, LOCK_EX, &$wouldblock);
+
+	ftruncate($h_lock, 0);
+
+	fseek($h_lock, 0, 0);
+
+	fwrite($h_lock, getmypid());
+
+	fflush($h_lock);
+
+	fclose($h_lock);
 
 	fclose(STDIN);
 
@@ -277,8 +311,9 @@ function wg_register_sig_handler() {
 }
 
 function sig_handler($signo) {
+	global $running, $wgg;
 
-	wg_service_stop();
+	$running = false;
 
 	return;
 
