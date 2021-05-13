@@ -23,8 +23,9 @@
 
 // pfSense includes
 require_once('config.inc');
+require_once('globals.inc');
 
-global $wgg;
+global $g, $wgg;
 
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
@@ -35,6 +36,7 @@ $wgg = array(
 	'wg_daemon'		=> '/usr/local/bin/php_wg',
 	'wg_includes'		=> '/usr/local/pkg/wireguard',
 	'kmod'			=> 'if_wg.ko',
+	'pid_path'		=> "{$g['varrun_path']}/wireguard.pid",
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',
