@@ -97,6 +97,8 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
+		pcntl_wait($status);
+
 		// I'm the parent, and I'm going to self-destruct...
 		exit(0);
 
@@ -114,6 +116,8 @@ function wg_service_start() {
 		exit(1);
 
 	} elseif ($newpid) {
+
+		pcntl_wait($status);
 
 		// I'm the parent, and I'm going to self-destruct...
 		exit(0);
