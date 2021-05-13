@@ -43,7 +43,7 @@ if (isset($argv[1])) {
 
 		wg_service_daemon();
 
-		exit;
+		exit(0);
 
 	} elseif ($argv[1] == 'wg_service_stop') {
 
@@ -53,11 +53,11 @@ if (isset($argv[1])) {
 
 		wg_service_stop();
 
-		exit;
+		exit(0);
 
 	} else {
 
-		exit;
+		exit(0);
 
 	}
 
@@ -66,9 +66,9 @@ if (isset($argv[1])) {
 function wg_service_stop() {
 	global $wgg;
 
-	wg_destroy_tunnels();
+	killbypid($wgg['pid_path']);
 
-	killbyname(basename($wgg['wg_daemon']));
+	wg_destroy_tunnels();
 
 	return;
 
@@ -77,9 +77,50 @@ function wg_service_stop() {
 function wg_service_start() {
 	global $g, $wgg;
 
-	if (platform_booting()) {
+	if (is_pid_running($wgg['pid_path'])) {
 
-		$g['wireguard_firststart'] = true;
+		// We are already running, bail out...
+		exit(1);
+
+	}
+
+	// The initial fork...
+	$newpid = pcntl_fork();
+
+	if ($newpid === - 1) {
+
+		// We could not fork...
+		exit(1);
+
+	} elseif ($newpid) {
+
+		// I'm the parent, and I'm going to self-destruct
+		exit(0);
+
+	}
+
+	// Now become the session leader
+	posix_setsid();
+
+	// The second fork...
+	$newpid = pcntl_fork();
+
+	if ($newpid === - 1) {
+
+		// We could not fork...
+		exit(1);
+
+	} elseif ($newpid) {
+
+		// I'm the parent, and I'm going to self-destruct
+		exit(0);
+
+	}
+
+	// If we've got this far, we are now properly daemonized, so write out the pid to disk
+	file_put_contents($wgg['pid_path'], getmypid());
+
+	if (platform_booting()) {
 
 		print_message("Configuring WireGuard tunnels...");
 
@@ -111,14 +152,6 @@ function wg_service_start() {
 
 	}
 
-	if ($g['wireguard_firststart']) {
-
-		unset($g['wireguard_firststart']);
-
-		return;
-
-	}
-
 	setup_gateways_monitor();
 
 	services_unbound_configure();
@@ -132,9 +165,9 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
-	if (!platform_booting() || !is_process_running(basename($wgg['wg_daemon']))) {
+	if (!platform_booting() || !is_pid_running($wgg['pid_path'])) {
 
-		while (TRUE) {
+		while (true) {
 
 			if (!is_module_loaded($wgg['kmod'])) {
 
@@ -148,7 +181,9 @@ function wg_service_daemon() {
 
 	}
 
-	return;
+	unlink_if_exists($wgg['pid_path']);
+
+	exit(0);
 
 }
 
