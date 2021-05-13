@@ -39,13 +39,21 @@ if (isset($argv[1])) {
 
 		set_time_limit(0);
 
+		print_message("\n Step 1 \n");
+
+		sleep(3);
+
 		wg_service_start();
 
-		print_message("  Starting daemon...");
+		print_message("\n Step 2 \n");
+
+		sleep(3);
 
 		wg_service_daemon();
 
-		print_message("   daemon is dead");
+		print_message("\n Step 3 \n");
+
+		sleep(3);
 
 		exit(0);
 
@@ -171,9 +179,15 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
+	print_message("\n Step 2.1 \n");
+
+	sleep(3);
+
 	if (!platform_booting() || is_pid_running($wgg['pid_path'])) {
 
-		print_message('We are in...');
+		print_message("\n Step 2.2 \n");
+
+		sleep(3);
 
 		while (true) {
 
@@ -188,6 +202,10 @@ function wg_service_daemon() {
 		}
 
 	}
+
+	print_message("\n Step 2.3 \n");
+
+	sleep(3);
 
 	unlink_if_exists($wgg['pid_path']);
 
