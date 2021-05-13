@@ -101,9 +101,6 @@ function wg_is_service_running() {
 
 }
 
-
-}
-
 function wg_service_start() {
 	global $g, $wgg;
 
