@@ -274,7 +274,7 @@ function wg_register_service_env() {
 
 	$h_lock = @fopen($wgg['pid_path'], 'a+');
 
-	$h_lock = flock($h_lock, LOCK_EX);
+	flock($h_lock, LOCK_EX);
 
 	ftruncate($h_lock, 0);
 
@@ -283,6 +283,8 @@ function wg_register_service_env() {
 	fwrite($h_lock, getmypid());
 
 	fflush($h_lock);
+
+	fclose($h_lock);
 
 	fclose(STDIN);
 
