@@ -31,7 +31,9 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
-if (isset($argv[1])) {
+global $running;
+
+if (isset($argv[1]) && wg_is_cli()) {
 
 	if ($argv[1] == 'wg_service_start') {
 
@@ -63,14 +65,20 @@ if (isset($argv[1])) {
 
 }
 
+function wg_is_cli()
+
+    return PHP_SAPI == 'cli';
+
+}
+
 function wg_service_stop() {
-	global $wgg;
+	global $running, $wgg;
 
-	killbypid($wgg['pid_path']);
-
-	unlink_if_exists($wgg['pid_path']);
+	$running = false;
 
 	wg_destroy_tunnels();
+
+	unlink_if_exists($wgg['pid_path']);
 
 	return;
 
@@ -97,15 +105,20 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
-		pcntl_wait($status);
-
 		// I'm the parent, and I'm going to self-destruct...
 		exit(0);
 
 	}
 
 	// Now become the session leader
-	posix_setsid();
+	if (posix_setsid() < 0) {
+
+		exit(1);
+
+	}
+
+	// Register signal handler
+	wg_register_sig_handler();
 
 	// The second fork...
 	$newpid = pcntl_fork();
@@ -117,15 +130,13 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
-		pcntl_wait($status);
-
 		// I'm the parent, and I'm going to self-destruct...
 		exit(0);
 
 	}
 
-	// If we've got this far, we are now properly daemonized, so write out the pid to disk
-	file_put_contents($wgg['pid_path'], getmypid());
+	// If we've got this far, we are now properly daemonized
+	wg_register_service_env();
 
 	if (platform_booting()) {
 
@@ -181,9 +192,11 @@ function wg_service_start() {
 }
 
 function wg_service_daemon() {
-	global $wgg;
+	global $running, $wgg;
 
-	while (true) {
+	$running = true;
+
+	while ($running) {
 
 		if (!is_module_loaded($wgg['kmod'])) {
 
@@ -238,6 +251,36 @@ function wg_service_rcfile() {
 	$rcfile['stop'] 	= implode("\n\t", $stop);
 
 	write_rcfile($rcfile);
+
+}
+
+function wg_register_service_env() {
+
+	file_put_contents($wgg['pid_path'], getmypid());
+
+	fclose(STDIN);
+
+	fclose(STDOUT);
+
+	fclose(STDERR);
+
+}
+
+function wg_register_sig_handler() {
+
+	pcntl_signal(SIGTERM, 'sig_handler');
+
+	pcntl_signal(SIGHUP, 'sig_handler');
+
+	pcntl_signal(SIGINT, 'sig_handler');
+
+}
+
+function sig_handler($signo) {
+
+	wg_service_stop();
+
+	return;
 
 }
 
