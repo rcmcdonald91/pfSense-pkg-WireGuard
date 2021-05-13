@@ -87,7 +87,7 @@ function wg_is_service_running() {
 
 	}
 
-	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, &$wouldblock);
+	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, $wouldblock);
 
 	if ($not_running) {
 	
