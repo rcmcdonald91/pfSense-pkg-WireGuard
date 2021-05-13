@@ -35,6 +35,8 @@ if (isset($argv[1])) {
 
 	if ($argv[1] == 'wg_service_start') {
 
+		exit(1);
+
 		ignore_user_abort(true);
 
 		set_time_limit(0);
