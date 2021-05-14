@@ -31,9 +31,23 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
-if (isset($argv[1]) && wg_is_cli()) {
+if (isset($argv[1])) {
 
-	switch ($argv[1]) {
+	if (!wg_is_cli()) {
+
+		// Bail out if we aren't in the CLI...
+		die("FATAL: This script can only be started through the CLI.\n");
+
+	}
+
+	if (PHP_BINARY != $wgg['wg_daemon']) {
+
+		// Bail out if we aren't running under under the correct executable...
+		die("FATAL: This script can only be executed by {$wgg['wg_daemon']}.\n");
+
+	}
+
+	switch (strtolower($argv[1])) {
 
 		case 'start':
 
@@ -260,9 +274,9 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc start &";
+	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc start";
 
-	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc stop &";
+	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc stop";
 
 	$rcfile['file'] 	= 'wireguardd';
 
