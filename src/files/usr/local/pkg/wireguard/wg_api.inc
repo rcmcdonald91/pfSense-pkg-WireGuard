@@ -718,26 +718,30 @@ function wg_get_tunnel_networks($family = 'both') {
 
 		foreach ($wgg['tunnels'] as $tunnel) {
 
-			foreach ($tunnel['addresses']['row'] as $address) {
+			if (!empty($tunnel['addresses']['row']) && is_array($tunnel['addresses']['row'])) {
 
-				$masked_address = "{$address['address']}/{$address['mask']}";
+				foreach ($tunnel['addresses']['row'] as $address) {
 
-				if ((is_ipaddrv6($masked_address) && ($family == 'ipv4')) ||
-					(is_ipaddrv4($masked_address) && ($family == 'ipv6'))) {
+					$masked_address = "{$address['address']}/{$address['mask']}";
 
-					continue;
+					if ((is_ipaddrv6($masked_address) && ($family == 'ipv4')) ||
+						(is_ipaddrv4($masked_address) && ($family == 'ipv6'))) {
 
-				}
+						continue;
 
-				if (is_subnet($masked_address)) {
+					}
 
-					$network = gen_subnet($address['address'], $address['mask']);
+					if (is_subnet($masked_address)) {
 
-					$wg_tunnel_networks[] 	= array(
-									'network' => $network, 
-									'mask' => $address['mask'],
-									'tun' => $tunnel['name'],
-									'descr' => $tunnel['descr']);
+						$network = gen_subnet($address['address'], $address['mask']);
+
+						$wg_tunnel_networks[] 	= array(
+										'network' => $network, 
+										'mask' => $address['mask'],
+										'tun' => $tunnel['name'],
+										'descr' => $tunnel['descr']);
+
+					}
 
 				}
 
