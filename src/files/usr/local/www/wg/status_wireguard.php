@@ -4,6 +4,7 @@
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald
+ * Copyright (c) 2021 Vajonam
  * Copyright (c) 2020 Ascrod
  * All rights reserved.
  *
