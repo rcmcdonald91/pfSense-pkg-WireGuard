@@ -33,31 +33,33 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1]) && wg_is_cli()) {
 
-	if ($argv[1] == 'start') {
+	switch ($argv[1]) {
 
-		ignore_user_abort(true);
+		case 'start':
 
-		set_time_limit(0);
+			ignore_user_abort(true);
 
-		wg_service_start();
+			set_time_limit(0);
+	
+			wg_service_start();
+	
+			wg_service_daemon();
+	
+			exit(0);
 
-		wg_service_daemon();
+		case 'stop':
 
-		exit(0);
+			ignore_user_abort(true);
 
-	} elseif ($argv[1] == 'stop') {
+			set_time_limit(0);
+	
+			wg_service_stop();
+	
+			exit(0);
 
-		ignore_user_abort(true);
+		default:
 
-		set_time_limit(0);
-
-		wg_service_stop();
-
-		exit(0);
-
-	} else {
-
-		exit(0);
+			exit(0);
 
 	}
 
@@ -65,7 +67,7 @@ if (isset($argv[1]) && wg_is_cli()) {
 
 function wg_is_cli() {
 
-    return PHP_SAPI == 'cli';
+	return PHP_SAPI == 'cli';
 
 }
 
@@ -108,6 +110,8 @@ function wg_service_start() {
 
 	}
 
+	umask(0);
+
 	// The initial fork...
 	$newpid = pcntl_fork();
 
@@ -130,9 +134,6 @@ function wg_service_start() {
 
 	}
 
-	// Register signal handler
-	wg_register_sig_handler();
-
 	// The second fork...
 	$newpid = pcntl_fork();
 
@@ -147,9 +148,6 @@ function wg_service_start() {
 		exit(0);
 
 	}
-
-	// If we've gotten this far, we are now properly daemonized
-	wg_register_service_env();
 
 	if (platform_booting()) {
 
@@ -207,6 +205,12 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
+	// Register the service environment
+	wg_register_service_env();
+
+	// Register the service signal handlers
+	wg_register_sig_handler();
+
 	while (true) {
 
 		// Check if any new signals are waiting for dispatch
@@ -219,11 +223,12 @@ function wg_service_daemon() {
 
 		}
 
+		// Wait a bit before trying again
 		sleep(1);
 
 	}
 
-	// Send a signal to self to terminate
+	// Send a signal to self to terminate gracefully
 	posix_kill(getmypid(), SIGTERM);
 
 	return;
@@ -309,12 +314,19 @@ function sig_handler($signo) {
 
 		case SIGTERM:
 
+			// Release exclusive lock
+			@flock($h_lock, LOCK_UN);
+
+			// Close file handler
 			@fclose($h_lock);
 
+			// Delete PID
 			unlink($wgg['pid_path']);
 
+			// Teardown tunnels
 			wg_destroy_tunnels();
 
+			// We are done...
 			exit;
 
 			break;
