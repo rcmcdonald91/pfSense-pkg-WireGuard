@@ -311,7 +311,9 @@ function sig_handler($signo) {
 
 			@fclose($h_lock);
 
-			unlink($wgg['pid_path']); 
+			unlink($wgg['pid_path']);
+
+			wg_destroy_tunnels();
 
 			exit;
 
