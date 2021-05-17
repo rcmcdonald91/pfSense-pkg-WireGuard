@@ -252,9 +252,7 @@ function wg_service_daemon() {
 function wg_service_install() {
 	global $wgg;
 
-	stop_service('wireguard');
-
-	unlink_if_exists($wgg['wg_daemon']);
+	wg_service_deinstall();
 
 	link($wgg['php'], $wgg['wg_daemon']);
 
