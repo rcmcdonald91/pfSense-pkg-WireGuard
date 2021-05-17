@@ -149,11 +149,7 @@ display_top_tabs($tab_array);
 </form>
 
 <script type="text/javascript">
-//<![CDATA[,
-
-events.push(function() {
-
-});
+//<![CDATA[
 //]]>
 </script>
 

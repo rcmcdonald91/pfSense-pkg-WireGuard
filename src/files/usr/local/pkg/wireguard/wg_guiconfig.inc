@@ -213,6 +213,8 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 
 		$s_usepost = $usepost ? 'usepost' : '';
 
+		wg_htmlspecialchars($s_icon, $s_title, $href, $s_usepost);
+
 		return "<a class=\"fa {$s_icon}\" title=\"{$s_title}\" href=\"{$href}\" {$s_usepost}></a>";
 
 	}
@@ -245,6 +247,8 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 					$data_html = "<table><thead><th>Address</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
 		
 					foreach ($addresses as $address) {
+
+						wg_htmlspecialchars($address);
 		
 						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
 		
@@ -253,12 +257,16 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 					$data_html .= '</tbody></table>';
 		
 					$hint = "{$addresses[0]['address']} (+{$extras})";
+
+					wg_htmlspecialchars($href, $data_html, $hint);
 		
 					$ret_html = "<a href=\"{$href}\" title=\"Interface Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
 		
 					return $ret_html;
 		
 				} else {
+
+					wg_htmlspecialchars($href, $addresses[0]);
 		
 					$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['descr']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
 		
@@ -275,6 +283,8 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 		} else {
 
 			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+			wg_htmlspecialchars($wg_pfsense_if);
 
 			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 3px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})</a>";
 
