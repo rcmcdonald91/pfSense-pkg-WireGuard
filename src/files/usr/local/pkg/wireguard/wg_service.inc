@@ -95,9 +95,9 @@ function wg_service_stop() {
 function wg_is_service_running() {
 	global $wgg;
 
-	if (!($h_lock = @fopen($wgg['pid_path'],'r')) || !file_exists($wgg['pid_path'])) {
+	if (!($h_lock = @fopen($wgg['pid_path'], 'a+')) || !file_exists($wgg['pid_path'])) {
 
-		return false;
+		return 0;
 
 	}
 
@@ -109,7 +109,7 @@ function wg_is_service_running() {
 
 	}
 
-	@fclose($h_lock);
+	fclose($h_lock);
 
 	return !$not_running || $wouldblock;
 
@@ -286,10 +286,26 @@ function wg_service_rcfile() {
 
 }
 
+function wg_deregister_service_env() {
+	global $h_lock, $wgg;
+
+	// Release exclusive lock
+	flock($h_lock, LOCK_UN);
+
+	// Close file handler
+	fclose($h_lock);
+
+	// Delete PID
+	unlink_if_exists($wgg['pid_path']);
+
+}
+
 function wg_register_service_env() {
 	global $h_lock, $wgg;
 
-	$h_lock = @fopen($wgg['pid_path'], 'a+');
+	wg_deregister_service_env();
+
+	$h_lock = fopen($wgg['pid_path'], 'a+');
 
 	flock($h_lock, LOCK_EX);
 
@@ -300,8 +316,6 @@ function wg_register_service_env() {
 	fwrite($h_lock, getmypid());
 
 	fflush($h_lock);
-
-	// We have no need for these, close them...
 
 	fclose(STDIN);
 
@@ -328,14 +342,8 @@ function sig_handler($signo) {
 
 		case SIGTERM:
 
-			// Release exclusive lock
-			@flock($h_lock, LOCK_UN);
-
-			// Close file handler
-			@fclose($h_lock);
-
-			// Delete PID
-			unlink($wgg['pid_path']);
+			// Cleanup the service environment
+			wg_deregister_service_env();
 
 			// Teardown tunnels
 			wg_destroy_tunnels();
@@ -346,10 +354,6 @@ function sig_handler($signo) {
 			break;
 
 		case SIGHUP:
-
-			break;
-
-		case SIGINT:
 
 			break;
 
