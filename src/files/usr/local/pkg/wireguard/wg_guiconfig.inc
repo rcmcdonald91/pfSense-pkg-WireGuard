@@ -24,6 +24,7 @@ require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_globals.inc');
+require_once('wireguard/wg.inc');
 
 // Formats peer endpoint address and port for the UI
 function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
@@ -314,6 +315,8 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 				$data_html = "<table><thead><th>Subnet</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
 	
 				foreach ($allowedips as $address) {
+
+					wg_htmlspecialchars($address);
 	
 					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
 	
@@ -322,12 +325,16 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 				$data_html .= '</tbody></table>';
 	
 				$hint = "{$allowedips[0]['address']} (+{$extras})";
+
+				wg_htmlspecialchars($href, $data_html, $hint);
 	
 				$ret_html = "<a href=\"{$href}\" title=\"Allowed IPs\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
 	
 				return $ret_html;
 	
 			} else {
+
+				wg_htmlspecialchars($href, $allowedips[0]);
 	
 				$ret_html = "<a href=\"{$href}\" title=\"{$allowedips[0]['descr']}\">{$allowedips[0]['address']}/{$allowedips[0]['mask']}</a>";
 	
@@ -338,6 +345,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 		} else {
 
 			return '(none)';
+			
 		}
 
 
