@@ -81,7 +81,7 @@ if (isset($argv[1])) {
 
 function wg_is_cli() {
 
-	return PHP_SAPI == 'cli';
+	return (PHP_SAPI == 'cli');
 
 }
 
@@ -97,7 +97,7 @@ function wg_is_service_running() {
 
 	if (!($h_lock = @fopen($wgg['pid_path'],'r')) || !file_exists($wgg['pid_path'])) {
 
-		return 0;
+		return false;
 
 	}
 
@@ -303,6 +303,8 @@ function wg_register_service_env() {
 
 	fflush($h_lock);
 
+	// We have no need for these, close them...
+
 	fclose(STDIN);
 
 	fclose(STDOUT);
@@ -341,11 +343,15 @@ function sig_handler($signo) {
 			wg_destroy_tunnels();
 
 			// We are done...
-			exit;
+			exit(0);
 
 			break;
 
 		case SIGHUP:
+
+			break;
+
+		case SIGINT:
 
 			break;
 
