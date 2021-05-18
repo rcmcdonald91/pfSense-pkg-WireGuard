@@ -167,7 +167,7 @@ function wg_ifconfig_del_address($wg_ifname, $masked_address, $verbose = false) 
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
-	if ($family = wg_get_address_family($address)) {
+	if ($family = wg_get_address_family($masked_address)) {
 
 		list($address, $address_subnet) = explode('/', $masked_address);
 
@@ -190,7 +190,7 @@ function wg_ifconfig_set_address($wg_ifname, $masked_address, $verbose = false) 
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
-	if ($family = wg_get_address_family($address)) {
+	if ($family = wg_get_address_family($masked_address)) {
 
 		$redirect = wg_verbosity_redirect($verbose);
 
