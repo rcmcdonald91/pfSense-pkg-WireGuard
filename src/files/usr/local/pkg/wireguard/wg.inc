@@ -392,15 +392,18 @@ function wg_resync_all() {
 		
 	}
 
+	// Create WireGuard configuration files
 	wg_create_config_files();
 
+	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
 		wg_resync_tunnel($tunnel['name'], true);
 	
 	}
 
-	wg_unbound_acl_update();
+	// Update the Unbound ACL without restarting Unbound
+	wg_unbound_acl_update(false);
 
 }
 
@@ -444,11 +447,15 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		}
 
-		// Update Unbound ACL
-		wg_unbound_acl_update();
-
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($tunnel['name']);
+
+	}
+
+	if (!$quick) {
+
+		// Update Unbound ACL
+		wg_unbound_acl_update();
 
 	}
 
@@ -564,7 +571,7 @@ function wg_htmlspecialchars(&...$vars) {
  * Call as wg_escapeshellargs($var1, $var2, ... $varX)
  * Vars can be a mix of strings and arrays
  */
-function wg_escapeshellargs(&...$vars) {
+function wg_escapeshellarg(&...$vars) {
 
 	foreach ($vars as &$var) {
 
