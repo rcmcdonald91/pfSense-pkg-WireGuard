@@ -57,8 +57,6 @@ if (isset($argv[1])) {
 	
 			wg_service_start();
 	
-			wg_service_daemon();
-	
 			exit(0);
 
 		case 'stop':
@@ -124,7 +122,8 @@ function wg_service_start() {
 
 	}
 
-	umask(0);
+	// Register the service environment and lock early to ensure singletons
+	wg_register_service_env(false);
 
 	// The initial fork...
 	$newpid = pcntl_fork();
@@ -163,6 +162,9 @@ function wg_service_start() {
 
 	}
 
+	// Now that we are properly daemonized, register the service signal handlers
+	wg_register_sig_handler();
+
 	if (platform_booting()) {
 
 		$g['wireguard_firststart'] = true;
@@ -173,18 +175,7 @@ function wg_service_start() {
 
 	}
 
-	// Create WireGuard configuration files
-	wg_create_config_files();
-
-	// Update Unbound ACL without restarting Unbound, we will do this once on service start
-	wg_unbound_acl_update(false);
-
-	// Build each tunnel
-	foreach ($wgg['tunnels'] as $tunnel) {
-	
-		wg_resync_tunnel($tunnel['name'], true);
-	
-	}
+	wg_resync_all();
  
 	if (platform_booting()) {
 
@@ -206,24 +197,45 @@ function wg_service_start() {
 
 	}
 
-	setup_gateways_monitor();
+	// Spawns a child process to handle additional service restarting
+	$newpid = pcntl_fork();
 
-	services_unbound_configure();
-	
-	filter_configure();
+	if ($newpid === -1) {
 
-	return;
+		// We could not fork, so bail out...
+		exit(1);
+
+	} elseif ($newpid) {
+
+		// Wait for the child to finish
+		pcntl_waitpid($newpid, $status);
+
+		// We are the parent so go on...
+		wg_service_daemon();
+
+	} else {
+
+		setup_gateways_monitor();
+
+		services_unbound_configure();
+		
+		filter_configure();
+
+		// All good
+		exit(0);
+
+	}
+
+	// We should never get here
+	exit(0);
 
 }
 
 function wg_service_daemon() {
 	global $wgg;
 
-	// Register the service environment
-	wg_register_service_env();
-
-	// Register the service signal handlers
-	wg_register_sig_handler();
+	// Re-register the service environment
+	wg_register_service_env(true);
 
 	while (true) {
 
@@ -300,7 +312,7 @@ function wg_deregister_service_env() {
 
 }
 
-function wg_register_service_env() {
+function wg_register_service_env($close_handlers = false) {
 	global $h_lock, $wgg;
 
 	wg_deregister_service_env();
@@ -317,11 +329,15 @@ function wg_register_service_env() {
 
 	fflush($h_lock);
 
-	fclose(STDIN);
+	if ($close_handlers) {
 
-	fclose(STDOUT);
+		fclose(STDIN);
 
-	fclose(STDERR);
+		fclose(STDOUT);
+
+		fclose(STDERR);
+
+	}
 
 }
 
@@ -336,7 +352,6 @@ function wg_register_sig_handler() {
 }
 
 function sig_handler($signo) {
-	global $h_lock, $wgg;
 
 	switch ($signo) {
 
