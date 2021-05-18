@@ -357,9 +357,11 @@ function wg_destroy_tunnels() {
 	// Now unload the kernel module if it is still loaded
 	if (is_module_loaded($wgg['kmod'])) {
 
-		$kmod_safe = escapeshellarg($wgg['kmod']);
+		$kmod = $wgg['kmod'];
 
-		mwexec("{$wgg['kldunload']} {$kmod_safe} > /dev/null 2>&1");
+		wg_escapeshellarg($kmod);
+
+		mwexec("{$wgg['kldunload']} {$kmod} > /dev/null 2>&1");
 
 	}
 
