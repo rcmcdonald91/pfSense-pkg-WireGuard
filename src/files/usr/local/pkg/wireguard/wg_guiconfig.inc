@@ -103,18 +103,24 @@ function wg_interface_status_icon($status, $fa_icon = "fa-ethernet") {
 }
 
 // Returns the appropriate fa icon class for handshake status icon
-function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshake") {
+function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-handshake") {
 	global $wgg;
 
-	$current_time = time();
+	$end_time = new DateTimeImmutable;
 
-	$diff_time = $current_time - $latest_handshake;
+	$start_time = new DateTime();
+
+	$start_time->setTimestamp($latest_handshake_stamp);
+
+	$diff_time = $end_time->diff($start_time);
+
+	$diff_time_seconds = abs($end_time->getTimestamp() - $start_time->getTimestamp());
 
 	$a_thresholds = $wgg['handshake_thresholds'];
 
 	foreach ($a_thresholds as $threshold => $value) {
 
-		if ($diff_time >= $threshold) {
+		if ($diff_time_seconds >= $threshold) {
 	
 			$ret_class = $value['class'];
 
@@ -187,7 +193,7 @@ function wg_human_time_diff($start_time_stamp, $end_time_stamp = null, $from_epo
 
 		$plural = ($num_of_units > 1) ? 's' : '';
 
-		$tense = ($diff_time->invert) ? 'ago'  : 'from now';
+		$tense = ($diff_time->invert) ? 'ago' : 'from now';
 		
 		return "{$num_of_units} {$text}{$plural} {$tense}";
 
