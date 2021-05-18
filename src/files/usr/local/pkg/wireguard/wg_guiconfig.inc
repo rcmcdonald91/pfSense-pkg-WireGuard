@@ -78,7 +78,7 @@ function wg_get_tun_list() {
 
 }
 
-// Truncates a given string if if necessary and formats it to make it look good
+// Truncates a given string if necessary and formats it to make it look good
 function wg_truncate_pretty($str, $length) {
 
 	$s_truncated = substr($str, 0, $length);
@@ -93,6 +93,8 @@ function wg_interface_status_icon($status, $fa_icon = "fa-ethernet") {
 	global $wgg;
 
 	$ret_class = ($status == "up") ? 'text-success' : '';
+
+	wg_htmlspecialchars($fa_icon, $ret_class, $status);
 
 	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$status}\"></i>";
 
@@ -124,6 +126,8 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 
 	}
 
+	wg_htmlspecialchars($fa_icon, $ret_class, $ret_title);
+
 	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$ret_title}\"></i>";
 
 	return $ret_html;
@@ -131,8 +135,8 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 }
 
 // Formats a given time difference in a human-friendly way
-function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) {
-	
+function wg_human_time_diff($start_time_stamp, $end_time_stamp = null) {
+
 	// If end time is not supplied, use the current time instead
 	$end_time = is_null($end_time) ? time() : $end_time;
 
@@ -142,19 +146,19 @@ function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) 
 	$diff_time = abs($end_time - $start_time);
 
 	$tokens = array (
-		31536000 => 'year',
-		2592000 => 'month',
-		604800 => 'week',
-		86400 => 'day',
-		3600 => 'hour',
-		60 => 'minute',
-		1 => 'second'
+		31536000 => gettext('year'),
+		2592000 => gettext('month'),
+		604800 => gettext('week'),
+		86400 => gettext('day'),
+		3600 => gettext('hour'),
+		60 => gettext('minute'),
+		1 => gettext('second')
 	);
 
 	foreach ($tokens as $unit => $text) {
 
 		if ($diff_time < $unit) {
-			
+
 			continue;
 			
 		}
@@ -167,7 +171,7 @@ function wg_human_time_diff($start_time, $end_time = null, $from_epoch = false) 
 
 	}
 
-	return "never";
+	return gettext('never');
 
 }
 
@@ -250,7 +254,7 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 					foreach ($addresses as $address) {
 
 						wg_htmlspecialchars($address);
-		
+
 						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
 		
 					}
