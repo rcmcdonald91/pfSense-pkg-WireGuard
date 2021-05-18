@@ -135,15 +135,35 @@ function wg_handshake_status_icon($latest_handshake = 0, $fa_icon = "fa-handshak
 }
 
 // Formats a given time difference in a human-friendly way
-function wg_human_time_diff($start_time_stamp, $end_time_stamp = null) {
+function wg_human_time_diff($start_time_stamp, $end_time_stamp = null, $from_epoch = false) {
 
-	// If end time is not supplied, use the current time instead
-	$end_time = is_null($end_time) ? time() : $end_time;
+	if (is_null($end_time_stamp)) {
 
-	// If start time is zero, proceed unless we are actually interested in calculating time from epoch, probably not...
-	$start_time = ($start_time > 0) ? $start_time : ($from_epoch ? $start_time : $end_time);
+		$end_time = new DateTimeImmutable();
 
-	$diff_time = abs($end_time - $start_time);
+	} elseif (is_numericint($end_time_stamp)) {
+
+		$end_time = new DateTime();
+
+		$end_time->setTimestamp($end_time_stamp);
+
+	}
+
+	$start_time = new DateTime();
+
+	if ($start_time_stamp > 0 || $from_epoch) {
+
+		$start_time->setTimestamp($start_time_stamp);
+
+	} else {
+
+		return gettext('never');
+
+	}
+
+	$diff_time = $end_time->diff($start_time);
+
+	$diff_time_seconds = abs($end_time->getTimestamp() - $start_time->getTimestamp());
 
 	$tokens = array (
 		31536000 => gettext('year'),
@@ -157,20 +177,23 @@ function wg_human_time_diff($start_time_stamp, $end_time_stamp = null) {
 
 	foreach ($tokens as $unit => $text) {
 
-		if ($diff_time < $unit) {
+		if ($diff_time_seconds < $unit) {
 
 			continue;
 			
 		}
 
-		$num_of_units = floor($diff_time / $unit);
+		$num_of_units = floor($diff_time_seconds / $unit);
 
 		$plural = ($num_of_units > 1) ? 's' : '';
+
+		$tense = ($diff_time->invert) ? 'ago'  : 'from now';
 		
-		return "{$num_of_units} {$text}{$plural}";
+		return "{$num_of_units} {$text}{$plural} {$tense}";
 
 	}
 
+	// We should 'never' get here...
 	return gettext('never');
 
 }
