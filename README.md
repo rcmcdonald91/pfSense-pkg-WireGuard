@@ -1,4 +1,7 @@
 # pfSense-pkg-WireGuard
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 This is a port of the original WireGuard*** UI bits as implemented by [Netgate](https://www.netgate.com/) in [pfSense 2.5.0](https://github.com/pfsense/pfsense/tree/RELENG_2_5_0) to a package suitable for sideloading and more frequent updating on future releases of pfSense.
 
 This also includes some improvments such as a proper status page (found under Status / WireGuard Status) and improved assigned interface handling.
@@ -48,3 +51,23 @@ https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
 ## Recognition
 
 \*** "WireGuard" and the "WireGuard" logo are registered trademarks of Jason A. Donenfeld.
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/theonemcdonald"><img src="https://avatars.githubusercontent.com/u/3102039?v=4?s=100" width="100px;" alt=""/><br /><sub><b>R. Christian McDonald</b></sub></a><br /><a href="#projectManagement-theonemcdonald" title="Project Management">📆</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
