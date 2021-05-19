@@ -16,22 +16,22 @@
     }
   ],
   "types": {
-    "custom": {
+    "recognizedSupporter": {
       "symbol": "🏆",
       "description": "Recognized Supporter",
       "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
     },
-    "custom": {
+    "bronzeSupporter": {
       "symbol": "🥉",
       "description": "Bronze Supporter",
       "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
     },
-    "custom": {
+    "silverSupporter": {
       "symbol": "🥈",
       "description": "Silver Supporter",
       "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
     },
-    "custom": {
+    "goldSupporter": {
       "symbol": "🥇",
       "description": "Gold Supporter",
       "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
