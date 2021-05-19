@@ -15,6 +15,28 @@
       ]
     }
   ],
+  "types": {
+    "custom": {
+      "symbol": "🏆",
+      "description": "Recognized Supporter",
+      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+    },
+    "custom": {
+      "symbol": "🥉",
+      "description": "Bronze Supporter",
+      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+    },
+    "custom": {
+      "symbol": "🥈",
+      "description": "Silver Supporter",
+      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+    },
+    "custom": {
+      "symbol": "🥇",
+      "description": "Gold Supporter",
+      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+    }
+  },
   "contributorsPerLine": 7,
   "projectName": "pfSense-pkg-WireGuard",
   "projectOwner": "theonemcdonald",
