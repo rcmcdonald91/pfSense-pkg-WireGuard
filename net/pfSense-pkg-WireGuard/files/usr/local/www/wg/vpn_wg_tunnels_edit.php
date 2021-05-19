@@ -136,11 +136,7 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-if (count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
-
-	print_info_box(gettext('The WireGuard kernel module is not loaded!'), 'danger', null);
-
-}
+wg_display_service_warning();
 
 if ($input_errors) {
 
@@ -236,6 +232,8 @@ $form->add($section);
 
 $section = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
+$section->setAttribute('id', 'addresses');
+
 if (!is_wg_tunnel_assigned($pconfig)) {
 
 	$section->addInput(new Form_StaticText(
@@ -270,7 +268,8 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 			'Interface Address',
 			$item['address'],
 			'BOTH'
-		))->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
+		))->addClass('address')
+			->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
 			->addMask("address_subnet{$counter}", $item['mask'])
 			->setWidth(4);
 		
@@ -485,6 +484,13 @@ events.push(function() {
 	// Save the form
 	$('#saveform').click(function(event) {
 		$(form).submit();
+	});
+
+	// Trim any whitespace from address input
+	$("#addresses").on("change", "input.address", function () {
+
+		$(this).val($(this).val().replace(/\s/g, ""));
+
 	});
 
 });

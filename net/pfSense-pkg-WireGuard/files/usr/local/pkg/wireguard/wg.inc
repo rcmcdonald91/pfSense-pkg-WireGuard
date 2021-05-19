@@ -29,6 +29,7 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg_api.inc');
 require_once('wireguard/wg_install.inc');
+require_once('wireguard/wg_service.inc');
 require_once('wireguard/wg_validate.inc');
 
 global $wgg;
@@ -180,19 +181,23 @@ function wg_delete_tunnel($tunnel_name) {
 function wg_peer_allowedips($post) {
 
 	// Convert the post into proper arrays
-	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
+	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr', 'address_route'));
 
 	$ret_array = array();
 
 	// Loop through each address entry
-	foreach ($allowedips as $address) {
+	foreach ($allowedips as $row) {
 
 		// Remove any accidental whitespace
-		$address['address'] = trim($address['address']);
+		$row['address'] = trim($row['address']);
 
-		if (!empty($address['address'])) {
+		if (!empty($row['address'])) {
 
-			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
+			$ret_array[] 	= array(
+						'address' 	=> $row['address'], 
+						'mask' 		=> $row['address_subnet'], 
+						'descr' 	=> $row['address_descr'],
+						'route' 	=> $row['address_route']);
 
 		}
 
@@ -213,14 +218,17 @@ function wg_tunnel_addresses($post) {
 	$ret_array = array();
 
 	// Loop through each address entry
-	foreach ($addresses as $address) {
+	foreach ($addresses as $row) {
 
 		// Remove any accidental whitespace
-		$address['address'] = trim($address['address']);
+		$row['address'] = trim($row['address']);
 
-		if (!empty($address['address'])) {
+		if (!empty($row['address'])) {
 
-			$ret_array[] = array('address' => $address['address'], 'mask' => $address['address_subnet'], 'descr' => $address['address_descr']);
+			$ret_array[] 	= array(
+						'address' 	=> $row['address'], 
+						'mask' 		=> $row['address_subnet'], 
+						'descr' 	=> $row['address_descr']);
 
 		}
 
@@ -421,6 +429,16 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 		// Create new configuration files
 		wg_create_config_files();
 
+		// Update Unnound access list
+		wg_unbound_acl_update();
+
+	}
+
+	// Bail if the service is not running
+	if (!wg_is_service_running()) {
+
+		return;	
+
 	}
 
 	if (isset($wgg['tunnels'][$tun_idx])) {
@@ -449,13 +467,6 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		// Sync the configuration with the tunnel interface
 		wg_interface_syncconf($tunnel['name']);
-
-	}
-
-	if (!$quick) {
-
-		// Update Unbound ACL
-		wg_unbound_acl_update();
 
 	}
 

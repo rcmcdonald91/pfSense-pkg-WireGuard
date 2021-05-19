@@ -148,15 +148,15 @@ function wg_validate_peer_post($pconfig, $peer_idx) {
 	// Allowed IPs
 	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 
-		foreach ($pconfig['allowedips']['row'] as $address) {
+		foreach ($pconfig['allowedips']['row'] as $row) {
 
-			$address['address'] = trim($address['address']);
+			$row['address'] = trim($row['address']);
 
-			$tmp_subnet = "{$address['address']}/{$address['mask']}";
+			$tmp_subnet = "{$row['address']}/{$row['mask']}";
 
-			if (!empty($address['address']) && !is_subnet($tmp_subnet)) {
+			if (!empty($row['address']) && !is_subnet($tmp_subnet)) {
 
-				$input_errors[] =gettext("Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.");
+				$input_errors[] = gettext("Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.");
 
 			}
 
