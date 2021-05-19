@@ -41,6 +41,18 @@ wg_globals();
 
 if ($_POST) {
 
+	if (isset($_POST['apply'])) {
+
+		if (wg_is_service_running()) {
+
+			restart_service('wireguard');
+
+		}
+
+		clear_subsystem_dirty('wireguard');
+
+	}
+
 	if (isset($_POST['peer'])) {
 
 		$peer_idx = $_POST['peer'];
@@ -73,6 +85,12 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 include("head.inc");
 
 wg_display_service_warning();
+
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box(0);
+
+}
 
 if (is_subsystem_dirty('wireguard')) {
 

@@ -43,6 +43,18 @@ $save_success = false;
 
 if ($_POST) {
 
+	if (isset($_POST['apply'])) {
+
+		if (wg_is_service_running()) {
+
+			restart_service('wireguard');
+
+		}
+
+		clear_subsystem_dirty('wireguard');
+
+	}
+
 	if ($_POST['act'] == 'save') {
 
 		if (!$input_errors) {
@@ -90,6 +102,18 @@ if ($save_success) {
 }
 
 wg_display_service_warning();
+
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box(0);
+
+}
+
+if (is_subsystem_dirty('wireguard')) {
+
+	print_apply_box(gettext("The WireGuard configuration has been changed.") . "<br />" . gettext("The changes must be applied for them to take effect."));
+
+}
 
 if ($input_errors) {
 
