@@ -74,6 +74,12 @@ include("head.inc");
 
 wg_display_service_warning();
 
+if (is_subsystem_dirty('wireguard')) {
+
+	print_apply_box(gettext("The WireGuard configuration has been changed.") . "<br />" . gettext("The changes must be applied for them to take effect."));
+
+}
+
 if ($input_errors) {
 
 	print_input_errors($input_errors);
