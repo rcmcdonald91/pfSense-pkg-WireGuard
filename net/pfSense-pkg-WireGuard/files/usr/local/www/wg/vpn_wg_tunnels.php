@@ -30,6 +30,7 @@
 // pfSense includes
 require_once('functions.inc');
 require_once('guiconfig.inc');
+require_once('service-utils.inc');
 
 // WireGuard includes
 require_once('wireguard/wg.inc');
@@ -40,6 +41,20 @@ global $wgg;
 wg_globals();
 
 if ($_POST) {
+
+	if (isset($_POST['apply'])) {
+
+		$retval = 0;
+
+		if (wg_is_service_running()) {
+
+			restart_service('wireguard');
+
+		}
+
+		clear_subsystem_dirty('wireguard');
+
+	}
 
 	if (isset($_POST['tun'])) {
 
@@ -73,6 +88,18 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 include("head.inc");
 
 wg_display_service_warning();
+
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box($retval);
+
+}
+
+if (is_subsystem_dirty('wireguard')) {
+
+	print_apply_box(gettext("The WireGuard configuration has been changed.") . "<br />" . gettext("The changes must be applied for them to take effect."));
+
+}
 
 if ($input_errors) {
 

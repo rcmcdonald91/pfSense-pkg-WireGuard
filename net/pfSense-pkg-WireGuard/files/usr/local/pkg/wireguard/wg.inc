@@ -62,8 +62,11 @@ function wg_toggle_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} toggled.");
 
-			// Sync with WireGuard backend
-			wg_resync_tunnel($tunnel['name']);
+			if (wg_is_service_running()) {
+			
+				mark_subsystem_dirty($wgg['subsystem']);
+	
+			}
 
 		} else {
 
@@ -369,8 +372,11 @@ function wg_do_tunnel_post($post) {
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
-		// Sync with WireGuard backend
-		wg_resync_tunnel($pconfig['name']);
+		if (wg_is_service_running()) {
+
+			mark_subsystem_dirty($wgg['subsystem']);
+
+		}
 
 	}
 
@@ -412,6 +418,9 @@ function wg_resync_all() {
 
 	// Update the Unbound ACL without restarting Unbound
 	wg_unbound_acl_update(false);
+
+	// If we are here, the subsystem is by definition not dirty
+	clear_subsystem_dirty($wgg['subsystem']);
 
 }
 
