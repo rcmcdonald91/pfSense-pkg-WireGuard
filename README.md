@@ -48,7 +48,7 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
 
-## Contributors ✨
+## Sponsors ✨
 
 Thanks goes to these sponsors ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
