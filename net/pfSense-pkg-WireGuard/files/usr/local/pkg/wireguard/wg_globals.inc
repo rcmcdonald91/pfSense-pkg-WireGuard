@@ -31,6 +31,7 @@ $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
 	'ifconfig'		=> '/sbin/ifconfig',
 	'pkg'			=> '/usr/sbin/pkg',
+	'kldload'		=> '/sbin/kldload',
 	'kldunload'		=> '/sbin/kldunload',
 	'php'			=> '/usr/local/bin/php',
 	'wg_daemon'		=> '/usr/local/bin/php_wg',

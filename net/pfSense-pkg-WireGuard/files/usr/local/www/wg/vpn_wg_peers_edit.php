@@ -116,11 +116,7 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-if (count($wgg['tunnels']) > 0 && !is_module_loaded($wgg['kmod'])) {
-
-	print_info_box(gettext('The WireGuard kernel module is not loaded!'), 'danger', null);
-
-}
+wg_display_service_warning();
 
 if ($input_errors) {
 
@@ -233,6 +229,8 @@ $form->add($section);
 
 $section = new Form_Section('Address Configuration');
 
+$section->setAttribute('id', 'allowedips');
+
 // Hack to ensure empty lists default to /128 mask
 if (!is_array($pconfig['allowedips']['row'])) {
 
@@ -255,7 +253,8 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 		'Allowed Subnet or Host',
 		$item['address'],
 		'BOTH'
-	))->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
+	))->AddClass('address')
+		->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
 		->addMask("address_subnet{$counter}", $item['mask'], 128, 0)
 		->setWidth(4);
 
@@ -337,6 +336,13 @@ events.push(function() {
 				}
 			});
 		}
+
+	});
+
+	// Trim any whitespace from allowedips input
+	$('#allowedips').on('change', 'input.address', function () {
+
+		$(this).val($(this).val().replace(/\s/g, ''));
 
 	});
 

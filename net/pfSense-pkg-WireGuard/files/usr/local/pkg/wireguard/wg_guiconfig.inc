@@ -20,11 +20,23 @@
  */
 
 // pfSense includes
+require_once('guiconfig.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wireguard/wg_globals.inc');
 require_once('wireguard/wg.inc');
+
+function wg_display_service_warning($only_with_tunnels = true) {
+	global $wgg;
+
+	if ((!$only_with_tunnels || count($wgg['tunnels']) > 0) && !wg_is_service_running()) {
+
+		print_info_box(gettext('The WireGuard service is not running.'), 'danger', null);
+	
+	}
+
+
+}
 
 // Formats peer endpoint address and port for the UI
 function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
