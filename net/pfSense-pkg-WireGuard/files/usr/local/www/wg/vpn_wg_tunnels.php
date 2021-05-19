@@ -44,8 +44,6 @@ if ($_POST) {
 
 	if (isset($_POST['apply'])) {
 
-		$retval = 0;
-
 		if (wg_is_service_running()) {
 
 			restart_service('wireguard');
@@ -91,7 +89,7 @@ wg_display_service_warning();
 
 if (isset($_POST['apply'])) {
 
-	print_apply_result_box($retval);
+	print_apply_result_box(0);
 
 }
 
