@@ -290,6 +290,8 @@ function wg_do_peer_post($post) {
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
 
+	$old_tun 			= $pconfig['tun'];
+
 	$pconfig['tun'] 		= $post['tun'];
 
 	$pconfig['descr'] 		= $post['descr'];
