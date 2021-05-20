@@ -113,7 +113,7 @@ function wg_status() {
 	}
 
 	// Consumers of this function always expect an array type
-	return $a_ret;
+	return $ret_array;
 
 }
 
