@@ -215,13 +215,16 @@ function wg_service_start() {
 		// We are the parent so go on...
 		wg_service_daemon();
 
-	// This is where we can now safely restart services
+	// In this child process is where we can now safely restart any additional services
 	} else {
 
+		// dpinger
 		setup_gateways_monitor();
 
+		// unbound
 		services_unbound_configure();
 		
+		// pf
 		filter_configure();
 
 		// All good
@@ -237,7 +240,7 @@ function wg_service_start() {
 function wg_service_daemon() {
 	global $wgg;
 
-	// Re-register the service environment now that we have finished restarting additional services
+	// Re-register the service environment and obtain a fresh lock now that we have finished restarting additional services
 	wg_register_service_env(true);
 
 	// Attempt to load the kmod, required to run the service without any tunnels configured
