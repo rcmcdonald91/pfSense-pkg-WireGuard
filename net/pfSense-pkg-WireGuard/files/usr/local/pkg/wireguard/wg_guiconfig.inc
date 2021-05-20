@@ -152,7 +152,10 @@ function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-ha
 
 }
 
-// Formats a given time difference in a human-friendly way
+/* 
+ * Formats a given time difference in a human-friendly way
+ * $start and $end should be format compatible with DateTime
+ */
 function wg_human_time_diff($start, $end = null, $from_epoch = false) {
 
 	if (!($start instanceof DateTime)) {
@@ -173,23 +176,17 @@ function wg_human_time_diff($start, $end = null, $from_epoch = false) {
 
 	}
 
-	if (($start->getTimestamp() == 0) && !$from_epoch) {
-
-		return gettext('never');
-
-	}
-
 	$interval = $end->diff($start);
 
-	$doPlural = function($nb, $str) { return ($nb > 1) ? "{$str}s" : $str; };
+	$doPlural = function($nb, $str) { return ($nb > 1) ? gettext("{$str}s") : gettext($str); };
 
-	$doTense = function($interval) { return ($interval->invert)} ? 'ago' : 'from now';};
+	$doTense = function($interval) { return ($interval->invert) ? gettext('ago') : gettext('from now'); };
 
 	$a_format = array();
 
-	$tokens = array('y' => 'year', 'm' => 'month', 'd' => 'day', 'h' => 'hour', 'i' => 'minute', 's' => 'second');
-
 	$a_interval = get_object_vars($interval);
+
+	$tokens = array('y' => 'year', 'm' => 'month', 'd' => 'day', 'h' => 'hour', 'i' => 'minute', 's' => 'second');
 
 	foreach ($tokens as $key => $value) {
 
@@ -201,16 +198,13 @@ function wg_human_time_diff($start, $end = null, $from_epoch = false) {
 
 	}
 
-	// Keep the two largest denominations
-	if (count($a_format) > 1) {
+	if ((count($a_format) == 0) || (($start->getTimestamp() == 0) && !$from_epoch)) {
 
-		$s_format = "{$a_format[0]}, {$a_format[1]}";
-
-	} else {
-
-		$s_format = $a_format[0];
+		return gettext('never');
 
 	}
+
+	$s_format = (count($a_format) > 1) ? "{$a_format[0]}, {$a_format[1]}" : $a_format[0];
 
 	return "{$interval->format($s_format)} {$doTense($interval)}";
 
