@@ -93,7 +93,7 @@ function wg_service_stop() {
 function wg_is_service_running() {
 	global $wgg;
 
-	if (!($h_lock = @fopen($wgg['pid_path'], 'a+')) || !file_exists($wgg['pid_path'])) {
+	if (!($h_lock = @fopen($wgg['pid_path'], 'r')) || !file_exists($wgg['pid_path'])) {
 
 		return false;
 
