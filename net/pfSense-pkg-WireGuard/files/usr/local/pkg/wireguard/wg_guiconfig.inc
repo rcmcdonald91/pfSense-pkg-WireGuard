@@ -158,21 +158,30 @@ function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-ha
  */
 function wg_human_time_diff($start, $end = null, $from_epoch = false) {
 
-	if (!($start instanceof DateTime)) {
-
-		$start = new DateTime($start);
-
-	}
-
 	if (is_null($end)) {
 
 		$end = new DateTime('now');
 
 	}
 
-	if (!($end instanceof DateTime)) {
+	// If these fail for any reason, just bail out...
+	try {
 
-		$end = new DateTime($end);
+		if (!($start instanceof DateTime)) {
+
+			$start = new DateTime($start);
+
+		}
+
+		if (!($end instanceof DateTime)) {
+
+			$end = new DateTime($end);
+
+		}
+
+	} catch (Exception $e) {
+
+		return gettext('never');
 
 	}
 
