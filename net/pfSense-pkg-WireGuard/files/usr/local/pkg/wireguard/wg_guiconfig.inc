@@ -77,16 +77,20 @@ function wg_get_tun_list() {
 	// Always include the unassigned option first
 	$a_ret['unassigned'] = 'Unassigned';
 
+	// Format tunnel description if one is configured
+	$tunDescr = function($tunnel) { return (!empty($tunnel['descr'])) ? " ({$tunnel['descr']})" : null; };
+
 	if (is_array($wgg['tunnels'])) {
 
 		foreach ($wgg['tunnels'] as $tunnel) {
 
-			$a_ret[$tunnel['name']] = "{$tunnel['name']} ({$tunnel['descr']})";	
+			$a_ret[$tunnel['name']] = "{$tunnel['name']}{$tunDescr($tunnel)}";	
 
 		}
 	
 	}
 
+	// Consumers of this function always expect an array type
 	return $a_ret;
 
 }
@@ -105,7 +109,7 @@ function wg_truncate_pretty($str, $length) {
 function wg_interface_status_icon($status, $fa_icon = "fa-ethernet") {
 	global $wgg;
 
-	$ret_class = ($status == "up") ? 'text-success' : '';
+	$ret_class = ($status == "up") ? 'text-success' : null;
 
 	wg_htmlspecialchars($fa_icon, $ret_class, $status);
 
@@ -157,7 +161,7 @@ function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-ha
  * Formats a given time difference in a human-friendly way
  * $start and $end should be format compatible with DateTime
  */
-function wg_human_time_diff($start, $end = null, $from_epoch = false) {
+function wg_human_time_diff($start, $end = null, $num_units = 2, $from_epoch = false) {
 
 	if (is_null($end)) {
 
@@ -214,7 +218,7 @@ function wg_human_time_diff($start, $end = null, $from_epoch = false) {
 
 	}
 
-	$s_format = (count($a_format) > 1) ? "{$a_format[0]}, {$a_format[1]}" : $a_format[0];
+	$s_format = implode(', ', array_slice($a_format, 0, $num_units));
 
 	return "{$interval->format($s_format)} {$doTense($interval)}";
 

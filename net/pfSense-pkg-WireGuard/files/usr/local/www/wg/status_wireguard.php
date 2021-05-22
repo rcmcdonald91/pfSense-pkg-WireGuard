@@ -83,7 +83,6 @@ if (!empty($a_devices)):
 			</thead>
 <?php
 	foreach ($a_devices as $device_name => $device):
-		wg_
 ?>
 			<tbody>	
 				<tr class="tunnel-entry">
