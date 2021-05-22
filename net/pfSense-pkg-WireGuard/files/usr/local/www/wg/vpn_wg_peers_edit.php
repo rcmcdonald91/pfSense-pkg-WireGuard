@@ -213,7 +213,7 @@ $group->add(new Form_Input(
 	'Pre-shared Key',
 	wg_secret_input_type(),
 	$pconfig['presharedkey']
-))->setHelp('Optional pre-shared key for this tunnel.');
+))->setHelp('Optional pre-shared key for this tunnel. (<a id="copypsk" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)');
 
 $group->add(new Form_Button(
 	'genpsk',
@@ -314,9 +314,25 @@ events.push(function() {
 	checkLastRow();
 
 	$('#copypsk').click(function () {
-		$('#presharedkey').focus();
-		$('#presharedkey').select();
-		document.execCommand("copy");
+
+		var $this = $(this);
+
+		var originalText = $this.text();
+
+		// The 'modern' way...
+		navigator.clipboard.writeText($('#presharedkey').val());
+
+		$this.text($this.attr('data-success-text'));
+
+		setTimeout(function() {
+
+			$this.text(originalText);
+
+		}, $this.attr('data-timeout'));
+
+		// Prevents the browser from scrolling
+		return false;
+
 	});
 
 	// These are action buttons, not submit buttons

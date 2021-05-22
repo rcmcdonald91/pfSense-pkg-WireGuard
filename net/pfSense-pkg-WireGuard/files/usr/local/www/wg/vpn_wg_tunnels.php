@@ -143,7 +143,10 @@ display_top_tabs($tab_array);
 						<td class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td><?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?></td>
+						<td class="pubkey" title="<?=htmlspecialchars($tunnel['publickey'])?>">
+							<?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?>
+							<a class="fa fa-copy text-success" style="display: none;"></a>
+						</td>
 						<td><?=wg_generate_tunnel_address_popup_link($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
@@ -232,7 +235,13 @@ events.push(function() {
 	$('#showpeers').click(function () {
 		peershidden = !peershidden;
 		hideClass('peer-entries', peershidden);
-	})
+	});
+
+	$('.pubkey').click(function () {
+
+		navigator.clipboard.writeText($(this).attr('title'));
+
+	});
 
 });
 //]]>

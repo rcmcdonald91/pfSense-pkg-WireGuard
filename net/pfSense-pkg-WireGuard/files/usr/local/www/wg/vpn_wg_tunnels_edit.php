@@ -215,7 +215,7 @@ $group->add(new Form_Input(
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp('Public key for this tunnel. (<a id="copypubkey" href="#">Copy</a>)')->setReadonly();
+))->setHelp('Public key for this tunnel. (<a id="copypubkey" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)')->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
@@ -440,9 +440,25 @@ events.push(function() {
 	checkLastRow();
 
 	$('#copypubkey').click(function () {
-		$('#publickey').focus();
-		$('#publickey').select();
-		document.execCommand("copy");
+
+		var $this = $(this);
+
+		var originalText = $this.text();
+
+		// The 'modern' way...
+		navigator.clipboard.writeText($('#publickey').val());
+		
+		$this.text($this.attr('data-success-text'));
+
+		setTimeout(function() {
+
+			$this.text(originalText);
+
+		}, $this.attr('data-timeout'));
+
+		// Prevents the browser from scrolling
+		return false;
+
 	});
 
 	// These are action buttons, not submit buttons
