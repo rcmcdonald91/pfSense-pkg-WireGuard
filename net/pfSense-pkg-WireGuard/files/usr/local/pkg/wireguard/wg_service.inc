@@ -320,13 +320,17 @@ function wg_service_rcfile() {
 function wg_deregister_service_env() {
 	global $h_lock, $wgg;
 
-	// Release exclusive lock
-	flock($h_lock, LOCK_UN);
+	if (!is_null($h_lock)) {
 
-	// Close file handler
-	fclose($h_lock);
+		// Release exclusive lock
+		@flock($h_lock, LOCK_UN);
 
-	// Delete PID
+		// Close file handler
+		@fclose($h_lock);
+
+	}
+
+	// Attempt to delete PID file
 	unlink_if_exists($wgg['pid_path']);
 
 }
