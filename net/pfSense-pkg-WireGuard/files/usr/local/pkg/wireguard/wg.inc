@@ -141,8 +141,6 @@ function wg_delete_tunnel($tunnel_name) {
 	// Make sure we have the latest info
 	wg_globals();
 
-	unset($ifname, $conf_path);
-
 	// Get the config array index
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -160,11 +158,11 @@ function wg_delete_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
 
-			// Recreate configuration files
-			wg_create_config_files();
-
-			// Destroy the interface
-			pfSense_interface_destroy($tunnel['name']);
+			if (wg_is_service_running()) {
+			
+				mark_subsystem_dirty($wgg['subsystem']);
+	
+			}
 		
 		} else {
 
@@ -246,9 +244,9 @@ function wg_tunnel_addresses($post) {
  */
 function wg_parse_post_repeatables($post, $fields = null) {
 
-	if (is_array($fields)) {
+	$ret_array = array();
 
-		$ret_array = array();
+	if (is_array($fields)) {
 
 		foreach ($fields as $field) {
 
@@ -264,11 +262,9 @@ function wg_parse_post_repeatables($post, $fields = null) {
 
 		}
 
-		return $ret_array;
-
 	}
 
-	return false;
+	return $ret_array;
 
 }
 
@@ -288,7 +284,7 @@ function wg_do_peer_post($post) {
 
 	wg_init_config_arr($pconfig, array('allowedips', 'row'));
 
-	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
+	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
 
 	$old_tun 			= $pconfig['tun'];
 
@@ -351,7 +347,7 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
-	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : 'yes';
+	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
 
 	$pconfig['descr'] 		= $post['descr'];
 
