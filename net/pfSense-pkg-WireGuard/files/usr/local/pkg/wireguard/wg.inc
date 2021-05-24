@@ -62,12 +62,6 @@ function wg_toggle_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} toggled.");
 
-			if (wg_is_service_running()) {
-			
-				mark_subsystem_dirty($wgg['subsystem']);
-	
-			}
-
 		} else {
 
 			$action_txt = ($tunnel['enabled'] == 'yes') ? 'disable' : 'enable';
@@ -157,12 +151,6 @@ function wg_delete_tunnel($tunnel_name) {
 
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
-
-			if (wg_is_service_running()) {
-			
-				mark_subsystem_dirty($wgg['subsystem']);
-	
-			}
 		
 		} else {
 
@@ -369,12 +357,6 @@ function wg_do_tunnel_post($post) {
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
-
-		if (wg_is_service_running()) {
-
-			mark_subsystem_dirty($wgg['subsystem']);
-
-		}
 
 	}
 

@@ -58,13 +58,34 @@ if ($_POST) {
 
 		$tun_name = $_POST['tun'];
 
-		if ($_POST['act'] == 'toggle') {
+		switch ($_POST['act']) {
 
-			$input_errors = wg_toggle_tunnel($tun_name);
+			case 'toggle':
+				
+				$input_errors = wg_toggle_tunnel($tun_name);
+				
+				break;
 
-		} elseif ($_POST['act'] == 'delete') { 
+			case 'delete':
 
-			$input_errors = wg_delete_tunnel($tun_name);
+				$input_errors = wg_delete_tunnel($tun_name);
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_tunnels.php");	
+
+		}
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running()) {
+
+				mark_subsystem_dirty($wgg['subsystem']);
+	
+			}
 
 		}
 

@@ -54,31 +54,42 @@ if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
 // All form save logic is in wireguard/wg.inc
 if ($_POST) {
 
-	if ($_POST['act'] == 'save') {
+	switch ($_POST['act']) {
 
-		$res = wg_do_peer_post($_POST);
+		case 'save':
+
+			$res = wg_do_peer_post($_POST);
 		
-		$input_errors = $res['input_errors'];
-
-		$pconfig = $res['pconfig'];
-
-		if (!$input_errors) {
+			$input_errors = $res['input_errors'];
+	
+			$pconfig = $res['pconfig'];
+	
+			if (!$input_errors) {
+				
+				// Save was successful
+				header("Location: /wg/vpn_wg_peers.php");
+	
+			}
 			
-			// Save was successful
+			break;
+
+		case 'genpsk':
+
+				// Process ajax call requesting new pre-shared key
+			print(wg_gen_psk());
+
+			exit;
+
+			break;
+
+		default:
+
+			// Shouldn't be here, so bail out.
 			header("Location: /wg/vpn_wg_peers.php");
 
-		}
-
-	} elseif ($_POST['act'] == 'genpsk') {
-
-		// Process ajax call requesting new pre-shared key
-		print(wg_gen_psk());
-
-		exit;
-	
 	}
 
-} 
+}
 
 $pconfig = array();
 
