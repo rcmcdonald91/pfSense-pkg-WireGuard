@@ -58,45 +58,67 @@ if (isset($_REQUEST['peer'])) {
 
 }
 
-// All form save logic is in wireguard/wg.inc
 if ($_POST) {
 
-	if ($_POST['act'] == 'save') {
+	switch ($_POST['act']) {
 
-		$res = wg_do_tunnel_post($_POST);
+		case 'save':
+
+			$res = wg_do_tunnel_post($_POST);
 		
-		$input_errors = $res['input_errors'];
+			$input_errors = $res['input_errors'];
+	
+			$pconfig = $res['pconfig'];
+	
+			if (empty($input_errors)) {
+	
+				if (wg_is_service_running()) {
+	
+					mark_subsystem_dirty($wgg['subsystem']);
+		
+				}
+	
+				// Save was successful
+				header("Location: /wg/vpn_wg_tunnels.php");
+	
+			}
 
-		$pconfig = $res['pconfig'];
+			break;
 
-		if (!$input_errors) {
+		case 'genkeys':
 
-			// Save was successful
-			header("Location: /wg/vpn_wg_tunnels.php");
+			// Process ajax call requesting new key pair
+			print(wg_gen_keypair(true));
 
-		}
+			exit;
 
-	} elseif ($_POST['act'] == 'genkeys') {
+			break;
 
-		// Process ajax call requesting new key pair
-		print(wg_gen_keypair(true));
+		case 'genpubkey':
 
-		exit;
+			// Process ajax call calculating the public key from a private key
+			print(wg_gen_publickey($_POST['privatekey']));
 
-	} elseif ($_POST['act'] == 'genpubkey') {
+			exit;
 
-		// Process ajax call calculating the public key from a private key
-		print(wg_gen_publickey($_POST['privatekey']));
+			break;
 
-		exit;
+		case 'toggle':
 
-	} elseif ($_POST['act'] == 'toggle') {
+			wg_toggle_peer($peer_id);
 
-		wg_toggle_peer($peer_id);
+			break;
 
-	} elseif ($_POST['act'] == 'delete') {
+		case 'delete':
 
-		wg_delete_peer($peer_id);
+			wg_delete_peer($peer_id);
+
+			break;
+
+		default:
+		
+			// Shouldn't be here, so bail out.
+			header("Location: /wg/vpn_wg_tunnels.php");		
 
 	}
 
@@ -301,7 +323,6 @@ if (!is_wg_tunnel_assigned($pconfig)) {
 
 } else {
 
-	// We want all configured interfaces, including disabled ones
 	$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
 
 	wg_htmlspecialchars($wg_pfsense_if);

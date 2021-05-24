@@ -57,14 +57,25 @@ if ($_POST) {
 
 		$peer_idx = $_POST['peer'];
 
-		if ($_POST['act'] == 'toggle') {
+		switch ($_POST['act']) {
 
-			wg_toggle_peer($peer_idx);
+			case 'toggle':
 
-		} elseif ($_POST['act'] == 'delete') { 
-		
-			wg_delete_peer($peer_idx);
+				wg_toggle_peer($peer_idx);
 
+				break;
+
+			case 'delete':
+				
+				wg_delete_peer($peer_idx);
+
+				break;
+
+			default:
+				
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_peers.php");
+				
 		}
 
 	}
