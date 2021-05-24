@@ -322,10 +322,10 @@ function wg_deregister_service_env() {
 
 	if (!is_null($h_lock)) {
 
-		// Release exclusive lock
+		// Attempt to release exclusive lock
 		@flock($h_lock, LOCK_UN);
 
-		// Close file handler
+		// Attempt to close file handler
 		@fclose($h_lock);
 
 	}
