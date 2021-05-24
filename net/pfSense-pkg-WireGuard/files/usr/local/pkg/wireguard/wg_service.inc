@@ -31,6 +31,8 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
+global $wgg;
+
 if (isset($argv[1])) {
 
 	if (!wg_is_cli()) {
@@ -209,31 +211,44 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
-		// Wait for the child to finish
+		// Wait for the child process below to finish
 		pcntl_waitpid($newpid, $status);
 
-		// We are the parent so go on...
-		wg_service_daemon();
+		// Get the return code from the child process
+		$ret_code = pcntl_wexitstatus($status);
 
-	// In this child process is where we can now safely restart any additional services
+		// Only continue if the child process exited okay
+		if ($ret_code == 0) {
+
+			// We are the parent so go on...
+			wg_service_daemon();
+
+		}
+
+		// Something went wrong, so bail out and return the code
+		return $ret_code;
+
 	} else {
 
-		// dpinger
-		setup_gateways_monitor();
+		// Services to restart
+		$services = array('dpinger', 'unbound');
 
-		// unbound
-		services_unbound_configure();
-		
-		// pf
+		// This is currently only a 'best effort' restart
+		foreach ($services as $service) {
+
+			service_control_restart($service);
+
+		}
+
+		// Finally, re-configure the pf firewall
 		filter_configure();
 
-		// All good
 		return 0;
 
 	}
 
 	// We should never get here
-	return 0;
+	return 1;
 
 }
 
@@ -243,7 +258,7 @@ function wg_service_daemon() {
 	// Re-register the service environment and obtain a fresh lock now that we have finished restarting additional services
 	wg_register_service_env(true);
 
-	// Attempt to load the kmod, required to run the service without any tunnels configured
+	// Attempt to load the kmod, this is required to run the service without any tunnels configured
 	if (!is_module_loaded($wgg['kmod'])) {
 
 		$kmod = $wgg['kmod'];
@@ -408,7 +423,7 @@ function print_message($message) {
 
 	$message = gettext($message);
 
-    	$message = escapeshellarg($message);
+    	wg_escapeshellarg($message);
 
 	mwexec("printf {$message} >&2");
 
