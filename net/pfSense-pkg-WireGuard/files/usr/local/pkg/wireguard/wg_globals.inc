@@ -70,7 +70,14 @@ $wgg = array(
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => 'Greater than 1 day'),
 					300 => array('class' => 'text-warning', 'title' => 'Greater than 5 minutes'),
-					0 => array('class' => 'text-success', 'title' => 'Less than 5 minutes')),
+					0 => array('class' => 'text-success', 'title' => 'Less than 5 minutes')),\
+	'error_flags'		=> array(
+					'resync' => array(
+							1 => 'Unable to create WireGuard interface.',
+							4 => 'Unable to add wireGuard interface to the WireGuard interface group.',
+							8 => 'Unable to update WireGuard interface address(es).',
+							16 => 'Unable to up/down WireGuard interface.',
+							32 => 'Unable to sync WireGuard configuration with wg(8).')),
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,

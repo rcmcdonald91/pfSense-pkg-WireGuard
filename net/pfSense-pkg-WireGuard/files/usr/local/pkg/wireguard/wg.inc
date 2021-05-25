@@ -378,6 +378,8 @@ function wg_resync_peer($peer) {
 function wg_resync_all() {
 	global $g, $wgg;
 
+	$ret_code = 0;
+
 	if ($g['wireguard_installing']) {
 
 		unset($g['wireguard_installing']);
@@ -392,7 +394,7 @@ function wg_resync_all() {
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
-		wg_resync_tunnel($tunnel['name'], true);
+		$ret_code |= wg_resync_tunnel($tunnel['name'], true);
 	
 	}
 
@@ -402,6 +404,8 @@ function wg_resync_all() {
 	// If we are here, the subsystem is by definition not dirty
 	clear_subsystem_dirty($wgg['subsystem']);
 
+	return $ret_code;
+
 }
 
 
@@ -410,6 +414,8 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 	global $wgg;
 
 	wg_globals();
+
+	$ret_code = 0;
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -426,7 +432,7 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 	// Bail if the service is not running
 	if (!wg_is_service_running()) {
 
-		return;	
+		return $ret_code;
 
 	}
 
@@ -435,29 +441,31 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
 		// Create the tunnel interface if it does not yet exist
-		wg_interface_create($tunnel['name']);
+		$ret_code |= wg_interface_create($tunnel['name']) << 1;
 
 		// Add the tunnel interface to the WireGuard interface group
-		wg_interface_group_add($tunnel['name']);
+		$ret_code |= wg_interface_group_add($tunnel['name']) << 2;
 
 		// Update the addresses on the tunnel interface
-		wg_interface_update_addresses($tunnel['name']);
+		$ret_code |= wg_interface_update_addresses($tunnel['name']) << 3;
 
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			wg_ifconfig_up_interface($tunnel['name']);
+			$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
 
 		} else {
 
-			wg_ifconfig_down_interface($tunnel['name']);
+			$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 4;
 
 		}
 
 		// Sync the configuration with the tunnel interface
-		wg_interface_syncconf($tunnel['name']);
+		$ret_code |= wg_interface_syncconf($tunnel['name']) << 5;
 
 	}
+
+	return $ret_code;
 
 }
 

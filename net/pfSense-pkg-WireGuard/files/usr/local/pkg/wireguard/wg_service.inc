@@ -121,27 +121,59 @@ function wg_is_service_running() {
 function wg_service_start() {
 	global $g, $wgg;
 
-	if (wg_is_service_running()) {
+	// Register the service environment and lock early to ensure singletons
+	wg_register_service_env(false);
+
+	pcntl_signal(SIGTERM, function($signo) use ($ret_code) {
+		
+		return($ret_code);
+
+	});
+
+	if (wg_is_service_running() || is_subsystem_dirty('wireguard_firststart')) {
+
+		clear_subsystem_dirty('wireguard_firststart');
 
 		return 1;
 
 	}
 
-	// Register the service environment and lock early to ensure singletons
-	wg_register_service_env(false);
+	if (platform_booting()) {
 
-	// The initial fork...
+		// This needs to be a file on disk to remain accessible between process instances
+		mark_subsystem_dirty('wireguard_firststart');
+
+		print_message("Configuring WireGuard tunnels...");
+
+		// Supresses ifconfig spew 
+		mute_kernel_msgs();
+
+	}
+	
+	// Build the tunnels
+	$ret_code = wg_resync_all();
+ 
+	if (platform_booting()) {
+
+		unmute_kernel_msgs();
+
+		print_message("done. \n");
+
+		return $ret_code;
+
+	}
+
+	// Now, the initial fork...
 	$newpid = pcntl_fork();
 
 	if ($newpid === -1) {
 
-		// We could not fork, so bail out...
 		return 1;
 
 	} elseif ($newpid) {
 
 		// I'm the parent, and I'm going to self-destruct...
-		return 0;
+		return $ret_code;
 
 	}
 
@@ -157,66 +189,14 @@ function wg_service_start() {
 
 	if ($newpid === -1) {
 
-		// We could not fork, so bail out...
-		return 1;
-
-	} elseif ($newpid) {
-		// I'm the parent, and I'm going to self-destruct...
-		return 0;
-
-	}
-
-	if (platform_booting()) {
-
-		$g['wireguard_firststart'] = true;
-
-		print_message("Configuring WireGuard tunnels...");
-
-		// Supresses ifconfig spew 
-		mute_kernel_msgs();
-
-	}
-	
-	// Build the tunnels
-	wg_resync_all();
- 
-	if (platform_booting()) {
-
-		unmute_kernel_msgs();
-
-		print_message("done. \n");
-
-		// Let the boot process continue and handle additional service and package invocation
-		return 0;
-
-	}
-
-	// We don't need to restart any additional services because we just finished booting...
-	if ($g['wireguard_firststart']) {
-
-		unset($g['wireguard_firststart']);
-
-		return 0;
-
-	}
-
-	// Spawns a child process to handle additional service restarting
-	$newpid = pcntl_fork();
-
-	if ($newpid === -1) {
-
-		// We could not fork, so bail out...
 		return 1;
 
 	} elseif ($newpid) {
 
-		// Wait for the child to finish to avoid zombies
 		pcntl_waitpid($newpid, $status);
 
-		// We are the parent so go on...
 		wg_service_daemon();
 
-	// In this child process is where we can now safely restart any additional services
 	} else {
 
 		// dpinger
@@ -224,17 +204,17 @@ function wg_service_start() {
 
 		// unbound
 		services_unbound_configure();
-		
+
 		// pf
 		filter_configure();
 
-		// All good
+		// This is a best effort...
 		return 0;
 
 	}
 
-	// We should never get here
-	return 0;
+	// We should not be here...
+	return 1;
 
 }
 
