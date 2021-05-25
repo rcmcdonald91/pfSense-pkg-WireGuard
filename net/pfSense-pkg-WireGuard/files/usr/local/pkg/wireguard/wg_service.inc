@@ -31,8 +31,6 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
-global $wgg;
-
 if (isset($argv[1])) {
 
 	if (!wg_is_cli()) {
@@ -109,9 +107,14 @@ function wg_is_service_running() {
 
 	}
 
+	$pid = fgets($h_lock);
+
+	// Another trick to test if a process is running
+	$sig_test = posix_kill($pid, 0);
+
 	fclose($h_lock);
 
-	return (!$not_running || $wouldblock);
+	return (!$not_running || $wouldblock || $sig_test);
 
 }
 
@@ -158,14 +161,10 @@ function wg_service_start() {
 		return 1;
 
 	} elseif ($newpid) {
-
 		// I'm the parent, and I'm going to self-destruct...
 		return 0;
 
 	}
-
-	// Now that we are properly daemonized, register the service signal handlers
-	wg_register_sig_handler();
 
 	if (platform_booting()) {
 
@@ -211,44 +210,31 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
-		// Wait for the child process below to finish
+		// Wait for the child to finish to avoid zombies
 		pcntl_waitpid($newpid, $status);
 
-		// Get the return code from the child process
-		$ret_code = pcntl_wexitstatus($status);
+		// We are the parent so go on...
+		wg_service_daemon();
 
-		// Only continue if the child process exited okay
-		if ($ret_code == 0) {
-
-			// We are the parent so go on...
-			wg_service_daemon();
-
-		}
-
-		// Something went wrong, so bail out and return the code
-		return $ret_code;
-
+	// In this child process is where we can now safely restart any additional services
 	} else {
 
-		// Services to restart
-		$services = array('dpinger', 'unbound');
+		// dpinger
+		setup_gateways_monitor();
 
-		// This is currently only a 'best effort' restart
-		foreach ($services as $service) {
-
-			service_control_restart($service);
-
-		}
-
-		// Finally, re-configure the pf firewall
+		// unbound
+		services_unbound_configure();
+		
+		// pf
 		filter_configure();
 
+		// All good
 		return 0;
 
 	}
 
 	// We should never get here
-	return 1;
+	return 0;
 
 }
 
@@ -258,7 +244,10 @@ function wg_service_daemon() {
 	// Re-register the service environment and obtain a fresh lock now that we have finished restarting additional services
 	wg_register_service_env(true);
 
-	// Attempt to load the kmod, this is required to run the service without any tunnels configured
+	// Now that we are properly daemonized, register the service signal handlers
+	wg_register_sig_handler();
+
+	// Attempt to load the kmod, required to run the service without any tunnels configured
 	if (!is_module_loaded($wgg['kmod'])) {
 
 		$kmod = $wgg['kmod'];

@@ -161,7 +161,7 @@ function wg_get_address_family($address) {
 
 }
 
-function wg_ifconfig_del_address($wg_ifname, $masked_address, $verbose = false) {
+function wg_ifconfig_del_address($wg_ifname, $masked_address, $ret_bool = false, $verbose = false) {
 	global $wgg;
 
 	// Gets the ifconfig address family while also validating the input at the same time
@@ -175,12 +175,12 @@ function wg_ifconfig_del_address($wg_ifname, $masked_address, $verbose = false) 
 
 		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$address} delete {$redirect}");
 
-		return ($ret_val == 0);
+		return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 	}
 
 	// Unable to validate address family, bail out...
-	return false;
+	return ($ret_bool ? false : 1);
 
 }
 
@@ -196,11 +196,12 @@ function wg_ifconfig_set_address($wg_ifname, $masked_address, $verbose = false) 
 
 		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$masked_address} add {$redirect}");
 
-		return ($ret_val == 0);
+		return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 	}
 
-	return false;
+	// Unable to validate address family, bail out...
+	return ($ret_bool ? false : 1);
 
 }
 
@@ -213,11 +214,11 @@ function wg_ifconfig_down_interface($wg_ifname, $verbose = false) {
 
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} down {$redirect}");
 
-	return ($ret_val == 0);
+	return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 }
 
-function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
+function wg_ifconfig_up_interface($wg_ifname, $ret_bool = false, $verbose = false) {
 	global $wgg;
 
 	$redirect = wg_verbosity_redirect($verbose);
@@ -226,7 +227,7 @@ function wg_ifconfig_up_interface($wg_ifname, $verbose = false) {
 
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} up {$redirect}");
 
-	return ($ret_val == 0);
+	return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 }
 
@@ -248,8 +249,11 @@ function wg_unbound_acl_update($restart_unbound = false) {
 /*
  * This updates the addresses of the specified interface without tearing it down
  */
-function wg_interface_update_addresses($wg_ifname) {
+function wg_interface_update_addresses($wg_ifname, $ret_bool = false) {
 	global $wgg;
+
+	// Assume everything will be okay...
+	$ret_val = 0;
 
 	$tun_idx = wg_get_tunnel_array_index($wg_ifname);
 
@@ -268,7 +272,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		// Now remove them
 		foreach ($addresses_to_remove as $address) {
 
-			wg_ifconfig_del_address($wg_ifname, $address);
+			$ret_val |= wg_ifconfig_del_address($wg_ifname, $address);
 
 		}
 
@@ -278,7 +282,7 @@ function wg_interface_update_addresses($wg_ifname) {
 		// Now add them
 		foreach ($addresses_to_add as $address) {
 
-			wg_ifconfig_set_address($wg_ifname, $address);
+			$ret_val |= wg_ifconfig_set_address($wg_ifname, $address);
 
 		}
 
@@ -292,6 +296,8 @@ function wg_interface_update_addresses($wg_ifname) {
 		}
 
 	}
+
+	return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 }
 
@@ -323,7 +329,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 
 }
 
-function wg_interface_syncconf($wg_ifname, $verbose = false) {
+function wg_interface_syncconf($wg_ifname, $ret_bool = false, $verbose = false) {
 	global $wgg;
 
 	$wg_conf_path = "{$wgg['conf_path']}/{$wg_ifname}.conf";
@@ -336,18 +342,18 @@ function wg_interface_syncconf($wg_ifname, $verbose = false) {
 
 		$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname} {$wg_conf_path} {$redirect}");
 
-		return ($ret_val == 0);
+		return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 	}
 
-	return false;
+	return ($ret_bool ? false : 1);
 
 }
 
 /*
  * This creates a WireGuard interface of a specified name
  */
-function wg_interface_create($wg_ifname, $verbose = false) {
+function wg_interface_create($wg_ifname, $ret_bool = false, $verbose = false) {
 	global $wgg;
 
 	$redirect = wg_verbosity_redirect($verbose);
@@ -356,8 +362,8 @@ function wg_interface_create($wg_ifname, $verbose = false) {
 
 	// We first check to see if the desired interface already exists, then we create it if it does not
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$redirect} || {$wgg['ifconfig']} wg create name {$wg_ifname} {$redirect}");
-		
-	return ($ret_val == 0);
+	
+	return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 }
 
@@ -378,7 +384,7 @@ function wg_get_real_ifs() {
 /*
  * This adds a WireGuard interface to the WireGuard interface group
  */
-function wg_interface_group_add($wg_ifname, $verbose = false) {
+function wg_interface_group_add($wg_ifname, $ret_bool = false, $verbose = false) {
 	global $wgg;
 
 	$wg_ifgroup = $wgg['if_group'];
@@ -390,7 +396,7 @@ function wg_interface_group_add($wg_ifname, $verbose = false) {
 	// We first check to see if the desired interface exists, then we add it to the group if it does
 	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$redirect} && {$wgg['ifconfig']} {$wg_ifname} group {$wg_ifgroup} {$redirect}");
 		
-	return ($ret_val == 0);
+	return ($ret_bool ? ($ret_val == 0) : $ret_val);
 
 }
 
