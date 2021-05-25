@@ -121,16 +121,7 @@ function wg_is_service_running() {
 function wg_service_start() {
 	global $g, $wgg;
 
-	// Register the service environment and lock early to ensure singletons
-	wg_register_service_env(false);
-
-	pcntl_signal(SIGTERM, function($signo) use ($ret_code) {
-		
-		return($ret_code);
-
-	});
-
-	if (wg_is_service_running() || is_subsystem_dirty('wireguard_firststart')) {
+	if (wg_is_service_running() || is_subsystem_dirty('wireguard_firststart')){
 
 		clear_subsystem_dirty('wireguard_firststart');
 
@@ -138,9 +129,14 @@ function wg_service_start() {
 
 	}
 
+	cli_set_process_title('WireGuard');
+
+	// Register the service environment and lock early to ensure singletons
+	wg_register_service_env(false);
+
 	if (platform_booting()) {
 
-		// This needs to be a file on disk to remain accessible between process instances
+		// This absolutely needs to be a file on disk to remain accessible between process instances
 		mark_subsystem_dirty('wireguard_firststart');
 
 		print_message("Configuring WireGuard tunnels...");
@@ -193,8 +189,10 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
+		// Make sure to reap the child...
 		pcntl_waitpid($newpid, $status);
 
+		// Move on to the daemon
 		wg_service_daemon();
 
 	} else {
