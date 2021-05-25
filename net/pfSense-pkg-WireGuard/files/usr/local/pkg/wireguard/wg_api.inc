@@ -384,7 +384,7 @@ function wg_get_real_ifs() {
 /*
  * This adds a WireGuard interface to the WireGuard interface group
  */
-function wg_interface_group_add($wg_ifname, $ret_posix_style = false, $verbose = false) {
+function wg_interface_group_add($wg_ifname, $ret_posix_style = true, $verbose = false) {
 	global $wgg;
 
 	$wg_ifgroup = $wgg['if_group'];
