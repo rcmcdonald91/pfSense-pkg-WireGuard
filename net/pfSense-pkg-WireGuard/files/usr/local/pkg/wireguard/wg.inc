@@ -423,8 +423,6 @@ function wg_resync_all() {
 
 	}
 
-	services
-
 	// If we are here, the subsystem is by definition not dirty
 	clear_subsystem_dirty($wgg['subsystem']);
 
