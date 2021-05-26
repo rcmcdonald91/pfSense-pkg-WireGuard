@@ -387,7 +387,7 @@ function wg_resync_all() {
 
 		unset($g['wireguard_installing']);
 
-		return $ret_array();
+		return $ret_array;
 		
 	}
 
