@@ -84,7 +84,7 @@ $wgg = array(
 	'max_tunnels'		=> 32768
 );
 
-$wgg['wg_daemon'] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc";
+$wgg['wg_daemon'] = "{$wgg['php_wg']} -f {$wgg['wg_includes']}/wg_service.inc";
 
 function &array_get_value(array &$array, $parents) {
 
