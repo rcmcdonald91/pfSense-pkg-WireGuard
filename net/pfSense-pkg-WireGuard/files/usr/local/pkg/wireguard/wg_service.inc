@@ -53,12 +53,14 @@ if (isset($argv[1])) {
 
 	switch (strtolower($argv[1])) {
 
-		case 'start':
+		case 'coldstart':
 	
 			// We want to perform a cold start
 			$ret_code = wg_service_cli_start(true);
 	
 			exit($ret_code);
+
+			break;
 
 		case 'warmstart':
 
@@ -66,16 +68,22 @@ if (isset($argv[1])) {
 
 			exit($ret_code);
 
+			break;
+
 		case 'stop':
 	
 			$ret_code = wg_service_cli_stop();
 	
 			exit($ret_code);
 
+			break;
+
 		default:
 
 			// We shouldn't be here...
 			exit(1);
+
+			break;
 
 	}
 
@@ -156,10 +164,12 @@ function wg_is_service_running() {
 }
 
 // This is a wrapper for safely calling from web frontend
-function wg_service_start() {
+function wg_service_start($cold_start = true) {
 	global $wgg;
 
-	$ret_code = mwexec("{$wgg['wg_daemon']} start");
+	$start_type = $cold_start ? 'start' : 'warmstart';
+
+	$ret_code = mwexec("{$wgg['wg_daemon']} {$start_type}");
 
 	return $ret_code;
 
@@ -194,7 +204,7 @@ function wg_service_cli_start($cold_start = true) {
 	// Register the service environment and lock early to ensure singletons
 	wg_register_service_env(false);
 
-	if ($coldstart) {
+	if ($cold_start) {
 
 		if (platform_booting()) {
 
@@ -231,7 +241,7 @@ function wg_service_cli_start($cold_start = true) {
 
 			foreach ($tunnel['errors'] as $error) {
 	
-				print_message("({$tunnel['name']}) {$error}");
+				print_message("({$tunnel['name']}) {$error}\n");
 	
 			}
 	
@@ -251,6 +261,11 @@ function wg_service_cli_start($cold_start = true) {
 
 		// Service invocation error
 		return 1;
+
+	} elseif ($newpid) {
+
+		// Returns the aggregated return code bit shifted, assume everything will be okay...
+		return ($resync_ret['ret_code'] << 1) | 0;
 
 	}
 
@@ -282,19 +297,24 @@ function wg_service_cli_start($cold_start = true) {
 		// Move on to the daemon
 		wg_service_daemon();
 
+	} else {
+
+		// dpinger
+		setup_gateways_monitor();
+
+		// unbound
+		services_unbound_configure();
+
+		// pf
+		filter_configure();
+
+		// This is a best effort at this point...
+		return 0;
+
 	}
 
-	// dpinger
-	setup_gateways_monitor();
-
-	// unbound
-	services_unbound_configure();
-
-	// pf
-	filter_configure();
-
-	// This is a best effort...
-	return 0;
+	// We shouldn't be here...
+	return 1;
 
 }
 
@@ -367,7 +387,7 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} start";
+	$start[] = "{$wgg['wg_daemon']} coldstart";
 
 	$stop[] = "{$wgg['wg_daemon']} stop";
 

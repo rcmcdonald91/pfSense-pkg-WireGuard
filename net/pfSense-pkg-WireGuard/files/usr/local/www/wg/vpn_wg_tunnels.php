@@ -104,31 +104,21 @@ $tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
 $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
+$getText = function($text) { return gettext($text); };
+
 include("head.inc");
 
 wg_display_service_warning();
 
 if (isset($_POST['apply'])) {
 
-	foreach ($resync_ret['tunnels'] as $tunnel) {
-
-		foreach ($tunnel['errors'] as $error) {
-
-			$errors[] = "({$tunnel['name']}) {$error}";
-
-		}
-
-	}
-
-	$extra_text = implode('<br />', $errors);
-
-	print_apply_result_box($resync_ret['ret_code'], "<br /><br />{$extra_text}");
+	print_apply_result_box($resync_ret['ret_code']);
 
 }
 
 if (is_subsystem_dirty('wireguard')) {
 
-	print_apply_box(gettext("The WireGuard configuration has been changed.") . "<br />" . gettext("The changes must be applied for them to take effect."));
+	print_apply_box("{$getText('The WireGuard configuration has been changed.')}<br />{$getText('The changes must be applied for them to take effect.')}");
 
 }
 

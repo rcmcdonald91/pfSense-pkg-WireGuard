@@ -41,6 +41,13 @@
 		<section>Status</section>
 		<url>/wg/status_wireguard.php</url>
 	</menu>
+	<logging>
+		<logtab>WireGuard</logtab>
+		<facilityname>wireguardd</facilityname>
+		<logfilename>wireguardd.log</logfilename>
+		<rotatecount>7</rotatecount>
+		<logfilesize>512000</logfilesize>
+	</logging>
 	<service>
 		<name>wireguard</name>
 		<rcfile>wireguardd</rcfile>
