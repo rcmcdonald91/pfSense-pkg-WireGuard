@@ -46,7 +46,7 @@ if ($_POST) {
 
 		if (wg_is_service_running()) {
 
-			restart_service('wireguard');
+			$resync_ret = wg_resync_all();
 
 		}
 
@@ -110,7 +110,19 @@ wg_display_service_warning();
 
 if (isset($_POST['apply'])) {
 
-	print_apply_result_box(0);
+	foreach ($resync_ret['tunnels'] as $tunnel) {
+
+		foreach ($tunnel['errors'] as $error) {
+
+			$errors[] = "({$tunnel['name']}) {$error}";
+
+		}
+
+	}
+
+	$extra_text = implode('<br />', $errors);
+
+	print_apply_result_box($resync_ret['ret_code'], "<br /><br />{$extra_text}");
 
 }
 

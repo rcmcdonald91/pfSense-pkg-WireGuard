@@ -129,7 +129,7 @@ function wg_service_start() {
 
 	}
 
-	cli_set_process_title('WireGuard');
+	cli_set_process_title('WireGuard daemon');
 
 	// Register the service environment and lock early to ensure singletons
 	wg_register_service_env(false);
@@ -168,7 +168,6 @@ function wg_service_start() {
 
 	} elseif ($newpid) {
 
-		// I'm the parent, and I'm going to self-destruct...
 		return $ret_code;
 
 	}
@@ -195,24 +194,26 @@ function wg_service_start() {
 		// Move on to the daemon
 		wg_service_daemon();
 
-	} else {
+	}
 
-		// dpinger
-		setup_gateways_monitor();
+	// Now become the session leader
+	if (posix_setsid() < 0) {
 
-		// unbound
-		services_unbound_configure();
-
-		// pf
-		filter_configure();
-
-		// This is a best effort...
-		return 0;
+		return 1;
 
 	}
 
-	// We should not be here...
-	return 1;
+	// dpinger
+	setup_gateways_monitor();
+
+	// unbound
+	services_unbound_configure();
+
+	// pf
+	filter_configure();
+
+	// This is a best effort...
+	return 0;
 
 }
 
