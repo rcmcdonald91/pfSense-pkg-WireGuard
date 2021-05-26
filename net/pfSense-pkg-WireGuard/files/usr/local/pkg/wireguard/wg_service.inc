@@ -52,6 +52,8 @@ if (isset($argv[1])) {
 	}
 
 	switch (strtolower($argv[1])) {
+		
+		case 'start':
 
 		case 'coldstart':
 	
@@ -60,15 +62,12 @@ if (isset($argv[1])) {
 	
 			exit($ret_code);
 
-			break;
-
 		case 'warmstart':
 
+			// We want to perform a warm start
 			$ret_code = wg_service_cli_start(false);
 
 			exit($ret_code);
-
-			break;
 
 		case 'stop':
 	
@@ -76,14 +75,10 @@ if (isset($argv[1])) {
 	
 			exit($ret_code);
 
-			break;
-
 		default:
 
 			// We shouldn't be here...
 			exit(1);
-
-			break;
 
 	}
 
@@ -104,9 +99,17 @@ function wg_service_restart() {
 
 	}
 
-	$ret_code = wg_service_start();
+	$resync_ret = wg_resync_all();
 
-	return $ret_code;
+	// Only bring up the service if the resync was successful
+	if ($resync_ret['ret_code'] == 0) {
+
+		// Warm start (cold_start = false) because we've already built the tunnels
+		wg_service_start(false);
+
+	}
+
+	return $resync_ret;
 
 }
 
@@ -167,7 +170,7 @@ function wg_is_service_running() {
 function wg_service_start($cold_start = true) {
 	global $wgg;
 
-	$start_type = $cold_start ? 'start' : 'warmstart';
+	$start_type = $cold_start ? 'coldstart' : 'warmstart';
 
 	$ret_code = mwexec("{$wgg['wg_daemon']} {$start_type}");
 
@@ -180,8 +183,6 @@ function wg_service_start($cold_start = true) {
  */
 function wg_service_cli_start($cold_start = true) {
 	global $g, $wgg;
-
-	$ret_code = 0;
 
 	if (!wg_is_cli()) {
 		
@@ -199,11 +200,13 @@ function wg_service_cli_start($cold_start = true) {
 
 	}
 
+	// Set the process name
 	cli_set_process_title('WireGuard service');
 
 	// Register the service environment and lock early to ensure singletons
 	wg_register_service_env(false);
 
+	// A cold start means we are building tunnels and then starting the daemon
 	if ($cold_start) {
 
 		if (platform_booting()) {
@@ -227,28 +230,28 @@ function wg_service_cli_start($cold_start = true) {
 
 			print_message("done. \n");
 
-			// Returns the aggregated return code bit shifted, assume everything was okay...
-			return ($resync_ret['ret_code'] << 1) | 0;
+			// Returns the aggregated return code bit shifted to include the full return code
+			return (($resync_ret['ret_code'] << 1) | ($resync_ret['retcode'] <> 0));
 
 		}
-	
-	}
 
-	// Should we proceeed with forking?
-	if ($resync_ret['ret_code'] <> 0) {
+		// Should we proceeed with forking?
+		if ($resync_ret['ret_code'] <> 0) {
 
-		foreach ($resync_ret['tunnels'] as $tunnel) {
+			foreach ($resync_ret['tunnels'] as $tunnel) {
 
-			foreach ($tunnel['errors'] as $error) {
-	
-				print_message("({$tunnel['name']}) {$error}\n");
-	
+				foreach ($tunnel['errors'] as $error_text) {
+		
+					print_message("[{$tunnel['name']}] {$error_text}\n");
+		
+				}
+		
 			}
-	
-		}
 
-		// Service invocation error + resync return code bitshifted by 1
-		return ($resync_ret['ret_code'] << 1) | 1;
+			// Service invocation error + resync return code bitshifted by 1
+			return (($resync_ret['ret_code'] << 1) | ($resync_ret['retcode'] <> 0));
+
+		}
 
 	}
 
@@ -264,8 +267,8 @@ function wg_service_cli_start($cold_start = true) {
 
 	} elseif ($newpid) {
 
-		// Returns the aggregated return code bit shifted, assume everything will be okay...
-		return ($resync_ret['ret_code'] << 1) | 0;
+		// Returns the aggregated return code bit shifted to include the full return code
+		return ($cold_start ? (($resync_ret['ret_code'] << 1) | ($resync_ret['retcode'] <> 0)) : 0);
 
 	}
 
