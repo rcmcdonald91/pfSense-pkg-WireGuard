@@ -121,7 +121,7 @@ function wg_service_cli_stop() {
 
 	}
 
-	$ret_code = killbypid($wgg['pid_path'])
+	$ret_code = killbypid($wgg['pid_path']);
 	
 	return $ret_code;
 
