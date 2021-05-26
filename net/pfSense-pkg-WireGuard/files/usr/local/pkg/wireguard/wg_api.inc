@@ -387,7 +387,7 @@ function wg_get_real_ifs() {
 function wg_interface_group_add($wg_ifname, $ret_posix_style = true, $verbose = false) {
 	global $wgg;
 
-	$wg_ifgroup = $wgg['if_group'];
+	$wg_ifgroup = $wgg['ifgroupentry']['ifname'];
 
 	$redirect = wg_verbosity_redirect($verbose);
 

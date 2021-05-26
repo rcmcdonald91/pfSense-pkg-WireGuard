@@ -378,94 +378,121 @@ function wg_resync_peer($peer) {
 function wg_resync_all() {
 	global $g, $wgg;
 
+	$ret_array = $ret_tunnels = array();
+
+	// Let's assume everything will be fine
 	$ret_code = 0;
 
 	if ($g['wireguard_installing']) {
 
 		unset($g['wireguard_installing']);
 
-		return;
+		return $ret_array();
 		
 	}
 
 	// Create WireGuard configuration files
 	wg_create_config_files();
 
+	// Update the Unbound ACL without restarting Unbound
+	wg_unbound_acl_update(false);
+
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
-		$ret_code |= wg_resync_tunnel($tunnel['name'], true);
-	
-	}
+		$resync_ret = wg_resync_tunnel($tunnel['name'], true);
 
-	// Update the Unbound ACL without restarting Unbound
-	wg_unbound_acl_update(false);
+		// Build an aggregated return code
+		$ret_code |= $resync_ret['ret_code'];
+
+		$ret_tunnels[] = array(
+					'name' => $tunnel['name'],
+					'ret_code' => $resync_ret['ret_code'], 
+					'errors' => $resync_ret['errors']);
+
+	}
 
 	// If we are here, the subsystem is by definition not dirty
 	clear_subsystem_dirty($wgg['subsystem']);
 
-	return $ret_code;
+	return array('ret_code' => $ret_code, 'tunnels' => $ret_tunnels);
 
 }
 
 
-// This resyncs a specific tunnel interface
+/*
+ * This resyncs a specific tunnel interface by name
+ */
 function wg_resync_tunnel($tunnel_name, $quick = false) {
 	global $wgg;
 
 	wg_globals();
-
-	$ret_code = 0;
-
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
 	if (!$quick) {
 
 		// Create new configuration files
 		wg_create_config_files();
 
-		// Update Unnound access list
+		// Update Unbound access list
 		wg_unbound_acl_update();
 
 	}
 
-	// Bail if the service is not running
-	if (!wg_is_service_running()) {
+	$ret_code = 0;
 
-		return $ret_code;
+	if (wg_is_service_running()) {
 
-	}
+		$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-	if (isset($wgg['tunnels'][$tun_idx])) {
+		$ret_code = (!isset($wgg['tunnels'][$tun_idx])) << 0;
+		
+		if (isset($wgg['tunnels'][$tun_idx])) {
 
-		$tunnel = $wgg['tunnels'][$tun_idx];
+			$ret_code = 0;
 
-		// Create the tunnel interface if it does not yet exist
-		$ret_code |= wg_interface_create($tunnel['name']) << 1;
+			$tunnel = $wgg['tunnels'][$tun_idx];
 
-		// Add the tunnel interface to the WireGuard interface group
-		$ret_code |= wg_interface_group_add($tunnel['name']) << 2;
+			// Create the tunnel interface if it does not yet exist
+			$ret_code |= wg_interface_create($tunnel['name']) << 1;
 
-		// Update the addresses on the tunnel interface
-		$ret_code |= wg_interface_update_addresses($tunnel['name']) << 3;
+			// Add the tunnel interface to the WireGuard interface group
+			$ret_code |= wg_interface_group_add($tunnel['name']) << 2;
 
-		// Toggle the interface accordingly instead of tearing it down completely
-		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+			// Update the addresses on the tunnel interface
+			$ret_code |= wg_interface_update_addresses($tunnel['name']) << 3;
 
-			$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
+			// Toggle the interface accordingly instead of tearing it down completely
+			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-		} else {
+				$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
 
-			$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 4;
+			} else {
+
+				$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 4;
+
+			}
+
+			// Sync the configuration with the tunnel interface
+			$ret_code |= wg_interface_syncconf($tunnel['name']) << 5;
 
 		}
 
-		// Sync the configuration with the tunnel interface
-		$ret_code |= wg_interface_syncconf($tunnel['name']) << 5;
+	}
+
+	// Collect the errors bitwise
+	$errors = array();
+
+	foreach ($wgg['error_flags']['tunnel_resync'] as $error_mask => $error_text) {
+
+		if (($ret_code & $error_mask) > 0) {
+
+			$errors[] = sprintf($error_text, $tunnel_name);
+
+		}
 
 	}
 
-	return $ret_code;
+	return array('ret_code' => $ret_code, 'errors' => $errors, );
 
 }
 
@@ -538,10 +565,14 @@ function wg_create_config_files($clean = true) {
 function wg_delete_config_files() {
 	global $wgg;
 
-	// Loop through each potential conf path and delete all .conf files
-	foreach ($wgg['conf_paths_to_clean'] as $confpath) {
+	$confpaths = array();
 
-		unlink_if_exists("{$confpath}/*.conf");
+	$confpaths = array_merge(array($wgg['conf_path']), $wgg['conf_paths_to_clean']);
+
+	// Loop through each potential conf path and delete all .conf files
+	foreach ($confpaths as $path) {
+
+		unlink_if_exists("{$path}/*.conf");
 
 	}
 
@@ -607,10 +638,14 @@ function wg_escapeshellarg(&...$vars) {
 function wg_remove_config_settings() {
 	global $config, $wgg;
 
-	// Loop through each potential conf path and unset
-	foreach ($wgg['xml_paths_to_clean'] as $confpath) {
+	$confpaths = array();
 
-		array_unset_value($config, $confpath);
+	$confpaths = array_merge(array($wgg['xml_path']), $wgg['xml_paths_to_clean']);
+
+	// Loop through each potential conf path and unset it
+	foreach ($confpaths as $path) {
+
+		array_unset_value($config, $path);
 
 	}
 
@@ -626,7 +661,7 @@ function make_wg_conf($tunnel) {
 	global $wgg;
 
 	$txt = "# This WireGuard config file has been created automatically. " .
-	    "Do not edit!\n";
+	    	"Do not edit!\n";
 
 	$txt .= "# Description: {$tunnel['descr']}\n\n";
 

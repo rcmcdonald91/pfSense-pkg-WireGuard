@@ -27,6 +27,8 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
+$getText = function($text) { return gettext($text); };
+
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
 	'ifconfig'		=> '/sbin/ifconfig',
@@ -44,16 +46,13 @@ $wgg = array(
 					'wireguard-kmod',
 					'wireguard-tools-lite'),
 	'conf_path'		=> '/usr/local/etc/wireguard',
-	'xml_path'		=> array('installedpackages', 'wireguard'),
 	'conf_paths_to_clean'	=> array(
-					'/usr/local/etc/wireguard', 
 					'/etc/wireguard', 
 					'/etc/wg'),
+	'xml_path'		=> array('installedpackages', 'wireguard'),
 	'xml_paths_to_clean'	=> array(
-					array('wireguard'), 
-					array('installedpackages', 'wireguard')),
+					array('wireguard')),
 	'if_prefix'		=> 'tun_wg',
-	'if_group'		=> 'WireGuard',
 	'ifgroupentry'		=> array(
 					'ifname' => 'WireGuard', 
 					'descr' => 'WireGuard Interface Group (DO NOT EDIT/DELETE!)', 
@@ -68,16 +67,17 @@ $wgg = array(
 					'aclaction' => 'allow',
 					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)'),
 	'handshake_thresholds' 	=> array(
-					86400 => array('class' => 'text-danger', 'title' => 'Greater than 1 day'),
-					300 => array('class' => 'text-warning', 'title' => 'Greater than 5 minutes'),
-					0 => array('class' => 'text-success', 'title' => 'Less than 5 minutes')),
+					86400 => array('class' => 'text-danger', 'title' => $getText('Greater than 1 day')),
+					300 => array('class' => 'text-warning', 'title' => $gettext('Greater than 5 minutes')),
+					0 => array('class' => 'text-success', 'title' => $gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
-					'resync' => array(
-							1 => 'Unable to create WireGuard interface.',
-							4 => 'Unable to add wireGuard interface to the WireGuard interface group.',
-							8 => 'Unable to update WireGuard interface address(es).',
-							16 => 'Unable to up/down WireGuard interface.',
-							32 => 'Unable to sync WireGuard configuration with wg(8).')),
+					'tunnel_resync' => array(
+						1 => "(%s) {$getText('Invalid WireGuard interface name')}.",
+						2 => "(%s) {$getText('Unable to create WireGuard interface')}.",
+						4 => "(%s) {$getText('Unable to add WireGuard interface to the WireGuard interface group')}.",
+						8 => "(%s) {$getText('Unable to update WireGuard interface addresses')}.",
+						16 => "(%s) {$getText('Unable to up/down WireGuard interface')}.",
+						32 => "(%s) {$getText('Unable to sync WireGuard configuration %s with wg(8)')}.")),
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,
