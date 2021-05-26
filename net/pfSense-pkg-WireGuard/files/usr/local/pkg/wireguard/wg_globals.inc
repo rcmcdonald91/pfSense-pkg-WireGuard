@@ -36,7 +36,7 @@ $wgg = array(
 	'kldload'		=> '/sbin/kldload',
 	'kldunload'		=> '/sbin/kldunload',
 	'php'			=> '/usr/local/bin/php',
-	'wg_daemon'		=> '/usr/local/bin/php_wg',
+	'php_wg'		=> '/usr/local/bin/php_wg',
 	'wg_includes'		=> '/usr/local/pkg/wireguard',
 	'kmod'			=> 'if_wg.ko',
 	'pid_path'		=> "{$g['varrun_path']}/wireguardd.pid",
@@ -67,22 +67,24 @@ $wgg = array(
 					'aclaction' => 'allow',
 					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)'),
 	'handshake_thresholds' 	=> array(
-					86400 => array('class' => 'text-danger', 'title' => $getText('Greater than 1 day')),
-					300 => array('class' => 'text-warning', 'title' => $getText('Greater than 5 minutes')),
-					0 => array('class' => 'text-success', 'title' => $getText('Less than 5 minutes'))),
+					86400 => array('class' => 'text-danger', 'title' => gettext('Greater than 1 day')),
+					300 => array('class' => 'text-warning', 'title' => gettext('Greater than 5 minutes')),
+					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
 					'tunnel_resync' => array(
-						1 => "(%s) {$getText('Invalid WireGuard interface name')}.",
-						2 => "(%s) {$getText('Unable to create WireGuard interface')}.",
-						4 => "(%s) {$getText('Unable to add WireGuard interface to the WireGuard interface group')}.",
-						8 => "(%s) {$getText('Unable to update WireGuard interface addresses')}.",
-						16 => "(%s) {$getText('Unable to up/down WireGuard interface')}.",
-						32 => "(%s) {$getText('Unable to sync WireGuard configuration %s with wg(8)')}.")),
+						1 => "{$getText('Invalid WireGuard interface name')}.",
+						2 => "{$getText('Unable to create WireGuard interface')}.",
+						4 => "{$getText('Unable to add WireGuard interface to the WireGuard interface group')}.",
+						8 => "{$getText('Unable to update WireGuard interface addresses')}.",
+						16 => "{$getText('Unable to up/down WireGuard interface')}.",
+						32 => "{$getText('Unable to sync WireGuard configuration with wg(8)')}.")),
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,
 	'max_tunnels'		=> 32768
 );
+
+$wgg['wg_daemon'] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc";
 
 function &array_get_value(array &$array, $parents) {
 

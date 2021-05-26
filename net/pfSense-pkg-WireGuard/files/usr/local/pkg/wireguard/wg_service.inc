@@ -33,6 +33,10 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1])) {
 
+	ignore_user_abort(true);
+
+	set_time_limit(0);
+
 	if (!wg_is_cli()) {
 
 		// Bail out if we aren't in the CLI...
@@ -50,27 +54,27 @@ if (isset($argv[1])) {
 	switch (strtolower($argv[1])) {
 
 		case 'start':
-
-			ignore_user_abort(true);
-
-			set_time_limit(0);
 	
-			$ret_code = wg_service_start();
+			// We want to perform a cold start
+			$ret_code = wg_service_cli_start(true);
 	
 			exit($ret_code);
 
+		case 'warmstart':
+
+			$ret_code = wg_service_cli_start(false);
+
+			exit($ret_code);
+
 		case 'stop':
-
-			ignore_user_abort(true);
-
-			set_time_limit(0);
 	
-			wg_service_stop();
+			$ret_code = wg_service_cli_stop();
 	
-			exit(0);
+			exit($ret_code);
 
 		default:
 
+			// We shouldn't be here...
 			exit(1);
 
 	}
@@ -83,11 +87,44 @@ function wg_is_cli() {
 
 }
 
+// This is a wrapper for safely calling from web frontend
+function wg_service_restart() {
+
+	if (wg_is_service_running()) {
+
+		wg_service_stop();
+
+	}
+
+	$ret_code = wg_service_start();
+
+	return $ret_code;
+
+}
+
+// This is a wrapper for safely calling from web frontend
 function wg_service_stop() {
 	global $wgg;
 
-	killbypid($wgg['pid_path']);
+	$ret_code = mwexec("{$wgg['wg_daemon']} stop");
+
+	return $ret_code;
+
+}
+
+function wg_service_cli_stop() {
+	global $wgg;
+
+	if (!wg_is_cli()) {
+
+		return 1;
+
+	}
+
+	$ret_code = killbypid($wgg['pid_path'])
 	
+	return $ret_code;
+
 }
 
 function wg_is_service_running() {
@@ -118,44 +155,90 @@ function wg_is_service_running() {
 
 }
 
+// This is a wrapper for safely calling from web frontend
 function wg_service_start() {
+	global $wgg;
+
+	$ret_code = mwexec("{$wgg['wg_daemon']} start");
+
+	return $ret_code;
+
+}
+
+/*
+ * does everything, useful for system startup and starting the service at the command line
+ */
+function wg_service_cli_start($cold_start = true) {
 	global $g, $wgg;
+
+	$ret_code = 0;
+
+	if (!wg_is_cli()) {
+		
+		// Service invocation error
+		return 1;
+
+	}
 
 	if (wg_is_service_running() || is_subsystem_dirty('wireguard_firststart')){
 
 		clear_subsystem_dirty('wireguard_firststart');
 
+		// Service invocation error
 		return 1;
 
 	}
 
-	cli_set_process_title('WireGuard daemon');
+	cli_set_process_title('WireGuard service');
 
 	// Register the service environment and lock early to ensure singletons
 	wg_register_service_env(false);
 
-	if (platform_booting()) {
+	if ($coldstart) {
 
-		// This absolutely needs to be a file on disk to remain accessible between process instances
-		mark_subsystem_dirty('wireguard_firststart');
+		if (platform_booting()) {
 
-		print_message("Configuring WireGuard tunnels...");
+			// This absolutely needs to be a file on disk to remain accessible between process instances
+			mark_subsystem_dirty('wireguard_firststart');
 
-		// Supresses ifconfig spew 
-		mute_kernel_msgs();
+			print_message("Configuring WireGuard tunnels...");
 
-	}
+			// Supresses ifconfig spew 
+			mute_kernel_msgs();
+
+		}
 	
-	// Build the tunnels
-	$ret_code = wg_resync_all();
+		// Build the tunnels
+		$resync_ret = wg_resync_all();
  
-	if (platform_booting()) {
+		if (platform_booting()) {
 
-		unmute_kernel_msgs();
+			unmute_kernel_msgs();
 
-		print_message("done. \n");
+			print_message("done. \n");
 
-		return $ret_code;
+			// Returns the aggregated return code bit shifted, assume everything was okay...
+			return ($resync_ret['ret_code'] << 1) | 0;
+
+		}
+	
+	}
+
+	// Should we proceeed with forking?
+	if ($resync_ret['ret_code'] <> 0) {
+
+		foreach ($resync_ret['tunnels'] as $tunnel) {
+
+			foreach ($tunnel['errors'] as $error) {
+	
+				print_message("({$tunnel['name']}) {$error}");
+	
+			}
+	
+		}
+
+		// Service invocation error + resync return code bitshifted by 1
+		return ($resync_ret['ret_code'] << 1) | 1;
 
 	}
 
@@ -164,17 +247,19 @@ function wg_service_start() {
 
 	if ($newpid === -1) {
 
+		wg_destroy_tunnels();
+
+		// Service invocation error
 		return 1;
-
-	} elseif ($newpid) {
-
-		return $ret_code;
 
 	}
 
 	// Now become the session leader
 	if (posix_setsid() < 0) {
 
+		wg_destroy_tunnels();
+
+		// Service invocation error
 		return 1;
 
 	}
@@ -184,6 +269,9 @@ function wg_service_start() {
 
 	if ($newpid === -1) {
 
+		wg_destroy_tunnels();
+
+		// Service invocation error
 		return 1;
 
 	} elseif ($newpid) {
@@ -193,13 +281,6 @@ function wg_service_start() {
 
 		// Move on to the daemon
 		wg_service_daemon();
-
-	}
-
-	// Now become the session leader
-	if (posix_setsid() < 0) {
-
-		return 1;
 
 	}
 
@@ -224,7 +305,7 @@ function wg_service_daemon() {
 	wg_register_service_env(true);
 
 	// Now that we are properly daemonized, register the service signal handlers
-	wg_register_sig_handler();
+	wg_register_daemon_sig_handler();
 
 	// Attempt to load the kmod, required to run the service without any tunnels configured
 	if (!is_module_loaded($wgg['kmod'])) {
@@ -268,7 +349,7 @@ function wg_service_install() {
 
 	wg_service_deinstall();
 
-	link($wgg['php'], $wgg['wg_daemon']);
+	link($wgg['php'], $wgg['php_wg']);
 
 }
 
@@ -277,7 +358,7 @@ function wg_service_deinstall() {
 
 	stop_service('wireguard');
 
-	unlink_if_exists($wgg['wg_daemon']);
+	unlink_if_exists($wgg['php_wg']);
 
 }
 
@@ -286,9 +367,9 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc start";
+	$start[] = "{$wgg['wg_daemon']} start";
 
-	$stop[] = "{$wgg['wg_daemon']} -f {$wgg['wg_includes']}/wg_service.inc stop";
+	$stop[] = "{$wgg['wg_daemon']} stop";
 
 	$rcfile['file'] 	= 'wireguardd';
 
@@ -347,17 +428,13 @@ function wg_register_service_env($close_handlers = false) {
 
 }
 
-function wg_register_sig_handler() {
+function wg_register_daemon_sig_handler() {
 
-	pcntl_signal(SIGTERM, 'sig_handler');
-
-	pcntl_signal(SIGHUP, 'sig_handler');
-
-	pcntl_signal(SIGINT, 'sig_handler');
+	pcntl_signal(SIGTERM, 'wg_daemon_sig_handler');
 
 }
 
-function sig_handler($signo) {
+function wg_daemon_sig_handler($signo) {
 
 	switch ($signo) {
 
@@ -366,15 +443,11 @@ function sig_handler($signo) {
 			// Cleanup the service environment
 			wg_deregister_service_env();
 
-			// Teardown tunnels
+			// Teardown tunnels and unload the module
 			wg_destroy_tunnels();
 
 			// We are done...
 			exit(0);
-
-			break;
-
-		case SIGHUP:
 
 			break;
 

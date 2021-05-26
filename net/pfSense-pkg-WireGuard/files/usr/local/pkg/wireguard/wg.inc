@@ -295,7 +295,7 @@ function wg_do_peer_post($post) {
 	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
 	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
 
-		unset($post['endpoint'], $post['port']);
+		unset($pconfig['endpoint'], $pconfig['port']);
 
 	}
 
@@ -349,6 +349,13 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
+	// No point in saving any address configuration here if the tunnel is assigned in pfSense
+	if (is_wg_tunnel_assigned($pconfig['name'])) {
+
+		unset($pconfig['addresses']);
+
+	}
+
 	$input_errors 			= wg_validate_tunnel_post($pconfig, $tun_idx);
 
 	if (!$input_errors) {
@@ -383,9 +390,12 @@ function wg_resync_all() {
 	// Let's assume everything will be fine
 	$ret_code = 0;
 
+	// We can't let pkg(7) become the parent of Unbound, dpinger, etc...
 	if ($g['wireguard_installing']) {
 
 		unset($g['wireguard_installing']);
+
+		// We might be able to start the service automatically here if the user wants to...
 
 		return $ret_array;
 		
@@ -394,8 +404,8 @@ function wg_resync_all() {
 	// Create WireGuard configuration files
 	wg_create_config_files();
 
-	// Update the Unbound ACL without restarting Unbound
-	wg_unbound_acl_update(false);
+	// Update the Unbound ACL
+	wg_unbound_acl_update();
 
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
@@ -406,11 +416,14 @@ function wg_resync_all() {
 		$ret_code |= $resync_ret['ret_code'];
 
 		$ret_tunnels[] = array(
-					'name' => $tunnel['name'],
+					'name' => $resync_ret['name'],
 					'ret_code' => $resync_ret['ret_code'], 
-					'errors' => $resync_ret['errors']);
+					'errors' => $resync_ret['errors'],
+					'config' => $resync_ret['config']);
 
 	}
+
+	services
 
 	// If we are here, the subsystem is by definition not dirty
 	clear_subsystem_dirty($wgg['subsystem']);
@@ -439,6 +452,8 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 	}
 
 	$ret_code = 0;
+
+	$tunnel = array();
 
 	if (wg_is_service_running()) {
 
@@ -486,13 +501,13 @@ function wg_resync_tunnel($tunnel_name, $quick = false) {
 
 		if (($ret_code & $error_mask) > 0) {
 
-			$errors[] = sprintf($error_text, $tunnel_name);
+			$errors[$error_mask] = sprintf($error_text, $tunnel_name);
 
 		}
 
 	}
 
-	return array('ret_code' => $ret_code, 'errors' => $errors, );
+	return array('name' => $tunnel_name, 'ret_code' => $ret_code, 'errors' => $errors, 'config' => $tunnel);
 
 }
 

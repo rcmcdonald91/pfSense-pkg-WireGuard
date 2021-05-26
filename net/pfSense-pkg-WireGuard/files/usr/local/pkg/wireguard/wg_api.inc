@@ -234,15 +234,9 @@ function wg_ifconfig_up_interface($wg_ifname, $ret_posix_style = true, $verbose 
 /*
  * Wrapper to update the unbound ACL by recreating it.
  */
-function wg_unbound_acl_update($restart_unbound = false) {
+function wg_unbound_acl_update() {
 
 	wg_unbound_acl_install();
-
-	if ($restart_unbound) {
-
-		services_unbound_configure();
-
-	}
 
 }
 
