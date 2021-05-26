@@ -44,10 +44,10 @@ if (isset($argv[1])) {
 
 	}
 
-	if (PHP_BINARY != $wgg['wg_daemon']) {
+	if (PHP_BINARY != $wgg['php_wg']) {
 
 		// Bail out if we aren't running under under the correct executable...
-		die("FATAL: This script can only be executed by {$wgg['wg_daemon']}.\n");
+		die("FATAL: This script can only be executed by {$wgg['php_wg']}.\n");
 
 	}
 
