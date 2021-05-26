@@ -68,8 +68,8 @@ $wgg = array(
 					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)'),
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => $getText('Greater than 1 day')),
-					300 => array('class' => 'text-warning', 'title' => $gettext('Greater than 5 minutes')),
-					0 => array('class' => 'text-success', 'title' => $gettext('Less than 5 minutes'))),
+					300 => array('class' => 'text-warning', 'title' => $getText('Greater than 5 minutes')),
+					0 => array('class' => 'text-success', 'title' => $getText('Less than 5 minutes'))),
 	'error_flags'		=> array(
 					'tunnel_resync' => array(
 						1 => "(%s) {$getText('Invalid WireGuard interface name')}.",
