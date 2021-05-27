@@ -480,11 +480,11 @@ function wg_tunnel_build($tunnel_name) {
 	// Collect the errors bitwise and construct an array
 	$errors = array();
 
-	foreach ($wgg['error_flags']['tunnel_build'] as $error_mask => $error_text) {
+	foreach ($wgg['error_flags']['tunnel'] as $error_mask => $error_text) {
 
 		if (($ret_code & $error_mask) > 0) {
 
-			$errors[$error_mask] = sprintf($error_text, $tunnel_name);
+			$errors[$error_mask] = $error_text;
 
 		}
 
