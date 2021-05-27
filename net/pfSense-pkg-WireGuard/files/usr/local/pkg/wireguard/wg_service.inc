@@ -53,11 +53,14 @@ if (isset($argv[1])) {
 
 	pcntl_async_signals(true);
 
+	// Should we serialize the return output?
+	$serialize = (isset($argv[2]) && $argv[2] == 'serialize');
+
 	switch (strtolower($argv[1])) {
 		
 		case 'start':
 
-			$ret_code = wg_service_cli_start();
+			$ret_code = wg_service_cli_start($serialize);
 	
 			exit($ret_code);
 			
@@ -65,7 +68,7 @@ if (isset($argv[1])) {
 
 		case 'stop':
 	
-			$ret_code = wg_service_cli_stop();
+			$ret_code = wg_service_cli_stop($serialize);
 	
 			exit($ret_code);
 
@@ -73,7 +76,6 @@ if (isset($argv[1])) {
 
 		default:
 
-			// We shouldn't be here...
 			exit(1);
 
 			break;
@@ -92,7 +94,7 @@ function wg_is_cli() {
 function wg_service_web_stop() {
 	global $wgg;
 
-	$ret_code = mwexec("{$wgg['wg_daemon']} stop");
+	$ret_code = mwexec("{$wgg['wg_daemon']} stop serialize");
 
 	return $ret_code;
 
@@ -162,7 +164,48 @@ function wg_is_service_running() {
 function wg_service_web_start() {
 	global $wgg;
 
-	$ret_code = mwexec("{$wgg['wg_daemon']} start");
+	$output = $ret_array = array();
+
+	exec("{$wgg['wg_daemon']} start serialize", $output, $ret_code);
+
+	if ($ret_array = deserialize($output[0])) {
+
+
+
+	}
+
+}
+
+function wg_service_error_handler($ret_code, $serialize_output = false, $extras = array()) {
+	global $g, $wgg;
+
+	$errors = $extras = array();
+
+	foreach ($wgg['error_flags']['service'] as $error_mask => $error_text) {
+
+		if (($ret_code & $error_mask) > 0) {
+	
+			if ($serialize_output) {
+
+				$errors[$error_mask] = $error_text;
+
+			} else {
+
+				fwrite(STDERR, "{$error_text}\n");
+
+			}
+
+		}
+
+	}
+
+	if ($serialize_output) {
+
+		$output_to_serialize = array_merge(array('ret_code' => $ret_code, 'errors' => $errors), $extras);
+
+		fwrite(STDOUT, serialize($output_to_serialize));
+
+	}
 
 	return $ret_code;
 
@@ -171,25 +214,25 @@ function wg_service_web_start() {
 /*
  * does everything, useful for system startup and starting the service at the command line
  */
-function wg_service_cli_start() {
-	global $g, $wgg, $h_lock;
-
-	if (!wg_is_cli()) {
-		
-		return 1;
-
-	}
-
-	if (wg_is_service_running() || is_subsystem_dirty('wireguard_firststart')){
-
-		clear_subsystem_dirty('wireguard_firststart');
-
-		return 1;
-
-	}
+function wg_service_cli_start($serialize_output = true) {
+	global $g, $wgg;
 
 	// Set the process name
 	cli_set_process_title('WireGuard service');
+	
+	$ret_code = 0;
+
+	$service_start_error = (!wg_is_cli() || wg_is_service_running());
+
+	if ($service_start_error) {
+
+		$ret_code |= $service_start_error << 0;
+
+		wg_service_error_handler($ret_code, $serialize_output);
+
+		return $ret_code;
+
+	}
 
 	// Register the service environment and lock early to ensure singletons
 	wg_register_service_env(false);
@@ -199,7 +242,8 @@ function wg_service_cli_start() {
 		// This absolutely needs to be a file on disk to remain accessible between process instances
 		mark_subsystem_dirty('wireguard_firststart');
 
-		print_message("Configuring WireGuard tunnels...");
+		// Output during booting must be STDERR
+		fwrite(STDERR, "Configuring WireGuard tunnels...");
 
 		// Supresses ifconfig spew 
 		mute_kernel_msgs();
@@ -207,52 +251,47 @@ function wg_service_cli_start() {
 	}
 
 	// Build the tunnels
-	$build_all_status = wg_build_all_tunnels();
+	$build_all_status = wg_tunnel_build_all();
+
+	$ret_code |= ($build_all_status['ret_code'] <> 0) << 2;
 
 	if (platform_booting()) {
 
 		unmute_kernel_msgs();
 
-		print_message("done. \n");
+		fwrite(STDERR, "done. \n");
 
-		// Returns the aggregated return code bit shifted to include the full return code
-		return (($build_all_status['ret_code'] << 1) | ($build_all_status['ret_code'] <> 0));
-
-	}
-
-	// Should we proceeed with forking?
-	if ($build_all_status['ret_code'] <> 0) {
-
-		foreach ($build_all_status['tunnels'] as $tunnel) {
-
-			foreach ($tunnel['errors'] as $error_code => $error_text) {
-	
-				print_message("[{$error_code}:{$tunnel['name']}] {$error_text}\n");
-	
-			}
-	
-		}
-
-		// Service invocation error + resync return code bitshifted by 1
-		return (($build_all_status['ret_code'] << 1) | ($build_all_status['ret_code'] <> 0));
+		return $ret_code;
 
 	}
 
 	// Now, the initial fork...
 	$newpid = pcntl_fork();
 
-	if ($newpid === -1) {
+	$service_start_error = ($newpid === -1);
+
+	if ($service_start_error) {
+
+		$ret_code |= $service_start_error << 0;
 
 		wg_destroy_tunnels();
 
-		return 1;
+		wg_service_error_handler($ret_code, $serialize_output, array('tunnels' => $build_all_status));
+
+		return $ret_code;
 
 	} elseif ($newpid) {
 
-		// Returns the aggregated return code bit shifted to include the full return code
-		return ($cold_start ? (($build_all_status['ret_code'] << 1) | ($build_all_status['retcode'] <> 0)) : 0);
+		wg_service_error_handler($ret_code, $serialize_output, array('tunnels' => $build_all_status));
+
+		return $ret_code;
 
 	}
+
+	/*
+	 * At this point, any output is completely invisible to the controlling tty. 
+	 * TODO: This is where a logging facility would be nice to have.
+	 */
 
 	// Now become the session leader
 	if (posix_setsid() < 0) {
@@ -281,6 +320,15 @@ function wg_service_cli_start() {
 		wg_service_daemon();
 
 	} else {
+
+		// We don't need to restart additional services because we just finished booting...
+		if (is_subsystem_dirty('wireguard_firststart')) {
+
+			clear_subsystem_dirty('wireguard_firststart');
+
+			return 0;
+
+		}
 
 		// dpinger
 		setup_gateways_monitor();
@@ -455,17 +503,6 @@ function wg_daemon_sig_handler($signo) {
 			break;
 
 	}
-
-}
-
-// This is a hack to get text onto the console during booting
-function print_message($message) {
-
-	$message = gettext($message);
-
-    	wg_escapeshellarg($message);
-
-	mwexec("printf {$message} >&2");
 
 }
 

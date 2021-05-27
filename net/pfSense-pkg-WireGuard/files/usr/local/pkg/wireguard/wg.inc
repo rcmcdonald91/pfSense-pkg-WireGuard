@@ -393,7 +393,7 @@ function wg_resync() {
 
 }
 
-function wg_build_all_tunnels() {
+function wg_tunnel_build_all() {
 	global $g, $wgg;
 
 	$ret_array = $ret_tunnels = array();
@@ -406,7 +406,7 @@ function wg_build_all_tunnels() {
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
-		$build_status = wg_build_tunnel($tunnel['name'], true);
+		$build_status = wg_tunnel_build($tunnel['name'], true);
 
 		// Build an aggregated return code
 		$ret_code |= $build_status['ret_code'];
@@ -430,7 +430,7 @@ function wg_build_all_tunnels() {
 /*
  * This builds a specific tunnel interface by name
  */
-function wg_build_tunnel($tunnel_name) {
+function wg_tunnel_build($tunnel_name) {
 	global $wgg;
 
 	wg_globals();
@@ -467,18 +467,20 @@ function wg_build_tunnel($tunnel_name) {
 
 			if (wg_interface_status($tunnel['name'])) {
 
-				$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 10;
+				$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 5;
 
 			}
 
 		}
 
+		$ret_code |= wg_interface_syncconf($tunnel['name']) << 6;
+
 	}
 
-	// Collect the errors bitwise
+	// Collect the errors bitwise and construct an array
 	$errors = array();
 
-	foreach ($wgg['error_flags']['build_tunnel'] as $error_mask => $error_text) {
+	foreach ($wgg['error_flags']['tunnel_build'] as $error_mask => $error_text) {
 
 		if (($ret_code & $error_mask) > 0) {
 
