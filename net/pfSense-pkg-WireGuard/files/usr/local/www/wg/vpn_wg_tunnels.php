@@ -106,7 +106,7 @@ wg_display_service_warning();
 
 if (isset($_POST['apply'])) {
 
-	print_apply_result_box($ret_service_restart['ret_code']);
+	print_apply_result_box(0);
 
 }
 
