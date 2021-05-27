@@ -349,13 +349,6 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
-	// No point in saving any address configuration here if the tunnel is assigned in pfSense
-	if (is_wg_tunnel_assigned($pconfig['name'])) {
-
-		unset($pconfig['addresses']);
-
-	}
-
 	$input_errors 			= wg_validate_tunnel_post($pconfig, $tun_idx);
 
 	if (!$input_errors) {
@@ -413,16 +406,16 @@ function wg_build_all() {
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
-		$resync_ret = wg_build_tunnel($tunnel['name'], true);
+		$build_status = wg_build_tunnel($tunnel['name'], true);
 
 		// Build an aggregated return code
-		$ret_code |= $resync_ret['ret_code'];
+		$ret_code |= $build_status['ret_code'];
 
 		$ret_tunnels[] = array(
-					'name' => $resync_ret['name'],
-					'ret_code' => $resync_ret['ret_code'], 
-					'errors' => $resync_ret['errors'],
-					'config' => $resync_ret['config']);
+					'name' => $build_status['name'],
+					'ret_code' => $build_status['ret_code'], 
+					'errors' => $build_status['errors'],
+					'config' => $build_status['config']);
 
 	}
 
@@ -480,7 +473,7 @@ function wg_build_tunnel($tunnel_name) {
 	// Collect the errors bitwise
 	$errors = array();
 
-	foreach ($wgg['error_flags']['tunnel_resync'] as $error_mask => $error_text) {
+	foreach ($wgg['error_flags']['build_tunnel'] as $error_mask => $error_text) {
 
 		if (($ret_code & $error_mask) > 0) {
 

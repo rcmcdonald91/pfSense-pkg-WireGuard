@@ -113,7 +113,7 @@ function wg_service_restart() {
 
 	$ret_code = (($build_all_status['ret_code'] << 1) | $service_start_status);
 
-	return $ret_code;
+	return array('ret_code' => $ret_code, 'status' => $build_all_status);
 
 }
 
