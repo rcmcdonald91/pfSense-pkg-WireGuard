@@ -369,9 +369,9 @@ function wg_get_real_ifs() {
 
 	$ret_array = array();
 
-	exec("{$wgg['ifconfig']} -g wg", $ret_array);
+	exec("{$wgg['ifconfig']} -g wg", $ret_array, $ret_code);
 	
-	return $ret_array;
+	return ($ret_code ==0) ? $ret_array : array();;
 
 }
 

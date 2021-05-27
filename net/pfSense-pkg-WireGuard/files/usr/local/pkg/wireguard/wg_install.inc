@@ -347,23 +347,27 @@ function wg_destroy_tunnels() {
 
 	$tunnels_to_destroy = wg_get_real_ifs();
 
+	$ret_code = 0;
+
 	// Tear down interfaces
 	foreach ($tunnels_to_destroy as $tunnel) {
 
-		pfSense_interface_destroy($tunnel);	
+		$ret_code |= !(pfSense_interface_destroy($tunnel) === true);
 
 	}
 
 	// Now unload the kernel module if it is still loaded
-	if (is_module_loaded($wgg['kmod'])) {
+	if ($ret_code ==0 && is_module_loaded($wgg['kmod'])) {
 
 		$kmod = $wgg['kmod'];
 
 		wg_escapeshellarg($kmod);
 
-		mwexec("{$wgg['kldunload']} {$kmod} > /dev/null 2>&1");
+		$ret_code |= mwexec("{$wgg['kldunload']} {$kmod}");
 
 	}
+
+	return $ret_code;
 
 }
 

@@ -55,22 +55,10 @@ if (isset($argv[1])) {
 		
 		case 'start':
 
-		case 'coldstart':
-	
-			// We want to perform a cold start
-			$ret_code = wg_service_cli_start(true);
+			$ret_code = wg_service_cli_start();
 	
 			exit($ret_code);
 			
-			break;
-
-		case 'warmstart':
-
-			// We want to perform a warm start
-			$ret_code = wg_service_cli_start(false);
-
-			exit($ret_code);
-
 			break;
 
 		case 'stop':
@@ -95,25 +83,6 @@ if (isset($argv[1])) {
 function wg_is_cli() {
 
 	return (PHP_SAPI == 'cli');
-
-}
-
-// This is a wrapper for safely calling from web frontend
-function wg_service_restart() {
-
-	if (wg_is_service_running()) {
-
-		wg_service_stop();
-
-	}
-
-	$build_all_status = wg_build_all();
-
-	$service_start_status = wg_service_start(false);
-
-	$ret_code = (($build_all_status['ret_code'] << 1) | $service_start_status);
-
-	return array('ret_code' => $ret_code, 'status' => $build_all_status);
 
 }
 
@@ -171,12 +140,10 @@ function wg_is_service_running() {
 }
 
 // This is a wrapper for safely calling from web frontend
-function wg_service_start($cold_start = true) {
+function wg_service_start() {
 	global $wgg;
 
-	$start_type = $cold_start ? 'coldstart' : 'warmstart';
-
-	$ret_code = mwexec("{$wgg['wg_daemon']} {$start_type}");
+	$ret_code = mwexec("{$wgg['wg_daemon']} start");
 
 	return $ret_code;
 
@@ -185,7 +152,7 @@ function wg_service_start($cold_start = true) {
 /*
  * does everything, useful for system startup and starting the service at the command line
  */
-function wg_service_cli_start($cold_start = true) {
+function wg_service_cli_start() {
 	global $g, $wgg;
 
 	if (!wg_is_cli()) {
@@ -210,52 +177,47 @@ function wg_service_cli_start($cold_start = true) {
 	// Register the service environment and lock early to ensure singletons
 	wg_register_service_env(false);
 
-	// A cold start means we are building tunnels and then starting the daemon
-	if ($cold_start) {
+	if (platform_booting()) {
 
-		if (platform_booting()) {
+		// This absolutely needs to be a file on disk to remain accessible between process instances
+		mark_subsystem_dirty('wireguard_firststart');
 
-			// This absolutely needs to be a file on disk to remain accessible between process instances
-			mark_subsystem_dirty('wireguard_firststart');
+		print_message("Configuring WireGuard tunnels...");
 
-			print_message("Configuring WireGuard tunnels...");
+		// Supresses ifconfig spew 
+		mute_kernel_msgs();
 
-			// Supresses ifconfig spew 
-			mute_kernel_msgs();
+	}
 
-		}
+	// Build the tunnels
+	$build_all_status = wg_build_all();
+
+	if (platform_booting()) {
+
+		unmute_kernel_msgs();
+
+		print_message("done. \n");
+
+		// Returns the aggregated return code bit shifted to include the full return code
+		return (($build_all_status['ret_code'] << 1) | ($build_all_status['ret_code'] <> 0));
+
+	}
+
+	// Should we proceeed with forking?
+	if ($build_all_status['ret_code'] <> 0) {
+
+		foreach ($build_all_status['tunnels'] as $tunnel) {
+
+			foreach ($build_all_status['errors'] as $error_text) {
 	
-		// Build the tunnels
-		$build_all_status = wg_build_all();
- 
-		if (platform_booting()) {
-
-			unmute_kernel_msgs();
-
-			print_message("done. \n");
-
-			// Returns the aggregated return code bit shifted to include the full return code
-			return (($build_all_status['ret_code'] << 1) | ($build_all_status['retcode'] <> 0));
-
-		}
-
-		// Should we proceeed with forking?
-		if ($build_all_status['ret_code'] <> 0) {
-
-			foreach ($build_all_status['tunnels'] as $tunnel) {
-
-				foreach ($build_all_status['errors'] as $error_text) {
-		
-					print_message("[{$tunnel['name']}] {$error_text}\n");
-		
-				}
-		
+				print_message("[{$tunnel['name']}] {$error_text}\n");
+	
 			}
-
-			// Service invocation error + resync return code bitshifted by 1
-			return (($build_all_status['ret_code'] << 1) | ($build_all_status['retcode'] <> 0));
-
+	
 		}
+
+		// Service invocation error + resync return code bitshifted by 1
+		return (($build_all_status['ret_code'] << 1) | ($build_all_status['ret_code'] <> 0));
 
 	}
 
