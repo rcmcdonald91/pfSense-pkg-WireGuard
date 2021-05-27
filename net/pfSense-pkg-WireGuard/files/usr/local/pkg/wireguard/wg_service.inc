@@ -51,6 +51,8 @@ if (isset($argv[1])) {
 
 	}
 
+	pcntl_async_signals(true);
+
 	switch (strtolower($argv[1])) {
 		
 		case 'start':
@@ -87,7 +89,7 @@ function wg_is_cli() {
 }
 
 // This is a wrapper for safely calling from web frontend
-function wg_service_stop() {
+function wg_service_web_stop() {
 	global $wgg;
 
 	$ret_code = mwexec("{$wgg['wg_daemon']} stop");
@@ -111,6 +113,23 @@ function wg_service_cli_stop() {
 
 }
 
+function wg_service_web_restart() {
+	global $wgg;
+
+	$ret_code = wg_service_web_stop();
+
+	if ($ret_code <> 0) {
+
+		return $ret_code;
+
+	}
+
+	$ret_code = wg_service_web_start();
+
+	return $ret_code;
+
+}
+
 function wg_is_service_running() {
 	global $wgg;
 
@@ -129,18 +148,18 @@ function wg_is_service_running() {
 	}
 
 	$pid = fgets($h_lock);
+	
+	fclose($h_lock);
 
 	// Another trick to test if a process is running
 	$sig_test = posix_kill($pid, 0);
-
-	fclose($h_lock);
 
 	return (!$not_running || $wouldblock || $sig_test);
 
 }
 
-// This is a wrapper for safely calling from web frontend
-function wg_service_start() {
+// This is a wrapper for safely calling from the web frontend
+function wg_service_web_start() {
 	global $wgg;
 
 	$ret_code = mwexec("{$wgg['wg_daemon']} start");
@@ -153,11 +172,10 @@ function wg_service_start() {
  * does everything, useful for system startup and starting the service at the command line
  */
 function wg_service_cli_start() {
-	global $g, $wgg;
+	global $g, $wgg, $h_lock;
 
 	if (!wg_is_cli()) {
 		
-		// Service invocation error
 		return 1;
 
 	}
@@ -166,7 +184,6 @@ function wg_service_cli_start() {
 
 		clear_subsystem_dirty('wireguard_firststart');
 
-		// Service invocation error
 		return 1;
 
 	}
@@ -190,7 +207,7 @@ function wg_service_cli_start() {
 	}
 
 	// Build the tunnels
-	$build_all_status = wg_build_all();
+	$build_all_status = wg_build_all_tunnels();
 
 	if (platform_booting()) {
 
@@ -208,9 +225,9 @@ function wg_service_cli_start() {
 
 		foreach ($build_all_status['tunnels'] as $tunnel) {
 
-			foreach ($build_all_status['errors'] as $error_text) {
+			foreach ($tunnel['errors'] as $error_code => $error_text) {
 	
-				print_message("[{$tunnel['name']}] {$error_text}\n");
+				print_message("[{$error_code}:{$tunnel['name']}] {$error_text}\n");
 	
 			}
 	
@@ -228,7 +245,6 @@ function wg_service_cli_start() {
 
 		wg_destroy_tunnels();
 
-		// Service invocation error
 		return 1;
 
 	} elseif ($newpid) {
@@ -243,7 +259,6 @@ function wg_service_cli_start() {
 
 		wg_destroy_tunnels();
 
-		// Service invocation error
 		return 1;
 
 	}
@@ -255,7 +270,6 @@ function wg_service_cli_start() {
 
 		wg_destroy_tunnels();
 
-		// Service invocation error
 		return 1;
 
 	} elseif ($newpid) {
@@ -290,7 +304,7 @@ function wg_service_cli_start() {
 function wg_service_daemon() {
 	global $wgg;
 
-	// Re-register the service environment and obtain a fresh lock now that we have finished restarting additional services
+	// Re-register the service environment
 	wg_register_service_env(true);
 
 	// Now that we are properly daemonized, register the service signal handlers
@@ -310,9 +324,6 @@ function wg_service_daemon() {
 	// Main daemon loop
 	while (true) {
 
-		// Check if any new signals are waiting for dispatch
-		pcntl_signal_dispatch();
-
 		// The whole point of this daemon...
 		if (!is_module_loaded($wgg['kmod'])) {
 
@@ -325,11 +336,8 @@ function wg_service_daemon() {
 
 	}
 
-	// Send a signal to self to terminate gracefully
-	posix_kill(getmypid(), SIGTERM);
-
-	// Fall though just in case
-	return 0;
+	// Execute SIGTERM handler
+	wg_daemon_sig_handler(SIGTERM);
 
 }
 
@@ -393,25 +401,27 @@ function wg_register_service_env($close_handlers = false) {
 
 	wg_deregister_service_env();
 
-	$h_lock = fopen($wgg['pid_path'], 'a+');
+	if ($h_lock = fopen($wgg['pid_path'], 'a+')) {
 
-	flock($h_lock, LOCK_EX);
+		flock($h_lock, LOCK_EX);
 
-	ftruncate($h_lock, 0);
+		ftruncate($h_lock, 0);
 
-	fseek($h_lock, 0, 0);
+		fseek($h_lock, 0, 0);
 
-	fwrite($h_lock, getmypid());
+		fwrite($h_lock, getmypid());
 
-	fflush($h_lock);
+		fflush($h_lock);
 
-	if ($close_handlers) {
+		if ($close_handlers) {
 
-		fclose(STDIN);
+			fclose(STDIN);
 
-		fclose(STDOUT);
+			fclose(STDOUT);
 
-		fclose(STDERR);
+			fclose(STDERR);
+
+		}
 
 	}
 
@@ -432,7 +442,7 @@ function wg_daemon_sig_handler($signo) {
 			// Cleanup the service environment
 			wg_deregister_service_env();
 
-			// Teardown tunnels and unload the module
+			// Teardown any tunnels and unload the module
 			wg_destroy_tunnels();
 
 			// We are done...

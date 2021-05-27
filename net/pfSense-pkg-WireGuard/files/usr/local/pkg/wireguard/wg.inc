@@ -393,7 +393,7 @@ function wg_resync() {
 
 }
 
-function wg_build_all() {
+function wg_build_all_tunnels() {
 	global $g, $wgg;
 
 	$ret_array = $ret_tunnels = array();
