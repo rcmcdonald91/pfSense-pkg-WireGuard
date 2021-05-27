@@ -111,7 +111,7 @@ function wg_service_restart() {
 
 	$service_start_status = wg_service_start(false);
 
-	$ret_code = ($build_all_status['ret_code'] << 1) | $service_start_status);
+	$ret_code = (($build_all_status['ret_code'] << 1) | $service_start_status);
 
 	return $ret_code;
 
