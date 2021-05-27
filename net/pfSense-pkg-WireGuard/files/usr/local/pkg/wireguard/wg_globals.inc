@@ -71,7 +71,7 @@ $wgg = array(
 					300 => array('class' => 'text-warning', 'title' => gettext('Greater than 5 minutes')),
 					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
-					'build_tunnel' => array(
+					'tunnel' => array(
 						1 => gettext('Invalid WireGuard interface name'),
 						2 => gettext('Unable to create WireGuard interface'),
 						4 => gettext('Unable to add WireGuard interface to the WireGuard interface group'),
@@ -79,7 +79,7 @@ $wgg = array(
 						16 => gettext('Unable to bring up WireGuard interface'),
 						32 => gettext('Unable to bring down WireGuard interface'),
 						64 => gettext('Unable to sync WireGuard configuration with wg(8)')),
-					'startstop_service' => array(
+					'service' => array(
 						1 => gettext('Unable to start WireGuard service'),
 						2 => gettext('Unable to stop WireGuard service'),
 						4 => gettext('Unable to build WireGuard tunnel(s)'))),
