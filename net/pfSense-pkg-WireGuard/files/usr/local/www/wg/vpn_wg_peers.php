@@ -43,13 +43,6 @@ if ($_POST) {
 
 	if (isset($_POST['apply'])) {
 
-		// We only want to restart the service if it is already running...
-		if (wg_is_service_running()) {
-
-			$ret_service_restart = wg_service_restart();
-
-		}
-
 		clear_subsystem_dirty('wireguard');
 
 	}
