@@ -457,16 +457,21 @@ function wg_build_tunnel($tunnel_name) {
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
+			if (!wg_interface_status($tunnel['name'])) {
+
+				$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
+
+			}
 
 		} else {
 
-			$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 4;
+			if (wg_interface_status($tunnel['name'])) {
+
+				$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 10;
+
+			}
 
 		}
-
-		// Sync the configuration with the tunnel interface
-		$ret_code |= wg_interface_syncconf($tunnel['name']) << 5;
 
 	}
 
