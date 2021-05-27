@@ -47,7 +47,7 @@ if ($_POST) {
 		// We only want to restart the service if it is already running...
 		if (wg_is_service_running()) {
 
-			$service_ret = wg_service_restart();
+			$ret_service_restart = wg_service_restart();
 
 		}
 
@@ -113,7 +113,7 @@ wg_display_service_warning();
 
 if (isset($_POST['apply'])) {
 
-	print_apply_result_box($service_ret['ret_code']);
+	print_apply_result_box($ret_service_restart['ret_code']);
 
 }
 
