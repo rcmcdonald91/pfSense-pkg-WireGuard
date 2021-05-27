@@ -94,23 +94,39 @@ function wg_is_cli() {
 function wg_service_web_stop() {
 	global $wgg;
 
-	$ret_code = mwexec("{$wgg['wg_daemon']} stop serialize");
+	$serialized_output = array();
 
-	return $ret_code;
+	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output, $ret_code);
+
+	$unserialized_output = unserialize($serialized_output[0]);
+
+	return $unserialized_output;
 
 }
 
-function wg_service_cli_stop() {
+// Only for calling service stop from the CLI
+function wg_service_cli_stop($serialize_output = true) {
 	global $wgg;
 
-	if (!wg_is_cli()) {
+	$ret_code = 0;
 
-		return 1;
+	$service_stop_error = (!wg_is_cli());
+
+	if ($service_stop_error) {
+
+		$ret_code |= $service_stop_error << 1;
+
+		wg_service_error_handler($ret_code, $serialize_output);
+
+		return $ret_code;
 
 	}
 
-	$ret_code = killbypid($wgg['pid_path']);
+	$ret_code |= killbypid($wgg['pid_path']) << 1;
 	
+	wg_service_error_handler($ret_code, $serialize_output);
+
 	return $ret_code;
 
 }
@@ -118,17 +134,17 @@ function wg_service_cli_stop() {
 function wg_service_web_restart() {
 	global $wgg;
 
-	$ret_code = wg_service_web_stop();
+	$stop_status = wg_service_web_stop();
 
-	if ($ret_code <> 0) {
+	if ($stop_status['ret_code'] <> 0) {
 
-		return $ret_code;
+		return $stop_status;
 
 	}
 
-	$ret_code = wg_service_web_start();
+	$start_status = wg_service_web_start();
 
-	return $ret_code;
+	return $start_status;
 
 }
 
@@ -164,22 +180,21 @@ function wg_is_service_running() {
 function wg_service_web_start() {
 	global $wgg;
 
-	$output = $ret_array = array();
+	$serialized_output = array();
 
-	exec("{$wgg['wg_daemon']} start serialize", $output, $ret_code);
+	// Invokes service start with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
 
-	if ($ret_array = deserialize($output[0])) {
+	$unserialized_output = unserialize($serialized_output[0]);
 
-
-
-	}
+	return $unserialized_output;
 
 }
 
-function wg_service_error_handler($ret_code, $serialize_output = false, $extras = array()) {
+function wg_service_error_handler($ret_code, $serialize_output = true, $extras = array()) {
 	global $g, $wgg;
 
-	$errors = $extras = array();
+	$errors = array();
 
 	foreach ($wgg['error_flags']['service'] as $error_mask => $error_text) {
 
@@ -211,9 +226,7 @@ function wg_service_error_handler($ret_code, $serialize_output = false, $extras 
 
 }
 
-/*
- * does everything, useful for system startup and starting the service at the command line
- */
+// Only for calling service start from the CLI
 function wg_service_cli_start($serialize_output = true) {
 	global $g, $wgg;
 
@@ -276,22 +289,17 @@ function wg_service_cli_start($serialize_output = true) {
 
 		wg_destroy_tunnels();
 
-		wg_service_error_handler($ret_code, $serialize_output, array('tunnels' => $build_all_status));
+		wg_service_error_handler($ret_code, $serialize_output);
 
 		return $ret_code;
 
 	} elseif ($newpid) {
 
-		wg_service_error_handler($ret_code, $serialize_output, array('tunnels' => $build_all_status));
+		wg_service_error_handler($ret_code, $serialize_output, array('build_all' => $build_all_status));
 
 		return $ret_code;
 
 	}
-
-	/*
-	 * At this point, any output is completely invisible to the controlling tty. 
-	 * TODO: This is where a logging facility would be nice to have.
-	 */
 
 	// Now become the session leader
 	if (posix_setsid() < 0) {
@@ -301,6 +309,13 @@ function wg_service_cli_start($serialize_output = true) {
 		return 1;
 
 	}
+
+	/*
+	 * From this point on, we are completely detached from the calling tty via posix_setsid().
+	 * Any further output via STDOUT, STDERRR, etc. is completely invisible.
+	 * 
+	 * TODO: This is where a true logging facility would be nice to have.
+	 */
 
 	// The second fork...
 	$newpid = pcntl_fork();
@@ -319,9 +334,12 @@ function wg_service_cli_start($serialize_output = true) {
 		// Move on to the daemon
 		wg_service_daemon();
 
+		// We shouldn't be here...
+		return 0;
+
 	} else {
 
-		// We don't need to restart additional services because we just finished booting...
+		// We don't need to restart additional services ifw we just finished booting...
 		if (is_subsystem_dirty('wireguard_firststart')) {
 
 			clear_subsystem_dirty('wireguard_firststart');
@@ -329,6 +347,13 @@ function wg_service_cli_start($serialize_output = true) {
 			return 0;
 
 		}
+
+		/*
+		 * This is where we can safely restart any additional services
+		 * 
+		 * TODO: Allow users to specify additional services to restart here.
+		 */
+
 
 		// dpinger
 		setup_gateways_monitor();
@@ -345,10 +370,11 @@ function wg_service_cli_start($serialize_output = true) {
 	}
 
 	// We shouldn't be here...
-	return 1;
+	return 0;
 
 }
 
+// Main WireGuard service loop
 function wg_service_daemon() {
 	global $wgg;
 
@@ -401,7 +427,7 @@ function wg_service_install() {
 function wg_service_deinstall() {
 	global $wgg;
 
-	stop_service('wireguard');
+	wg_service_web_stop();
 
 	unlink_if_exists($wgg['php_wg']);
 
