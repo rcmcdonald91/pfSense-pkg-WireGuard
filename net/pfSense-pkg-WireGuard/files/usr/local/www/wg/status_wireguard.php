@@ -36,10 +36,19 @@ require_once('util.inc');
 require_once('wireguard/wg.inc');
 require_once('wireguard/wg_guiconfig.inc');
 
-// Grab the latest info
+global $wgg;
+
 wg_globals();
 
-global $wgg;
+if ($_POST) {
+
+	if (isset($_POST['apply'])) {
+
+		clear_subsystem_dirty('wireguard');
+
+	}
+
+}
 
 $shortcut_section = "wireguard";
 
@@ -55,6 +64,18 @@ $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 include("head.inc");
 
 wg_display_service_warning(false);
+
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box(0);
+
+}
+
+if (is_subsystem_dirty('wireguard')) {
+
+	print_apply_box(gettext("The WireGuard configuration has been changed.") . "<br />" . gettext("The changes must be applied for them to take effect."));
+
+}
 
 display_top_tabs($tab_array);
 

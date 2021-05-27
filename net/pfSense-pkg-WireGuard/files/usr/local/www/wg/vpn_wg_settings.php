@@ -45,12 +45,6 @@ if ($_POST) {
 
 	if (isset($_POST['apply'])) {
 
-		if (wg_is_service_running()) {
-
-			restart_service('wireguard');
-
-		}
-
 		clear_subsystem_dirty('wireguard');
 
 	}
