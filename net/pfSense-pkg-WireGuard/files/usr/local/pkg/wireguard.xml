@@ -45,8 +45,6 @@
 		<logtab>WireGuard</logtab>
 		<facilityname>wireguardd</facilityname>
 		<logfilename>wireguardd.log</logfilename>
-		<rotatecount>7</rotatecount>
-		<logfilesize>512000</logfilesize>
 	</logging>
 	<service>
 		<name>wireguard</name>
@@ -64,11 +62,9 @@
 		wg_deinstall();
 		]]>
 	</custom_php_pre_deinstall_command>
-	<custom_php_validation_command>
-	</custom_php_validation_command>
 	<custom_php_resync_config_command>
 		<![CDATA[
-		wg_resync_all();
+		wg_resync();
 		]]>
 	</custom_php_resync_config_command>
 </packagegui>

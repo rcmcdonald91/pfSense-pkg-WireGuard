@@ -61,6 +61,8 @@ if (isset($argv[1])) {
 			$ret_code = wg_service_cli_start(true);
 	
 			exit($ret_code);
+			
+			break;
 
 		case 'warmstart':
 
@@ -69,16 +71,22 @@ if (isset($argv[1])) {
 
 			exit($ret_code);
 
+			break;
+
 		case 'stop':
 	
 			$ret_code = wg_service_cli_stop();
 	
 			exit($ret_code);
 
+			break;
+
 		default:
 
 			// We shouldn't be here...
 			exit(1);
+
+			break;
 
 	}
 
@@ -99,17 +107,13 @@ function wg_service_restart() {
 
 	}
 
-	$resync_ret = wg_resync_all();
+	$build_all_status = wg_build_all();
 
-	// Only bring up the service if the resync was successful
-	if ($resync_ret['ret_code'] == 0) {
+	$service_start_status = wg_service_start(false);
 
-		// Warm start (cold_start = false) because we've already built the tunnels
-		wg_service_start(false);
+	$ret_code = ($build_all_status['ret_code'] << 1) | $service_start_status);
 
-	}
-
-	return $resync_ret;
+	return $ret_code;
 
 }
 
@@ -222,7 +226,7 @@ function wg_service_cli_start($cold_start = true) {
 		}
 	
 		// Build the tunnels
-		$resync_ret = wg_resync_all();
+		$build_all_status = wg_build_all();
  
 		if (platform_booting()) {
 
@@ -231,16 +235,16 @@ function wg_service_cli_start($cold_start = true) {
 			print_message("done. \n");
 
 			// Returns the aggregated return code bit shifted to include the full return code
-			return (($resync_ret['ret_code'] << 1) | ($resync_ret['retcode'] <> 0));
+			return (($build_all_status['ret_code'] << 1) | ($build_all_status['retcode'] <> 0));
 
 		}
 
 		// Should we proceeed with forking?
-		if ($resync_ret['ret_code'] <> 0) {
+		if ($build_all_status['ret_code'] <> 0) {
 
-			foreach ($resync_ret['tunnels'] as $tunnel) {
+			foreach ($build_all_status['tunnels'] as $tunnel) {
 
-				foreach ($tunnel['errors'] as $error_text) {
+				foreach ($build_all_status['errors'] as $error_text) {
 		
 					print_message("[{$tunnel['name']}] {$error_text}\n");
 		
@@ -249,7 +253,7 @@ function wg_service_cli_start($cold_start = true) {
 			}
 
 			// Service invocation error + resync return code bitshifted by 1
-			return (($resync_ret['ret_code'] << 1) | ($resync_ret['retcode'] <> 0));
+			return (($build_all_status['ret_code'] << 1) | ($build_all_status['retcode'] <> 0));
 
 		}
 
@@ -268,7 +272,7 @@ function wg_service_cli_start($cold_start = true) {
 	} elseif ($newpid) {
 
 		// Returns the aggregated return code bit shifted to include the full return code
-		return ($cold_start ? (($resync_ret['ret_code'] << 1) | ($resync_ret['retcode'] <> 0)) : 0);
+		return ($cold_start ? (($build_all_status['ret_code'] << 1) | ($build_all_status['retcode'] <> 0)) : 0);
 
 	}
 
@@ -390,7 +394,7 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} coldstart";
+	$start[] = "{$wgg['wg_daemon']} start";
 
 	$stop[] = "{$wgg['wg_daemon']} stop";
 
