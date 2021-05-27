@@ -418,8 +418,6 @@ function wg_service_daemon() {
 function wg_service_install() {
 	global $wgg;
 
-	wg_service_deinstall();
-
 	link($wgg['php'], $wgg['php_wg']);
 
 }
