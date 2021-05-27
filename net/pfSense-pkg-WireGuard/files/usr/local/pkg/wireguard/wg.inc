@@ -382,24 +382,8 @@ function wg_resync_peer($peer) {
 
 }
 
-function wg_resync_all() {
+function wg_resync() {
 	global $g, $wgg;
-
-	$ret_array = $ret_tunnels = array();
-
-	// Let's assume everything will be fine
-	$ret_code = 0;
-
-	// We can't let pkg(7) become the parent of Unbound, dpinger, etc...
-	if ($g['wireguard_installing']) {
-
-		unset($g['wireguard_installing']);
-
-		// We might be able to start the service automatically here if the user wants to...
-
-		return $ret_array;
-		
-	}
 
 	// Create WireGuard configuration files
 	wg_create_config_files();
@@ -407,10 +391,29 @@ function wg_resync_all() {
 	// Update the Unbound ACL
 	wg_unbound_acl_update();
 
+	// We don't want active tunnels when the service is not running...
+	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
+
+		wg_destroy_tunnels();
+
+	}
+
+}
+
+function wg_build_all() {
+	global $g, $wgg;
+
+	$ret_array = $ret_tunnels = array();
+
+	// Let's assume everything will be fine
+	$ret_code = 0;
+
+	wg_resync();
+
 	// Build each tunnel
 	foreach ($wgg['tunnels'] as $tunnel) {
 		
-		$resync_ret = wg_resync_tunnel($tunnel['name'], true);
+		$resync_ret = wg_build_tunnel($tunnel['name'], true);
 
 		// Build an aggregated return code
 		$ret_code |= $resync_ret['ret_code'];
@@ -432,63 +435,45 @@ function wg_resync_all() {
 
 
 /*
- * This resyncs a specific tunnel interface by name
+ * This builds a specific tunnel interface by name
  */
-function wg_resync_tunnel($tunnel_name, $quick = false) {
+function wg_build_tunnel($tunnel_name) {
 	global $wgg;
 
 	wg_globals();
 
-	if (!$quick) {
-
-		// Create new configuration files
-		wg_create_config_files();
-
-		// Update Unbound access list
-		wg_unbound_acl_update();
-
-	}
-
-	$ret_code = 0;
-
 	$tunnel = array();
 
-	if (wg_is_service_running()) {
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-		$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+	$ret_code = (!isset($wgg['tunnels'][$tun_idx])) << 0;
+	
+	if (isset($wgg['tunnels'][$tun_idx])) {
 
-		$ret_code = (!isset($wgg['tunnels'][$tun_idx])) << 0;
-		
-		if (isset($wgg['tunnels'][$tun_idx])) {
+		$tunnel = $wgg['tunnels'][$tun_idx];
 
-			$ret_code = 0;
+		// Create the tunnel interface if it does not yet exist
+		$ret_code |= wg_interface_create($tunnel['name']) << 1;
 
-			$tunnel = $wgg['tunnels'][$tun_idx];
+		// Add the tunnel interface to the WireGuard interface group
+		$ret_code |= wg_interface_group_add($tunnel['name']) << 2;
 
-			// Create the tunnel interface if it does not yet exist
-			$ret_code |= wg_interface_create($tunnel['name']) << 1;
+		// Update the addresses on the tunnel interface
+		$ret_code |= wg_interface_update_addresses($tunnel['name']) << 3;
 
-			// Add the tunnel interface to the WireGuard interface group
-			$ret_code |= wg_interface_group_add($tunnel['name']) << 2;
+		// Toggle the interface accordingly instead of tearing it down completely
+		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			// Update the addresses on the tunnel interface
-			$ret_code |= wg_interface_update_addresses($tunnel['name']) << 3;
+			$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
 
-			// Toggle the interface accordingly instead of tearing it down completely
-			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
+		} else {
 
-				$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
-
-			} else {
-
-				$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 4;
-
-			}
-
-			// Sync the configuration with the tunnel interface
-			$ret_code |= wg_interface_syncconf($tunnel['name']) << 5;
+			$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 4;
 
 		}
+
+		// Sync the configuration with the tunnel interface
+		$ret_code |= wg_interface_syncconf($tunnel['name']) << 5;
 
 	}
 
