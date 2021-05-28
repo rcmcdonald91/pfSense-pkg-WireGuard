@@ -95,7 +95,7 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-wg_display_service_warning();
+wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
 
@@ -103,11 +103,7 @@ if (isset($_POST['apply'])) {
 
 }
 
-if (is_subsystem_dirty('wireguard')) {
-
-	print_apply_box(gettext("The WireGuard configuration has been changed.") . "<br />" . gettext("The changes must be applied for them to take effect."));
-
-}
+wg_print_config_apply_box();
 
 if ($input_errors) {
 
