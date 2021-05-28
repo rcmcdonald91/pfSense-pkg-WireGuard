@@ -27,8 +27,6 @@ require_once('util.inc');
 require_once('wireguard/wg.inc');
 require_once('wireguard/wg_globals.inc');
 
-$getText = function($text) { return gettext($text); };
-
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;
 
@@ -41,9 +39,9 @@ function wg_print_service_warning($only_with_tunnels = true) {
 
 }
 
-
-
 function wg_print_config_apply_box() {
+
+	$getText = function($text) { return gettext($text); };
 
 	if (is_subsystem_dirty('wireguard')) {
 
@@ -55,6 +53,8 @@ function wg_print_config_apply_box() {
 
 // Formats peer endpoint address and port for the UI
 function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
+
+	$getText = function($text) { return gettext($text); };
 
 	if ($header) {
 

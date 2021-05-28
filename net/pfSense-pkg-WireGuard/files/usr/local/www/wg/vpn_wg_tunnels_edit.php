@@ -158,7 +158,7 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-wg_display_service_warning();
+wg_print_service_warning();
 
 if ($input_errors) {
 
