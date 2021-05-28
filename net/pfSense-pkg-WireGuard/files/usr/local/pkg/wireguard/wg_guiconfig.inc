@@ -58,7 +58,7 @@ function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpo
 
 	if ($header) {
 
-		return "{$getText($endpoint)} : {$getText($port)}";
+		return "{$getText('Endpoint')} : {$getText('Port')}";
 
 	}
 
