@@ -376,7 +376,7 @@ function wg_resync_peer($peer) {
 }
 
 function wg_resync() {
-	global $g, $wgg;
+	global $wgg;
 
 	// Create WireGuard configuration files
 	wg_create_config_files();
@@ -384,8 +384,11 @@ function wg_resync() {
 	// Update the Unbound ACL
 	wg_unbound_acl_update();
 
-	// We don't want active tunnels when the service is not running...
-	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
+	// We don't want active tunnels when the service isn't running...
+	if (is_module_loaded($wgg['kmod']) 
+		&& !wg_is_service_running()) {
+
+		wg_service_web_stop();
 
 		wg_destroy_tunnels();
 
@@ -394,7 +397,7 @@ function wg_resync() {
 }
 
 function wg_tunnel_build_all() {
-	global $g, $wgg;
+	global $wgg;
 
 	$ret_array = $ret_tunnels = array();
 
@@ -403,19 +406,23 @@ function wg_tunnel_build_all() {
 
 	wg_resync();
 
-	// Build each tunnel
-	foreach ($wgg['tunnels'] as $tunnel) {
-		
-		$build_status = wg_tunnel_build($tunnel['name'], true);
+	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
 
-		// Build an aggregated return code
-		$ret_code |= $build_status['ret_code'];
+		// Build each tunnel
+		foreach ($wgg['tunnels'] as $tunnel) {
+			
+			$build_status = wg_tunnel_build($tunnel['name'], true);
 
-		$ret_tunnels[] = array(
-					'name' => $build_status['name'],
-					'ret_code' => $build_status['ret_code'], 
-					'errors' => $build_status['errors'],
-					'config' => $build_status['config']);
+			// Build an aggregated return code
+			$ret_code |= $build_status['ret_code'];
+
+			$ret_tunnels[] = array(
+						'name' => $build_status['name'],
+						'ret_code' => $build_status['ret_code'], 
+						'errors' => $build_status['errors'],
+						'config' => $build_status['config']);
+
+		}
 
 	}
 
@@ -457,20 +464,11 @@ function wg_tunnel_build($tunnel_name) {
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			if (!wg_interface_status($tunnel['name'])) {
-
-				$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
-
-			}
+			$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
 
 		} else {
 
-			if (wg_interface_status($tunnel['name'])) {
-
-				$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 5;
-
-			}
-
+			$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 5;
 		}
 
 		$ret_code |= wg_interface_syncconf($tunnel['name']) << 6;
@@ -524,30 +522,28 @@ function wg_create_config_files($clean = true) {
 
 	wg_globals();
 
+	// Create configuration path if it is missing
+	if (!file_exists($wgg['conf_path'])) {
+
+		mkdir($wgg['conf_path'], 0700, true);
+
+	} else {
+
+		chmod($wgg['conf_path'], 0700);
+
+	}
+
+	// We almost always want to just overwrite the old configurations
+	if ($clean) {
+
+		wg_delete_config_files();
+
+	}
+
 	// Check if there are any configurations to write to disk
-	if (is_array($wgg['tunnels'])) {
+	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
 
-		// Create configuration path if it is missing
-		if (!file_exists($wgg['conf_path'])) {
-
-			mkdir($wgg['conf_path'], 0700, true);
-
-		} else {
-
-			chmod($wgg['conf_path'], 0700);
-
-		}
-
-		// We almost always want to just overwrite the old configurations
-		if ($clean) {
-
-			wg_delete_config_files();
-
-		}
-
-		$tunnels = wg_get_enabled_tunnels();
-
-		foreach ($tunnels as $tunnel) {
+		foreach ($wgg['tunnels'] as $tunnel) {
 
 			make_wg_conf($tunnel);
 
@@ -667,11 +663,15 @@ function make_wg_conf($tunnel) {
 	$txt .= "[Interface]\n";
 
 	if (!empty($tunnel['privatekey'])) {
+
 		$txt .= "PrivateKey = {$tunnel['privatekey']}\n";
+
 	}
 
 	if (!empty($tunnel['listenport'])) {
+
 		$txt .= "ListenPort = {$tunnel['listenport']}\n";
+
 	}
 
 	$txt .= "\n";
