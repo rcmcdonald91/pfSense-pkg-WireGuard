@@ -27,8 +27,6 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
-$getText = function($text) { return gettext($text); };
-
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
 	'ifconfig'		=> '/sbin/ifconfig',
