@@ -43,14 +43,18 @@ if ($_POST) {
 
 	if (isset($_POST['apply'])) {
 
+		$ret_code = 0;
+
 		if (wg_is_service_running()) {
 
 			$restart_status = wg_service_web_restart();
 
+			$ret_code |= $restart_status['ret_code'];
+
 		}
 
 		clear_subsystem_dirty('wireguard');
-
+		
 	}
 
 	if (isset($_POST['peer'])) {
@@ -99,7 +103,7 @@ wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
 
-	print_apply_result_box($restart_status['ret_code']);
+	print_apply_result_box($ret_code);
 
 }
 
