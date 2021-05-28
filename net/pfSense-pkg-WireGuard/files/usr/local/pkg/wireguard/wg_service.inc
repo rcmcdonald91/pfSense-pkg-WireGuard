@@ -84,9 +84,21 @@ if (isset($argv[1])) {
 
 }
 
-function wg_is_cli() {
+// This is a wrapper for safely calling from web frontend
+function wg_service_web_restart() {
+	global $wgg;
 
-	return (PHP_SAPI == 'cli');
+	$stop_status = wg_service_web_stop();
+
+	if ($stop_status['ret_code'] <> 0) {
+
+		return $stop_status;
+
+	}
+
+	$start_status = wg_service_web_start();
+
+	return $start_status;
 
 }
 
@@ -131,51 +143,6 @@ function wg_service_cli_stop($serialize_output = true) {
 
 }
 
-function wg_service_web_restart() {
-	global $wgg;
-
-	$stop_status = wg_service_web_stop();
-
-	if ($stop_status['ret_code'] <> 0) {
-
-		return $stop_status;
-
-	}
-
-	$start_status = wg_service_web_start();
-
-	return $start_status;
-
-}
-
-function wg_is_service_running() {
-	global $wgg;
-
-	if (!($h_lock = @fopen($wgg['pid_path'], 'r')) || !file_exists($wgg['pid_path'])) {
-
-		return false;
-
-	}
-
-	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, $wouldblock);
-
-	if ($not_running) {
-	
-		flock($h_lock, LOCK_UN);
-
-	}
-
-	$pid = fgets($h_lock);
-	
-	fclose($h_lock);
-
-	// Another trick to test if a process is running
-	$sig_test = posix_kill($pid, 0);
-
-	return (!$not_running || $wouldblock || $sig_test);
-
-}
-
 // This is a wrapper for safely calling from the web frontend
 function wg_service_web_start() {
 	global $wgg;
@@ -188,41 +155,6 @@ function wg_service_web_start() {
 	$unserialized_output = unserialize($serialized_output[0]);
 
 	return $unserialized_output;
-
-}
-
-function wg_service_error_handler($ret_code, $serialize_output = true, $extras = array()) {
-	global $g, $wgg;
-
-	$errors = array();
-
-	foreach ($wgg['error_flags']['service'] as $error_mask => $error_text) {
-
-		if (($ret_code & $error_mask) > 0) {
-	
-			if ($serialize_output) {
-
-				$errors[$error_mask] = $error_text;
-
-			} else {
-
-				fwrite(STDERR, "{$error_text}\n");
-
-			}
-
-		}
-
-	}
-
-	if ($serialize_output) {
-
-		$output_to_serialize = array_merge(array('ret_code' => $ret_code, 'errors' => $errors), $extras);
-
-		fwrite(STDOUT, serialize($output_to_serialize));
-
-	}
-
-	return $ret_code;
 
 }
 
@@ -395,7 +327,7 @@ function wg_service_daemon() {
 
 	}
 
-	// Main daemon loop
+	// Main WireGuard service loop
 	while (true) {
 
 		// The whole point of this daemon...
@@ -410,7 +342,7 @@ function wg_service_daemon() {
 
 	}
 
-	// Execute SIGTERM handler
+	// Execute SIGTERM handler to exit gracefully
 	wg_daemon_sig_handler(SIGTERM);
 
 }
@@ -527,6 +459,77 @@ function wg_daemon_sig_handler($signo) {
 			break;
 
 	}
+
+}
+
+function wg_service_error_handler($ret_code, $serialize_output = true, $extras = array()) {
+	global $g, $wgg;
+
+	$errors = array();
+
+	foreach ($wgg['error_flags']['service'] as $error_mask => $error_text) {
+
+		if (($ret_code & $error_mask) > 0) {
+	
+			if ($serialize_output) {
+
+				$errors[$error_mask] = $error_text;
+
+			} else {
+
+				fwrite(STDERR, "{$error_text}\n");
+
+			}
+
+		}
+
+	}
+
+	if ($serialize_output) {
+
+		$output_to_serialize = array_merge(array('ret_code' => $ret_code, 'errors' => $errors), $extras);
+
+		fwrite(STDOUT, serialize($output_to_serialize));
+
+	}
+
+	return $ret_code;
+
+}
+
+// Check if we are in CLI or not
+function wg_is_cli() {
+
+	return (PHP_SAPI == 'cli');
+
+}
+
+// Checks if the service is running
+function wg_is_service_running() {
+	global $wgg;
+
+	if (!($h_lock = @fopen($wgg['pid_path'], 'r')) || !file_exists($wgg['pid_path'])) {
+
+		return false;
+
+	}
+
+	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, $wouldblock);
+
+	if ($not_running) {
+	
+		flock($h_lock, LOCK_UN);
+
+	}
+
+	$pid = fgets($h_lock);
+	
+	fclose($h_lock);
+
+	// Another trick to test if a process is running
+	$sig_test = posix_kill($pid, 0);
+
+	return (!$not_running || $wouldblock || $sig_test);
 
 }
 
