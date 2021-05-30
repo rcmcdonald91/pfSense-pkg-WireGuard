@@ -37,6 +37,8 @@ if (isset($argv[1])) {
 
 	set_time_limit(0);
 
+	pcntl_async_signals(true);
+
 	if (!wg_is_cli()) {
 
 		// Bail out if we aren't in the CLI...
@@ -50,8 +52,6 @@ if (isset($argv[1])) {
 		die("FATAL: This script can only be executed by {$wgg['php_wg']}.\n");
 
 	}
-
-	pcntl_async_signals(true);
 
 	// Should we serialize the return output?
 	$serialize = (isset($argv[2]) && $argv[2] == 'serialize');
@@ -88,11 +88,15 @@ if (isset($argv[1])) {
 function wg_service_web_restart() {
 	global $wgg;
 
-	$stop_status = wg_service_web_stop();
+	if (wg_is_service_running()) {
 
-	if ($stop_status['ret_code'] <> 0) {
+		$stop_status = wg_service_web_stop();
 
-		return $stop_status;
+		if ($stop_status['ret_code'] <> 0) {
+
+			return $stop_status;
+
+		}
 
 	}
 
@@ -135,7 +139,7 @@ function wg_service_cli_stop($serialize_output = true) {
 
 	}
 
-	$ret_code |= killbypid($wgg['pid_path']) << 1;
+	$ret_code |= killbypid($wgg['pid_path'], 1) << 1;
 	
 	wg_service_error_handler($ret_code, $serialize_output);
 
@@ -149,12 +153,18 @@ function wg_service_web_start() {
 
 	$serialized_output = array();
 
-	// Invokes service start with serialization flag so we can cleanly report back to the web frontend.
+	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
 	exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
 
-	$unserialized_output = unserialize($serialized_output[0]);
+	// Catch unserialization results before returning
+	if ($unserialized_output = unserialize($serialized_output[0])) {
 
-	return $unserialized_output;
+		return $unserialized_output;
+
+	}
+
+	// Consumers expect an array type
+	return array();
 
 }
 
@@ -242,13 +252,6 @@ function wg_service_cli_start($serialize_output = true) {
 
 	}
 
-	/*
-	 * From this point on, we are completely detached from the calling tty via posix_setsid().
-	 * Any further output via STDOUT, STDERRR, etc. is completely invisible.
-	 * 
-	 * TODO: This is where a true logging facility would be nice to have.
-	 */
-
 	// The second fork...
 	$newpid = pcntl_fork();
 
@@ -260,8 +263,16 @@ function wg_service_cli_start($serialize_output = true) {
 
 	} elseif ($newpid) {
 
-		// Make sure to reap the child...
+		// Reap the child process below...
 		pcntl_waitpid($newpid, $status);
+
+		// Boilerplate if we want to trap service ret codes and halt...
+		$ret_code = pcntl_wexitstatus($status);
+
+		if ($ret_code <> 0) {
+
+			return $ret_code;
+		}
 
 		// Move on to the daemon
 		wg_service_daemon();
@@ -280,13 +291,6 @@ function wg_service_cli_start($serialize_output = true) {
 
 		}
 
-		/*
-		 * This is where we can safely restart any additional services
-		 * 
-		 * TODO: Allow users to specify additional services to restart here.
-		 */
-
-
 		// dpinger
 		setup_gateways_monitor();
 
@@ -302,7 +306,7 @@ function wg_service_cli_start($serialize_output = true) {
 	}
 
 	// We shouldn't be here...
-	return 0;
+	return 1;
 
 }
 
@@ -400,7 +404,7 @@ function wg_deregister_service_env() {
 
 }
 
-function wg_register_service_env($close_handlers = false) {
+function wg_register_service_env($close_fdio = false) {
 	global $h_lock, $wgg;
 
 	wg_deregister_service_env();
@@ -417,15 +421,15 @@ function wg_register_service_env($close_handlers = false) {
 
 		fflush($h_lock);
 
-		if ($close_handlers) {
+	}
 
-			fclose(STDIN);
+	if ($close_fdio) {
 
-			fclose(STDOUT);
+		fclose(STDIN);
 
-			fclose(STDERR);
+		fclose(STDOUT);
 
-		}
+		fclose(STDERR);
 
 	}
 
@@ -443,11 +447,11 @@ function wg_daemon_sig_handler($signo) {
 
 		case SIGTERM:
 
-			// Cleanup the service environment
-			wg_deregister_service_env();
-
 			// Teardown any tunnels and unload the module
 			wg_destroy_tunnels();
+
+			// Cleanup the service environment
+			wg_deregister_service_env();
 
 			// We are done...
 			exit(0);
@@ -477,7 +481,7 @@ function wg_service_error_handler($ret_code, $serialize_output = true, $extras =
 
 			} else {
 
-				fwrite(STDERR, "{$error_text}\n");
+				fwrite(STDOUT, "{$error_text}\n");
 
 			}
 
@@ -487,9 +491,11 @@ function wg_service_error_handler($ret_code, $serialize_output = true, $extras =
 
 	if ($serialize_output) {
 
-		$output_to_serialize = array_merge(array('ret_code' => $ret_code, 'errors' => $errors), $extras);
+		$ret_array = array_merge(array('ret_code' => $ret_code, 'errors' => $errors), $extras);
 
-		fwrite(STDOUT, serialize($output_to_serialize));
+		$ret_serialized = serialize($ret_array);
+
+		fwrite(STDOUT, "{$ret_serialized}\n");
 
 	}
 
