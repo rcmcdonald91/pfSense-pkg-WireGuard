@@ -161,7 +161,7 @@ function wg_get_address_family($address) {
 
 }
 
-function wg_ifconfig_del_address($wg_ifname, $masked_address, $ret_posix_style = true, $verbose = false) {
+function wg_ifconfig_del_address($wg_ifname, $masked_address, $ret_posix_style = true) {
 	global $wgg;
 
 	// Assume family validation will fail...
@@ -172,11 +172,9 @@ function wg_ifconfig_del_address($wg_ifname, $masked_address, $ret_posix_style =
 
 		list($address, $address_subnet) = explode('/', $masked_address);
 
-		$redirect = wg_verbosity_redirect($verbose);
-
 		wg_escapeshellarg($wg_ifname, $address);
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$address} delete {$redirect}");
+		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$address} delete");
 
 	}
 
@@ -184,7 +182,7 @@ function wg_ifconfig_del_address($wg_ifname, $masked_address, $ret_posix_style =
 
 }
 
-function wg_ifconfig_set_address($wg_ifname, $masked_address, $ret_posix_style = true, $verbose = false) {
+function wg_ifconfig_set_address($wg_ifname, $masked_address, $ret_posix_style = true) {
 	global $wgg;
 
 	// Assume family validation will fail...
@@ -193,11 +191,9 @@ function wg_ifconfig_set_address($wg_ifname, $masked_address, $ret_posix_style =
 	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family = wg_get_address_family($masked_address)) {
 
-		$redirect = wg_verbosity_redirect($verbose);
-
 		wg_escapeshellarg($wg_ifname, $masked_address);
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$masked_address} add {$redirect}");
+		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$masked_address} add");
 
 	}
 
@@ -205,27 +201,23 @@ function wg_ifconfig_set_address($wg_ifname, $masked_address, $ret_posix_style =
 
 }
 
-function wg_ifconfig_down_interface($wg_ifname, $ret_posix_style = true, $verbose = false) {
+function wg_ifconfig_down_interface($wg_ifname, $ret_posix_style = true) {
 	global $wgg;
-
-	$redirect = wg_verbosity_redirect($verbose);
 
 	wg_escapeshellarg($wg_ifname);
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} down {$redirect}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} down");
 
 	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
 
 }
 
-function wg_ifconfig_up_interface($wg_ifname, $ret_posix_style = true, $verbose = false) {
+function wg_ifconfig_up_interface($wg_ifname, $ret_posix_style = true) {
 	global $wgg;
-
-	$redirect = wg_verbosity_redirect($verbose);
 
 	wg_escapeshellarg($wg_ifname);
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} up {$redirect}");
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} up");
 
 	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
 
@@ -323,7 +315,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 
 }
 
-function wg_interface_syncconf($wg_ifname, $ret_posix_style = true, $verbose = false) {
+function wg_interface_syncconf($wg_ifname, $ret_posix_style = true) {
 	global $wgg;
 
 	$ret_val = 1;
@@ -332,11 +324,9 @@ function wg_interface_syncconf($wg_ifname, $ret_posix_style = true, $verbose = f
 
 	if (file_exists($wg_conf_path)) {
 
-		$redirect = wg_verbosity_redirect($verbose);
-
 		wg_escapeshellarg($wg_ifname, $wg_conf_path);
 
-		$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname} {$wg_conf_path} {$redirect}");
+		$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname} {$wg_conf_path}");
 
 	}
 
@@ -347,16 +337,35 @@ function wg_interface_syncconf($wg_ifname, $ret_posix_style = true, $verbose = f
 /*
  * This creates a WireGuard interface of a specified name
  */
-function wg_interface_create($wg_ifname, $ret_posix_style = true, $verbose = false) {
+function wg_interface_create($wg_ifname, $ret_posix_style = true) {
 	global $wgg;
-
-	$redirect = wg_verbosity_redirect($verbose);
 
 	wg_escapeshellarg($wg_ifname);
 
-	// We first check to see if the desired interface already exists, then we create it if it does not
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$redirect} || {$wgg['ifconfig']} wg create name {$wg_ifname} {$redirect}");
+	// First check if the interface already exists
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname}");
+
+	if ($ret_val <> 0) {
+		
+		// Create the interface with the specified name
+		$ret_val = mwexec("{$wgg['ifconfig']} wg create name {$wg_ifname}");
+
+	}
 	
+	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+
+}
+
+/*
+ * This destroys a WireGuard interface of a specified name
+ */
+function wg_interface_destroy($wg_ifname, $ret_posix_style = true) {
+	global $wgg;
+
+	wg_escapeshellarg($wg_ifname);
+
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} destroy");
+
 	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
 
 }
@@ -371,24 +380,29 @@ function wg_get_real_ifs() {
 
 	exec("{$wgg['ifconfig']} -g wg", $ret_array, $ret_code);
 	
-	return ($ret_code ==0) ? $ret_array : array();;
+	return ($ret_code == 0) ? $ret_array : array();
 
 }
 
 /*
  * This adds a WireGuard interface to the WireGuard interface group
  */
-function wg_interface_group_add($wg_ifname, $ret_posix_style = true, $verbose = false) {
+function wg_interface_group_add($wg_ifname, $ret_posix_style = true) {
 	global $wgg;
 
 	$wg_ifgroup = $wgg['ifgroupentry']['ifname'];
 
-	$redirect = wg_verbosity_redirect($verbose);
-
 	wg_escapeshellarg($wg_ifname, $wg_ifgroup);
 
-	// We first check to see if the desired interface exists, then we add it to the group if it does
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$redirect} && {$wgg['ifconfig']} {$wg_ifname} group {$wg_ifgroup} {$redirect}");
+	// First check if the interface already exists
+	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname}");
+
+	if ($ret_val == 0) {
+
+		// Add interface to interface group
+		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} group {$wg_ifgroup}");
+
+	}
 		
 	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
 
@@ -757,12 +771,6 @@ function wg_get_tunnel_networks($family = 'both') {
 	}
 
 	return $wg_tunnel_networks;
-
-}
-
-function wg_verbosity_redirect($verbose = false) {
-
-	return $verbose ? '' : '> /dev/null 2>&1';
 
 }
 

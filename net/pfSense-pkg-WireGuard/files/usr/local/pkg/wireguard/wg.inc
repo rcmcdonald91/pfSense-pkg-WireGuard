@@ -385,10 +385,7 @@ function wg_resync() {
 	wg_unbound_acl_update();
 
 	// We don't want active tunnels when the service isn't running...
-	if (is_module_loaded($wgg['kmod']) 
-		&& !wg_is_service_running()) {
-
-		wg_service_web_stop();
+	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
 
 		wg_destroy_tunnels();
 

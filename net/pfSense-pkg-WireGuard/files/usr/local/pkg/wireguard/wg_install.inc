@@ -352,12 +352,12 @@ function wg_destroy_tunnels() {
 	// Tear down interfaces
 	foreach ($tunnels_to_destroy as $tunnel) {
 
-		$ret_code |= !(pfSense_interface_destroy($tunnel) === true);
+		$ret_code |= wg_interface_destroy($tunnel);
 
 	}
 
 	// Now unload the kernel module if it is still loaded
-	if ($ret_code ==0 && is_module_loaded($wgg['kmod'])) {
+	if ($ret_code == 0 && is_module_loaded($wgg['kmod'])) {
 
 		$kmod = $wgg['kmod'];
 
