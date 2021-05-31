@@ -301,7 +301,7 @@ function wg_do_peer_post($post) {
 
 	$input_errors = wg_validate_peer_post($pconfig, $peer_idx);
 
-	if (!$input_errors) {
+	if (empty($input_errors)) {
 
 		$wgg['peers'][$peer_idx] = $pconfig;
 
@@ -329,7 +329,8 @@ function wg_do_tunnel_post($post) {
 
 	$tun_idx = $post['index'];
 
-	$pconfig = $wgg['tunnels'][$tun_idx];
+	// We need to save the "old config" to compare against later...
+	$pconfig = $old_config = $wgg['tunnels'][$tun_idx];
 
 	wg_init_config_arr($pconfig, array('addresses', 'row'));
 
@@ -351,12 +352,24 @@ function wg_do_tunnel_post($post) {
 
 	$input_errors 			= wg_validate_tunnel_post($pconfig, $tun_idx);
 
-	if (!$input_errors) {
+	if (empty($input_errors)) {
 
 		$wgg['tunnels'][$tun_idx] = $pconfig;
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
+
+		// Only need to restart if the service was already running
+		if (wg_is_service_running()) {
+
+			// Check if anything actually changed or was this a clean re-save?
+			if (md5(serialize($old_config)) != md5(serialize($pconfig)) {
+	
+				mark_subsystem_dirty($wgg['subsystem']);
+
+			}
+
+		}
 
 	}
 

@@ -79,7 +79,9 @@ if ($_POST) {
 			default:
 
 				// Shouldn't be here, so bail out.
-				header("Location: /wg/vpn_wg_tunnels.php");	
+				header("Location: /wg/vpn_wg_tunnels.php");
+
+				break;
 
 		}
 
@@ -120,7 +122,7 @@ if (isset($_POST['apply'])) {
 
 wg_print_config_apply_box();
 
-if ($input_errors) {
+if (!empty($input_errors)) {
 
 	print_input_errors($input_errors);
 
