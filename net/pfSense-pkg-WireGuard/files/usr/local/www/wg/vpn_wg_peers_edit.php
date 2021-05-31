@@ -64,7 +64,7 @@ if ($_POST) {
 	
 			$pconfig = $res['pconfig'];
 	
-			if (!$input_errors) {
+			if (empty($input_errors)) {
 				
 				// Save was successful
 				header("Location: /wg/vpn_wg_peers.php");
@@ -86,6 +86,8 @@ if ($_POST) {
 
 			// Shouldn't be here, so bail out.
 			header("Location: /wg/vpn_wg_peers.php");
+
+			break;
 
 	}
 
@@ -129,7 +131,7 @@ include("head.inc");
 
 wg_print_service_warning();
 
-if ($input_errors) {
+if (!empty($input_errors)) {
 
 	print_input_errors($input_errors);
 

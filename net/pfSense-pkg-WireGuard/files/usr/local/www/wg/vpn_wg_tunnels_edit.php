@@ -72,12 +72,6 @@ if ($_POST) {
 	
 			if (empty($input_errors)) {
 	
-				if (wg_is_service_running()) {
-	
-					mark_subsystem_dirty($wgg['subsystem']);
-		
-				}
-	
 				// Save was successful
 				header("Location: /wg/vpn_wg_tunnels.php");
 	
@@ -118,7 +112,9 @@ if ($_POST) {
 		default:
 		
 			// Shouldn't be here, so bail out.
-			header("Location: /wg/vpn_wg_tunnels.php");		
+			header("Location: /wg/vpn_wg_tunnels.php");
+			
+			break;
 
 	}
 
@@ -160,7 +156,7 @@ include("head.inc");
 
 wg_print_service_warning();
 
-if ($input_errors) {
+if (!empty($input_errors)) {
 
 	print_input_errors($input_errors);
 

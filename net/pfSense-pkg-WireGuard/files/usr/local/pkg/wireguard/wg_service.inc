@@ -54,7 +54,7 @@ if (isset($argv[1])) {
 	}
 
 	// Should we serialize the return output?
-	$serialize = (isset($argv[2]) && $argv[2] == 'serialize');
+	$serialize = (isset($argv[2]) && strtolower($argv[2]) == 'serialize');
 
 	switch (strtolower($argv[1])) {
 		
@@ -139,6 +139,7 @@ function wg_service_cli_stop($serialize_output = true) {
 
 	}
 
+	// Need to wait here for just a second...
 	$ret_code |= killbypid($wgg['pid_path'], 1) << 1;
 	
 	wg_service_error_handler($ret_code, $serialize_output);
@@ -274,7 +275,7 @@ function wg_service_cli_start($serialize_output = true) {
 			return $ret_code;
 		}
 
-		// Move on to the daemon
+		// Move on to the actual daemon
 		wg_service_daemon();
 
 		// We shouldn't be here...
