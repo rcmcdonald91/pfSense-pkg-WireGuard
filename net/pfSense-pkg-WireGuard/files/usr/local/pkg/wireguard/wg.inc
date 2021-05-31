@@ -363,7 +363,7 @@ function wg_do_tunnel_post($post) {
 		if (wg_is_service_running()) {
 
 			// Check if anything actually changed or was this a clean re-save?
-			if (md5(serialize($old_config)) != md5(serialize($pconfig)) {
+			if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
 	
 				mark_subsystem_dirty($wgg['subsystem']);
 
