@@ -52,6 +52,9 @@ $wgg = array(
 	'kmod'			=> 'if_wg.ko',
 	'pid_path'		=> "{$g['varrun_path']}/wireguardd.pid",
 	'subsystem'		=> 'wireguard',
+	'applylist'		=> array(
+					'tunnels' => "{$g['tmp_path']}/.wireguard_tunnel.apply",
+					'peers' => "{$g['tmp_path']}/.wireguard_peer.apply"),
 	'pkg_names'		=> array(
 					'pfSense-pkg-WireGuard',
 					'wireguard-kmod',

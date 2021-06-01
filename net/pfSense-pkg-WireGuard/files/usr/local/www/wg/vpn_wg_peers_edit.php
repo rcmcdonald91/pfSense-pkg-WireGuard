@@ -74,11 +74,8 @@ if ($_POST) {
 
 				}
 
-				
-				$changes_param = $changes ? null : '?nochanges';
-				
 				// Save was successful
-				header("Location: /wg/vpn_wg_peers.php{$changes}");
+				header("Location: /wg/vpn_wg_peers.php");
 	
 			}
 			
