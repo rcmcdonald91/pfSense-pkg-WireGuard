@@ -71,13 +71,11 @@ function wg_toggle_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
 
-			// Check if anything actually changed or was this just a clean re-save?
-			if (md5(serialize($old_config)) != md5(serialize($wgg['tunnels'][$tun_idx]))) {
+			// Changes were made
+			$changes = true;
 
-				// Config hashes mismatched, so we've got changes...
-				$changes = true;
-
-			}
+			// Add tunnel to the list to apply
+			wg_apply_list_append($pconfig['name'], 'tunnels');
 
 		}
 
@@ -174,7 +172,11 @@ function wg_delete_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
 
+			// Changes were made
 			$changes = true;
+
+			// Add tunnel to the list to apply
+			wg_apply_list_append($pconfig['name'], 'tunnels');
 
 		}
 
@@ -453,7 +455,7 @@ function wg_apply_list_append($entry, $list) {
 
 		$toapplylist[] = $entry;
 
-		file_put_contents($path, serialize($toapplylist));
+		file_put_contents($listpath, serialize($toapplylist));
 
 	}
 
