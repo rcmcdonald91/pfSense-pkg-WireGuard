@@ -312,22 +312,31 @@ function wg_service_cli_start($serialize_output = true) {
 
 		}
 
-		// dpinger
-		setup_gateways_monitor();
+		// Restart any additional services
+		$ret_code = wg_restart_extra_services();
 
-		// unbound
-		services_unbound_configure();
-
-		// pf
-		filter_configure();
-
-		// This is a best effort at this point...
-		return 0;
+		return $ret_code;
 
 	}
 
 	// We shouldn't be here...
 	return 1;
+
+}
+
+function wg_restart_extra_services() {
+
+	// dpinger
+	setup_gateways_monitor();
+
+	// unbound
+	services_unbound_configure();
+
+	// pf
+	filter_configure();
+
+	// This is currently just a best effort attempt...
+	return 0;
 
 }
 
