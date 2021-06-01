@@ -130,12 +130,6 @@ include("head.inc");
 
 wg_print_service_warning();
 
-if (isset($_REQUEST['nochanges'])) {
-
-	print_info_box(gettext('No changes to the WireGuard configuration were made.'), 'success');
-
-}
-
 if (isset($_POST['apply'])) {
 
 	print_apply_result_box($ret_code);
