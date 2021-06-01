@@ -570,7 +570,7 @@ function wg_tunnel_build($tunnel_names = null) {
 
 				$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 			
-			}
+			} else {
 
 				// Nope...
 				$tunnel_names = array();
