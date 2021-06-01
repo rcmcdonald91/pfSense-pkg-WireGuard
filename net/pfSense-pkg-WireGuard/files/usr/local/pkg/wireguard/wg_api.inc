@@ -225,15 +225,6 @@ function wg_ifconfig_up_interface($wg_ifname, $ret_posix_style = true) {
 }
 
 /*
- * Wrapper to update the unbound ACL by recreating it.
- */
-function wg_unbound_acl_update() {
-
-	wg_unbound_acl_install();
-
-}
-
-/*
  * This updates the addresses of the specified interface without tearing it down
  */
 function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
