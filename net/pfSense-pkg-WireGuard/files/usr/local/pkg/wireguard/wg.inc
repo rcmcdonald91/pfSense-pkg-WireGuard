@@ -676,7 +676,7 @@ function wg_tunnel_build_by_name($tunnel_name) {
 	// We've got a tunnel we need to destroy...
 	} elseif (in_array($tunnel['name'], wg_get_real_ifs())) {
 		
-		if (wg_interface_destroy($tunnel['name']) <> 0 {
+		if (wg_interface_destroy($tunnel['name']) <> 0) {
 			
 			$ret_code |= WG_ERROR_IF_DESTROY;
 
