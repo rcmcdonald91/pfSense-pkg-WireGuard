@@ -48,7 +48,7 @@ function wg_print_config_apply_box() {
 
 		print_apply_box("{$getText('The WireGuard configuration has been changed.')}<br />
 					{$getText('The changes must be applied for them to take effect.')}<br />
-					{$getText('Notice: This action will restart WireGuard and temporarily suspend all active WireGuard peer connections.')}");
+					{$getText('Notice: This action may momentarily suspend active WireGuard peer connections on any changed tunnels.')}");
 	
 	}
 

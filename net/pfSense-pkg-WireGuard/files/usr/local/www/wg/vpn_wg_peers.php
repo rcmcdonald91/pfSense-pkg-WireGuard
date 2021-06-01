@@ -51,9 +51,9 @@ if ($_POST) {
 
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-				$build_status = wg_tunnel_build($tunnels_to_apply);
+				$sync_status = wg_tunnel_sync($tunnels_to_apply);
 
-				$ret_code |= $build_status['ret_code'];
+				$ret_code |= $sync_status['ret_code'];
 
 			}
 
@@ -75,13 +75,13 @@ if ($_POST) {
 
 			case 'toggle':
 
-				$input_errors = wg_toggle_peer($peer_idx);
+				$res = wg_toggle_peer($peer_idx);
 
 				break;
 
 			case 'delete':
 				
-				$input_errors = wg_delete_peer($peer_idx);
+				$res = wg_delete_peer($peer_idx);
 
 				break;
 
@@ -92,6 +92,20 @@ if ($_POST) {
 
 				break;
 				
+		}
+
+		$input_errors = $res['input_errors'];
+
+		$changes = $res['changes'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $changes) {
+
+				mark_subsystem_dirty($wgg['subsystem']);
+
+			}
+
 		}
 
 	}

@@ -67,7 +67,7 @@ function wg_toggle_tunnel($tunnel_name) {
 		if (empty($input_errors)) {
 
 			// Now we toggle the tunnel
-			$wgg['tunnels'][$tun_idx]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
+			$wgg['tunnels'][$tun_idx]['enabled'] = $enabled ? 'no' : 'yes';
 
 			$action_txt = $enabled ? 'disabled' : 'enabled';
 			
@@ -91,51 +91,101 @@ function wg_toggle_tunnel($tunnel_name) {
 /*
  * This toggles a given peer based on peerid
  */
-function wg_toggle_peer($peer_id) {
+function wg_toggle_peer($peer_idx) {
 	global $wgg;
 
 	// Make sure we have the latest info
 	wg_globals();
 
+	// Assume no changes will be made...
+	$changes = false;
+
+	$input_errors = array();
+
 	// Make sure we have a valid peer
-	if (isset($wgg['peers'][$peer_id])) {
+	if (isset($wgg['peers'][$peer_idx])) {
 
-		// Toggle the peer
-		$wgg['peers'][$peer_id]['enabled'] = ($wgg['peers'][$peer_id]['enabled'] == 'yes') ? 'no' : 'yes';
+		$peer = $wgg['peers'][$peer_idx];
 
-		// Sync with configuration backend
-		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
+		$enabled = ($peer['enabled'] == 'yes');
 
-		// Sync with the WireGuard backend
-		wg_resync_peer($wgg['peers'][$peer_id]);
+		// Boilerplate...
+		if (empty($input_errors)) {
+
+			// Toggle the peer
+			$wgg['peers'][$peer_idx]['enabled'] = $enabled ? 'no' : 'yes';
+
+			$action_text = $enabled ? 'disabled' : 'enabled';
+
+			// Sync with configuration backend
+			write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} {$action_text}.");
+
+			// Changes were made
+			$changes = true;
+
+			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
+
+			// This checks if the peer tunnel is a valid tunnel
+			if (in_array($peer['tun'], $tunnel_names)) {
+
+				// Add peer's tunnel to the list to apply
+				wg_apply_list_append($peer['tun'], 'tunnels');
+
+			}
+
+		}
 
 	}
+
+	return array('input_errors' => $input_errors, 'changes' => $changes);
 
 }
 
 /*
- * This deletes a given peer based on index
+ * This deletes a given peer based on config array index
  */
-function wg_delete_peer($peer_id) {
+function wg_delete_peer($peer_idx) {
 	global $wgg;
 
+	// Make sure we have the latest info
 	wg_globals();
 
-	if (isset($wgg['peers'][$peer_id])) {
+	$changes = false;
+
+	$input_errors = array();
+
+	if (isset($wgg['peers'][$peer_idx])) {
 
 		// We need to save this because we are about to unset it
-		$tunnel_name = $wgg['peers'][$peer_id]['tun'];
+		$peer = $wgg['peers'][$peer_idx];
 
-		// Delete the peer
-		unset($wgg['peers'][$peer_id]);
+		// Boilerplate...
+		if (empty($input_errors)) {
 
-		// Sync with configuration backend
-		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
+			// Delete the peer
+			unset($wgg['peers'][$peer_idx]);
 
-		// Sync with the WireGuard backend
-		wg_resync_tunnel($tunnel_name);
+			// Sync with configuration backend
+			write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_idx} deleted.");
 
+			// Changes were made
+			$changes = true;
+
+			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
+
+			// This checks if the peer tunnel is a valid tunnel
+			if (in_array($peer['tun'], $tunnel_names)) {
+
+				// Add peer's tunnel to the list to apply
+				wg_apply_list_append($peer['tun'], 'tunnels');
+
+			}
+
+		}
+		
 	}
+
+	return array('input_errors' => $input_errors, 'changes' => $changes);
 
 }
 
@@ -338,13 +388,28 @@ function wg_do_peer_post($post) {
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
 
 		// Check if anything actually changed or was this just a clean re-save?
-		if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
+		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
 
 			// Config hashes mismatched, so we've got changes...
 			$changes = true;
 
-		}
+			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
+			// This checks if the pconfig tunnel is a valid tunnel
+			if (in_array($pconfig['tun'], $tunnel_names)) {
+
+				// Add peer's tunnel to the list to apply
+				wg_apply_list_append($pconfig['tun'], 'tunnels');
+
+			// Now try the old_config tunnel...
+			} elseif (in_array($old_config['tun'], $tunnel_names)) {
+
+				// Add peer's tunnel to the list to apply
+				wg_apply_list_append($old_config['tun'], 'tunnels');
+
+			}
+ 
+		}
 
 	}
 
@@ -398,7 +463,7 @@ function wg_do_tunnel_post($post) {
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
 		// Check if anything actually changed or was this just a clean re-save?
-		if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
+		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
 
 			// Config hashes mismatched, so we've got changes...
 			$changes = true;
@@ -553,7 +618,7 @@ function wg_tunnel_resync($tunnel_name) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnels is empty, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_build($tunnel_names = null) {
+function wg_tunnel_sync($tunnel_names = null) {
 	global $wgg;
 
 	$tunnels = array();
@@ -589,16 +654,16 @@ function wg_tunnel_build($tunnel_names = null) {
 
 			$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-			$tun_build_status = wg_tunnel_build_by_name($tunnel_name);
+			$tun_sync_status = wg_tunnel_sync_by_name($tunnel_name);
 
 			// Build an aggregated return code
-			$ret_code |= $tun_build_status['ret_code'];
+			$ret_code |= $tun_sync_status['ret_code'];
 
 			$tunnels[] = array(
 					'name' => $tunnel_name,
-					'ret_code' => $tun_build_status['ret_code'], 
-					'errors' => $tun_build_status['errors'],
-					'config' => $tun_build_status['config']);
+					'ret_code' => $tun_sync_status['ret_code'], 
+					'errors' => $tun_sync_status['errors'],
+					'config' => $tun_sync_status['config']);
 
 		}
 
@@ -611,7 +676,7 @@ function wg_tunnel_build($tunnel_names = null) {
 /*
  * This builds, rebuilds, or destroys a specific tunnel interface by name
  */
-function wg_tunnel_build_by_name($tunnel_name) {
+function wg_tunnel_sync_by_name($tunnel_name) {
 	global $wgg;
 
 	wg_globals();
@@ -674,9 +739,9 @@ function wg_tunnel_build_by_name($tunnel_name) {
 		}
 
 	// We've got a tunnel we need to destroy...
-	} elseif (in_array($tunnel['name'], wg_get_real_ifs())) {
+	} elseif (in_array($tunnel_name, wg_get_real_ifs())) {
 		
-		if (wg_interface_destroy($tunnel['name']) <> 0) {
+		if (wg_interface_destroy($tunnel_name) <> 0) {
 			
 			$ret_code |= WG_ERROR_IF_DESTROY;
 
@@ -700,6 +765,7 @@ function wg_tunnel_build_by_name($tunnel_name) {
 
 	}
 
+	// Build the return array
 	return array('name' => $tunnel_name, 'ret_code' => $ret_code, 'errors' => $errors, 'config' => $tunnel);
 
 }
