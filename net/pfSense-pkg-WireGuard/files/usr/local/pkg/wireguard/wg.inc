@@ -55,7 +55,7 @@ function wg_toggle_tunnel($tunnel_name) {
 
 		$old_config = $wgg['tunnels'][$tun_idx];
 
-		$enabled = ($tunnel['enabled'] == 'yes')
+		$enabled = ($tunnel['enabled'] == 'yes');
 
 		if ($enabled && is_wg_tunnel_assigned($old_config['name'])) {
 
