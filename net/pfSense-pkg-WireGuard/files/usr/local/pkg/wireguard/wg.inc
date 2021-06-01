@@ -452,40 +452,70 @@ function wg_tunnel_build($tunnel_name) {
 
 	wg_globals();
 
+	$ret_code = 0;
+
 	$tunnel = array();
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-	$ret_code = (!isset($wgg['tunnels'][$tun_idx])) << 0;
+	if ((!isset($wgg['tunnels'][$tun_idx])) {
+		
+		$ret_code |= WG_ERROR_WG_ERROR_IF_NAME;
+	
+	}
 	
 	if (isset($wgg['tunnels'][$tun_idx])) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
 		// Create the tunnel interface if it does not yet exist
-		$ret_code |= wg_interface_create($tunnel['name']) << 1;
+		if (wg_interface_create($tunnel['name']) <> 0) {
+			
+			$ret_code |= WG_ERROR_IF_CREATE;
+		
+		}
 
 		// Add the tunnel interface to the WireGuard interface group
-		$ret_code |= wg_interface_group_add($tunnel['name']) << 2;
+		if (wg_interface_group_add($tunnel['name']) <> 0) {
+			
+			$ret_code |= WG_ERROR_IF_GROUP;
+		
+		}
 
 		// Update the addresses on the tunnel interface
-		$ret_code |= wg_interface_update_addresses($tunnel['name']) << 3;
+		if (wg_interface_update_addresses($tunnel['name']) <> 0) {
+			
+			$ret_code |= WG_ERROR_IF_ADDRESSES;
+		
+		}
 
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			$ret_code |= wg_ifconfig_up_interface($tunnel['name']) << 4;
+			if (wg_ifconfig_up_interface($tunnel['name']) <> 0) { 
+				
+				$ret_code |= WG_ERROR_IF_UP;
+			
+			}
 
 		} else {
 
-			$ret_code |= wg_ifconfig_down_interface($tunnel['name']) << 5;
+			if (wg_ifconfig_down_interface($tunnel['name']) <> 0) {
+				
+				$ret_code |= WG_ERROR_IF_DOWN;
+			
+			}
 		}
 
-		$ret_code |= wg_interface_syncconf($tunnel['name']) << 6;
+		// Sync interface with WireGuard wg(8)
+		if (wg_interface_syncconf($tunnel['name']) <> 0) {
+
+			$ret_code |= WG_ERROR_IF_SYNC;
+		
+		}
 
 	}
 
-	// Collect the errors bitwise and construct an array
 	$errors = array();
 
 	foreach ($wgg['error_flags']['tunnel'] as $error_mask => $error_text) {

@@ -27,6 +27,19 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
+define('WG_ERROR_IF_NAME',	1);
+define('WG_ERROR_IF_CREATE',	2);
+define('WG_ERROR_IF_GROUP',	4);
+define('WG_ERROR_IF_ADDRESSES',	8);
+define('WG_ERROR_IF_UP',	16);
+define('WG_ERROR_IF_DOWN',	32);
+define('WG_ERROR_IF_SYNC',	64);
+
+define('WG_ERROR_SVC_RUNNING',	1);
+define('WG_ERROR_SVC_START',	2);
+define('WG_ERROR_SVC_STOP',	4);
+define('WG_ERROR_SVC_BUILD',	8);
+
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
 	'ifconfig'		=> '/sbin/ifconfig',
@@ -70,24 +83,25 @@ $wgg = array(
 					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
 					'tunnel' => array(
-						1 => gettext('Invalid WireGuard interface name'),
-						2 => gettext('Unable to create WireGuard interface'),
-						4 => gettext('Unable to add WireGuard interface to the WireGuard interface group'),
-						8 => gettext('Unable to update WireGuard interface addresses'),
-						16 => gettext('Unable to bring up WireGuard interface'),
-						32 => gettext('Unable to bring down WireGuard interface'),
-						64 => gettext('Unable to sync WireGuard configuration with wg(8)')),
+						WG_ERROR_IF_NAME	=> gettext('Invalid WireGuard tunnel name'),
+						WG_ERROR_IF_CREATE	=> gettext('Unable to create WireGuard tunnel interface'),
+						WG_ERROR_IF_GROUP	=> gettext('Unable to add WireGuard tunnel interface to the WireGuard interface group'),
+						WG_ERROR_IF_ADDRESSES	=> gettext('Unable to update WireGuard tunnel interface addresses'),
+						WG_ERROR_IF_UP		=> gettext('Unable to bring up WireGuard tunnel interface'),
+						WG_ERROR_IF_DOWN	=> gettext('Unable to bring down WireGuard tunnel interface'),
+						WG_ERROR_IF_SYNC	=> gettext('Unable to sync WireGuard tunnel configuration with wg(8)')),
 					'service' => array(
-						1 => gettext('Unable to start WireGuard service'),
-						2 => gettext('Unable to stop WireGuard service'),
-						4 => gettext('Unable to build WireGuard tunnel(s)'))),
+						WG_ERROR_SVC_RUNNING	= > gettext('WireGuard service is already running'),
+						WG_ERROR_SVC_START	=> gettext('Unable to start WireGuard service'),
+						WG_ERROR_SVC_STOP	=> gettext('Unable to stop WireGuard service'),
+						WG_ERROR_SVC_BUILD	=> gettext('Unable to build WireGuard tunnel(s)'))),
 	'default_mtu'		=> 1420,
 	'default_port'		=> 51820,
 	'max_port'		=> 65535,
 	'max_tunnels'		=> 32768
 );
 
-$wgg['wg_daemon'] = "{$wgg['php_wg']} -f {$wgg['wg_includes']}/wg_service.inc";
+$wgg['wg_daemon'] 		= "{$wgg['php_wg']} -f {$wgg['wg_includes']}/wg_service.inc";
 
 function &array_get_value(array &$array, $parents) {
 
@@ -150,7 +164,6 @@ function array_unset_value(&$array, $parents) {
 /*
  * This is a generalized implementation of init_config_arr
  */
-
 function wg_init_config_arr(&$a_config, $keys) {
 
 	$c = &$a_config;
