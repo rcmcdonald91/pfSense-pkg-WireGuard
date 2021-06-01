@@ -445,7 +445,7 @@ function wg_apply_list_append($entry, $list) {
 
 		$listpath = $wgg['applylist'][$list];
 
-		if (file_exists($listpath) {
+		if (file_exists($listpath)) {
 
 			$toapplylist = unserialize(file_get_contents($listpath));
 
