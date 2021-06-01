@@ -103,7 +103,7 @@ include("head.inc");
 
 wg_print_service_warning();
 
-if (isset($_REQUEST['nc'])) {
+if (isset($_REQUEST['nochanges'])) {
 
 	print_info_box(gettext('No WireGuard configuration changes were made.'), 'success');
 
