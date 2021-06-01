@@ -1,13 +1,12 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.0.9.5
+PORTVERSION=	0.1.2
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
 EXTRACT_ONLY=	# empty
 
-
 MAINTAINER=	rcmcdonald91@gmail.com
-COMMENT=	pfSense package WireGuard
+COMMENT=	pfSense package WireGuard (EXPERIMENTAL)
 
 LICENSE=	APACHE20
 
@@ -32,7 +31,7 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg/js
 
 	${MKDIR} ${STAGEDIR}${DATADIR}
-	
+
 	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/wireguard.priv.inc \
 		${STAGEDIR}/etc/inc/priv
 
