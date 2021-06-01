@@ -305,8 +305,8 @@ function wg_deinstall() {
 
 	update_status("done.\n  Removing WireGuard temporary files...");
 
-	// Removes WireGuard temporary configuration files
-	wg_delete_config_files();
+	// Removes WireGuard temporary files
+	wg_delete_temp_files();
 
 	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'no') {
 
@@ -337,6 +337,24 @@ function wg_deinstall() {
 	wg_service_deinstall();
 
 	update_status("done.\n");
+
+}
+
+function wg_delete_temp_files() {
+	global $wgg;
+
+	// Removes WireGuard temporary configuration files
+	wg_delete_config_files();
+
+	// This nukes any lingering .apply files
+	foreach ($wgg['applylist'] as $path) {
+
+		unlink_if_exists($path);
+
+	}
+
+	// Package is uninstalling, so clear lingering dirty status too...
+	clear_subsystem_dirty($wgg['subsystem']);
 
 }
 
