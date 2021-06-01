@@ -62,14 +62,23 @@ if ($_POST) {
 		
 			$input_errors = $res['input_errors'];
 
-			$changes = $res['changes'] ? null : 'nochanges';
+			$changes = $res['changes'];
 	
 			$pconfig = $res['pconfig'];
 	
 			if (empty($input_errors)) {
+
+				if (wg_is_service_running() && $changes) {
+
+					wg_tunnel_resync($res['tun_to_sync']);
+
+				}
+
+				
+				$changes_param = $changes ? null : '?nochanges';
 				
 				// Save was successful
-				header("Location: /wg/vpn_wg_peers.php?{$changes}");
+				header("Location: /wg/vpn_wg_peers.php{$changes}");
 	
 			}
 			
@@ -77,7 +86,7 @@ if ($_POST) {
 
 		case 'genpsk':
 
-				// Process ajax call requesting new pre-shared key
+			// Process ajax call requesting new pre-shared key
 			print(wg_gen_psk());
 
 			exit;

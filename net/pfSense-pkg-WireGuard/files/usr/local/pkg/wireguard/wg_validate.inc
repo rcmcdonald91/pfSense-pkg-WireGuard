@@ -31,11 +31,12 @@ require_once('wireguard/wg_api.inc');
 wg_globals();
 
 // Validate the user's input and return error messages if not acceptable
-function wg_validate_tunnel_post($pconfig, $tun_idx) {
+function wg_validate_tunnel_post($pconfig) {
+
 	$input_errors = array();
 
 	// Assigned tunnels don't need these validation checks
-	if (!is_wg_tunnel_assigned($pconfig)) {
+	if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
 		foreach ($pconfig['addresses']['row'] as $address) {
 
@@ -66,7 +67,7 @@ function wg_validate_tunnel_post($pconfig, $tun_idx) {
 	
 	}
 
-	if (is_wg_tunnel_assigned($pconfig) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
+	if (is_wg_tunnel_assigned($pconfig['name']) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
 
 		$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
 
@@ -97,9 +98,11 @@ function wg_validate_tunnel_post($pconfig, $tun_idx) {
 }
 
 // Valildate a peer
-function wg_validate_peer_post($pconfig, $peer_idx) {
+function wg_validate_peer_post($pconfig) {
 
 	$input_errors = array();
+
+	$peer_idx = wg_get_peer_id($pconfig['publickey'], $pconfig['tun'])
 
 	// Check remote port
 	$rport = $pconfig['port'];
@@ -123,6 +126,8 @@ function wg_validate_peer_post($pconfig, $peer_idx) {
 		$peers = wg_get_tunnel_peers($pconfig['tun']);
 
 		foreach ($peers as $peer) {
+
+			wg_get_peer_id($pconfig['publickey'], $pconfig['tun'])
 
 			// We don't want to allow duplicate public keys to be assigned on the same tunnel
 			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $peer_idx)) {
@@ -165,6 +170,7 @@ function wg_validate_peer_post($pconfig, $peer_idx) {
 	}
 
 	return $input_errors;
+
 }
 
 ?>

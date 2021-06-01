@@ -45,15 +45,23 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (wg_is_service_running()) {
+		if (is_subsystem_dirty($wgg['subsystem'])) {
 
-			$restart_status = wg_service_fpm_restart();
+			if (wg_is_service_running()) {
 
-			$ret_code |= $restart_status['ret_code'];
+				$restart_status = wg_service_fpm_restart();
+
+				$ret_code |= $restart_status['ret_code'];
+
+			}
+
+			if ($ret_code == 0) {
+
+				clear_subsystem_dirty('wireguard');
+
+			}
 
 		}
-
-		clear_subsystem_dirty('wireguard');
 
 	}
 
@@ -65,13 +73,13 @@ if ($_POST) {
 
 			case 'toggle':
 
-				wg_toggle_peer($peer_idx);
+				$input_errors = wg_toggle_peer($peer_idx);
 
 				break;
 
 			case 'delete':
 				
-				wg_delete_peer($peer_idx);
+				$input_errors = wg_delete_peer($peer_idx);
 
 				break;
 
@@ -105,7 +113,7 @@ wg_print_service_warning();
 
 if (isset($_REQUEST['nochanges'])) {
 
-	print_info_box(gettext('No WireGuard configuration changes were made.'), 'success');
+	print_info_box(gettext('No changes to the WireGuard configuration were made.'), 'success');
 
 }
 

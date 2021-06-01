@@ -68,14 +68,23 @@ if ($_POST) {
 		
 			$input_errors = $res['input_errors'];
 
-			$changes = $res['changes'] ? null : 'nochanges';
+			$changes = $res['changes'];
 	
 			$pconfig = $res['pconfig'];
 	
 			if (empty($input_errors)) {
+
+				if (wg_is_service_running() && $changes) {
+
+					// Everything looks good so far, so mark the subsystem dirty for a mandatory service restart
+					mark_subsystem_dirty($wgg['subsystem']);
+
+				}
+
+				$changes_param = $changes ? null : '?nochanges';
 	
 				// Save was successful
-				header("Location: /wg/vpn_wg_tunnels.php?{$changes}");
+				header("Location: /wg/vpn_wg_tunnels.php{$changes_param}");
 	
 			}
 
@@ -187,7 +196,7 @@ $tun_enable = new Form_Checkbox(
 $tun_enable->setHelp('<span class="text-danger">Note: </span>Tunnel must be <b>enabled</b> in order to be assigned to a pfSense interface.');	
 
 // Disable the tunnel enabled button if interface is assigned in pfSense
-if (is_wg_tunnel_assigned($pconfig)) {
+if (is_wg_tunnel_assigned($pconfig['name'])) {
 
 	$tun_enable->setDisabled();
 
@@ -254,7 +263,7 @@ $section = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
 $section->setAttribute('id', 'addresses');
 
-if (!is_wg_tunnel_assigned($pconfig)) {
+if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',

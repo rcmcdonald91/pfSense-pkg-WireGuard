@@ -40,10 +40,12 @@ global $wgg;
 function wg_toggle_tunnel($tunnel_name) {
 	global $wgg;
 
-	$input_errors = array();
-
 	// Make sure we have the latest info
 	wg_globals();
+
+	$changes = false;
+
+	$input_errors = $pconfig = array();
 
 	// Get the config array index
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
@@ -51,28 +53,37 @@ function wg_toggle_tunnel($tunnel_name) {
 	// Make sure we have a valid tunnel in the xml
 	if (isset($wgg['tunnels'][$tun_idx])) {
 
-		$tunnel = $wgg['tunnels'][$tun_idx];
+		$old_config = $wgg['tunnels'][$tun_idx];
 
-		// We can't disable a tunnel assigned to a pfSense interface
-		if (!is_wg_tunnel_assigned($tunnel['name'])) {
+		$enabled = ($tunnel['enabled'] == 'yes')
+
+		if ($enabled && is_wg_tunnel_assigned($old_config['name'])) {
+
+			$input_errors[] = 'Cannot disable a WireGuard tunnel while it is assigned as an interface.';
+
+		}
+
+		if (empty($input_errors)) {
 
 			// Now we toggle the tunnel
-			$wgg['tunnels'][$tun_idx]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
+			$wgg['tunnels'][$tun_idx]['enabled'] = ($old_config['enabled'] == 'yes') ? 'no' : 'yes';
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} toggled.");
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
 
-		} else {
+			// Check if anything actually changed or was this just a clean re-save?
+			if (md5(serialize($old_config)) != md5(serialize($wgg['tunnels'][$tun_idx]))) {
 
-			$action_txt = ($tunnel['enabled'] == 'yes') ? 'disable' : 'enable';
+				// Config hashes mismatched, so we've got changes...
+				$changes = true;
 
-			$input_errors[] = "Cannot {$action_txt} a WireGuard tunnel while it is assigned as an interface.";
+			}
 
 		}
 
 	}
 
-	return $input_errors;
+	return array('input_errors' => $input_errors, 'changes' => $changes);
 
 }
 
@@ -112,15 +123,16 @@ function wg_delete_peer($peer_id) {
 	if (isset($wgg['peers'][$peer_id])) {
 
 		// We need to save this because we are about to unset it
-		$tmp_peer = $wgg['peers'][$peer_id];
+		$tunnel_name = $wgg['peers'][$peer_id]['tun'];
 
+		// Delete the peer
 		unset($wgg['peers'][$peer_id]);
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} deleted.");
 
 		// Sync with the WireGuard backend
-		wg_resync_peer($tmp_peer);
+		wg_resync_tunnel($tunnel_name);
 
 	}
 
@@ -135,6 +147,10 @@ function wg_delete_tunnel($tunnel_name) {
 	// Make sure we have the latest info
 	wg_globals();
 
+	$changes = false;
+
+	$input_errors = array();
+
 	// Get the config array index
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -144,23 +160,27 @@ function wg_delete_tunnel($tunnel_name) {
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
 		// We can't delete assigned tunnels
-		if (!is_wg_tunnel_assigned($tunnel['name'])) {
+		if (is_wg_tunnel_assigned($tunnel['name'])) {
+
+			$input_errors[] = 'Cannot delete a WireGuard tunnel assigned to a pfSense interface.';
+
+		}
+
+		if (empty($input_errors)) {
 
 			// Delete the tunnel
 			unset($wgg['tunnels'][$tun_idx]);
 
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
-		
-		} else {
 
-			$input_errors[] = "Cannot delete a WireGuard tunnel assigned to a pfSense interface.";
+			$changes = true;
 
 		}
 
 	}
 
-	return $input_errors;
+	return array('input_errors' => $input_errors, 'changes' => $changes);
 
 }
 
@@ -266,6 +286,7 @@ function wg_do_peer_post($post) {
 
 	$pconfig = $input_errors = array();
 
+	// Assume no changes will be made...
 	$changes = false;
 
 	$peer_idx = $post['index'];
@@ -302,7 +323,7 @@ function wg_do_peer_post($post) {
 
 	}
 
-	$input_errors = wg_validate_peer_post($pconfig, $peer_idx);
+	$input_errors = wg_validate_peer_post($pconfig);
 
 	if (empty($input_errors)) {
 
@@ -311,20 +332,14 @@ function wg_do_peer_post($post) {
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
 
-		// Only need to restart if the service was already running
-		if (wg_is_service_running()) {
+		// Check if anything actually changed or was this just a clean re-save?
+		if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
 
-			// Check if anything actually changed or was this just a clean re-save?
-			if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
-
-				$changes = true;
-
-			}
+			// Config hashes mismatched, so we've got changes...
+			$changes = true;
 
 		}
 
-		// Sync with WireGuard backend
-		wg_resync_peer($pconfig);
 
 	}
 
@@ -342,6 +357,7 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig = $input_errors = array();
 
+	// Assume no changes will be made...
 	$changes = false;
 
 	$tun_idx = $post['index'];
@@ -376,17 +392,11 @@ function wg_do_tunnel_post($post) {
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Tunnel {$pconfig['name']} updated.");
 
-		// Only need to restart if the service was already running
-		if (wg_is_service_running()) {
+		// Check if anything actually changed or was this just a clean re-save?
+		if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
 
-			// Check if anything actually changed or was this just a clean re-save?
-			if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
-
-				$changes = true;
-	
-				mark_subsystem_dirty($wgg['subsystem']);
-
-			}
+			// Config hashes mismatched, so we've got changes...
+			$changes = true;
 
 		}
 
@@ -396,39 +406,98 @@ function wg_do_tunnel_post($post) {
 
 }
 
-function wg_resync_peer($peer) {
+/*
+ * This resyncs (i.e. wg syncconf) all configured tunnel interfaces
+ */
+function wg_tunnel_resync_all() {
 	global $wgg;
 
-	// Create new configuration files
-	wg_create_config_files();
+	$ret_tunnels = array();
 
-	// Sync the configuration with the tunnel interface
-	wg_interface_syncconf($peer['tun']);
+	// Let's assume everything will be fine
+	$ret_code = 0;
 
-}
+	wg_resync();
 
-function wg_resync() {
-	global $wgg;
+	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
 
-	// Create WireGuard configuration files
-	wg_create_config_files();
+		// Resync each tunnel
+		foreach ($wgg['tunnels'] as $tunnel) {
+			
+			$build_status = wg_tunnel_resync($tunnel['name']);
 
-	// Update the Unbound ACL
-	wg_unbound_acl_update();
+			// Build an aggregated return code
+			$ret_code |= $build_status['ret_code'];
 
-	// We don't want active tunnels when the service isn't running...
-	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
+			$ret_tunnels[] = array(
+						'name' => $tunnel['name'],
+						'ret_code' => $build_status['ret_code'], 
+						'errors' => $build_status['errors'],
+						'config' => $build_status['config']);
 
-		wg_destroy_tunnels();
+		}
 
 	}
 
+	return array('ret_code' => $ret_code, 'tunnels' => $ret_tunnels);
+
 }
 
+/*
+ * This resyncs (i.e. wg syncconf) a specific tunnel interface by name
+ */
+function wg_tunnel_resync($tunnel_name) {
+	global $wgg;
+
+	wg_globals();
+
+	$ret_code = 0;
+
+	$errors = $tunnel = array();
+
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+
+	if (!isset($wgg['tunnels'][$tun_idx])) {
+		
+		$ret_code |= WG_ERROR_WG_ERROR_IF_NAME;
+	
+	}
+	
+	if (isset($wgg['tunnels'][$tun_idx])) {
+
+		$tunnel = $wgg['tunnels'][$tun_idx];
+
+		// Sync interface with WireGuard wg(8)
+		if (wg_interface_syncconf($tunnel['name']) <> 0) {
+
+			$ret_code |= WG_ERROR_IF_SYNC;
+		
+		}
+
+	}
+
+	// Now collect the errors...
+	foreach ($wgg['error_flags']['tunnel'] as $error_mask => $error_text) {
+
+		if (($ret_code & $error_mask) > 0) {
+
+			$errors[$error_mask] = $error_text;
+
+		}
+
+	}
+
+	return array('name' => $tunnel_name, 'ret_code' => $ret_code, 'errors' => $errors, 'config' => $tunnel);
+
+}
+
+/*
+ * This builds all configured tunnel interfaces
+ */
 function wg_tunnel_build_all() {
 	global $wgg;
 
-	$ret_array = $ret_tunnels = array();
+	$ret_tunnels = array();
 
 	// Let's assume everything will be fine
 	$ret_code = 0;
@@ -440,13 +509,13 @@ function wg_tunnel_build_all() {
 		// Build each tunnel
 		foreach ($wgg['tunnels'] as $tunnel) {
 			
-			$build_status = wg_tunnel_build($tunnel['name'], true);
+			$build_status = wg_tunnel_build($tunnel['name']);
 
 			// Build an aggregated return code
 			$ret_code |= $build_status['ret_code'];
 
 			$ret_tunnels[] = array(
-						'name' => $build_status['name'],
+						'name' => $tunnel['name'],
 						'ret_code' => $build_status['ret_code'], 
 						'errors' => $build_status['errors'],
 						'config' => $build_status['config']);
@@ -462,7 +531,6 @@ function wg_tunnel_build_all() {
 
 }
 
-
 /*
  * This builds a specific tunnel interface by name
  */
@@ -473,7 +541,7 @@ function wg_tunnel_build($tunnel_name) {
 
 	$ret_code = 0;
 
-	$tunnel = array();
+	$errors = $tunnel = array();
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -535,8 +603,7 @@ function wg_tunnel_build($tunnel_name) {
 
 	}
 
-	$errors = array();
-
+	// Now collect the errors...
 	foreach ($wgg['error_flags']['tunnel'] as $error_mask => $error_text) {
 
 		if (($ret_code & $error_mask) > 0) {
@@ -548,6 +615,24 @@ function wg_tunnel_build($tunnel_name) {
 	}
 
 	return array('name' => $tunnel_name, 'ret_code' => $ret_code, 'errors' => $errors, 'config' => $tunnel);
+
+}
+
+function wg_resync() {
+	global $wgg;
+
+	// Create WireGuard configuration files
+	wg_create_config_files();
+
+	// Update the Unbound ACL
+	wg_unbound_acl_update();
+
+	// We don't want active tunnels when the service isn't running...
+	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
+
+		wg_destroy_tunnels();
+
+	}
 
 }
 

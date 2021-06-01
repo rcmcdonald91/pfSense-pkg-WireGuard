@@ -46,15 +46,23 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (wg_is_service_running()) {
+		if (is_subsystem_dirty($wgg['subsystem'])) {
 
-			$restart_status = wg_service_fpm_restart();
+			if (wg_is_service_running()) {
 
-			$ret_code |= $restart_status['ret_code'];
+				$restart_status = wg_service_fpm_restart();
+
+				$ret_code |= $restart_status['ret_code'];
+
+			}
+
+			if ($ret_code == 0) {
+
+				clear_subsystem_dirty('wireguard');
+
+			}
 
 		}
-
-		clear_subsystem_dirty('wireguard');
 
 	}
 
@@ -62,35 +70,43 @@ if ($_POST) {
 
 		$tun_name = $_POST['tun'];
 
-		switch ($_POST['act']) {
+		if (isset($_POST['act'])) {
 
-			case 'toggle':
-				
-				$input_errors = wg_toggle_tunnel($tun_name);
-				
-				break;
+			switch ($_POST['act']) {
 
-			case 'delete':
+				case 'toggle':
+					
+					$res = wg_toggle_tunnel($tun_name);
+					
+					break;
 
-				$input_errors = wg_delete_tunnel($tun_name);
+				case 'delete':
 
-				break;
+					$res = wg_delete_tunnel($tun_name);
 
-			default:
+					break;
 
-				// Shouldn't be here, so bail out.
-				header("Location: /wg/vpn_wg_tunnels.php");
+				default:
 
-				break;
+					// Shouldn't be here, so bail out.
+					header("Location: /wg/vpn_wg_tunnels.php");
 
-		}
+					break;
 
-		if (empty($input_errors)) {
+			}
 
-			if (wg_is_service_running()) {
+			$input_errors = $res['input_errors'];
 
-				mark_subsystem_dirty($wgg['subsystem']);
+			$changes = $res['changes'];
+
+			if (empty($input_errors)) {
+
+				if (wg_is_service_running() && $changes) {
+
+					mark_subsystem_dirty($wgg['subsystem']);
 	
+				}
+
 			}
 
 		}
@@ -116,7 +132,7 @@ wg_print_service_warning();
 
 if (isset($_REQUEST['nochanges'])) {
 
-	print_info_box(gettext('No WireGuard configuration changes were made.'), 'success');
+	print_info_box(gettext('No changes to the WireGuard configuration were made.'), 'success');
 
 }
 
