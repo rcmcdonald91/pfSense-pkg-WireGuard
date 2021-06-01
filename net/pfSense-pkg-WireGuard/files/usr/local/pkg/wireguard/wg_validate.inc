@@ -127,8 +127,6 @@ function wg_validate_peer_post($pconfig) {
 
 		foreach ($peers as $peer) {
 
-			wg_get_peer_id($pconfig['publickey'], $pconfig['tun'])
-
 			// We don't want to allow duplicate public keys to be assigned on the same tunnel
 			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $peer_idx)) {
 
