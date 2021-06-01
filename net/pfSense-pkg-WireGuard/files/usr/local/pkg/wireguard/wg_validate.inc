@@ -102,7 +102,7 @@ function wg_validate_peer_post($pconfig) {
 
 	$input_errors = array();
 
-	$peer_idx = wg_get_peer_id($pconfig['publickey'], $pconfig['tun'])
+	$peer_idx = wg_get_peer_id($pconfig['publickey'], $pconfig['tun']);
 
 	// Check remote port
 	$rport = $pconfig['port'];
