@@ -47,7 +47,7 @@ if ($_POST) {
 
 		if (wg_is_service_running()) {
 
-			$restart_status = wg_service_web_restart();
+			$restart_status = wg_service_fpm_restart();
 
 			$ret_code |= $restart_status['ret_code'];
 
