@@ -45,4 +45,6 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
 
-## Sponsors ✨
+## Recognition
+
+\*** "WireGuard" and the "WireGuard" logo are registered trademarks of Jason A. Donenfeld.
