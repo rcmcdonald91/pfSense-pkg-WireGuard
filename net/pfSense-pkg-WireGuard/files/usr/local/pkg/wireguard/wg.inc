@@ -398,11 +398,64 @@ function wg_do_tunnel_post($post) {
 			// Config hashes mismatched, so we've got changes...
 			$changes = true;
 
+			// Add tunnel to the list to apply
+			wg_apply_list_append($pconfig['name'], 'tunnels'));
+
 		}
 
 	}
 
 	return array('input_errors' => $input_errors, 'changes' => $changes, 'pconfig' => $pconfig);
+
+}
+
+function wg_apply_list_get($list, $delete_after_get = true) {
+	global $wgg;
+
+	$toapplylist = array();
+
+	if (isset($wgg['applylist'][$list])) {
+
+		$listpath = $wgg['applylist'][$list];
+
+		if (file_exists($listpath)) {
+
+			$toapplylist = unserialize(file_get_contents($listpath));
+
+		}
+
+		if ($delete_after_get) {
+
+			unlink_if_exists($listpath);
+
+		}
+
+	}
+
+	return $toapplylist;
+
+}
+
+function wg_apply_list_append($entry, $list) {
+	global $wgg;
+
+	$toapplylist = array();
+
+	if (isset($wgg['applylist'][$list])) {
+
+		$listpath = $wgg['applylist'][$list];
+
+		if (file_exists($listpath) {
+
+			$toapplylist = unserialize(file_get_contents($listpath));
+
+		}
+
+		$toapplylist[] = $entry;
+
+		file_put_contents($path, serialize($toapplylist));
+
+	}
 
 }
 
@@ -492,49 +545,72 @@ function wg_tunnel_resync($tunnel_name) {
 }
 
 /*
- * This builds all configured tunnel interfaces
+ * This builds configured tunnel interfaces
+ * If $tunnels is empty, this will (re)build all tunnels.
  */
-function wg_tunnel_build_all() {
+function wg_tunnel_build($tunnel_names = null) {
 	global $wgg;
 
-	$ret_tunnels = array();
+	$tunnels = array();
 
 	// Let's assume everything will be fine
 	$ret_code = 0;
 
+	// Fetch and build latest config files
 	wg_resync();
 
-	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
+	// This is only necessary if the sevice is running
+	if (wg_is_service_running()) {
+
+		// Should we build all the tunnels?
+		if (is_null($tunnel_names) || !is_array($tunnel_names)) {
+
+			// Are there any tunnels to build?
+			if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
+
+				$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
+			
+			}
+
+				// Nope...
+				$tunnel_names = array();
+
+			}
+
+		}
 
 		// Build each tunnel
-		foreach ($wgg['tunnels'] as $tunnel) {
-			
-			$build_status = wg_tunnel_build($tunnel['name']);
+		foreach ($tunnel_names as $tunnel_name) {
 
-			// Build an aggregated return code
-			$ret_code |= $build_status['ret_code'];
+			$tun_idx = wg_get_tunnel_array_index($tunnel_name)
 
-			$ret_tunnels[] = array(
-						'name' => $tunnel['name'],
-						'ret_code' => $build_status['ret_code'], 
-						'errors' => $build_status['errors'],
-						'config' => $build_status['config']);
+			if (isset($wgg['tunnels'][$tun_idx])) {
+
+				$tun_build_status = wg_tunnel_build_by_name($tunnel_name);
+
+				// Build an aggregated return code
+				$ret_code |= $tun_build_status['ret_code'];
+
+				$tunnels[] = array(
+						'name' => $tunnel_name,
+						'ret_code' => $tun_build_status['ret_code'], 
+						'errors' => $tun_build_status['errors'],
+						'config' => $tun_build_status['config']);
+
+			}
 
 		}
 
 	}
 
-	// If we are here, the subsystem is by definition not dirty
-	clear_subsystem_dirty($wgg['subsystem']);
-
-	return array('ret_code' => $ret_code, 'tunnels' => $ret_tunnels);
+	return array('ret_code' => $ret_code, 'tunnels' => $tunnels);
 
 }
 
 /*
  * This builds a specific tunnel interface by name
  */
-function wg_tunnel_build($tunnel_name) {
+function wg_tunnel_build_by_name($tunnel_name) {
 	global $wgg;
 
 	wg_globals();

@@ -76,15 +76,13 @@ if ($_POST) {
 
 				if (wg_is_service_running() && $changes) {
 
-					// Everything looks good so far, so mark the subsystem dirty for a mandatory service restart
+					// Everything looks good so far, so mark the subsystem dirty
 					mark_subsystem_dirty($wgg['subsystem']);
 
 				}
-
-				$changes_param = $changes ? null : '?nochanges';
 	
 				// Save was successful
-				header("Location: /wg/vpn_wg_tunnels.php{$changes_param}");
+				header("Location: /wg/vpn_wg_tunnels.php");
 	
 			}
 
