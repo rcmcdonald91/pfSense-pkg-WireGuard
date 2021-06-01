@@ -74,7 +74,7 @@ function wg_toggle_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} {$action_txt}.");
 
-			// Changes were made
+			// We've got meaningful changes...
 			$changes = true;
 
 			// Add tunnel to the list to apply
@@ -125,7 +125,7 @@ function wg_toggle_peer($peer_idx) {
 			// This checks if the peer tunnel is a valid tunnel
 			if (in_array($peer['tun'], $tunnel_names)) {
 
-				// Changes were made
+				// We've got meaningful changes...
 				$changes = true;
 
 				// Add peer's tunnel to the list to apply
@@ -173,7 +173,7 @@ function wg_delete_peer($peer_idx) {
 			// This checks if the peer's tunnel was a valid tunnel
 			if (in_array($peer['tun'], $tunnel_names)) {
 
-				// Changes were made
+				// We've got meaningful changes...
 				$changes = true;
 
 				// Add peer's tunnel to the list to apply
@@ -225,7 +225,7 @@ function wg_delete_tunnel($tunnel_name) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
 
-			// Changes were made
+			// We've got meaningful changes...
 			$changes = true;
 
 			// Add tunnel to the list to apply
@@ -390,13 +390,13 @@ function wg_do_peer_post($post) {
 		// Check if anything actually changed or was this just a clean re-save?
 		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
 
-			// Config hashes mismatched, so we've got changes...
-			$changes = true;
-
 			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
 			// This checks if the pconfig tunnel is a valid tunnel
 			if (in_array($pconfig['tun'], $tunnel_names)) {
+
+				// We've got meaningful changes...
+				$changes = true;
 
 				// Add peer's tunnel to the list to apply
 				wg_apply_list_add($pconfig['tun'], 'tunnels');
@@ -404,8 +404,16 @@ function wg_do_peer_post($post) {
 			// Now try the old_config tunnel...
 			} elseif (in_array($old_config['tun'], $tunnel_names)) {
 
+				// We've got meaningful changes...
+				$changes = true;
+
 				// Add peer's tunnel to the list to apply
 				wg_apply_list_add($old_config['tun'], 'tunnels');
+
+			// Looks like we are just resaving an unassigned peer...
+			} else {
+
+				$changes = false;
 
 			}
  
@@ -465,7 +473,7 @@ function wg_do_tunnel_post($post) {
 		// Check if anything actually changed or was this just a clean re-save?
 		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
 
-			// Config hashes mismatched, so we've got changes...
+			// We've got meaningful changes...
 			$changes = true;
 
 			// Add tunnel to the list to apply
