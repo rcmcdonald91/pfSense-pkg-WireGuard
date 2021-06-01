@@ -85,12 +85,14 @@ if (isset($argv[1])) {
 }
 
 // This is a wrapper for safely calling from web frontend
-function wg_service_web_restart() {
+function wg_service_fpm_restart() {
 	global $wgg;
+
+	$start_status = $stop_status = array();
 
 	if (wg_is_service_running()) {
 
-		$stop_status = wg_service_web_stop();
+		$stop_status = wg_service_fpm_stop();
 
 		if ($stop_status['ret_code'] <> 0) {
 
@@ -100,24 +102,29 @@ function wg_service_web_restart() {
 
 	}
 
-	$start_status = wg_service_web_start();
+	$start_status = wg_service_fpm_start();
 
 	return $start_status;
 
 }
 
 // This is a wrapper for safely calling from web frontend
-function wg_service_web_stop() {
+function wg_service_fpm_stop() {
 	global $wgg;
 
-	$serialized_output = array();
+	$serialized_output = $ret_output = array();
 
 	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output, $ret_code);
+	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output);
 
-	$unserialized_output = unserialize($serialized_output[0]);
+	if ($ret_output = unserialize($serialized_output[0])) {
 
-	return $unserialized_output;
+		return $ret_output;
+
+	}
+
+	// Consumers expect an array...
+	return array();
 
 }
 
@@ -127,40 +134,43 @@ function wg_service_cli_stop($serialize_output = true) {
 
 	$ret_code = 0;
 
-	$service_stop_error = (!wg_is_cli());
+	if (!wg_is_cli()) {
 
-	if ($service_stop_error) {
-
-		$ret_code |= $service_stop_error << 1;
+		$ret_code |= WG_ERROR_SVC_STOP;
 
 		wg_service_error_handler($ret_code, $serialize_output);
 
+		// Terminate early...
 		return $ret_code;
 
 	}
 
 	// Need to wait here for just a second...
-	$ret_code |= killbypid($wgg['pid_path'], 1) << 1;
-	
-	wg_service_error_handler($ret_code, $serialize_output);
+	if (killbypid($wgg['pid_path'], 1) <> 0) {
+
+		$ret_code |= WG_ERROR_SVC_STOP;
+
+		wg_service_error_handler($ret_code, $serialize_output);
+
+	}
 
 	return $ret_code;
 
 }
 
 // This is a wrapper for safely calling from the web frontend
-function wg_service_web_start() {
+function wg_service_fpm_start() {
 	global $wgg;
 
-	$serialized_output = array();
+	$serialized_output = $ret_output = array();
 
 	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
 	exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
 
 	// Catch unserialization results before returning
-	if ($unserialized_output = unserialize($serialized_output[0])) {
+	if ($ret_output = unserialize($serialized_output[0])) {
 
-		return $unserialized_output;
+		return $ret_output;
 
 	}
 
@@ -178,11 +188,19 @@ function wg_service_cli_start($serialize_output = true) {
 	
 	$ret_code = 0;
 
-	$service_start_error = (!wg_is_cli() || wg_is_service_running());
+	if (!wg_is_cli()) {
 
-	if ($service_start_error) {
+		$ret_code |= WG_ERROR_SVC_START;
 
-		$ret_code |= $service_start_error << 0;
+		wg_service_error_handler($ret_code, $serialize_output);
+
+		return $ret_code;
+
+	}
+
+	if (wg_is_service_running()) {
+
+		$ret_code |= WG_ERROR_SVC_RUNNING;
 
 		wg_service_error_handler($ret_code, $serialize_output);
 
@@ -198,7 +216,7 @@ function wg_service_cli_start($serialize_output = true) {
 		// This absolutely needs to be a file on disk to remain accessible between process instances
 		mark_subsystem_dirty('wireguard_firststart');
 
-		// Output during booting must be STDERR
+		// Output during booting must be STDERR for some reason
 		fwrite(STDERR, "Configuring WireGuard tunnels...");
 
 		// Supresses ifconfig spew 
@@ -209,7 +227,11 @@ function wg_service_cli_start($serialize_output = true) {
 	// Build the tunnels
 	$build_all_status = wg_tunnel_build_all();
 
-	$ret_code |= ($build_all_status['ret_code'] <> 0) << 2;
+	if ($build_all_status['ret_code'] <> 0 ) {
+
+		$ret_code |= WG_ERROR_SVC_BUILD;
+
+	}
 
 	if (platform_booting()) {
 
@@ -224,11 +246,9 @@ function wg_service_cli_start($serialize_output = true) {
 	// Now, the initial fork...
 	$newpid = pcntl_fork();
 
-	$service_start_error = ($newpid === -1);
+	if ($newpid === -1) {
 
-	if ($service_start_error) {
-
-		$ret_code |= $service_start_error << 0;
+		$ret_code |= WG_ERROR_SVC_START;
 
 		wg_destroy_tunnels();
 
@@ -352,41 +372,6 @@ function wg_service_daemon() {
 
 }
 
-function wg_service_install() {
-	global $wgg;
-
-	link($wgg['php'], $wgg['php_wg']);
-
-}
-
-function wg_service_deinstall() {
-	global $wgg;
-
-	wg_service_web_stop();
-
-	unlink_if_exists($wgg['php_wg']);
-
-}
-
-function wg_service_rcfile() {
-	global $wgg;
-
-	$start = $stop = array();
-
-	$start[] = "{$wgg['wg_daemon']} start";
-
-	$stop[] = "{$wgg['wg_daemon']} stop";
-
-	$rcfile['file'] 	= 'wireguardd';
-
-	$rcfile['start'] 	= implode("\n\t", $start);
-
-	$rcfile['stop'] 	= implode("\n\t", $stop);
-
-	write_rcfile($rcfile);
-
-}
-
 function wg_deregister_service_env() {
 	global $h_lock, $wgg;
 
@@ -468,7 +453,7 @@ function wg_daemon_sig_handler($signo) {
 }
 
 function wg_service_error_handler($ret_code, $serialize_output = true, $extras = array()) {
-	global $g, $wgg;
+	global $wgg;
 
 	$errors = array();
 
@@ -482,7 +467,7 @@ function wg_service_error_handler($ret_code, $serialize_output = true, $extras =
 
 			} else {
 
-				fwrite(STDOUT, "{$error_text}\n");
+				fwrite(STDERR, "{$error_text}\n");
 
 			}
 

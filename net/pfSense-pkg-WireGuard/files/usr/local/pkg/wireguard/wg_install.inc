@@ -66,8 +66,6 @@ function wg_install() {
 	// Creating service
 	wg_service_install();
 
-	wg_service_rcfile();
-
 	update_status("done.\n");
 
 }
@@ -339,6 +337,43 @@ function wg_deinstall() {
 	wg_service_deinstall();
 
 	update_status("done.\n");
+
+}
+
+function wg_service_rcfile() {
+	global $wgg;
+
+	$start = $stop = array();
+
+	$start[] = "{$wgg['wg_daemon']} start";
+
+	$stop[] = "{$wgg['wg_daemon']} stop";
+
+	$rcfile['file'] 	= 'wireguardd';
+
+	$rcfile['start'] 	= implode("\n\t", $start);
+
+	$rcfile['stop'] 	= implode("\n\t", $stop);
+
+	write_rcfile($rcfile);
+
+}
+
+function wg_service_install() {
+	global $wgg;
+
+	wg_service_rcfile();
+
+	link($wgg['php'], $wgg['php_wg']);
+
+}
+
+function wg_service_deinstall() {
+	global $wgg;
+
+	wg_service_fpm_stop();
+
+	unlink_if_exists($wgg['php_wg']);
 
 }
 
