@@ -61,13 +61,15 @@ if ($_POST) {
 			$res = wg_do_peer_post($_POST);
 		
 			$input_errors = $res['input_errors'];
+
+			$changes = $res['changes'] ? null : 'nochanges';
 	
 			$pconfig = $res['pconfig'];
 	
 			if (empty($input_errors)) {
 				
 				// Save was successful
-				header("Location: /wg/vpn_wg_peers.php");
+				header("Location: /wg/vpn_wg_peers.php?{$changes}");
 	
 			}
 			
