@@ -399,7 +399,7 @@ function wg_do_tunnel_post($post) {
 			$changes = true;
 
 			// Add tunnel to the list to apply
-			wg_apply_list_append($pconfig['name'], 'tunnels'));
+			wg_apply_list_append($pconfig['name'], 'tunnels');
 
 		}
 
