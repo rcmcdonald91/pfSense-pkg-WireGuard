@@ -225,9 +225,9 @@ function wg_service_cli_start($serialize_output = true) {
 	}
 
 	// Build all (null) the tunnels
-	$build_all_status = wg_tunnel_build(null);
+	$sync_all_status = wg_tunnel_sync(null);
 
-	if ($build_all_status['ret_code'] <> 0 ) {
+	if ($sync_all_status['ret_code'] <> 0 ) {
 
 		$ret_code |= WG_ERROR_SVC_BUILD;
 
@@ -258,7 +258,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 	} elseif ($newpid) {
 
-		wg_service_error_handler($ret_code, $serialize_output, array('build_all' => $build_all_status));
+		wg_service_error_handler($ret_code, $serialize_output, array('sync_all_status' => $sync_all_status));
 
 		return $ret_code;
 

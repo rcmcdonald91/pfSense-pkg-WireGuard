@@ -52,9 +52,9 @@ if ($_POST) {
 
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-				$build_status = wg_tunnel_build($tunnels_to_apply);
+				$sync_status = wg_tunnel_sync($tunnels_to_apply);
 
-				$ret_code |= $build_status['ret_code'];
+				$ret_code |= $sync_status['ret_code'];
 
 			}
 
