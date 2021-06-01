@@ -266,9 +266,12 @@ function wg_do_peer_post($post) {
 
 	$pconfig = $input_errors = array();
 
+	$changes = false;
+
 	$peer_idx = $post['index'];
 
-	$pconfig = $wgg['peers'][$peer_idx];
+	// We need to save the "old config" to compare against later...
+	$pconfig = $old_config = $wgg['peers'][$peer_idx];
 
 	wg_init_config_arr($pconfig, array('allowedips', 'row'));
 
@@ -308,12 +311,24 @@ function wg_do_peer_post($post) {
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_names'][0]}] Peer {$pconfig['descr']} updated.");
 
+		// Only need to restart if the service was already running
+		if (wg_is_service_running()) {
+
+			// Check if anything actually changed or was this just a clean re-save?
+			if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
+
+				$changes = true;
+
+			}
+
+		}
+
 		// Sync with WireGuard backend
 		wg_resync_peer($pconfig);
 
 	}
 
-	return array('input_errors' => $input_errors, 'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'pconfig' => $pconfig);
 
 }
 
@@ -326,6 +341,8 @@ function wg_do_tunnel_post($post) {
 	wg_globals();
 
 	$pconfig = $input_errors = array();
+
+	$changes = false;
 
 	$tun_idx = $post['index'];
 
@@ -362,8 +379,10 @@ function wg_do_tunnel_post($post) {
 		// Only need to restart if the service was already running
 		if (wg_is_service_running()) {
 
-			// Check if anything actually changed or was this a clean re-save?
+			// Check if anything actually changed or was this just a clean re-save?
 			if (md5(serialize($old_config)) != md5(serialize($pconfig))) {
+
+				$changes = true;
 	
 				mark_subsystem_dirty($wgg['subsystem']);
 
@@ -373,7 +392,7 @@ function wg_do_tunnel_post($post) {
 
 	}
 
-	return array('input_errors' => $input_errors, 'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'pconfig' => $pconfig);
 
 }
 
