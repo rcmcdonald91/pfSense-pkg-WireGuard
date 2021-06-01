@@ -458,7 +458,7 @@ function wg_tunnel_build($tunnel_name) {
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-	if ((!isset($wgg['tunnels'][$tun_idx])) {
+	if (!isset($wgg['tunnels'][$tun_idx])) {
 		
 		$ret_code |= WG_ERROR_WG_ERROR_IF_NAME;
 	
