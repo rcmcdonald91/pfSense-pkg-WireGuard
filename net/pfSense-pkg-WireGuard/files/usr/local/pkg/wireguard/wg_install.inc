@@ -398,9 +398,10 @@ function wg_service_deinstall() {
 function wg_destroy_tunnels() {
 	global $wgg;
 
-	$tunnels_to_destroy = wg_get_real_ifs();
-
 	$ret_code = 0;
+
+	// We only care about the ones in the running state
+	$tunnels_to_destroy = wg_get_real_ifs();
 
 	// Tear down interfaces
 	foreach ($tunnels_to_destroy as $tunnel) {
