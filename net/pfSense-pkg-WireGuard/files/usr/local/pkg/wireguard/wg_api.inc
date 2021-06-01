@@ -126,6 +126,7 @@ function wg_status_json($pretty = false) {
 
 }
 
+// Returns a peer array index by public key and tunnel name
 function wg_get_peer_id($public_key, $tunnel_name) {
 	global $wgg;
 
@@ -619,21 +620,11 @@ function next_wg_if() {
 }
 
 // Check if wg tunnel is assigned to an interface
-function is_wg_tunnel_assigned($tunnel, $disabled = true) {
-
-	// Assume we have an interface first
-	$wg_ifname = $tunnel;
-
-	// Looks like we have a tunnel structure
-	if (is_array($tunnel) && isset($tunnel['name'])) {
-
-		$wg_ifname = $tunnel['name'];
-
-	}
+function is_wg_tunnel_assigned($tunnel_name, $disabled = true) {
 
 	$if_list = get_configured_interface_list_by_realif($disabled);
 
-	$is_assigned = array_key_exists($wg_ifname, $if_list);
+	$is_assigned = array_key_exists($tunnel_name, $if_list);
 
 	return $is_assigned;
 	

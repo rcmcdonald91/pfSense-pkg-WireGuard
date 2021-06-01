@@ -46,15 +46,23 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (wg_is_service_running()) {
+		if (is_subsystem_dirty($wgg['subsystem'])) {
 
-			$restart_status = wg_service_fpm_restart();
+			if (wg_is_service_running()) {
 
-			$ret_code |= $restart_status['ret_code'];
+				$restart_status = wg_service_fpm_restart();
+
+				$ret_code |= $restart_status['ret_code'];
+
+			}
+
+			if ($ret_code == 0) {
+
+				clear_subsystem_dirty('wireguard');
+
+			}
 
 		}
-
-		clear_subsystem_dirty('wireguard');
 
 	}
 
