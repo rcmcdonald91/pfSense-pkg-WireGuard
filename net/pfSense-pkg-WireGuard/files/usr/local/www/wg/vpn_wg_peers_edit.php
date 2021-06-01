@@ -70,7 +70,8 @@ if ($_POST) {
 
 				if (wg_is_service_running() && $changes) {
 
-					wg_tunnel_resync($res['tun_to_sync']);
+					// Everything looks good so far, so mark the subsystem dirty
+					mark_subsystem_dirty($wgg['subsystem']);
 
 				}
 

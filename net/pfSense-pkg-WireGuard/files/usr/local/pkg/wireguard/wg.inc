@@ -78,7 +78,7 @@ function wg_toggle_tunnel($tunnel_name) {
 			$changes = true;
 
 			// Add tunnel to the list to apply
-			wg_apply_list_append($tunnel['name'], 'tunnels');
+			wg_apply_list_add($tunnel['name'], 'tunnels');
 
 		}
 
@@ -120,16 +120,16 @@ function wg_toggle_peer($peer_idx) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_id} {$action_text}.");
 
-			// Changes were made
-			$changes = true;
-
 			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
 			// This checks if the peer tunnel is a valid tunnel
 			if (in_array($peer['tun'], $tunnel_names)) {
 
+				// Changes were made
+				$changes = true;
+
 				// Add peer's tunnel to the list to apply
-				wg_apply_list_append($peer['tun'], 'tunnels');
+				wg_apply_list_add($peer['tun'], 'tunnels');
 
 			}
 
@@ -168,16 +168,16 @@ function wg_delete_peer($peer_idx) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_names'][0]}] Peer {$peer_idx} deleted.");
 
-			// Changes were made
-			$changes = true;
-
 			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
-			// This checks if the peer tunnel is a valid tunnel
+			// This checks if the peer's tunnel was a valid tunnel
 			if (in_array($peer['tun'], $tunnel_names)) {
 
+				// Changes were made
+				$changes = true;
+
 				// Add peer's tunnel to the list to apply
-				wg_apply_list_append($peer['tun'], 'tunnels');
+				wg_apply_list_add($peer['tun'], 'tunnels');
 
 			}
 
@@ -229,7 +229,7 @@ function wg_delete_tunnel($tunnel_name) {
 			$changes = true;
 
 			// Add tunnel to the list to apply
-			wg_apply_list_append($tunnel['name'], 'tunnels');
+			wg_apply_list_add($tunnel['name'], 'tunnels');
 
 		}
 
@@ -399,13 +399,13 @@ function wg_do_peer_post($post) {
 			if (in_array($pconfig['tun'], $tunnel_names)) {
 
 				// Add peer's tunnel to the list to apply
-				wg_apply_list_append($pconfig['tun'], 'tunnels');
+				wg_apply_list_add($pconfig['tun'], 'tunnels');
 
 			// Now try the old_config tunnel...
 			} elseif (in_array($old_config['tun'], $tunnel_names)) {
 
 				// Add peer's tunnel to the list to apply
-				wg_apply_list_append($old_config['tun'], 'tunnels');
+				wg_apply_list_add($old_config['tun'], 'tunnels');
 
 			}
  
@@ -469,7 +469,7 @@ function wg_do_tunnel_post($post) {
 			$changes = true;
 
 			// Add tunnel to the list to apply
-			wg_apply_list_append($pconfig['name'], 'tunnels');
+			wg_apply_list_add($pconfig['name'], 'tunnels');
 
 		}
 
@@ -506,7 +506,7 @@ function wg_apply_list_get($list, $delete_after_get = true) {
 
 }
 
-function wg_apply_list_append($entry, $list) {
+function wg_apply_list_add($entry, $list) {
 	global $wgg;
 
 	$toapplylist = array();
@@ -521,7 +521,11 @@ function wg_apply_list_append($entry, $list) {
 
 		}
 
-		$toapplylist[] = $entry;
+		if (!in_array($entry, $toapplylist)) {
+
+			$toapplylist[] = $entry;
+
+		}
 
 		file_put_contents($listpath, serialize($toapplylist));
 
