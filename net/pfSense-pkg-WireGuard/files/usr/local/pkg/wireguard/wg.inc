@@ -43,9 +43,10 @@ function wg_toggle_tunnel($tunnel_name) {
 	// Make sure we have the latest info
 	wg_globals();
 
+	// Assume no changes will be made...
 	$changes = false;
 
-	$input_errors = $pconfig = array();
+	$input_errors = array();
 
 	// Get the config array index
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
@@ -53,29 +54,31 @@ function wg_toggle_tunnel($tunnel_name) {
 	// Make sure we have a valid tunnel in the xml
 	if (isset($wgg['tunnels'][$tun_idx])) {
 
-		$old_config = $wgg['tunnels'][$tun_idx];
+		$tunnel = $wgg['tunnels'][$tun_idx];
 
 		$enabled = ($tunnel['enabled'] == 'yes');
 
-		if ($enabled && is_wg_tunnel_assigned($old_config['name'])) {
+		if ($enabled && is_wg_tunnel_assigned($tunnel['name'])) {
 
-			$input_errors[] = 'Cannot disable a WireGuard tunnel while it is assigned as an interface.';
+			$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
 
 		}
 
 		if (empty($input_errors)) {
 
 			// Now we toggle the tunnel
-			$wgg['tunnels'][$tun_idx]['enabled'] = ($old_config['enabled'] == 'yes') ? 'no' : 'yes';
+			$wgg['tunnels'][$tun_idx]['enabled'] = ($tunnel['enabled'] == 'yes') ? 'no' : 'yes';
 
+			$action_txt = $enabled ? 'disabled' : 'enabled';
+			
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} deleted.");
+			write_config("[{$wgg['pkg_names'][0]}] Tunnel {$tunnel['name']} {$action_txt}.");
 
 			// Changes were made
 			$changes = true;
 
 			// Add tunnel to the list to apply
-			wg_apply_list_append($pconfig['name'], 'tunnels');
+			wg_apply_list_append($tunnel['name'], 'tunnels');
 
 		}
 
@@ -160,7 +163,7 @@ function wg_delete_tunnel($tunnel_name) {
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
 
-			$input_errors[] = 'Cannot delete a WireGuard tunnel assigned to a pfSense interface.';
+			$input_errors[] = gettext('Cannot delete a WireGuard tunnel assigned to a pfSense interface.');
 
 		}
 
@@ -176,7 +179,7 @@ function wg_delete_tunnel($tunnel_name) {
 			$changes = true;
 
 			// Add tunnel to the list to apply
-			wg_apply_list_append($pconfig['name'], 'tunnels');
+			wg_apply_list_append($tunnel['name'], 'tunnels');
 
 		}
 
@@ -547,8 +550,8 @@ function wg_tunnel_resync($tunnel_name) {
 }
 
 /*
- * This builds configured tunnel interfaces
- * If $tunnels is empty, this will (re)build all tunnels.
+ * This builds, rebuilds, or destroys tunnel interfaces
+ * If $tunnels is empty, this will apply to all configured tunnel interfaces
  */
 function wg_tunnel_build($tunnel_names = null) {
 	global $wgg;
@@ -581,25 +584,21 @@ function wg_tunnel_build($tunnel_names = null) {
 
 		}
 
-		// Build each tunnel
+		// Build (or destroy) each tunnel
 		foreach ($tunnel_names as $tunnel_name) {
 
 			$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-			if (isset($wgg['tunnels'][$tun_idx])) {
+			$tun_build_status = wg_tunnel_build_by_name($tunnel_name);
 
-				$tun_build_status = wg_tunnel_build_by_name($tunnel_name);
+			// Build an aggregated return code
+			$ret_code |= $tun_build_status['ret_code'];
 
-				// Build an aggregated return code
-				$ret_code |= $tun_build_status['ret_code'];
-
-				$tunnels[] = array(
-						'name' => $tunnel_name,
-						'ret_code' => $tun_build_status['ret_code'], 
-						'errors' => $tun_build_status['errors'],
-						'config' => $tun_build_status['config']);
-
-			}
+			$tunnels[] = array(
+					'name' => $tunnel_name,
+					'ret_code' => $tun_build_status['ret_code'], 
+					'errors' => $tun_build_status['errors'],
+					'config' => $tun_build_status['config']);
 
 		}
 
@@ -610,7 +609,7 @@ function wg_tunnel_build($tunnel_names = null) {
 }
 
 /*
- * This builds a specific tunnel interface by name
+ * This builds, rebuilds, or destroys a specific tunnel interface by name
  */
 function wg_tunnel_build_by_name($tunnel_name) {
 	global $wgg;
@@ -622,13 +621,8 @@ function wg_tunnel_build_by_name($tunnel_name) {
 	$errors = $tunnel = array();
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
-	if (!isset($wgg['tunnels'][$tun_idx])) {
-		
-		$ret_code |= WG_ERROR_WG_ERROR_IF_NAME;
 	
-	}
-	
+	// We've got a tunnel we need to build...
 	if (isset($wgg['tunnels'][$tun_idx])) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
@@ -678,6 +672,20 @@ function wg_tunnel_build_by_name($tunnel_name) {
 			$ret_code |= WG_ERROR_IF_SYNC;
 		
 		}
+
+	// We've got a tunnel we need to destroy...
+	} elseif (in_array($tunnel['name'], wg_get_real_ifs())) {
+		
+		if (wg_interface_destroy($tunnel['name']) <> 0 {
+			
+			$ret_code |= WG_ERROR_IF_DESTROY;
+
+		}
+	
+	// No idea what's going on...
+	} else {
+
+		$ret_code |= WG_ERROR_IF_NAME;
 
 	}
 

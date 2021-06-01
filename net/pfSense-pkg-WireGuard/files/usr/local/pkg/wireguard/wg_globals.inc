@@ -34,6 +34,7 @@ define('WG_ERROR_IF_ADDRESSES',	8);
 define('WG_ERROR_IF_UP',	16);
 define('WG_ERROR_IF_DOWN',	32);
 define('WG_ERROR_IF_SYNC',	64);
+define('WG_ERROR_IF_DESTROY',	128);
 
 define('WG_ERROR_SVC_RUNNING',	1);
 define('WG_ERROR_SVC_START',	2);
@@ -92,7 +93,8 @@ $wgg = array(
 						WG_ERROR_IF_ADDRESSES	=> gettext('Unable to update WireGuard tunnel interface addresses'),
 						WG_ERROR_IF_UP		=> gettext('Unable to bring up WireGuard tunnel interface'),
 						WG_ERROR_IF_DOWN	=> gettext('Unable to bring down WireGuard tunnel interface'),
-						WG_ERROR_IF_SYNC	=> gettext('Unable to sync WireGuard tunnel configuration with wg(8)')),
+						WG_ERROR_IF_SYNC	=> gettext('Unable to sync WireGuard tunnel configuration with wg(8)'),
+						WG_ERROR_IF_DESTROY	=> gettext('Unable to destroy WireGuard tunnel interface')),
 					'service' => array(
 						WG_ERROR_SVC_RUNNING	=> gettext('WireGuard service is already running'),
 						WG_ERROR_SVC_START	=> gettext('Unable to start WireGuard service'),
