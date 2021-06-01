@@ -582,7 +582,7 @@ function wg_tunnel_build($tunnel_names = null) {
 		// Build each tunnel
 		foreach ($tunnel_names as $tunnel_name) {
 
-			$tun_idx = wg_get_tunnel_array_index($tunnel_name)
+			$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
 			if (isset($wgg['tunnels'][$tun_idx])) {
 
