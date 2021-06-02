@@ -484,7 +484,7 @@ function wg_earlyshellcmd_deinstall() {
 
 	$shellcmd_pkg_cmds = array_map(fn($x) => $x['cmd'], $a_shellcmdsettings);
 
-	foreach ($wgg['shellcmdsettings'] as $shellcmd) {
+	foreach ($wgg['shellcmdentries'] as $shellcmd) {
 
 		// Need to escape slashes from the path
 		$escaped_cmd = preg_quote($shellcmd['cmd'], '/');
