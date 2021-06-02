@@ -117,7 +117,7 @@ function wg_validate_peer_post($pconfig) {
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
 
-		$input_errors[] = "Endpoint {$ep} must be a valid IPv4 or IPv6 adress or hostname.";
+		$input_errors[] = "Endpoint {$ep} must be a valid IPv4 or IPv6 address or hostname.";
 
 	}
 

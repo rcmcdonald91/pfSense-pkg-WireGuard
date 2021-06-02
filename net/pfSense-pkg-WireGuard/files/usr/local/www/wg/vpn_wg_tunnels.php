@@ -186,7 +186,6 @@ display_top_tabs($tab_array);
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
 						<td class="pubkey" title="<?=htmlspecialchars($tunnel['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?>
-							<a class="fa fa-copy text-success" style="display: none;"></a>
 						</td>
 						<td><?=wg_generate_tunnel_address_popup_link($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
