@@ -30,10 +30,42 @@ require_once('wireguard/wg_api.inc');
 
 wg_globals();
 
-// Validate the user's input and return error messages if not acceptable
+/*
+ * Valildate a tunnel
+ * These validation checks should be in the same order as the UI for consistency
+ */
 function wg_validate_tunnel_post($pconfig) {
 
 	$input_errors = array();
+
+	// Check enabled/disabled status
+	if (is_wg_tunnel_assigned($pconfig['name']) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
+
+		$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
+
+		$input_errors[] = "Cannot disable {$pconfig['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']}).";
+
+	}
+
+	// Check listen port
+	$lport = $pconfig['listenport'];
+
+	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
+
+		$input_errors[] = "Invalid interface listen port ({$lport}).";
+
+	}
+
+	// Check keys
+	if (empty($pconfig['privatekey'])) {
+
+		$input_errors[] = gettext('A private key must be specified.');
+
+	} elseif (!wg_is_valid_key($pconfig['privatekey'])) {
+
+		$input_errors[] = gettext('The private key specified is not a valid WireGuard private key.');
+
+	}
 
 	// Assigned tunnels don't need these validation checks
 	if (!is_wg_tunnel_assigned($pconfig['name'])) {
@@ -67,42 +99,44 @@ function wg_validate_tunnel_post($pconfig) {
 	
 	}
 
-	if (is_wg_tunnel_assigned($pconfig['name']) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
-
-		$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
-
-		$input_errors[] = "Cannot disable {$pconfig['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']}).";
-
-	}
-
-	// Check listen port
-	$lport = $pconfig['listenport'];
-
-	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
-
-		$input_errors[] = "Invalid interface listen port ({$lport}).";
-
-	}
-
-	// Check keys
-	if (empty($pconfig['privatekey'])) {
-
-		$input_errors[] = gettext('A private key must be specified.');
-
-	} elseif (!wg_is_valid_key($pconfig['privatekey'])) {
-
-		$input_errors[] = gettext('The private key specified is not a valid WireGuard private key.');
-
-	}
-
+	// Consumers expect an array
 	return $input_errors;
 
 }
 
-// Valildate a peer
+/*
+ * Valildate a peer
+ * These validation checks should be in the same order as the UI for consistency
+ */
 function wg_validate_peer_post($pconfig) {
 
 	$input_errors = array();
+
+	// Check remote endpoint
+	$ep = trim($pconfig['endpoint']);
+
+	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
+
+		$input_errors[] = "Endpoint {$ep} must be a valid IPv4 or IPv6 adress or hostname.";
+
+	}
+
+	// Check remote port
+	$rport = $pconfig['port'];
+
+	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
+
+		$input_errors[] = "Invalid peer remote port ({$rport}).";
+	}
+
+	// Check persistent keep alive
+	$keepalive = $pconfig['persistentkeepalive'];
+
+	if (!empty($keepalive) && !is_numericint($keepalive)) {
+
+		$input_errors[] = "Invalid keep alive interval ({$keepalive}).";
+
+	}
 
 	// Check public key
 	if (empty($pconfig['publickey'])) {
@@ -134,23 +168,6 @@ function wg_validate_peer_post($pconfig) {
 
 	}
 
-	// Check remote endpoint
-	$ep = trim($pconfig['endpoint']);
-
-	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
-
-		$input_errors[] = "Endpoint {$ep} must be a valid IPv4 or IPv6 adress or hostname.";
-
-	}
-
-	// Check remote port
-	$rport = $pconfig['port'];
-
-	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
-
-		$input_errors[] = "Invalid peer remote port ({$rport}).";
-	}
-
 	// Check allowed ips
 	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 
@@ -170,6 +187,7 @@ function wg_validate_peer_post($pconfig) {
 
 	}
 
+	// Consumers expect an array
 	return $input_errors;
 
 }
