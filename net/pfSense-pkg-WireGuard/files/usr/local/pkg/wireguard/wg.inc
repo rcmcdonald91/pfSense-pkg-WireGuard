@@ -62,7 +62,7 @@ function wg_toggle_tunnel($tunnel_name) {
 
 			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
 
-			$input_errors[] = "Cannot disable {$tunnel['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']})";
+			$input_errors[] = "Cannot disable {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
 
 		}
 
@@ -217,7 +217,7 @@ function wg_delete_tunnel($tunnel_name) {
 
 			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
 
-			$input_errors[] = "Cannot delete {$tunnel['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']})";
+			$input_errors[] = "Cannot delete {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
 
 		}
 
@@ -271,6 +271,7 @@ function wg_peer_allowedips($post) {
 
 	}
 
+	// Consumers expect an array
 	return $ret_array;
 
 }
@@ -302,6 +303,7 @@ function wg_tunnel_addresses($post) {
 
 	}
 
+	// Consumers expect an array
 	return $ret_array;
 
 }
