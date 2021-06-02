@@ -46,24 +46,24 @@ function wg_install() {
 
 	wg_upgrade_allowedips();
 
-	update_status("done.\n  Creating WireGuard early shell commands...");
+	update_status("done.\n  Installing WireGuard early shell commands...");
 
 	// Installs the WireGuard earlyshellcmds
 	wg_earlyshellcmd_install();
 
 	update_status("done.\n  Creating WireGuard interface group...");
 
-	// Installs the 'WireGuard' interface group
+	// Create the 'WireGuard' interface group
 	wg_ifgroup_install();
 
 	update_status("done.\n  Creating WireGuard Unbound access list...");
 
-	// Create Unbound ACL
+	// Create the WireGuard Unbound ACL
 	wg_unbound_acl_install();
 
-	update_status("done.\n  Creating WireGuard service...");
+	update_status("done.\n  Installing WireGuard service...");
 
-	// Creating service
+	// Create the WireGuard service
 	wg_service_install();
 
 	update_status("done.\n");
@@ -331,10 +331,10 @@ function wg_deinstall() {
 	// Teardown any WireGuard tunnel interfaces
 	wg_destroy_tunnels();
 
-	update_status("done.\n  Removing WireGuard service...");
+	update_status("done.\n  Stopping and removing the WireGuard service...");
 
-	// Remove WireGuard watchdog service
-	wg_service_deinstall();
+	// Stop and remove the WireGuard service
+	wg_service_deinstall(true);
 
 	update_status("done.\n");
 
@@ -388,10 +388,14 @@ function wg_service_install() {
 
 }
 
-function wg_service_deinstall() {
+function wg_service_deinstall($force_stop = false) {
 	global $wgg;
+	
+	if ($force_stop) {
 
-	wg_service_fpm_stop();
+		wg_service_fpm_stop();
+
+	}
 
 	unlink_if_exists($wgg['php_wg']);
 

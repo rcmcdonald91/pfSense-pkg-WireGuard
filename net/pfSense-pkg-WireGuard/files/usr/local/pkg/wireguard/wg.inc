@@ -715,14 +715,11 @@ function wg_resync() {
 	// Reinstall earlyshellcmd in case it was accidently deleted
 	wg_earlyshellcmd_install();
 
-	// Reinstall interface group in case it was accidently deleted
+	// Recreate interface group in case it was accidently deleted
 	wg_ifgroup_install();
 
-	// Update by re-installing the Unbound ACL
+	// Update Unbound ACL by recreating it
 	wg_unbound_acl_install();
-
-	// Reinstall service in case it was accidently deleted
-	wg_service_install();
 
 	// We don't want active tunnels when the service isn't running
 	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
