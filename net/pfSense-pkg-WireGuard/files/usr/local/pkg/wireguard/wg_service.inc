@@ -114,17 +114,21 @@ function wg_service_fpm_stop() {
 
 	$serialized_output = $ret_output = array();
 
-	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output);
+	if (file_exists($wgg['php_wg'])) {
 
-	if ($ret_output = unserialize($serialized_output[0])) {
+		// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
+		exec("{$wgg['wg_daemon']} stop serialize", $serialized_output);
 
-		return $ret_output;
+		if ($ret_output = unserialize($serialized_output[0])) {
+
+			return $ret_output;
+
+		}
 
 	}
 
 	// Consumers expect an array...
-	return array();
+	return array('ret_code' => -1);
 
 }
 
@@ -164,18 +168,22 @@ function wg_service_fpm_start() {
 
 	$serialized_output = $ret_output = array();
 
-	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
-	exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
+	if (file_exists($wgg['php_wg'])) {
 
-	// Catch unserialization results before returning
-	if ($ret_output = unserialize($serialized_output[0])) {
+		// Invokes service start with serialization flag so we can cleanly report back to the web frontend
+		exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
 
-		return $ret_output;
+		// Catch unserialization results before returning
+		if ($ret_output = unserialize($serialized_output[0])) {
+
+			return $ret_output;
+
+		}
 
 	}
 
-	// Consumers expect an array type
-	return array();
+	// Consumers expect an array...
+	return array('ret_code' => -1);
 
 }
 
