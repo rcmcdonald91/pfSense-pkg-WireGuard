@@ -60,7 +60,9 @@ function wg_toggle_tunnel($tunnel_name) {
 
 		if ($enabled && is_wg_tunnel_assigned($tunnel['name'])) {
 
-			$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
+			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+			$input_errors[] = "Cannot disable {$tunnel['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']})";
 
 		}
 
@@ -213,7 +215,9 @@ function wg_delete_tunnel($tunnel_name) {
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
 
-			$input_errors[] = gettext('Cannot delete a WireGuard tunnel assigned to a pfSense interface.');
+			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+			$input_errors[] = "Cannot delete {$tunnel['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']})";
 
 		}
 

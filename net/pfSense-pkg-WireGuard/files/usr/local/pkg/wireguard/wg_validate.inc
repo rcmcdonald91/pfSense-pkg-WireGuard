@@ -47,7 +47,7 @@ function wg_validate_tunnel_post($pconfig) {
 
 			if (!empty($address['address']) && !is_subnet($tmp_subnet)) {
 
-				$input_errors[] = gettext("{$tmp_subnet} is not a valid CIDR address");
+				$input_errors[] = "Address {$tmp_subnet} is not a valid CIDR address.";
 
 			}
 
@@ -59,7 +59,7 @@ function wg_validate_tunnel_post($pconfig) {
 
 					$ifname = strtoupper($conflict['if']);
 
-					$input_errors[] = gettext("{$address['address']} is already configured on this firewall: {$ifname} ({$conflict['ip_or_subnet']})");
+					$input_errors[] = "Address {$address['address']} is already configured on this firewall. [ {$ifname} ({$conflict['ip_or_subnet']}) ]";
 				
 				}
 			}
@@ -69,7 +69,9 @@ function wg_validate_tunnel_post($pconfig) {
 
 	if (is_wg_tunnel_assigned($pconfig['name']) && (!isset($pconfig['enabled']) || ($pconfig['enabled'] != 'yes'))) {
 
-		$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
+		$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
+
+		$input_errors[] = "Cannot disable {$pconfig['name']} while it is assigned to {$wg_pfsense_if['name']} ({$wg_pfsense_if['name']}).";
 
 	}
 
@@ -78,7 +80,7 @@ function wg_validate_tunnel_post($pconfig) {
 
 	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
 
-		$input_errors[] = gettext('Invalid interface listen port.');
+		$input_errors[] = "Invalid interface listen port ({$lport})."
 
 	}
 
@@ -109,7 +111,7 @@ function wg_validate_peer_post($pconfig) {
 
 	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
 
-		$input_errors[] = gettext("Invalid remote port. ({$rport}})");
+		$input_errors[] = "Invalid peer remote port ({$rport}}).";
 	}
 
 	// Check public key
@@ -119,7 +121,7 @@ function wg_validate_peer_post($pconfig) {
 
 	} elseif (!wg_is_valid_key($pconfig['publickey'])) {
 
-		$input_errors[] = gettext("The public key ({$pconfig['publickey']}) is not a valid WireGuard public key.");
+		$input_errors[] = "The public key ({$pconfig['publickey']}) is not a valid WireGuard public key."
 
 	} elseif (!empty($pconfig['tun'])) {
 
@@ -130,7 +132,7 @@ function wg_validate_peer_post($pconfig) {
 			// We don't want to allow duplicate public keys to be assigned on the same tunnel
 			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $peer_idx)) {
 
-				$input_errors[] = gettext("The public key ({$pconfig['publickey']}) is already assigned to a peer on this tunnel ({$pconfig['tun']}).");
+				$input_errors[] = "The public key ({$pconfig['publickey']}) is already assigned to a peer on this tunnel ({$pconfig['tun']})."
 				
 				break;
 
@@ -144,7 +146,7 @@ function wg_validate_peer_post($pconfig) {
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
 
-		$input_errors[] = gettext('Endpoint must be a valid IPv4 or IPv6 adress or hostname.');
+		$input_errors[] = "Endpoint {$ep} must be a valid IPv4 or IPv6 adress or hostname.";
 
 	}
 
@@ -159,7 +161,7 @@ function wg_validate_peer_post($pconfig) {
 
 			if (!empty($row['address']) && !is_subnet($tmp_subnet)) {
 
-				$input_errors[] = gettext("Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.");
+				$input_errors[] = "Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.";
 
 			}
 
