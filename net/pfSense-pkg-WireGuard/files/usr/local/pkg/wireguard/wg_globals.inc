@@ -96,7 +96,7 @@ $wgg['conf_paths_to_clean']	= array($wgg['conf_path'], '/etc/wireguard', '/etc/w
 
 $wgg['xml_paths_to_clean']	= array($wgg['xml_path'], array('wireguard'));
 
-$wgg['depends_names']		=> array(
+$wgg['depends_names']		= array(
 					$wgg['pkg_name'],
 					'wireguard-kmod',
 					'wireguard-tools-lite');
