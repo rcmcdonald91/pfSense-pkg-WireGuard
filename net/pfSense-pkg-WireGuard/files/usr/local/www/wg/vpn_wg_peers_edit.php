@@ -37,6 +37,8 @@ require_once('wireguard/wg_guiconfig.inc');
 
 global $wgg;
 
+$pconfig = array();
+
 wg_globals();
 
 if (isset($_REQUEST['tun'])) {
@@ -102,17 +104,12 @@ if ($_POST) {
 
 }
 
-$pconfig = array();
-
 if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
 
 	// Looks like we are editing an existing peer
 	$pconfig = &$wgg['peers'][$peer_idx];
 
 } else {
-
-	// We are creating a new peer
-	$pconfig = array();
 
 	// Default to enabled
 	$pconfig['enabled'] = 'yes';
