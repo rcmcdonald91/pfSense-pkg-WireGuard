@@ -121,7 +121,7 @@ function wg_validate_peer_post($pconfig) {
 
 	} elseif (!wg_is_valid_key($pconfig['publickey'])) {
 
-		$input_errors[] = "The public key ({$pconfig['publickey']}) is not a valid WireGuard public key."
+		$input_errors[] = "The public key ({$pconfig['publickey']}) is not a valid WireGuard public key.";
 
 	} elseif (!empty($pconfig['tun'])) {
 
@@ -132,7 +132,7 @@ function wg_validate_peer_post($pconfig) {
 			// We don't want to allow duplicate public keys to be assigned on the same tunnel
 			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $peer_idx)) {
 
-				$input_errors[] = "The public key ({$pconfig['publickey']}) is already assigned to a peer on this tunnel ({$pconfig['tun']})."
+				$input_errors[] = "The public key ({$pconfig['publickey']}) is already assigned to a peer on this tunnel ({$pconfig['tun']}).";
 				
 				break;
 
