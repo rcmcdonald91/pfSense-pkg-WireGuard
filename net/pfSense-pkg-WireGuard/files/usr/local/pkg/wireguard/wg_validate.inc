@@ -80,7 +80,7 @@ function wg_validate_tunnel_post($pconfig) {
 
 	if (!empty($lport) && (!ctype_digit($lport) || !is_port($lport))) {
 
-		$input_errors[] = "Invalid interface listen port ({$lport})."
+		$input_errors[] = "Invalid interface listen port ({$lport}).";
 
 	}
 
