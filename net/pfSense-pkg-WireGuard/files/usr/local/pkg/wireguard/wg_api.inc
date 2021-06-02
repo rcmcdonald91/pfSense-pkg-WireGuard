@@ -444,7 +444,7 @@ function wg_pkg_info() {
 
 	$field_string = implode("\t", $a_fields);
 
-	$a_packages = $wgg['pkg_names'];
+	$a_packages = $wgg['depends_names'];
 
 	// Each package needs to be escaped individually before imploding
 	wg_escapeshellarg($field_string, $a_packages);

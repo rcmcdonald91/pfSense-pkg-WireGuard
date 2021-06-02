@@ -273,6 +273,11 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$wgg['ifgroupentry']['ifname']}'>WireGuard Interface Group</a>"
 	));
 
+	$section->addInput(new Form_StaticText(
+		'Hint',
+		"These interface addresses are only applicable for unassigned WireGuard tunnel interfaces.</a>"
+	));
+
 	// Hack to ensure empty lists default to /128 mask
 	if (!is_array($pconfig['addresses']['row'])) {
 

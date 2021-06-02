@@ -51,31 +51,18 @@ $wgg = array(
 	'php_wg'		=> '/usr/local/bin/php_wg',
 	'wg_includes'		=> '/usr/local/pkg/wireguard',
 	'kmod'			=> 'if_wg.ko',
-	'pid_path'		=> "{$g['varrun_path']}/wireguardd.pid",
 	'subsystem'		=> 'wireguard',
+	'service_name'		=> 'wireguardd',
 	'applylist'		=> array(
 					'tunnels' => "{$g['tmp_path']}/.wireguard_tunnel.apply"),
-	'pkg_names'		=> array(
-					'pfSense-pkg-WireGuard',
-					'wireguard-kmod',
-					'wireguard-tools-lite'),
+	'pkg_name'		=> 'pfSense-pkg-WireGuard',
 	'conf_path'		=> '/usr/local/etc/wireguard',
-	'conf_paths_to_clean'	=> array(
-					'/etc/wireguard', 
-					'/etc/wg'),
 	'xml_path'		=> array('installedpackages', 'wireguard'),
-	'xml_paths_to_clean'	=> array(
-					array('wireguard')),
 	'if_prefix'		=> 'tun_wg',
 	'ifgroupentry'		=> array(
 					'ifname' => 'WireGuard', 
 					'descr' => 'WireGuard Interface Group (DO NOT EDIT/DELETE!)', 
 					'members' => null),
-	'shellcmdentries'	=> array(
-					array(
-						'cmd' => 'service wireguardd start',
-						'cmdtype' => 'earlyshellcmd',
-						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)')),
 	'unboundaclentry'	=> array(
 					'aclname' => 'WireGuard',
 					'aclaction' => 'allow',
@@ -105,63 +92,80 @@ $wgg = array(
 	'max_tunnels'		=> 32768
 );
 
+$wgg['conf_paths_to_clean']	= array($wgg['conf_path'], '/etc/wireguard', '/etc/wg');
+
+$wgg['xml_paths_to_clean']	= array($wgg['xml_path'], array('wireguard'));
+
+$wgg['depends_names']		= array(
+					$wgg['pkg_name'],
+					'wireguard-kmod',
+					'wireguard-tools-lite');
+
+$wgg['shellcmdentries']		= array(
+					array(
+						'cmd' => "service {$wgg['service_name']} start",
+						'cmdtype' => 'earlyshellcmd',
+						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)'));
+
+$wgg['pid_path']		= "{$g['varrun_path']}/{$wgg['service_name']}.pid";
+
 $wgg['wg_daemon'] 		= "{$wgg['php_wg']} -f {$wgg['wg_includes']}/wg_service.inc";
 
 function &array_get_value(array &$array, $parents) {
 
-    $ref = &$array;
+	$ref = &$array;
 
-    foreach ((array) $parents as $parent) {
+	foreach ((array) $parents as $parent) {
 
-        if (is_array($ref) && array_key_exists($parent, $ref)) {
+		if (is_array($ref) && array_key_exists($parent, $ref)) {
 
-            $ref = &$ref[$parent];
+			$ref = &$ref[$parent];
 
-        } else {
+		} else {
 
-            return null;
+			return null;
 
-        }
+		}
 
-    }
+	}
 
-    return $ref;
+	return $ref;
 
 }
 
 function array_set_value(array &$array, $parents, $value) {
 
-    $ref = &$array;
+	$ref = &$array;
 
-    foreach ((array) $parents as $parent) {
+	foreach ((array) $parents as $parent) {
 
-        if (isset($ref) && !is_array($ref)) {
+	if (isset($ref) && !is_array($ref)) {
 
-            $ref = array();
+		$ref = array();
 
-        }
+	}
 
-        $ref = &$ref[$parent];
+	$ref = &$ref[$parent];
 
-    }
+	}
 
-    $ref = $value;
+	$ref = $value;
 
 }
 
 function array_unset_value(&$array, $parents) {
 
-    $key = array_shift($parents);
+	$key = array_shift($parents);
 
-    if (empty($parents)) {
+	if (empty($parents)) {
 
-        unset($array[$key]);
+		unset($array[$key]);
 
-    } else {
+	} else {
 
-        array_unset_value($array[$key], $parents);
+		array_unset_value($array[$key], $parents);
 
-    }
+	}
 
 }
 

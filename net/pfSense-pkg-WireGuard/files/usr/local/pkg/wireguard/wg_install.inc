@@ -41,7 +41,7 @@ function wg_install() {
 
 	update_status("\n  Upgrading any existing WireGuard XML configuration...");
 
-	// Things to potentially upgrade
+	// Things to potentially upgrade, these will be removed in future versions.
 	wg_upgrade_addresses();
 
 	wg_upgrade_allowedips();
@@ -106,7 +106,7 @@ function wg_upgrade_allowedips() {
 	}
 
 	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+	write_config("[{$wgg['pkg_name']}] Upgraded peer allowed ips XML structure.");
 
 	// Read latest settings
 	wg_globals();
@@ -141,7 +141,7 @@ function wg_upgrade_allowedips() {
 	}
 	
 	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+	write_config("[{$wgg['pkg_name']}] Upgraded peer allowed ips XML structure.");
 
 	// Read latest settings
 	wg_globals();
@@ -174,7 +174,7 @@ function wg_upgrade_allowedips() {
 	}
 
 	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+	write_config("[{$wgg['pkg_name']}] Upgraded peer allowed ips XML structure.");
 
 }
 
@@ -213,7 +213,7 @@ function wg_upgrade_addresses() {
 	}
 
 	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
+	write_config("[{$wgg['pkg_name']}] Upgraded tunnel addresses XML structure.");
 
 	// Read latest settings
 	wg_globals();
@@ -248,7 +248,7 @@ function wg_upgrade_addresses() {
 	}
 
 	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded tunnel addresses XML structure.");
+	write_config("[{$wgg['pkg_name']}] Upgraded tunnel addresses XML structure.");
 
 	// Read latest settings
 	wg_globals();
@@ -281,7 +281,7 @@ function wg_upgrade_addresses() {
 	}
 
 	// Write the changes out to disk
-	write_config("[WireGuard] Upgraded peer allowed ips XML structure.");
+	write_config("[{$wgg['pkg_name']}] Upgraded tunnel addresses XML structure.");
 
 }
 
@@ -367,7 +367,7 @@ function wg_service_rcfile() {
 
 	$stop[] = "{$wgg['wg_daemon']} stop";
 
-	$rcfile['file'] 	= 'wireguardd';
+	$rcfile['file'] 	= $wgg['service_name'];
 
 	$rcfile['start'] 	= implode("\n\t", $start);
 
@@ -464,7 +464,7 @@ function wg_earlyshellcmd_install() {
 
 	}
 
-	write_config("[WireGuard] earlyshellcmd(s) installed.");
+	write_config("[{$wgg['pkg_name']}] earlyshellcmd(s) installed.");
 
 }
 
@@ -513,8 +513,8 @@ function wg_earlyshellcmd_deinstall() {
 
 	}
 
-	write_config("[WireGuard] earlyshellcmd(s) de-installed.");
-	
+	write_config("[{$wgg['pkg_name']}] earlyshellcmd(s) de-installed.");
+
 }
 
 /*
@@ -537,7 +537,7 @@ function wg_ifgroup_install() {
 
 	}
 
-	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) installed.");
+	write_config("[{$wgg['pkg_name']}] Interface group ({$wgg['ifgroupentry']['ifname']}) installed.");
 
 }
 
@@ -562,7 +562,8 @@ function wg_ifgroup_deinstall() {
 		}
 
 	}
-	write_config("[WireGuard] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
+
+	write_config("[{$wgg['pkg_name']}] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
 
 }
 
@@ -588,7 +589,7 @@ function wg_unbound_acl_deinstall() {
 
 	}
 
-	write_config("[WireGuard] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) de-installed.");
+	write_config("[{$wgg['pkg_name']}] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) de-installed.");
 
 }
 
@@ -635,7 +636,7 @@ function wg_unbound_acl_install() {
 
 	}
 
-	write_config("[WireGuard] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) installed.");
+	write_config("[{$wgg['pkg_name']}] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) installed.");
 
 }
 

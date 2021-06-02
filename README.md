@@ -45,6 +45,8 @@ You can find pre-compiled binaries and packages [here](https://github.com/theone
 
 https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
 
+**Note:** The Netgate documentation reflects WireGuard as implemented in 2.5.0. There are several differences due to the packaged nature of this implementation that diverge the configuration steps from the official Netgate docs. (See the notes above).
+
 ## Recognition
 
 \*** "WireGuard" and the "WireGuard" logo are registered trademarks of Jason A. Donenfeld.
