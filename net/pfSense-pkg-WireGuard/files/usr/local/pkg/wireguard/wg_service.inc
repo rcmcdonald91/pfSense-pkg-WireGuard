@@ -233,8 +233,6 @@ function wg_service_cli_start($serialize_output = true) {
 
 	}
 
-	exit();
-
 	if (platform_booting()) {
 
 		unmute_kernel_msgs();
