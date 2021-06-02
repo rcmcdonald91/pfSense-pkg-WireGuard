@@ -104,16 +104,6 @@ function wg_validate_peer_post($pconfig) {
 
 	$input_errors = array();
 
-	$peer_idx = wg_get_peer_id($pconfig['publickey'], $pconfig['tun']);
-
-	// Check remote port
-	$rport = $pconfig['port'];
-
-	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
-
-		$input_errors[] = "Invalid peer remote port ({$rport}}).";
-	}
-
 	// Check public key
 	if (empty($pconfig['publickey'])) {
 
@@ -126,6 +116,8 @@ function wg_validate_peer_post($pconfig) {
 	} elseif (!empty($pconfig['tun'])) {
 
 		$peers = wg_get_tunnel_peers($pconfig['tun']);
+
+		$peer_idx = wg_get_peer_id($pconfig['publickey'], $pconfig['tun']);
 
 		foreach ($peers as $peer) {
 
@@ -142,6 +134,7 @@ function wg_validate_peer_post($pconfig) {
 
 	}
 
+	// Check remote endpoint
 	$ep = trim($pconfig['endpoint']);
 
 	if (!empty($ep) && !is_hostname($ep) && !is_ipaddr($ep)) {
@@ -150,7 +143,15 @@ function wg_validate_peer_post($pconfig) {
 
 	}
 
-	// Allowed IPs
+	// Check remote port
+	$rport = $pconfig['port'];
+
+	if (!empty($rport) && (!ctype_digit($rport) || !is_port($rport))) {
+
+		$input_errors[] = "Invalid peer remote port ({$rport}).";
+	}
+
+	// Check allowed ips
 	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 
 		foreach ($pconfig['allowedips']['row'] as $row) {
