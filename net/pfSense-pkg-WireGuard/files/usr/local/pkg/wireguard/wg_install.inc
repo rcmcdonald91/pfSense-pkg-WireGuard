@@ -382,6 +382,8 @@ function wg_service_install() {
 
 	wg_service_rcfile();
 
+	wg_service_deinstall();
+
 	link($wgg['php'], $wgg['php_wg']);
 
 }
