@@ -187,7 +187,7 @@ display_top_tabs($tab_array);
 						<td class="pubkey" title="<?=htmlspecialchars($tunnel['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?>
 						</td>
-						<td><?=wg_generate_tunnel_address_popup_link($tunnel['name'])?></td>
+						<td><?=wg_generate_tunnel_address_popover_link($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['listenport'])?></td>
 						<td><?=count($peers)?></td>
 

@@ -290,8 +290,10 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 
 }
 
-function wg_generate_tunnel_address_popup_link($tunnel_name) {
+function wg_generate_tunnel_address_popover_link($tunnel_name) {
 	global $wgg;
+
+	$getText = function($text) { return gettext($text); };
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -299,53 +301,80 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
-		$addresses = $tunnel['addresses']['row'];
+		$addresses = array_map(function($x) {
+			
+			return array(
+				'address' => "{$x['address']}/{$x['mask']}", 
+				'descr' => $x['descr']);
+			
+		}, $tunnel['addresses']['row']);
 
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
 			
 			if (is_array($addresses) && count($addresses) > 0) {
 
-				$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
-
 				$extras = count($addresses) - 1;
 
 				if ($extras > 0) {
 
-					$data_html = "<table><thead><th>Address</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
+					$data_html = 	<<<"START"
+							<table>
+								<thead>
+									<th>{$getText('Address')}</th>
+									<th style="padding-left: 10px;">{$getText('Description')</th>
+								</thead>
+								<tbody>
+
+							START;
 		
 					foreach ($addresses as $address) {
 
 						wg_htmlspecialchars($address);
 
-						$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
+						$data_html .= 	<<<"ROW"
+										<tr>
+											<td>{$address['address']}</td>
+											<td style="padding-left: 10px;">{$address['descr']}</td>
+										</tr>
 		
+								ROW;
 					}
 		
-					$data_html .= '</tbody></table>';
+					$data_html .= 	<<<"END"
+								</tbody>
+							</table>
 		
+							END;
+
+					$title = gettext('Interfae Addresses');
+
 					$hint = "{$addresses[0]['address']} (+{$extras})";
 
-					wg_htmlspecialchars($href, $data_html, $hint);
-		
-					$ret_html = "<a href=\"{$href}\" title=\"Interface Addresses\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
-		
-					return $ret_html;
+					$popover_params = " data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\"";
 		
 				} else {
 
-					wg_htmlspecialchars($href, $addresses[0]);
-		
-					$ret_html = "<a href=\"{$href}\" title=\"{$addresses[0]['descr']}\">{$addresses[0]['address']}/{$addresses[0]['mask']}</a>";
-		
-					return $ret_html;
+					$title = $addresses[0]['descr'];
+
+					$hint = $addresses[0]['address'];
+
+					$popover_params = null;
 				
 				}
+
+				$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
+
+				wg_htmlspecialchars($href, $title, $hint);
+
+				$ret_html = "<a href=\"{$href}\" title=\"{$title}\"{$popover_params}>{$hint}</a>";
 		
 			} else {
 
-				return '(none)';
+				$ret_html = "({$getText('none')})";
 
 			}
+
+			return $ret_html;
 
 		} else {
 
@@ -353,7 +382,13 @@ function wg_generate_tunnel_address_popup_link($tunnel_name) {
 
 			wg_htmlspecialchars($wg_pfsense_if);
 
-			return "<i class=\"fa fa-sitemap\" style=\"vertical-align: middle;\"></i><a style=\"padding-left: 3px\" href=\"../../interfaces.php?if={$wg_pfsense_if['name']}\">{$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})</a>";
+			$ret_html = 	<<<"RET"
+					<i class="fa fa-sitemap" style="vertical-align: middle;"></i>
+					<a style="padding-left: 3px" href="../../interfaces.php?if={$wg_pfsense_if['name']}">{$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})</a>
+					
+					RET;
+
+			return $ret_html;
 
 		}
 

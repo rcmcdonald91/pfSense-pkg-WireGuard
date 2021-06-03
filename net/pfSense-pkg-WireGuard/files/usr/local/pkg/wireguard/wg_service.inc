@@ -224,7 +224,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 	}
 
-	// Build all (null) the tunnels
+	// Build all (i.e. null) the tunnels
 	$sync_all_status = wg_tunnel_sync(null);
 
 	if ($sync_all_status['ret_code'] <> 0 ) {
