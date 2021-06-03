@@ -437,14 +437,14 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 						START;
 
-				foreach ($allowedips as $address) {
+				foreach ($allowedips as $allowedip) {
 
-					wg_htmlspecialchars($address);
+					wg_htmlspecialchars($allowedip);
 	
 					$data_html .= 	<<<"ROW"
 							<tr>
-								<td>{$address['address']}</td>
-								<td style='padding-left: 10px;'>{$address['descr']}</td>
+								<td>{$allowedip['address']}</td>
+								<td style='padding-left: 10px;'>{$allowedip['descr']}</td>
 							</tr>
 
 							ROW;
@@ -464,9 +464,9 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	
 			} else {
 
-				$title = $addresses[0]['descr'];
+				$title = $allowedips[0]['descr'];
 
-				$hint = $addresses[0]['address'];
+				$hint = $allowedips[0]['address'];
 
 				$popover_params = null;
 			
