@@ -109,24 +109,24 @@ function wg_get_tun_list() {
 }
 
 // Truncates a given string if necessary and formats it to make it look good
-function wg_truncate_pretty($str, $length) {
+function wg_truncate_pretty($text, $max_length) {
 
-	$s_truncated = substr($str, 0, $length);
+	$s_truncated = substr($text, 0, $max_length);
 
-	$s_pretty_dots = (strlen($str) > $length) ? '...' : '';
+	$s_pretty_dots = (strlen($text) > $max_length) ? '...' : null;
 
 	return "{$s_truncated}{$s_pretty_dots}";
 
 }
 
-function wg_interface_status_icon($status, $fa_icon = "fa-ethernet") {
+function wg_interface_status_icon($title, $enabled_class = "fa fa-arrow-up text-success", $disabled_class = "fa fa-arrow-down text-danger") {
 	global $wgg;
 
-	$ret_class = ($status == "up") ? 'text-success' : null;
+	$ret_class = ($status === "up" || $status === true) ? " {$enabled_class}" : " {$disabled_class}";
 
-	wg_htmlspecialchars($fa_icon, $ret_class, $status);
+	wg_htmlspecialchars($ret_class, $status);
 
-	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$status}\"></i>";
+	$ret_html = "<i class=\"{$ret_class}\" style=\"vertical-align: middle;\" title=\"{$title}\"></i>";
 
 	return $ret_html;
 

@@ -35,6 +35,7 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 require_once('wireguard/wg_guiconfig.inc');
+require_once('wireguard/wg_service.inc');
 
 global $wgg;
 
@@ -97,8 +98,6 @@ display_top_tabs($tab_array);
 
 $a_devices = wg_status();
 
-if (!empty($a_devices)):
-
 ?>
 
 <div class="panel panel-default">
@@ -118,10 +117,12 @@ if (!empty($a_devices)):
 				<th><?=gettext('RX')?></th>
 				<th><?=gettext('TX')?></th>
 			</thead>
+			<tbody>
 <?php
+if (!empty($a_devices)):
+
 	foreach ($a_devices as $device_name => $device):
 ?>
-			<tbody>	
 				<tr class="tunnel-entry">
 					<td>
 						<?=wg_interface_status_icon($device['status'])?>
@@ -129,7 +130,9 @@ if (!empty($a_devices)):
 					</td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
 					<td><?=count($device['peers'])?></td>
-					<td><?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?></td>
+					<td title="<?=htmlspecialchars($device['public_key'])?>">
+						<?=htmlspecialchars(wg_truncate_pretty($device['public_key'], 16))?>
+					</td>
 					<td><?=wg_generate_tunnel_address_popover_link($device_name)?></td>
 					<td><?=htmlspecialchars($device['mtu'])?></td>
 					<td><?=htmlspecialchars($device['listen_port'])?></td>
@@ -137,12 +140,6 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
 				<tr class="peer-entries">
-	
-<?php
-		if ($device['status'] == 'up'):
-			
-			if (count($device['peers']) > 0):
-?>
 					<td colspan="9">
 						<table class="table table-hover table-condensed">
 							<thead>
@@ -156,7 +153,9 @@ if (!empty($a_devices)):
 							</thead>
 							<tbody>
 <?php
-				foreach($device['peers'] as $peer):
+		if (count($device['peers']) > 0):
+
+			foreach($device['peers'] as $peer):
 ?>
 								<tr>
 									<td>
@@ -164,42 +163,50 @@ if (!empty($a_devices)):
 										<?=htmlspecialchars(wg_truncate_pretty($peer['config']['descr'], 16))?>
 									</td>
 									<td><?=htmlspecialchars(wg_human_time_diff("@{$peer['latest_handshake']}"))?></td>
-									<td><?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?></td>
+									<td title="<?=htmlspecialchars($peer['public_key'])?>">
+										<?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?>
+									</td>
 									<td><?=htmlspecialchars($peer['endpoint'])?></td>
 									<td><?=wg_generate_peer_allowedips_popup_link(wg_get_peer_id($peer['config']['publickey'], $peer['config']['tun']))?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
 								</tr>
 <?php	
-				endforeach;
+			endforeach;
+		else:
 ?>
+								<tr>
+									<td colspan="7"><?=gettext('No peers have been configured')?></td>
+								</tr>
+<?php		
+		endif;
+?>
+
 							</tbody>
 						</table>
 					</td>
-<?php
-			else:
-?>
-					<td colspan="9"><?=gettext('No peers have been configured')?></td>
-<?php
-			endif;
-		endif;
-?>
 				</tr>
 <?php
 	endforeach;
+
+elseif (empty($wgg['tunnels'])):
+?>
+				<tr>
+					<td colspan="9"><?php print_info_box(gettext('No WireGuard tunnels have been configured.'), 'warning', null); ?></td>
+				</tr>
+<?php
+else:
+?>
+				<tr>
+					<td colspan="9"><?php print_info_box(gettext('No WireGuard status information is available.'), 'warning', null); ?></td>
+				</tr>
+<?php
+endif;
 ?>
 			</tbody>
 		</table>
     	</div>
 </div>
-
-<?php
-else:
-
-	print_info_box('No WireGuard tunnels have been configured.', 'warning', null);
-
-endif;
-?>
 
 <nav class="action-buttons">
 	<a href="#" class="btn btn-info btn-sm" id="showpeers">

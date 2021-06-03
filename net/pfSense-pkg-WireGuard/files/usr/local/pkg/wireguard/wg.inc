@@ -352,10 +352,10 @@ function wg_do_peer_post($post) {
 
 	$peer_idx = $post['index'];
 
+	wg_init_config_arr($wgg['peers'][$peer_idx], array('allowedips', 'row'));
+
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['peers'][$peer_idx];
-
-	wg_init_config_arr($pconfig, array('allowedips', 'row'));
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
 
@@ -404,7 +404,6 @@ function wg_do_peer_post($post) {
 				// We've got meaningful changes...
 				$changes = true;
 
-				// Add peer's tunnel to the list to apply
 				wg_apply_list_add($pconfig['tun'], 'tunnels');
 
 			// Now try the old_config tunnel...
@@ -413,13 +412,7 @@ function wg_do_peer_post($post) {
 				// We've got meaningful changes...
 				$changes = true;
 
-				// Add peer's tunnel to the list to apply
 				wg_apply_list_add($old_config['tun'], 'tunnels');
-
-			// Looks like we are just resaving an unassigned peer...
-			} else {
-
-				$changes = false;
 
 			}
  
@@ -446,10 +439,10 @@ function wg_do_tunnel_post($post) {
 
 	$tun_idx = $post['index'];
 
+	wg_init_config_arr($wgg['tunnels'][$tun_idx], array('addresses', 'row'));
+
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['tunnels'][$tun_idx];
-
-	wg_init_config_arr($pconfig, array('addresses', 'row'));
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
