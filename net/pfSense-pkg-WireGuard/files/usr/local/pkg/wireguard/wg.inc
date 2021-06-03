@@ -249,7 +249,7 @@ function wg_delete_tunnel($tunnel_name) {
 function wg_peer_allowedips($post) {
 
 	// Convert the post into proper arrays
-	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr', 'address_route'));
+	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
 
 	$ret_array = array();
 
@@ -264,8 +264,7 @@ function wg_peer_allowedips($post) {
 			$ret_array[] 	= array(
 						'address' 	=> $row['address'], 
 						'mask' 		=> $row['address_subnet'], 
-						'descr' 	=> $row['address_descr'],
-						'route' 	=> $row['address_route']);
+						'descr' 	=> $row['address_descr']);
 
 		}
 
