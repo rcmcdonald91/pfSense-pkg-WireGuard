@@ -119,14 +119,14 @@ function wg_truncate_pretty($text, $max_length) {
 
 }
 
-function wg_interface_status_icon($title, $enabled_class = "fa fa-arrow-up text-success", $disabled_class = "fa fa-arrow-down text-danger") {
+function wg_interface_status_icon($status, $enabled_class = "fa fa-arrow-up text-success", $disabled_class = "fa fa-arrow-down text-danger") {
 	global $wgg;
 
 	$ret_class = ($status === "up" || $status === true) ? " {$enabled_class}" : " {$disabled_class}";
 
 	wg_htmlspecialchars($ret_class, $status);
 
-	$ret_html = "<i class=\"{$ret_class}\" style=\"vertical-align: middle;\" title=\"{$title}\"></i>";
+	$ret_html = "<i class=\"{$ret_class}\" style=\"vertical-align: middle;\" title=\"{$status}\"></i>";
 
 	return $ret_html;
 
