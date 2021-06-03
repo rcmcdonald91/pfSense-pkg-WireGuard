@@ -243,13 +243,15 @@ function wg_secret_input_type() {
 
 	wg_globals();
 
+	$type = 'text';
+
 	if (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') {
 
-		return 'password';
+		$type = 'password';
 
 	}
 
-	return 'text';
+	return $type;
 	
 }
 
@@ -257,20 +259,24 @@ function wg_secret_input_type() {
 function wg_entrystatus_class($target_device) {
 	global $wgg;
 
+	$class = 'disabled';
+
 	if (isset($target_device) && 
 		$target_device['enabled'] == 'yes' &&
 			is_module_loaded($wgg['kmod'])) {
 
-		return 'enabled';
+		$class = 'enabled';
 
 	}
 
-	return 'disabled';
+	return $class;
 
 }
 
 // Generates a toggle icon link based on the status of the target
 function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
+
+	$ret_html = null;
 
 	if (isset($target_device)) {
 	
@@ -282,11 +288,11 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 
 		wg_htmlspecialchars($s_icon, $s_title, $href, $s_usepost);
 
-		return "<a class=\"fa {$s_icon}\" title=\"{$s_title}\" href=\"{$href}\" {$s_usepost}></a>";
+		$ret_html = "<a class=\"fa {$s_icon}\" title=\"{$s_title}\" href=\"{$href}\" {$s_usepost}></a>";
 
 	}
 
-	return null;
+	return $ret_html;
 
 }
 
@@ -301,6 +307,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
+		// Smash address + mask
 		$addresses = array_map(function($x) {
 			
 			return array(
@@ -321,7 +328,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 							<table>
 								<thead>
 									<th>{$getText('Address')}</th>
-									<th style="padding-left: 10px;">{$getText('Description')</th>
+									<th style='padding-left: 10px;'>{$getText('Description')}</th>
 								</thead>
 								<tbody>
 
@@ -334,16 +341,16 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 						$data_html .= 	<<<"ROW"
 										<tr>
 											<td>{$address['address']}</td>
-											<td style="padding-left: 10px;">{$address['descr']}</td>
+											<td style='padding-left: 10px;'>{$address['descr']}</td>
 										</tr>
 		
 								ROW;
+
 					}
 		
 					$data_html .= 	<<<"END"
 								</tbody>
 							</table>
-		
 							END;
 
 					$title = gettext('Interfae Addresses');
@@ -399,56 +406,85 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	global $wgg;
 
+	$getText = function($text) { return gettext($text); };
+
 	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
 
 		$peer = $wgg['peers'][$peer_idx];
 
-		$allowedips = $peer['allowedips']['row'];
+		// Smash address + mask
+		$allowedips = array_map(function($x) {
 			
-		if (is_array($allowedips) && count($allowedips) > 0) {
+			return array(
+				'address' => "{$x['address']}/{$x['mask']}", 
+				'descr' => $x['descr']);
+			
+		}, $tunnel['allowedips']['row']);
 
-			$href = "vpn_wg_peers_edit.php?peer={$peer_idx}";
+		if (is_array($allowedips) && count($allowedips) > 0) {
 
 			$extras = count($allowedips) - 1;
 
 			if ($extras > 0) {
 
-				$data_html = "<table><thead><th>Subnet</th><th style='padding-left: 10px;'>Description</th></thead><tbody>";
-	
+				$data_html = 	<<<"START"
+						<table>
+							<thead>
+								<th>{$getText('Subnet')}</th>
+								<th style='padding-left: 10px;'>{$getText('Description')}</th>
+							</thead>
+							<tbody>
+
+						START;
+
 				foreach ($allowedips as $address) {
 
 					wg_htmlspecialchars($address);
 	
-					$data_html .= "<tr><td>{$address['address']}/{$address['mask']}</td><td style='padding-left: 10px;'>{$address['descr']}</td></tr>";
-	
+					$data_html .= 	<<<"ROW"
+							<tr>
+								<td>{$address['address']}</td>
+								<td style='padding-left: 10px;'>{$address['descr']}</td>
+							</tr>
+
+							ROW;
+
 				}
 	
-				$data_html .= '</tbody></table>';
-	
-				$hint = "{$allowedips[0]['address']} (+{$extras})";
+				$data_html .= 	<<<"END"
+							</tbody>
+						</table>
+						END;
 
-				wg_htmlspecialchars($href, $data_html, $hint);
+				$title 	= gettext('Allowed IPs');
 	
-				$ret_html = "<a href=\"{$href}\" title=\"Allowed IPs\" data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\">{$hint}</a>";
-	
-				return $ret_html;
+				$hint 	= "{$allowedips[0]['address']} (+{$extras})";
+
+				$popover_params = " data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\"";
 	
 			} else {
 
-				wg_htmlspecialchars($href, $allowedips[0]);
-	
-				$ret_html = "<a href=\"{$href}\" title=\"{$allowedips[0]['descr']}\">{$allowedips[0]['address']}/{$allowedips[0]['mask']}</a>";
-	
-				return $ret_html;
+				$title = $addresses[0]['descr'];
+
+				$hint = $addresses[0]['address'];
+
+				$popover_params = null;
 			
 			}
 
+			$href ="vpn_wg_peers_edit.php?peer={$peer_idx}";
+
+			wg_htmlspecialchars($href, $title, $hint);
+
+			$ret_html = "<a href=\"{$href}\" title=\"{$title}\"{$popover_params}>{$hint}</a>";
+
 		} else {
 
-			return '(none)';
+			$ret_html = "({$getText('none')})";
 			
 		}
 
+	return $ret_html;
 
 	}
 
