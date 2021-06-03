@@ -419,7 +419,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 				'address' => "{$x['address']}/{$x['mask']}", 
 				'descr' => $x['descr']);
 			
-		}, $tunnel['allowedips']['row']);
+		}, $peer['allowedips']['row']);
 
 		if (is_array($allowedips) && count($allowedips) > 0) {
 
