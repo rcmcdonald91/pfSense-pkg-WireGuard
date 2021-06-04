@@ -115,7 +115,7 @@ function wg_service_fpm_stop() {
 	$serialized_output = $ret_output = array();
 
 	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output);
+	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output, $ret_code);
 
 	if ($ret_output = unserialize($serialized_output[0])) {
 
@@ -224,7 +224,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 	}
 
-	// Build all (null) the tunnels
+	// Build all (i.e. null) the tunnels
 	$sync_all_status = wg_tunnel_sync(null);
 
 	if ($sync_all_status['ret_code'] <> 0 ) {
@@ -331,9 +331,6 @@ function wg_restart_extra_services() {
 
 	// unbound
 	services_unbound_configure();
-
-	// pf
-	filter_configure();
 
 	// This is currently just a best effort attempt...
 	return 0;

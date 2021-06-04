@@ -278,11 +278,12 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 		"These interface addresses are only applicable for unassigned WireGuard tunnel interfaces.</a>"
 	));
 
-	// Hack to ensure empty lists default to /128 mask
-	if (!is_array($pconfig['addresses']['row'])) {
+	// Init the addresses array if necessary
+	if (!is_array($pconfig['addresses']['row']) || empty($pconfig['addresses']['row'])) {
 
 		wg_init_config_arr($pconfig, array('addresses', 'row', 0));
 
+		// Hack to ensure empty lists default to /128 mask
 		$pconfig['addresses']['row'][0]['mask'] = '128';
 
 	}

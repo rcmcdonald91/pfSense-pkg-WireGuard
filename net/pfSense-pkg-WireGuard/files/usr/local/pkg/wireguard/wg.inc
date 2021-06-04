@@ -60,7 +60,9 @@ function wg_toggle_tunnel($tunnel_name) {
 
 		if ($enabled && is_wg_tunnel_assigned($tunnel['name'])) {
 
-			$input_errors[] = gettext('Cannot disable a WireGuard tunnel while it is assigned as an interface.');
+			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+			$input_errors[] = "Cannot disable {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
 
 		}
 
@@ -213,7 +215,9 @@ function wg_delete_tunnel($tunnel_name) {
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
 
-			$input_errors[] = gettext('Cannot delete a WireGuard tunnel assigned to a pfSense interface.');
+			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+			$input_errors[] = "Cannot delete {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
 
 		}
 
@@ -245,7 +249,7 @@ function wg_delete_tunnel($tunnel_name) {
 function wg_peer_allowedips($post) {
 
 	// Convert the post into proper arrays
-	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr', 'address_route'));
+	$allowedips = wg_parse_post_repeatables($post, array('address', 'address_subnet', 'address_descr'));
 
 	$ret_array = array();
 
@@ -260,13 +264,13 @@ function wg_peer_allowedips($post) {
 			$ret_array[] 	= array(
 						'address' 	=> $row['address'], 
 						'mask' 		=> $row['address_subnet'], 
-						'descr' 	=> $row['address_descr'],
-						'route' 	=> $row['address_route']);
+						'descr' 	=> $row['address_descr']);
 
 		}
 
 	}
 
+	// Consumers expect an array
 	return $ret_array;
 
 }
@@ -298,6 +302,7 @@ function wg_tunnel_addresses($post) {
 
 	}
 
+	// Consumers expect an array
 	return $ret_array;
 
 }
@@ -346,10 +351,10 @@ function wg_do_peer_post($post) {
 
 	$peer_idx = $post['index'];
 
+	wg_init_config_arr($wgg['peers'][$peer_idx], array('allowedips', 'row'));
+
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['peers'][$peer_idx];
-
-	wg_init_config_arr($pconfig, array('allowedips', 'row'));
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
 
@@ -398,7 +403,6 @@ function wg_do_peer_post($post) {
 				// We've got meaningful changes...
 				$changes = true;
 
-				// Add peer's tunnel to the list to apply
 				wg_apply_list_add($pconfig['tun'], 'tunnels');
 
 			// Now try the old_config tunnel...
@@ -407,13 +411,7 @@ function wg_do_peer_post($post) {
 				// We've got meaningful changes...
 				$changes = true;
 
-				// Add peer's tunnel to the list to apply
 				wg_apply_list_add($old_config['tun'], 'tunnels');
-
-			// Looks like we are just resaving an unassigned peer...
-			} else {
-
-				$changes = false;
 
 			}
  
@@ -440,10 +438,10 @@ function wg_do_tunnel_post($post) {
 
 	$tun_idx = $post['index'];
 
+	wg_init_config_arr($wgg['tunnels'][$tun_idx], array('addresses', 'row'));
+
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['tunnels'][$tun_idx];
-
-	wg_init_config_arr($pconfig, array('addresses', 'row'));
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
@@ -593,6 +591,9 @@ function wg_tunnel_sync($tunnel_names = null) {
 					'config' => $tun_sync_status['config']);
 
 		}
+		
+		// Reload the filter
+		filter_configure();
 
 	}
 
@@ -709,14 +710,11 @@ function wg_resync() {
 	// Reinstall earlyshellcmd in case it was accidently deleted
 	wg_earlyshellcmd_install();
 
-	// Reinstall interface group in case it was accidently deleted
+	// Recreate interface group in case it was accidently deleted
 	wg_ifgroup_install();
 
-	// Update by re-installing the Unbound ACL
+	// Update Unbound ACL by recreating it
 	wg_unbound_acl_install();
-
-	// Reinstall service in case it was accidently deleted
-	wg_service_install();
 
 	// We don't want active tunnels when the service isn't running
 	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {

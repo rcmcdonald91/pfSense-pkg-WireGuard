@@ -37,6 +37,8 @@ require_once('wireguard/wg_guiconfig.inc');
 
 global $wgg;
 
+$pconfig = array();
+
 wg_globals();
 
 if (isset($_REQUEST['tun'])) {
@@ -102,17 +104,12 @@ if ($_POST) {
 
 }
 
-$pconfig = array();
-
 if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
 
 	// Looks like we are editing an existing peer
 	$pconfig = &$wgg['peers'][$peer_idx];
 
 } else {
-
-	// We are creating a new peer
-	$pconfig = array();
 
 	// Default to enabled
 	$pconfig['enabled'] = 'yes';
@@ -253,11 +250,12 @@ $section = new Form_Section('Address Configuration');
 
 $section->setAttribute('id', 'allowedips');
 
-// Hack to ensure empty lists default to /128 mask
-if (!is_array($pconfig['allowedips']['row'])) {
+// Init the addresses array if necessary
+if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['row'])) {
 
 	wg_init_config_arr($pconfig, array('allowedips', 'row', 0));
 	
+	// Hack to ensure empty lists default to /128 mask
 	$pconfig['allowedips']['row'][0]['mask'] = '128';
 	
 }
