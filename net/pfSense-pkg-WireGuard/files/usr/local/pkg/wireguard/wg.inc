@@ -591,6 +591,9 @@ function wg_tunnel_sync($tunnel_names = null) {
 					'config' => $tun_sync_status['config']);
 
 		}
+		
+		// Reload the filter
+		filter_configure();
 
 	}
 

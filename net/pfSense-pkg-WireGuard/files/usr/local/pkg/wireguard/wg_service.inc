@@ -332,9 +332,6 @@ function wg_restart_extra_services() {
 	// unbound
 	services_unbound_configure();
 
-	// pf
-	filter_configure();
-
 	// This is currently just a best effort attempt...
 	return 0;
 
