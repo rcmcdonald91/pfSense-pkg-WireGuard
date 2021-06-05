@@ -702,26 +702,34 @@ function wg_tunnel_sync_by_name($tunnel_name) {
  * This performs some routine checks just to make sure everything is still in order
  */
 function wg_resync() {
-	global $wgg;
+	global $g, $wgg;
 
 	// Create WireGuard configuration files
 	wg_create_config_files();
 
-	// Reinstall earlyshellcmd in case it was accidently deleted
-	wg_earlyshellcmd_install();
+	// Not really important if we are installing...
+	if (!$g['wireguard_installing']) {
 
-	// Recreate interface group in case it was accidently deleted
-	wg_ifgroup_install();
+		// Reinstall earlyshellcmd in case it was accidently deleted
+		wg_earlyshellcmd_install();
 
-	// Update Unbound ACL by recreating it
-	wg_unbound_acl_install();
+		// Recreate interface group in case it was accidently deleted
+		wg_ifgroup_install();
 
+		// Update Unbound ACL by recreating it
+		wg_unbound_acl_install();
+
+	}
+	
 	// We don't want active tunnels when the service isn't running
 	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
 
 		wg_destroy_tunnels();
 
 	}
+
+	// We definitely aren't installing at this point...
+	unset($g['wireguard_installing']);
 
 }
 

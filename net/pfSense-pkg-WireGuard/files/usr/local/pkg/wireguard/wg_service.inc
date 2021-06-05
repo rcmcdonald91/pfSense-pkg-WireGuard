@@ -303,7 +303,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 	} else {
 
-		// We don't need to restart additional services ifw we just finished booting...
+		// We don't need to restart additional services if we just finished booting...
 		if (is_subsystem_dirty('wireguard_firststart')) {
 
 			clear_subsystem_dirty('wireguard_firststart');
@@ -326,11 +326,15 @@ function wg_service_cli_start($serialize_output = true) {
 
 function wg_restart_extra_services() {
 
-	// dpinger
-	setup_gateways_monitor();
+	if (!platform_booting()) {
 
-	// unbound
-	services_unbound_configure();
+		// dpinger
+		setup_gateways_monitor();
+
+		// unbound
+		services_unbound_configure();
+
+	}
 
 	// This is currently just a best effort attempt...
 	return 0;
