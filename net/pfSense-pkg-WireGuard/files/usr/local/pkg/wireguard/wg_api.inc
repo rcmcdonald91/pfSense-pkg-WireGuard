@@ -497,13 +497,15 @@ function wg_gen_keypair($json = false) {
 function wg_gen_publickey($privkey, $json = false) {
 	global $wgg;
 
-	wg_escapeshellarg($privkey);
+	$was_clamped = wg_is_key_clamped($privkey)
 
-	$privkey = wg_clamp_key($privkey);
+	$privkey = $safe_privkey = wg_clamp_key($privkey);
 
-	$pubkey = exec("echo {$privkey} | {$wgg['wg']} pubkey");
+	wg_escapeshellarg($safe_privkey);
 
-	$res = array('privkey' => $privkey, 'pubkey' => $pubkey, 'was_clamped' => wg_is_key_clamped($privkey));
+	$pubkey = exec("echo {$safe_privkey} | {$wgg['wg']} pubkey");
+
+	$res = array('privkey' => $privkey, 'pubkey' => $pubkey, 'was_clamped' => $was_clamped);
 
 	return $json ? json_encode($res) : $res;
 
@@ -523,7 +525,9 @@ function wg_clamp_key($key) {
 
 		$decoded_clamped_key = pack("C*", ...$key_bytes);
 
-		return base64_encode($decoded_clamped_key);
+		$encoded_clamped_key = base64_encode($decoded_clamped_key);
+
+		return $encoded_clamped_key;
 
 	}
 
