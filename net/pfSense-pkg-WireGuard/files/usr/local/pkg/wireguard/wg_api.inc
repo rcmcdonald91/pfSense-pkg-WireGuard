@@ -235,6 +235,10 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 
 	$tun_idx = wg_get_tunnel_array_index($wg_ifname);
 
+	$tunnel = $wgg['tunnels'][$tun_idx];
+
+	wg_init_config_arr($tunnel, array('addresses', 'row'));
+
 	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
 
@@ -242,7 +246,7 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 		$current = pfSense_getall_interface_addresses($wg_ifname);
 
 		// Get an array of the addresses to be assigned to the interface
-		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $wgg['tunnels'][$tun_idx]['addresses']['row']);
+		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $tunnel['addresses']['row']);
 
 		// Determine the addresses to remove
 		$addresses_to_remove = array_diff($current, array_intersect($current, $desired));

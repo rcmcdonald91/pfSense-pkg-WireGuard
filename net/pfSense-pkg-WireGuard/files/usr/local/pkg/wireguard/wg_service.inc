@@ -33,6 +33,8 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1])) {
 
+	$ret_code = 0;
+
 	ignore_user_abort(true);
 
 	set_time_limit(0);
@@ -61,26 +63,38 @@ if (isset($argv[1])) {
 		case 'start':
 
 			$ret_code = wg_service_cli_start($serialize);
-	
-			exit($ret_code);
 			
 			break;
 
 		case 'stop':
 	
 			$ret_code = wg_service_cli_stop($serialize);
-	
-			exit($ret_code);
+
+			break;
+
+		case 'restart':
+
+			$ret_code = wg_service_cli_restart($serialize);
 
 			break;
 
 		default:
 
-			exit(1);
+			$ret_code = usage();
 
 			break;
 
 	}
+
+	exit($ret_code);
+
+}
+
+function usage() {
+
+	fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP} [SERIALIZE]");
+
+	return 1;
 
 }
 
@@ -88,23 +102,39 @@ if (isset($argv[1])) {
 function wg_service_fpm_restart() {
 	global $wgg;
 
-	$start_status = $stop_status = array();
+	$serialized_output = $ret_output = array();
+
+	// Invokes service restart with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} restart serialize", $serialized_output, $ret_code);
+
+	if ($ret_output = unserialize($serialized_output[0])) {
+
+		return $ret_output;
+
+	}
+
+	// Consumers expect an array...
+	return array();
+
+}
+
+function wg_service_cli_restart($serialize = true) {
+	global $wgg;
 
 	if (wg_is_service_running()) {
 
-		$stop_status = wg_service_fpm_stop();
+		$ret_code = wg_service_cli_stop($serialize);
 
-		if ($stop_status['ret_code'] <> 0) {
+		if ($ret_code <> 0) {
 
-			return $stop_status;
-
+			return $ret_Code;
 		}
 
 	}
 
-	$start_status = wg_service_fpm_start();
+	$ret_code = wg_service_cli_start($serialize);
 
-	return $start_status;
+	return $ret_code;
 
 }
 
@@ -129,7 +159,7 @@ function wg_service_fpm_stop() {
 }
 
 // Only for calling service stop from the CLI
-function wg_service_cli_stop($serialize_output = true) {
+function wg_service_cli_stop($serialize = true) {
 	global $wgg;
 
 	$ret_code = 0;
@@ -138,7 +168,7 @@ function wg_service_cli_stop($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		// Terminate early...
 		return $ret_code;
@@ -150,7 +180,7 @@ function wg_service_cli_stop($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 	}
 
@@ -180,7 +210,7 @@ function wg_service_fpm_start() {
 }
 
 // Only for calling service start from the CLI
-function wg_service_cli_start($serialize_output = true) {
+function wg_service_cli_start($serialize = true) {
 	global $g, $wgg;
 
 	// Set the process name
@@ -192,7 +222,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_START;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		return $ret_code;
 
@@ -202,7 +232,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_RUNNING;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		return $ret_code;
 
@@ -252,13 +282,13 @@ function wg_service_cli_start($serialize_output = true) {
 
 		wg_destroy_tunnels();
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		return $ret_code;
 
 	} elseif ($newpid) {
 
-		wg_service_error_handler($ret_code, $serialize_output, array('sync_all_status' => $sync_all_status));
+		wg_service_error_handler($ret_code, $serialize, array('sync_all_status' => $sync_all_status));
 
 		return $ret_code;
 

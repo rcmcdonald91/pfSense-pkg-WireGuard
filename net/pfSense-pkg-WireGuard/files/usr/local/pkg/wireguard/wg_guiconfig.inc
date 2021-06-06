@@ -307,6 +307,8 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
+		wg_init_config_arr($tunnel, array('addresses', 'row'));
+
 		// Smash address + mask
 		$addresses = array_map(function($x) {
 			
