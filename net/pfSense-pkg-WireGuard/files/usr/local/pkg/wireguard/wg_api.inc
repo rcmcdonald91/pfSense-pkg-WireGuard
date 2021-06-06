@@ -497,7 +497,7 @@ function wg_gen_keypair($json = false) {
 function wg_gen_publickey($privkey, $json = false) {
 	global $wgg;
 
-	$was_clamped = wg_is_key_clamped($privkey)
+	$was_clamped = wg_is_key_clamped($privkey);
 
 	$privkey = $safe_privkey = wg_clamp_key($privkey);
 
