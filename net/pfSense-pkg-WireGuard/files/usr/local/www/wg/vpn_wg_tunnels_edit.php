@@ -464,7 +464,6 @@ endif;
 
 <?php $genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
 
-
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
