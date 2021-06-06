@@ -80,21 +80,15 @@ if (isset($argv[1])) {
 
 		default:
 
-			$ret_code = usage();
+			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP} [SERIALIZE]");
+
+			$ret_code = 1;
 
 			break;
 
 	}
 
 	exit($ret_code);
-
-}
-
-function usage() {
-
-	fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP} [SERIALIZE]");
-
-	return 1;
 
 }
 
