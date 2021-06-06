@@ -80,7 +80,7 @@ if (isset($argv[1])) {
 
 		default:
 
-			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP} [SERIALIZE]");
+			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP|RESTART} [SERIALIZE]");
 
 			$ret_code = 1;
 
@@ -136,19 +136,23 @@ function wg_service_cli_restart($serialize = true) {
 function wg_service_fpm_stop() {
 	global $wgg;
 
-	$serialized_output = $ret_output = array();
+	$exec_output = $unserialize_output = $ret_output = array();
 
 	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output, $ret_code);
+	exec("{$wgg['wg_daemon']} stop serialize", $exec_output, $ret_code);
 
-	if ($ret_output = unserialize($serialized_output[0])) {
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		return $ret_output;
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
 
 	}
 
 	// Consumers expect an array...
-	return array();
+	return $ret_output;
 
 }
 
@@ -186,20 +190,24 @@ function wg_service_cli_stop($serialize = true) {
 function wg_service_fpm_start() {
 	global $wgg;
 
-	$serialized_output = $ret_output = array();
+	$exec_output = $unserialize_output = $ret_output = array();
 
 	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
-	exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
+	exec("{$wgg['wg_daemon']} start serialize", $exec_output, $ret_code);
 
 	// Catch unserialization results before returning
-	if ($ret_output = unserialize($serialized_output[0])) {
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		return $ret_output;
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
 
 	}
 
-	// Consumers expect an array type
-	return array();
+	// Consumers expect an array...
+	return $ret_output;
 
 }
 
@@ -240,7 +248,7 @@ function wg_service_cli_start($serialize = true) {
 		// This absolutely needs to be a file on disk to remain accessible between process instances
 		mark_subsystem_dirty('wireguard_firststart');
 
-		// Output during booting must be STDERR for some reason
+		// Output during booting must be to STDERR for some reason
 		fwrite(STDERR, "Configuring WireGuard tunnels...");
 
 		// Supresses ifconfig spew 
@@ -249,9 +257,9 @@ function wg_service_cli_start($serialize = true) {
 	}
 
 	// Build all (i.e. null) the tunnels
-	$sync_all_status = wg_tunnel_sync(null);
+	$sync_status = wg_tunnel_sync(null);
 
-	if ($sync_all_status['ret_code'] <> 0 ) {
+	if ($sync_status['ret_code'] <> 0 ) {
 
 		$ret_code |= WG_ERROR_SVC_BUILD;
 
@@ -282,7 +290,7 @@ function wg_service_cli_start($serialize = true) {
 
 	} elseif ($newpid) {
 
-		wg_service_error_handler($ret_code, $serialize, array('sync_all_status' => $sync_all_status));
+		wg_service_error_handler($ret_code, $serialize, array('sync_status' => $sync_status));
 
 		return $ret_code;
 
@@ -348,6 +356,7 @@ function wg_service_cli_start($serialize = true) {
 
 }
 
+// This is where we restart any extra services
 function wg_restart_extra_services() {
 
 	if (!platform_booting()) {

@@ -505,6 +505,34 @@ function wg_gen_publickey($privkey) {
 
 }
 
+function wg_clamp_key($key) {
+
+	if (wg_is_valid_key($key)) {
+
+		$decoded_key = base64_decode($key);
+
+		$key_bytes = array_slice(unpack("C*", "\0{$decoded_key}"), 1);
+
+		$key_bytes[0] &= 248;
+
+		$key_bytes[31] = ($key_bytes[31] & 127) | 64;
+
+		$decoded_clamped_key = pack("C*", ...$key_bytes);
+
+		return base64_encode($decoded_clamped_key);
+
+	}
+
+	return false;
+
+}
+
+function wg_is_key_clamped($key) {
+
+	return ($key == wg_clamp_key($key));
+
+}
+
 // Checks if a given private or public key is valid
 function wg_is_valid_key($key) {
 
