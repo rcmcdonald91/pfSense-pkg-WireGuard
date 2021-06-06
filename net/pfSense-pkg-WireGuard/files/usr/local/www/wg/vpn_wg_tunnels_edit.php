@@ -462,7 +462,8 @@ endif;
 	</button>
 </nav>
 
-<?php $genkeywarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
+<?php $genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
+
 
 <script type="text/javascript">
 //<![CDATA[
@@ -498,7 +499,7 @@ events.push(function() {
 
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
-		if ($('#privatekey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
+		if ($('#privatekey').val().length == 0 || confirm("<?=$genKeyWarning?>")) {
 			ajaxRequest = $.ajax({
 				url: '/wg/vpn_wg_tunnels_edit.php',
 				type: 'post',
@@ -525,6 +526,7 @@ events.push(function() {
 			success: function(response, textStatus, jqXHR) {
 				resp = JSON.parse(response);
 				$('#publickey').val(resp.pubkey);
+				$('#privatekey').val(resp.privkey);
 			}
 		});
 	});
