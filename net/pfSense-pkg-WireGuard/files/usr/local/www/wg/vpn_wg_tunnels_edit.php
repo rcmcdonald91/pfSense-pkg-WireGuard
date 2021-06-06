@@ -526,7 +526,6 @@ events.push(function() {
 			success: function(response, textStatus, jqXHR) {
 				resp = JSON.parse(response);
 				$('#publickey').val(resp.pubkey);
-				$('#privatekey').val(resp.privkey);
 			}
 		});
 	});
