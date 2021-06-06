@@ -100,7 +100,7 @@ if ($_POST) {
 		case 'genpubkey':
 
 			// Process ajax call calculating the public key from a private key
-			print(wg_gen_publickey($_POST['privatekey']));
+			print(wg_gen_publickey($_POST['privatekey'], true));
 
 			exit;
 
@@ -523,7 +523,8 @@ events.push(function() {
 					privatekey: $('#privatekey').val()
 				},
 			success: function(response, textStatus, jqXHR) {
-				$('#publickey').val(response);
+				resp = JSON.parse(response);
+				$('#publickey').val(resp.pubkey);
 			}
 		});
 	});
