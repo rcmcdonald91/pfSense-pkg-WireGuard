@@ -487,7 +487,7 @@ function wg_gen_keypair($json = false) {
 
 	$pubkey = wg_gen_publickey($privkey);
 
-	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
+	$res = array('privkey' => $privkey, 'pubkey' => $pubkey['pubkey']);
 
 	return $json ? json_encode($res) : $res;
 
