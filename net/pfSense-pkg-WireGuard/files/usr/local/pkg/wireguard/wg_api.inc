@@ -494,14 +494,18 @@ function wg_gen_keypair($json = false) {
 }
 
 // Compose the public key from a provided private key
-function wg_gen_publickey($privkey) {
+function wg_gen_publickey($privkey, $json = false) {
 	global $wgg;
 
 	wg_escapeshellarg($privkey);
 
+	$privkey = wg_clamp_key($privkey);
+
 	$pubkey = exec("echo {$privkey} | {$wgg['wg']} pubkey");
 
-	return $pubkey;
+	$res = array('privkey' => $privkey, 'pubkey' => $pubkey, 'was_clamped' => wg_is_key_clamped($privkey));
+
+	return $json ? json_encode($res) : $res;
 
 }
 
