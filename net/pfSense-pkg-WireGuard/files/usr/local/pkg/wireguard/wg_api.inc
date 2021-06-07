@@ -543,7 +543,7 @@ function wg_is_key_clamped($key) {
 
 }
 
-// Checks if a given private or public key is valid
+// Checks if a given private, public, or pre-shared key is valid
 function wg_is_valid_key($key) {
 
 	// Reference: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html

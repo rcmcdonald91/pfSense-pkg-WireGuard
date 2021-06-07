@@ -445,21 +445,23 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
-	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
+	$pconfig['enabled']		= empty($post['enabled']) ? 'no' : $post['enabled'];
 
-	$pconfig['descr'] 		= $post['descr'];
+	$pconfig['descr']		= $post['descr'];
 
-	$pconfig['listenport'] 		= empty($post['listenport']) ? next_wg_port() : $post['listenport'];
+	$pconfig['listenport']		= empty($post['listenport']) ? next_wg_port() : $post['listenport'];
 
-	$pconfig['privatekey'] 		= $post['privatekey'];
+	$key 				= wg_gen_publickey($post['privatekey']);
 
-	$pconfig['publickey'] 		= wg_gen_publickey($post['privatekey']);
+	$pconfig['privatekey']		= $key['privkey'];
 
-	$pconfig['mtu'] 		= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
+	$pconfig['publickey']		= $key['privkey'];
+
+	$pconfig['mtu']			= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
 
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
-	$input_errors 			= wg_validate_tunnel_post($pconfig, $tun_idx);
+	$input_errors			= wg_validate_tunnel_post($pconfig, $tun_idx);
 
 	if (empty($input_errors)) {
 
