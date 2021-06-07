@@ -178,7 +178,6 @@ print($form);
 	</button>
 </nav>
 
-<!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {

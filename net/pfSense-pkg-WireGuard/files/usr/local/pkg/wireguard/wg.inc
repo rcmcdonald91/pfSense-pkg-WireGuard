@@ -443,6 +443,8 @@ function wg_do_tunnel_post($post) {
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['tunnels'][$tun_idx];
 
+	$key = wg_gen_publickey($post['privatekey']);
+
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
 
 	$pconfig['enabled']		= empty($post['enabled']) ? 'no' : $post['enabled'];
@@ -451,11 +453,9 @@ function wg_do_tunnel_post($post) {
 
 	$pconfig['listenport']		= empty($post['listenport']) ? next_wg_port() : $post['listenport'];
 
-	$key 				= wg_gen_publickey($post['privatekey']);
-
 	$pconfig['privatekey']		= $key['privkey'];
 
-	$pconfig['publickey']		= $key['privkey'];
+	$pconfig['publickey']		= $key['pubkey'];
 
 	$pconfig['mtu']			= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
 
