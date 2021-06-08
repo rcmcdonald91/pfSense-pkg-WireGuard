@@ -88,6 +88,7 @@ if (isset($argv[1])) {
 
 	}
 
+	// We are done...
 	exit($ret_code);
 
 }
@@ -96,24 +97,30 @@ if (isset($argv[1])) {
 function wg_service_fpm_restart() {
 	global $wgg;
 
-	$serialized_output = $ret_output = array();
+	$exec_output = $unserialize_output = $ret_output = array();
 
 	// Invokes service restart with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} restart serialize", $serialized_output, $ret_code);
+	exec("{$wgg['wg_daemon']} restart serialize", $exec_output, $ret_code);
 
-	if ($ret_output = unserialize($serialized_output[0])) {
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		return $ret_output;
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
 
 	}
 
 	// Consumers expect an array...
-	return array();
+	return $ret_output;
 
 }
 
 function wg_service_cli_restart($serialize = true) {
 	global $wgg;
+
+	$ret_code = 0;
 
 	if (wg_is_service_running()) {
 
