@@ -105,10 +105,8 @@ if ($_POST) {
 
 }
 
-wg_globals();
-
 // Default yes for new installations (i.e. keep_conf is empty)
-$pconfig['keep_conf'] = (isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
+$pconfig['keep_conf'] = (isset($wgg['config']['keep_conf'])) ? $wgg['config']['keep_conf'] : 'yes';
 
 $pconfig['hide_secrets'] = $wgg['config']['hide_secrets'];
 
