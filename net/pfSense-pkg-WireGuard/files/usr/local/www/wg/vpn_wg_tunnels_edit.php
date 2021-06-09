@@ -108,13 +108,13 @@ if ($_POST) {
 
 		case 'toggle':
 
-			wg_toggle_peer($peer_id);
+			$res = wg_toggle_peer($peer_id);
 
 			break;
 
 		case 'delete':
 
-			wg_delete_peer($peer_id);
+			$res = wg_delete_peer($peer_id);
 
 			break;
 
@@ -124,6 +124,20 @@ if ($_POST) {
 			header("Location: /wg/vpn_wg_tunnels.php");
 			
 			break;
+
+	}
+
+	$input_errors = $res['input_errors'];
+
+	$changes = $res['changes'];
+
+	if (empty($input_errors)) {
+
+		if (wg_is_service_running() && $changes) {
+
+			mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+		}
 
 	}
 
@@ -164,6 +178,14 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 include("head.inc");
 
 wg_print_service_warning();
+
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box($ret_code);
+
+}
+
+wg_print_config_apply_box();
 
 if (!empty($input_errors)) {
 

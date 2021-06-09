@@ -226,9 +226,6 @@ function wg_delete_tunnel($tunnel_name) {
 			// Delete the tunnel
 			unset($wgg['tunnels'][$tun_idx]);
 
-			// Unassign any peers
-			wg_tunnel_unassign_peers($tunnel['name']);
-
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_name']}] Tunnel {$tunnel['name']} deleted.");
 
@@ -243,30 +240,6 @@ function wg_delete_tunnel($tunnel_name) {
 	}
 
 	return array('input_errors' => $input_errors, 'changes' => $changes);
-
-}
-
-function wg_tunnel_unassign_peers($tunnel_name) {
-	global $wgg;
-
-	$ret_peers = array();
-
-	$peers = wg_get_tunnel_peers($tunnel_name);
-
-	foreach ($peers as $peer_idx => $peer) {
-
-		if ($peer['tun'] == $tunnel_name) {
-
-			$wgg['peers'][$peer_idx]['tun'] = 'unassigned';
-
-			$ret_peers[] = $wgg['peers'][$peer_idx];
-
-		}
-
-	}
-
-	// Return an array of peers that were unassigned
-	return $ret_peers;
 
 }
 
