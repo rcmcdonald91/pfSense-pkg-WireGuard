@@ -106,7 +106,7 @@ $a_devices = wg_status();
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
-		<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" style="overflow-x: 'visible'">
+		<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" style="overflow-x: 'visible'" data-sortable>
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
