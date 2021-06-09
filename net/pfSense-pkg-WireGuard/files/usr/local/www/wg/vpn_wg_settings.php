@@ -82,7 +82,7 @@ if ($_POST) {
 
 					$wgg['config']['keep_conf'] 	= $pconfig['keep_conf'] ? 'yes' : 'no';
 					
-					$wgg['config']['hide_secrets'] 	= $pconfig['hide_secrets'];
+					$wgg['config']['hide_secrets'] 	= $pconfig['hide_secrets'] ? 'yes' : 'no';
 
 					write_config("[{$wgg['pkg_name']}] Package settings saved.");
 
@@ -108,7 +108,8 @@ if ($_POST) {
 // Default yes for new installations (i.e. keep_conf is empty)
 $pconfig['keep_conf'] = (isset($wgg['config']['keep_conf'])) ? $wgg['config']['keep_conf'] : 'yes';
 
-$pconfig['hide_secrets'] = $wgg['config']['hide_secrets'];
+// Default yes for new installations (i.e. hide_secrets is empty)
+$pconfig['hide_secrets'] = (isset($wgg['config']['hide_secrets'])) $wgg['config']['hide_secrets'] : 'yes';
 
 $shortcut_section = "wireguard";
 
