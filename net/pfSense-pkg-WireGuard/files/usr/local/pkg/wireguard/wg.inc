@@ -545,7 +545,7 @@ function wg_apply_list_add($entry, $list) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnels is empty, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names = null) {
+function wg_tunnel_sync($tunnel_names = null, $restart_services = false) {
 	global $wgg;
 
 	$tunnels = array();
@@ -596,6 +596,12 @@ function wg_tunnel_sync($tunnel_names = null) {
 		
 		// Reload the filter
 		filter_configure();
+
+		if ($restart_services) {
+
+			wg_restart_extra_services();
+
+		}
 
 	}
 
@@ -901,9 +907,9 @@ function wg_remove_config_settings() {
 function make_wg_conf($tunnel) {
 	global $wgg;
 
-	$txt = "# This WireGuard config file has been created automatically. Do not edit!\n";
+	$txt = "# This WireGuard config file has been created automatically. Do not edit!\n\n";
 
-	$txt .= "# Description: {$tunnel['descr']}\n\n";
+	$txt .= "# Description: {$tunnel['descr']}\n";
 
 	// Process Interfaces section
 	$txt .= "[Interface]\n";
@@ -915,9 +921,9 @@ function make_wg_conf($tunnel) {
 		if (!$key['was_clamped']) {
 
 			$txt .= "# The provided PrivateKey was not pre-clamped by the key generator.\n";
-	
+
 			$txt .= "# PrivateKey = {$key['privkey']}\n";
-			
+
 			$txt .= "# PublicKey = {$key['pubkey']}\n";
 
 		}
@@ -959,7 +965,6 @@ function make_wg_conf($tunnel) {
 
 				}
 
-				
 				if (is_array($peer['allowedips']['row'])) {
 
 					$allowedips = implode(',', array_map(fn($x) => "{$x['address']}/{$x['mask']}", $peer['allowedips']['row']));

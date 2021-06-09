@@ -260,6 +260,7 @@ function wg_service_cli_start($serialize = true) {
 
 	}
 
+	// We don't need to do this if we are in postboot
 	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
 		// Build all (i.e. null) the tunnels
@@ -279,7 +280,7 @@ function wg_service_cli_start($serialize = true) {
 
 		fwrite(STDERR, "done. \n");
 
-		// We just finished booting...
+		// Set postboot state
 		mark_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
@@ -346,7 +347,7 @@ function wg_service_cli_start($serialize = true) {
 
 	} else {
 
-		// We don't need to restart additional services if we just finished booting...
+		// We don't need to restart additional services if we are in postboot
 		if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
 			// Restart any additional services
@@ -354,6 +355,7 @@ function wg_service_cli_start($serialize = true) {
 
 		}
 
+		// Clear postboot state
 		clear_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
