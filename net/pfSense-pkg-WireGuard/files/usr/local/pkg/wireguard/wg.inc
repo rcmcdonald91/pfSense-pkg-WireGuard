@@ -914,9 +914,11 @@ function make_wg_conf($tunnel) {
 
 		if (!$key['was_clamped']) {
 
-			$txt .= "# The provided PrivateKey ({$key['privkey']}) was not properly pre-clamped by the key generator.\n";
+			$txt .= "# The provided PrivateKey was not pre-clamped by the key generator.\n";
 	
 			$txt .= "# PrivateKey = {$key['privkey']}\n";
+			
+			$txt .= "# PublicKey = {$key['pubkey']}\n";
 
 		}
 
