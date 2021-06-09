@@ -260,17 +260,12 @@ function wg_service_cli_start($serialize = true) {
 
 	}
 
-	// If this is set, we have just booted and we can skip rebuilding the tunnels all over again...
-	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
+	// Build all (i.e. null) the tunnels
+	$sync_status = wg_tunnel_sync(null);
 
-		// Build all (i.e. null) the tunnels
-		$sync_status = wg_tunnel_sync(null);
+	if ($sync_status['ret_code'] <> 0 ) {
 
-		if ($sync_status['ret_code'] <> 0 ) {
-
-			$ret_code |= WG_ERROR_SVC_BUILD;
-
-		}
+		$ret_code |= WG_ERROR_SVC_BUILD;
 
 	}
 
@@ -280,7 +275,7 @@ function wg_service_cli_start($serialize = true) {
 
 		fwrite(STDERR, "done. \n");
 
-		// We just finished our firststart at system boot...
+		// We just finished booting...
 		mark_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
@@ -352,6 +347,8 @@ function wg_service_cli_start($serialize = true) {
 
 			// Restart any additional services
 			$ret_code = wg_restart_extra_services();
+
+			sleep(10);
 
 		}
 
