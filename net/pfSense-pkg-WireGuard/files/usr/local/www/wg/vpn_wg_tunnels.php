@@ -162,7 +162,7 @@ display_top_tabs($tab_array);
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Tunnels')?></h2></div>
 		<div class="panel-body table-responsive">
-			<table class="table table-striped table-hover">
+			<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" data-sortable>
 				<thead>
 					<tr>
 						<th class="peer-entries"></th>
@@ -172,7 +172,7 @@ display_top_tabs($tab_array);
 						<th><?=gettext("Address / Assignment")?></th>
 						<th><?=gettext("Listen Port")?></th>
 						<th><?=gettext("# Peers")?></th>
-						<th><?=gettext("Actions")?></th>
+						<th data-sortable="false"><?=gettext("Actions")?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -207,9 +207,9 @@ display_top_tabs($tab_array);
 			if (count($peers) > 0):
 ?>
 						<td colspan="6">
-							<table class="table table-hover peerbg_color">
+							<table class="table table-hover">
 								<thead>
-									<tr class="peerbg_color">
+									<tr>
 										<th><?=gettext("Description")?></th>
 										<th><?=gettext("Public key")?></th>
 										<th><?=gettext("Allowed IPs")?></th>
@@ -221,7 +221,7 @@ display_top_tabs($tab_array);
 <?php
 				foreach ($peers as $peer):
 ?>
-									<tr class="peerbg_color">
+									<tr>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 										<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>

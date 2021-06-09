@@ -393,14 +393,14 @@ else:
 		<h2 class="panel-title"><?=gettext("Peer Configuration")?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
-		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
+		<table id="peertable" class="table table-hover table-striped table-condensed sortable-theme-bootstrap" style="overflow-x: 'visible'" data-sortable>
 			<thead>
 				<tr>
 					<th><?=gettext("Description")?></th>
 					<th><?=gettext("Public key")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
 					<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
-					<th><?=gettext("Actions")?></th>
+					<th data-sortable="false"><?=gettext("Actions")?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -413,7 +413,9 @@ else:
 ?>
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
-					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
+					<td title="<?=htmlspecialchars($peer['publickey'])?>">
+						<?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?>
+					</td>
 					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">

@@ -106,7 +106,7 @@ $a_devices = wg_status();
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
-		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
+		<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" style="overflow-x: 'visible'">
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
@@ -116,7 +116,7 @@ $a_devices = wg_status();
 				<th><?=gettext('MTU')?></th>
 				<th><?=gettext('Listen Port')?></th>
 				<th><?=gettext('RX')?></th>
-				<th><?=gettext('TX')?></th>
+				<th data-sortable="false"><?=gettext('TX')?></th>
 			</thead>
 			<tbody>
 <?php
