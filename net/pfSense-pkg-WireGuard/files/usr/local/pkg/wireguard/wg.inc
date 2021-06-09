@@ -724,7 +724,9 @@ function wg_resync() {
 	}
 	
 	// We don't want active tunnels when the service isn't running
-	if (is_module_loaded($wgg['kmod']) && !wg_is_service_running()) {
+	if (!wg_is_service_running() &&
+		is_module_loaded($wgg['kmod']) &&
+			!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
 		wg_destroy_tunnels();
 
@@ -908,7 +910,17 @@ function make_wg_conf($tunnel) {
 
 	if (!empty($tunnel['privatekey'])) {
 
-		$txt .= "PrivateKey = {$tunnel['privatekey']}\n";
+		$key = wg_gen_publickey($tunnel['privatekey']);
+
+		if (!$key['was_clamped']) {
+
+			$txt .= "# The provided PrivateKey ({$key['privkey']}) was not properly pre-clamped by the key generator.\n";
+	
+			$txt .= "# PrivateKey = {$key['privkey']}\n";
+
+		}
+
+		$txt .= "PrivateKey = {$key['privkey_clamped']}\n";
 
 	}
 

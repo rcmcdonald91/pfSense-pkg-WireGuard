@@ -260,13 +260,17 @@ function wg_service_cli_start($serialize = true) {
 
 	}
 
-	// Build all (i.e. null) the tunnels
-	$sync_status = wg_tunnel_sync(null);
+	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
-	if ($sync_status['ret_code'] <> 0 ) {
+		// Build all (i.e. null) the tunnels
+		$sync_status = wg_tunnel_sync(null);
 
-		$ret_code |= WG_ERROR_SVC_BUILD;
+		if ($sync_status['ret_code'] <> 0 ) {
 
+			$ret_code |= WG_ERROR_SVC_BUILD;
+
+		}
+	
 	}
 
 	if (platform_booting()) {
@@ -347,8 +351,6 @@ function wg_service_cli_start($serialize = true) {
 
 			// Restart any additional services
 			$ret_code = wg_restart_extra_services();
-
-			sleep(10);
 
 		}
 

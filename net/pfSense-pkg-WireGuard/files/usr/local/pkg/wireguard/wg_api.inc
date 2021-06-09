@@ -495,15 +495,18 @@ function wg_gen_keypair($json = false) {
 function wg_gen_publickey($privkey, $json = false) {
 	global $wgg;
 
-	$was_clamped = wg_is_key_clamped($privkey);
+	// We want to pass the unmodified privkey through to the return array
+	$safe_privkey = $privkey;
 
-	$privkey = $safe_privkey = wg_clamp_key($privkey);
+	$was_clamped 		= wg_is_key_clamped($privkey);
+
+	$privkey_clamped 	= wg_clamp_key($privkey);
 
 	wg_escapeshellarg($safe_privkey);
 
 	$pubkey = exec("echo {$safe_privkey} | {$wgg['wg']} pubkey");
 
-	$res = array('privkey' => $privkey, 'pubkey' => $pubkey, 'was_clamped' => $was_clamped);
+	$res = array('privkey' => $privkey, 'privkey_clamped' => $privkey_clamped, 'pubkey' => $pubkey, 'was_clamped' => $was_clamped);
 
 	return $json ? json_encode($res) : $res;
 
