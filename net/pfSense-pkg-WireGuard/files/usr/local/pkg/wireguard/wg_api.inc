@@ -715,6 +715,7 @@ function is_wg_enabled() {
 	}
 
 	return false;
+	
 }
 
 /*

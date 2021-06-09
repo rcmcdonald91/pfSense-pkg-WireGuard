@@ -216,7 +216,6 @@ endif;
 	</a>
 </nav>
 
-
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
@@ -232,11 +231,9 @@ endif;
 			</thead>
 			<tbody>
 <?php
-
 			$a_packages = wg_pkg_info();
 
 			foreach ($a_packages as $package):
-
 ?>
     				<tr>
 					<td><?=htmlspecialchars($package['name'])?></td>
