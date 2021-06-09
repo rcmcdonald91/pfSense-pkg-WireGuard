@@ -73,42 +73,38 @@ if ($_POST) {
 
 		$tun_name = $_POST['tun'];
 
-		if (isset($_POST['act'])) {
+		switch ($_POST['act']) {
 
-			switch ($_POST['act']) {
+			case 'toggle':
+				
+				$res = wg_toggle_tunnel($tun_name);
+				
+				break;
 
-				case 'toggle':
-					
-					$res = wg_toggle_tunnel($tun_name);
-					
-					break;
+			case 'delete':
 
-				case 'delete':
+				$res = wg_delete_tunnel($tun_name);
 
-					$res = wg_delete_tunnel($tun_name);
+				break;
 
-					break;
+			default:
 
-				default:
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_tunnels.php");
 
-					// Shouldn't be here, so bail out.
-					header("Location: /wg/vpn_wg_tunnels.php");
+				break;
 
-					break;
+		}
 
-			}
+		$input_errors = $res['input_errors'];
 
-			$input_errors = $res['input_errors'];
+		$changes = $res['changes'];
 
-			$changes = $res['changes'];
+		if (empty($input_errors)) {
 
-			if (empty($input_errors)) {
+			if (wg_is_service_running() && $changes) {
 
-				if (wg_is_service_running() && $changes) {
-
-					mark_subsystem_dirty($wgg['subsystems']['wg']);
-	
-				}
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 			}
 

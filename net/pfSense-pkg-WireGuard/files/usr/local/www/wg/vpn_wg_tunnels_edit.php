@@ -52,90 +52,132 @@ if (isset($_REQUEST['tun'])) {
 
 }
 
-if (isset($_REQUEST['peer'])) {
-
-	$peer_id = $_REQUEST['peer'];
-
-}
-
 if ($_POST) {
 
-	switch ($_POST['act']) {
+	if (isset($_POST['apply'])) {
 
-		case 'save':
+		$ret_code = 0;
 
-			$res = wg_do_tunnel_post($_POST);
-		
-			$input_errors = $res['input_errors'];
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
-			$changes = $res['changes'];
-	
-			$pconfig = $res['pconfig'];
-	
-			if (empty($input_errors)) {
+			if (wg_is_service_running()) {
 
-				if (wg_is_service_running() && $changes) {
+				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-					// Everything looks good so far, so mark the subsystem dirty
-					mark_subsystem_dirty($wgg['subsystems']['wg']);
+				// TODO: Make extra services restart (true) a package setting
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true);
 
-				}
-	
-				// Save was successful
-				header("Location: /wg/vpn_wg_tunnels.php");
-	
+				$ret_code |= $sync_status['ret_code'];
+
 			}
 
-			break;
+			if ($ret_code == 0) {
 
-		case 'genkeys':
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
 
-			// Process ajax call requesting new key pair
-			print(wg_gen_keypair(true));
+			}
 
-			exit;
-
-			break;
-
-		case 'genpubkey':
-
-			// Process ajax call calculating the public key from a private key
-			print(wg_gen_publickey($_POST['privatekey'], true));
-
-			exit;
-
-			break;
-
-		case 'toggle':
-
-			$res = wg_toggle_peer($peer_id);
-
-			break;
-
-		case 'delete':
-
-			$res = wg_delete_peer($peer_id);
-
-			break;
-
-		default:
-		
-			// Shouldn't be here, so bail out.
-			header("Location: /wg/vpn_wg_tunnels.php");
-			
-			break;
+		}
 
 	}
 
-	$input_errors = $res['input_errors'];
+	if (isset($_POST['act'])) {
 
-	$changes = $res['changes'];
+		switch ($_POST['act']) {
 
-	if (empty($input_errors)) {
+			case 'save':
 
-		if (wg_is_service_running() && $changes) {
+				$res = wg_do_tunnel_post($_POST);
+			
+				$input_errors = $res['input_errors'];
 
-			mark_subsystem_dirty($wgg['subsystems']['wg']);
+				$changes = $res['changes'];
+		
+				$pconfig = $res['pconfig'];
+		
+				if (empty($input_errors)) {
+
+					if (wg_is_service_running() && $changes) {
+
+						// Everything looks good so far, so mark the subsystem dirty
+						mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+					}
+		
+					// Save was successful
+					header("Location: /wg/vpn_wg_tunnels.php");
+		
+				}
+
+				break;
+
+			case 'genkeys':
+
+				// Process ajax call requesting new key pair
+				print(wg_gen_keypair(true));
+
+				exit;
+
+				break;
+
+			case 'genpubkey':
+
+				// Process ajax call calculating the public key from a private key
+				print(wg_gen_publickey($_POST['privatekey'], true));
+
+				exit;
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$tun}");
+
+				break;
+
+		}
+
+	}
+
+	if (isset($_POST['peer'])) {
+
+		$peer_idx = $_POST['peer'];
+
+		switch ($_POST['act']) {
+
+			case 'toggle':
+
+				$res = wg_toggle_peer($peer_idx);
+
+				break;
+
+			case 'delete':
+				
+				$res = wg_delete_peer($peer_idx);
+
+				break;
+
+			default:
+				
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$tun}");
+
+				break;
+				
+		}
+
+		$input_errors = $res['input_errors'];
+
+		$changes = $res['changes'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $changes) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+			}
 
 		}
 

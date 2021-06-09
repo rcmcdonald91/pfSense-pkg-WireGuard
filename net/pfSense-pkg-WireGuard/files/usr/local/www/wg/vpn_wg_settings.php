@@ -70,32 +70,47 @@ if ($_POST) {
 
 	}
 
-	if ($_POST['act'] == 'save') {
+	if (isset($_POST['act'])) {
 
-		if (!$input_errors) {
+		switch ($_POST['act']) {
 
-			$pconfig = $_POST;
+			case 'save':
 
-			$wgg['config']['keep_conf'] = $pconfig['keep_conf'];
-			
-			$wgg['config']['hide_secrets'] = $pconfig['hide_secrets'];
+				if (empty($input_errors)) {
 
-			write_config('[WireGuard] Save WireGuard settings');
+					$pconfig = $_POST;
 
-			$save_success = true;
+					$wgg['config']['keep_conf'] 	= $pconfig['keep_conf'] ? 'yes' : 'no';
+					
+					$wgg['config']['hide_secrets'] 	= $pconfig['hide_secrets'];
+
+					write_config("[{$wgg['pkg_name']}] Package settings saved.");
+
+					$save_success = true;
+
+				}
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_settings.php");
+
+				break;
 
 		}
 
 	}
 
-} else {
-
-	// Default to yes if not set (i.e. a new installation)
-	$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
-
-	$pconfig['hide_secrets'] = $wgg['config']['hide_secrets'];
-
 }
+
+wg_globals();
+
+// Default yes for new installations (i.e. keep_conf is empty)
+$pconfig['keep_conf'] = (isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
+
+$pconfig['hide_secrets'] = $wgg['config']['hide_secrets'];
 
 $shortcut_section = "wireguard";
 
@@ -126,7 +141,7 @@ if (isset($_POST['apply'])) {
 
 wg_print_config_apply_box();
 
-if ($input_errors) {
+if (!empty($input_errors)) {
 
 	print_input_errors($input_errors);
 	

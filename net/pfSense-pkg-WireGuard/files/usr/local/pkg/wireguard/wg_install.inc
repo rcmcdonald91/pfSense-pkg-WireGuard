@@ -308,6 +308,7 @@ function wg_deinstall() {
 	// Removes WireGuard temporary files
 	wg_delete_temp_files();
 
+	// Only delete WireGuard configuration if keep_conf is explicitly 'no'
 	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'no') {
 
 		update_status("done.\n  Removing WireGuard configuration settings...");
