@@ -264,7 +264,7 @@ function wg_service_cli_start($serialize = true) {
 	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
 		// Build all (i.e. null) the tunnels
-		$sync_status = wg_tunnel_sync(null);
+		$sync_status = wg_tunnel_sync(null, false);
 
 		if ($sync_status['ret_code'] <> 0 ) {
 
