@@ -44,7 +44,7 @@ function wg_print_config_apply_box() {
 
 	$getText = function($text) { return gettext($text); };
 
-	if (is_subsystem_dirty($wgg['subsystem'])) {
+	if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
 		print_apply_box("{$getText('The WireGuard configuration has been changed.')}<br />
 					{$getText('The changes must be applied for them to take effect.')}<br />

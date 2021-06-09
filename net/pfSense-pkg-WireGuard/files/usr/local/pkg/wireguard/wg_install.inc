@@ -354,7 +354,11 @@ function wg_delete_temp_files() {
 	}
 
 	// Package is uninstalling, so clear lingering dirty status too...
-	clear_subsystem_dirty($wgg['subsystem']);
+	foreach ($wgg['subsystems'] as $subsystem) {
+
+		clear_subsystem_dirty($subsystem);
+
+	}
 
 }
 

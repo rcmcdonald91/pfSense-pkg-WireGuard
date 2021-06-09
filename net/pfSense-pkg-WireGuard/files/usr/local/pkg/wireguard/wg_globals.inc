@@ -51,7 +51,7 @@ $wgg = array(
 	'php_wg'		=> '/usr/local/bin/php_wg',
 	'wg_includes'		=> '/usr/local/pkg/wireguard',
 	'kmod'			=> 'if_wg.ko',
-	'subsystem'		=> 'wireguard',
+	'subsystem_prefix'	=> 'wireguard',
 	'service_name'		=> 'wireguardd',
 	'applylist'		=> array(
 					'tunnels' => "{$g['tmp_path']}/.wireguard_tunnel.apply"),
@@ -96,17 +96,23 @@ $wgg = array(
 
 $wgg['conf_paths_to_clean']	= array($wgg['conf_path'], '/etc/wireguard', '/etc/wg');
 $wgg['xml_paths_to_clean']	= array($wgg['xml_path'], array('wireguard'));
+
 $wgg['depends_names']		= array(
 					$wgg['pkg_name'],
 					'wireguard-kmod',
 					'wireguard-tools-lite');
+
+$wgg['pid_path']		= "{$g['varrun_path']}/{$wgg['service_name']}.pid";
+$wgg['subsystems']		= array(
+					'wg' => $wgg['subsystem_prefix'], 
+					'postboot' => "{$wgg['subsystem_prefix']}_postboot");
+$wgg['wg_daemon'] 		= "{$wgg['php_wg']} -f {$wgg['wg_includes']}/wg_service.inc";
+
 $wgg['shellcmdentries']		= array(
 					array(
 						'cmd' => "service {$wgg['service_name']} start",
 						'cmdtype' => 'earlyshellcmd',
 						'description' => 'WireGuard earlyshellcmd (DO NOT EDIT/DELETE!)'));
-$wgg['pid_path']		= "{$g['varrun_path']}/{$wgg['service_name']}.pid";
-$wgg['wg_daemon'] 		= "{$wgg['php_wg']} -f {$wgg['wg_includes']}/wg_service.inc";
 
 function &array_get_value(array &$array, $parents) {
 

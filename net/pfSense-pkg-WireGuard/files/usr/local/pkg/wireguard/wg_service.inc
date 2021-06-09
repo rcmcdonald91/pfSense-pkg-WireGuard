@@ -252,9 +252,6 @@ function wg_service_cli_start($serialize = true) {
 
 	if (platform_booting()) {
 
-		// This absolutely needs to be a file on disk to remain accessible between process instances
-		mark_subsystem_dirty('wireguard_firststart');
-
 		// Output during booting must be to STDERR for some reason
 		fwrite(STDERR, "Configuring WireGuard tunnels...");
 
@@ -263,12 +260,17 @@ function wg_service_cli_start($serialize = true) {
 
 	}
 
-	// Build all (i.e. null) the tunnels
-	$sync_status = wg_tunnel_sync(null);
+	// If this is set, we have just booted and we can skip rebuilding the tunnels all over again...
+	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
-	if ($sync_status['ret_code'] <> 0 ) {
+		// Build all (i.e. null) the tunnels
+		$sync_status = wg_tunnel_sync(null);
 
-		$ret_code |= WG_ERROR_SVC_BUILD;
+		if ($sync_status['ret_code'] <> 0 ) {
+
+			$ret_code |= WG_ERROR_SVC_BUILD;
+
+		}
 
 	}
 
@@ -277,6 +279,9 @@ function wg_service_cli_start($serialize = true) {
 		unmute_kernel_msgs();
 
 		fwrite(STDERR, "done. \n");
+
+		// We just finished our firststart at system boot...
+		mark_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
 
@@ -343,16 +348,14 @@ function wg_service_cli_start($serialize = true) {
 	} else {
 
 		// We don't need to restart additional services if we just finished booting...
-		if (is_subsystem_dirty('wireguard_firststart')) {
+		if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
-			clear_subsystem_dirty('wireguard_firststart');
-
-			return 0;
+			// Restart any additional services
+			$ret_code = wg_restart_extra_services();
 
 		}
 
-		// Restart any additional services
-		$ret_code = wg_restart_extra_services();
+		clear_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
 

@@ -45,7 +45,7 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (is_subsystem_dirty($wgg['subsystem'])) {
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
 			if (wg_is_service_running()) {
 
@@ -59,7 +59,7 @@ if ($_POST) {
 
 			if ($ret_code == 0) {
 
-				clear_subsystem_dirty('wireguard');
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
 
 			}
 
@@ -102,7 +102,7 @@ if ($_POST) {
 
 			if (wg_is_service_running() && $changes) {
 
-				mark_subsystem_dirty($wgg['subsystem']);
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 			}
 
