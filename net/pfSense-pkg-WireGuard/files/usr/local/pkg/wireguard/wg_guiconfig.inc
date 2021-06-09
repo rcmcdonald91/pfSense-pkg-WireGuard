@@ -414,6 +414,8 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 		$peer = $wgg['peers'][$peer_idx];
 
+		wg_init_config_arr($peer, array('allowedips', 'row'));
+
 		// Smash address + mask
 		$allowedips = array_map(function($x) {
 			
