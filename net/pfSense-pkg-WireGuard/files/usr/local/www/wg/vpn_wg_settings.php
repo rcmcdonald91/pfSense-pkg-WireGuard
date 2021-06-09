@@ -109,7 +109,7 @@ if ($_POST) {
 $pconfig['keep_conf'] = (isset($wgg['config']['keep_conf'])) ? $wgg['config']['keep_conf'] : 'yes';
 
 // Default yes for new installations (i.e. hide_secrets is empty)
-$pconfig['hide_secrets'] = (isset($wgg['config']['hide_secrets'])) $wgg['config']['hide_secrets'] : 'yes';
+$pconfig['hide_secrets'] = (isset($wgg['config']['hide_secrets'])) ? $wgg['config']['hide_secrets'] : 'yes';
 
 $shortcut_section = "wireguard";
 
