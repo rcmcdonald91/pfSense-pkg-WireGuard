@@ -157,7 +157,7 @@ display_top_tabs($tab_array);
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Peers')?></h2></div>
 		<div class="panel-body table-responsive">
-			<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" data-sortable>
+			<table class="table table-hover table-striped table-condensed">
 				<thead>
 					<tr>
 						<th><?=gettext("Description")?></th>
@@ -165,7 +165,7 @@ display_top_tabs($tab_array);
 						<th><?=gettext("Tunnel")?></th>
 						<th><?=gettext("Allowed IPs")?></th>
 						<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
-						<th data-sortable="false"><?=gettext("Actions")?></th>
+						<th><?=gettext("Actions")?></th>
 					</tr>
 				</thead>
 				<tbody>

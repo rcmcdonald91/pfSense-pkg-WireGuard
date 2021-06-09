@@ -457,14 +457,14 @@ else:
 		<h2 class="panel-title"><?=gettext("Peer Configuration")?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
-		<table id="peertable" class="table table-hover table-striped table-condensed sortable-theme-bootstrap" style="overflow-x: 'visible'" data-sortable>
+		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 			<thead>
 				<tr>
 					<th><?=gettext("Description")?></th>
 					<th><?=gettext("Public key")?></th>
 					<th><?=gettext("Allowed IPs")?></th>
 					<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
-					<th data-sortable="false"><?=gettext("Actions")?></th>
+					<th><?=gettext("Actions")?></th>
 				</tr>
 			</thead>
 			<tbody>

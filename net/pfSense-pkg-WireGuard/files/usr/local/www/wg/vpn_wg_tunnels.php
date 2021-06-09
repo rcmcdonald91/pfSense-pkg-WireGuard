@@ -158,7 +158,7 @@ display_top_tabs($tab_array);
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Tunnels')?></h2></div>
 		<div class="panel-body table-responsive">
-			<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" data-sortable>
+			<table class="table table-hover table-striped table-condensed">
 				<thead>
 					<tr>
 						<th class="peer-entries"></th>
@@ -168,7 +168,7 @@ display_top_tabs($tab_array);
 						<th><?=gettext("Address / Assignment")?></th>
 						<th><?=gettext("Listen Port")?></th>
 						<th><?=gettext("# Peers")?></th>
-						<th data-sortable="false"><?=gettext("Actions")?></th>
+						<th><?=gettext("Actions")?></th>
 					</tr>
 				</thead>
 				<tbody>

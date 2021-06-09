@@ -355,7 +355,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 							</table>
 							END;
 
-					$title = gettext('Interfae Addresses');
+					$title = gettext('Interface Addresses');
 
 					$hint = "{$addresses[0]['address']} (+{$extras})";
 
