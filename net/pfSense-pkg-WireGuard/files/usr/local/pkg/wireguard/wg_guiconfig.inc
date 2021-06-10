@@ -30,7 +30,8 @@ require_once('wireguard/wg_globals.inc');
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;
 
-	if ((!$only_with_tunnels || count($wgg['tunnels']) > 0) && !wg_is_service_running()) {
+	if (!wg_is_service_running() &&
+		(!$only_with_tunnels || count($wgg['tunnels']) > 0)) {
 
 		print_info_box(gettext('The WireGuard service is not running.'), 'danger', null);
 	
@@ -44,7 +45,7 @@ function wg_print_config_apply_box() {
 
 	$getText = function($text) { return gettext($text); };
 
-	if (is_subsystem_dirty($wgg['subsystem'])) {
+	if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
 		print_apply_box("{$getText('The WireGuard configuration has been changed.')}<br />
 					{$getText('The changes must be applied for them to take effect.')}<br />
@@ -307,6 +308,8 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
+		wg_init_config_arr($tunnel, array('addresses', 'row'));
+
 		// Smash address + mask
 		$addresses = array_map(function($x) {
 			
@@ -353,7 +356,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 							</table>
 							END;
 
-					$title = gettext('Interfae Addresses');
+					$title = gettext('Interface Addresses');
 
 					$hint = "{$addresses[0]['address']} (+{$extras})";
 
@@ -411,6 +414,8 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
 
 		$peer = $wgg['peers'][$peer_idx];
+
+		wg_init_config_arr($peer, array('allowedips', 'row'));
 
 		// Smash address + mask
 		$allowedips = array_map(function($x) {

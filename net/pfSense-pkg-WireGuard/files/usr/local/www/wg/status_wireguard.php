@@ -47,13 +47,14 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (is_subsystem_dirty($wgg['subsystem'])) {
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
 			if (wg_is_service_running()) {
 
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-				$sync_status = wg_tunnel_sync($tunnels_to_apply);
+				// TODO: Make extra services restart (true) a package setting
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true);
 
 				$ret_code |= $sync_status['ret_code'];
 
@@ -61,7 +62,7 @@ if ($_POST) {
 
 			if ($ret_code == 0) {
 
-				clear_subsystem_dirty('wireguard');
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
 
 			}
 
@@ -84,7 +85,7 @@ $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-wg_print_service_warning(false);
+wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
 
@@ -105,7 +106,7 @@ $a_devices = wg_status();
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
-		<table class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
+		<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
@@ -215,7 +216,6 @@ endif;
 	</a>
 </nav>
 
-
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
@@ -231,11 +231,9 @@ endif;
 			</thead>
 			<tbody>
 <?php
-
 			$a_packages = wg_pkg_info();
 
 			foreach ($a_packages as $package):
-
 ?>
     				<tr>
 					<td><?=htmlspecialchars($package['name'])?></td>

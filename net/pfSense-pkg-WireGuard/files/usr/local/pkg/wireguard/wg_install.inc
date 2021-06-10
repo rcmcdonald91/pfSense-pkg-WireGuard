@@ -308,6 +308,7 @@ function wg_deinstall() {
 	// Removes WireGuard temporary files
 	wg_delete_temp_files();
 
+	// Only delete WireGuard configuration if keep_conf is explicitly 'no'
 	if (isset($wgg['config']['keep_conf']) && $wgg['config']['keep_conf'] == 'no') {
 
 		update_status("done.\n  Removing WireGuard configuration settings...");
@@ -354,7 +355,11 @@ function wg_delete_temp_files() {
 	}
 
 	// Package is uninstalling, so clear lingering dirty status too...
-	clear_subsystem_dirty($wgg['subsystem']);
+	foreach ($wgg['subsystems'] as $subsystem) {
+
+		clear_subsystem_dirty($subsystem);
+
+	}
 
 }
 
@@ -457,14 +462,16 @@ function wg_earlyshellcmd_install() {
 		// Install the earlyshellcmd
 		if (!preg_grep("/{$escaped_cmd}/", $a_earlyshellcmd)) {
 
-			$a_earlyshellcmd[] = "{$shellcmd['cmd']}";
+			// Put our entry at the top of the list
+			array_unshift($a_earlyshellcmd, $shellcmd['cmd']);
 
 		}
 
 		// Update the shellcmd package too
 		if (!preg_grep("/{$escaped_cmd}/", $shellcmd_pkg_cmds)) {
 
-			$a_shellcmdsettings[] = $shellcmd;
+			// Put our entry at the top of the list
+			array_unshift($a_shellcmdsettings, $shellcmd);
 
 		}
 
@@ -539,7 +546,8 @@ function wg_ifgroup_install() {
 
 	if (!preg_grep("/{$wgg['ifgroupentry']['ifname']}/", $ifgroup_names)) {
 
-		$a_ifgroups[] = $wgg['ifgroupentry'];
+		// Put our entry at the top of the list
+		array_unshift($a_ifgroups, $wgg['ifgroupentry']);
 
 	}
 
@@ -636,7 +644,8 @@ function wg_unbound_acl_install() {
 
 			}
 
-			$a_unbound_acls[] = $wgg['unboundaclentry'];
+			// Put our entry at the top of the list
+			array_unshift($a_unbound_acls, $wgg['unboundaclentry']);
 
 		}
 

@@ -47,13 +47,14 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (is_subsystem_dirty($wgg['subsystem'])) {
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
 			if (wg_is_service_running()) {
 
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-				$sync_status = wg_tunnel_sync($tunnels_to_apply);
+				// TODO: Make extra services restart (true) a package setting
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true);
 
 				$ret_code |= $sync_status['ret_code'];
 
@@ -61,7 +62,7 @@ if ($_POST) {
 
 			if ($ret_code == 0) {
 
-				clear_subsystem_dirty('wireguard');
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
 
 			}
 
@@ -69,32 +70,46 @@ if ($_POST) {
 
 	}
 
-	if ($_POST['act'] == 'save') {
+	if (isset($_POST['act'])) {
 
-		if (!$input_errors) {
+		switch ($_POST['act']) {
 
-			$pconfig = $_POST;
+			case 'save':
 
-			$wgg['config']['keep_conf'] = $pconfig['keep_conf'];
-			
-			$wgg['config']['hide_secrets'] = $pconfig['hide_secrets'];
+				if (empty($input_errors)) {
 
-			write_config('[WireGuard] Save WireGuard settings');
+					$pconfig = $_POST;
 
-			$save_success = true;
+					$wgg['config']['keep_conf'] 	= $pconfig['keep_conf'] ? 'yes' : 'no';
+					
+					$wgg['config']['hide_secrets'] 	= $pconfig['hide_secrets'] ? 'yes' : 'no';
+
+					write_config("[{$wgg['pkg_name']}] Package settings saved.");
+
+					$save_success = true;
+
+				}
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_settings.php');
+
+				break;
 
 		}
 
 	}
 
-} else {
-
-	// Default to yes if not set (i.e. a new installation)
-	$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
-
-	$pconfig['hide_secrets'] = $wgg['config']['hide_secrets'];
-
 }
+
+// Default yes for new installations (i.e. keep_conf is empty)
+$pconfig['keep_conf'] = (isset($wgg['config']['keep_conf'])) ? $wgg['config']['keep_conf'] : 'yes';
+
+// Default yes for new installations (i.e. hide_secrets is empty)
+$pconfig['hide_secrets'] = (isset($wgg['config']['hide_secrets'])) ? $wgg['config']['hide_secrets'] : 'yes';
 
 $shortcut_section = "wireguard";
 
@@ -125,7 +140,7 @@ if (isset($_POST['apply'])) {
 
 wg_print_config_apply_box();
 
-if ($input_errors) {
+if (!empty($input_errors)) {
 
 	print_input_errors($input_errors);
 	
@@ -178,7 +193,6 @@ print($form);
 	</button>
 </nav>
 
-<!-- ============== JavaScript =================================================================================================-->
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {

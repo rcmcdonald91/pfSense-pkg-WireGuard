@@ -52,78 +52,136 @@ if (isset($_REQUEST['tun'])) {
 
 }
 
-if (isset($_REQUEST['peer'])) {
-
-	$peer_id = $_REQUEST['peer'];
-
-}
-
 if ($_POST) {
 
-	switch ($_POST['act']) {
+	if (isset($_POST['apply'])) {
 
-		case 'save':
+		$ret_code = 0;
 
-			$res = wg_do_tunnel_post($_POST);
-		
-			$input_errors = $res['input_errors'];
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
-			$changes = $res['changes'];
-	
-			$pconfig = $res['pconfig'];
-	
-			if (empty($input_errors)) {
+			if (wg_is_service_running()) {
 
-				if (wg_is_service_running() && $changes) {
+				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-					// Everything looks good so far, so mark the subsystem dirty
-					mark_subsystem_dirty($wgg['subsystem']);
+				// TODO: Make extra services restart (true) a package setting
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true);
 
-				}
-	
-				// Save was successful
-				header("Location: /wg/vpn_wg_tunnels.php");
-	
+				$ret_code |= $sync_status['ret_code'];
+
 			}
 
-			break;
+			if ($ret_code == 0) {
 
-		case 'genkeys':
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
 
-			// Process ajax call requesting new key pair
-			print(wg_gen_keypair(true));
+			}
 
-			exit;
+		}
 
-			break;
+	}
 
-		case 'genpubkey':
+	if (isset($_POST['act'])) {
 
-			// Process ajax call calculating the public key from a private key
-			print(wg_gen_publickey($_POST['privatekey']));
+		switch ($_POST['act']) {
 
-			exit;
+			case 'save':
 
-			break;
-
-		case 'toggle':
-
-			wg_toggle_peer($peer_id);
-
-			break;
-
-		case 'delete':
-
-			wg_delete_peer($peer_id);
-
-			break;
-
-		default:
-		
-			// Shouldn't be here, so bail out.
-			header("Location: /wg/vpn_wg_tunnels.php");
+				$res = wg_do_tunnel_post($_POST);
 			
-			break;
+				$input_errors = $res['input_errors'];
+		
+				$pconfig = $res['pconfig'];
+		
+				if (empty($input_errors)) {
+
+					if (wg_is_service_running() && $res['changes']) {
+
+						// Everything looks good so far, so mark the subsystem dirty
+						mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+						// Add tunnel to the list to apply
+						wg_apply_list_add($res['tun_to_sync'], 'tunnels');
+
+					}
+		
+					// Save was successful
+					header('Location: /wg/vpn_wg_tunnels.php');
+		
+				}
+
+				break;
+
+			case 'genkeys':
+
+				// Process ajax call requesting new key pair
+				print(wg_gen_keypair(true));
+
+				exit;
+
+				break;
+
+			case 'genpubkey':
+
+				// Process ajax call calculating the public key from a private key
+				print(wg_gen_publickey($_POST['privatekey'], true));
+
+				exit;
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+				break;
+
+		}
+
+	}
+
+	if (isset($_POST['peer'])) {
+
+		$peer_idx = $_POST['peer'];
+
+		switch ($_POST['act']) {
+
+			case 'toggle':
+
+				$res = wg_toggle_peer($peer_idx);
+
+				break;
+
+			case 'delete':
+				
+				$res = wg_delete_peer($peer_idx);
+
+				break;
+
+			default:
+				
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+				break;
+				
+		}
+
+		$input_errors = $res['input_errors'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $res['changes']) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add($res['tun_to_sync'], 'tunnels');
+
+			}
+
+		}
 
 	}
 
@@ -164,6 +222,14 @@ $tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 include("head.inc");
 
 wg_print_service_warning();
+
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box($ret_code);
+
+}
+
+wg_print_config_apply_box();
 
 if (!empty($input_errors)) {
 
@@ -380,12 +446,6 @@ $form->addGlobal(new Form_Input(
 
 print($form);
 
-if ($is_new):
-
-	print_info_box("New tunnels must be saved before adding or assigning peers.", 'warning', null);
-
-else:
-
 ?>
 
 <div class="panel panel-default">
@@ -393,7 +453,7 @@ else:
 		<h2 class="panel-title"><?=gettext("Peer Configuration")?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
-		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: 'visible'">
+		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 			<thead>
 				<tr>
 					<th><?=gettext("Description")?></th>
@@ -405,6 +465,8 @@ else:
 			</thead>
 			<tbody>
 <?php
+	if (!$is_new):
+
 		$peers = wg_get_tunnel_peers($pconfig['name']);
 
 		if (!empty($peers)):
@@ -413,28 +475,35 @@ else:
 ?>
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_entrystatus_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
-					<td><?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?></td>
+					<td title="<?=htmlspecialchars($peer['publickey'])?>">
+						<?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?>
+					</td>
 					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
-						<a class="fa fa-pencil" title="<?=gettext("Edit peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
+						<a class="fa fa-pencil" title="<?=gettext("Edit Peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
 						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer['index']}&tun={$tun}")?>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete peer')?>" href="<?="?act=delete&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
 					</td>
 				</tr>
 
 <?php
 			endforeach;
 		endif;
+	else:
+?>
+				<tr>
+					<td colspan="5">
+						<?php print_info_box("New tunnels must be saved before adding or assigning peers.", 'warning', null); ?>
+					</td>
+				</tr>
+<?php
+	endif;
 ?>
 			</tbody>
 		</table>
 	</div>
 </div>
-
-<?php
-endif;
-?>
 
 <nav class="action-buttons">
 <?php
@@ -462,7 +531,7 @@ endif;
 	</button>
 </nav>
 
-<?php $genkeywarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
+<?php $genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
 
 <script type="text/javascript">
 //<![CDATA[
@@ -498,7 +567,7 @@ events.push(function() {
 
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
-		if ($('#privatekey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
+		if ($('#privatekey').val().length == 0 || confirm("<?=$genKeyWarning?>")) {
 			ajaxRequest = $.ajax({
 				url: '/wg/vpn_wg_tunnels_edit.php',
 				type: 'post',
@@ -523,7 +592,8 @@ events.push(function() {
 					privatekey: $('#privatekey').val()
 				},
 			success: function(response, textStatus, jqXHR) {
-				$('#publickey').val(response);
+				resp = JSON.parse(response);
+				$('#publickey').val(resp.pubkey);
 			}
 		});
 	});

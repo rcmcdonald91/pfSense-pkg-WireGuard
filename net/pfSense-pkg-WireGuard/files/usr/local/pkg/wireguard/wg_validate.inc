@@ -168,6 +168,13 @@ function wg_validate_peer_post($pconfig) {
 
 	}
 
+	// Check pre-shared key
+	if (!empty($pconfig['presharedkey']) && !wg_is_valid_key($pconfig['presharedkey'])) {
+
+		$input_errors[] = "The pre-shared key ({$pconfig['presharedkey']}) is not a valid WireGuard pre-shared key.";
+
+	}
+
 	// Check allowed ips
 	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 

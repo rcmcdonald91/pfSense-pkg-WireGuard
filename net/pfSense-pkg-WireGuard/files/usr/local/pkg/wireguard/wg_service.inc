@@ -33,6 +33,8 @@ require_once('wireguard/wg.inc');
 
 if (isset($argv[1])) {
 
+	$ret_code = 0;
+
 	ignore_user_abort(true);
 
 	set_time_limit(0);
@@ -61,26 +63,33 @@ if (isset($argv[1])) {
 		case 'start':
 
 			$ret_code = wg_service_cli_start($serialize);
-	
-			exit($ret_code);
 			
 			break;
 
 		case 'stop':
 	
 			$ret_code = wg_service_cli_stop($serialize);
-	
-			exit($ret_code);
+
+			break;
+
+		case 'restart':
+
+			$ret_code = wg_service_cli_restart($serialize);
 
 			break;
 
 		default:
 
-			exit(1);
+			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP|RESTART} [SERIALIZE]");
+
+			$ret_code = 1;
 
 			break;
 
 	}
+
+	// We are done...
+	exit($ret_code);
 
 }
 
@@ -88,23 +97,45 @@ if (isset($argv[1])) {
 function wg_service_fpm_restart() {
 	global $wgg;
 
-	$start_status = $stop_status = array();
+	$exec_output = $unserialize_output = $ret_output = array();
 
-	if (wg_is_service_running()) {
+	// Invokes service restart with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} restart serialize", $exec_output, $ret_code);
 
-		$stop_status = wg_service_fpm_stop();
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		if ($stop_status['ret_code'] <> 0) {
+		if (is_array($unserialize_output)) {
 
-			return $stop_status;
+			$ret_output = $unserialize_output;
 
 		}
 
 	}
 
-	$start_status = wg_service_fpm_start();
+	// Consumers expect an array...
+	return $ret_output;
 
-	return $start_status;
+}
+
+function wg_service_cli_restart($serialize = true) {
+	global $wgg;
+
+	$ret_code = 0;
+
+	if (wg_is_service_running()) {
+
+		$ret_code = wg_service_cli_stop($serialize);
+
+		if ($ret_code <> 0) {
+
+			return $ret_Code;
+		}
+
+	}
+
+	$ret_code = wg_service_cli_start($serialize);
+
+	return $ret_code;
 
 }
 
@@ -112,24 +143,28 @@ function wg_service_fpm_restart() {
 function wg_service_fpm_stop() {
 	global $wgg;
 
-	$serialized_output = $ret_output = array();
+	$exec_output = $unserialize_output = $ret_output = array();
 
 	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} stop serialize", $serialized_output, $ret_code);
+	exec("{$wgg['wg_daemon']} stop serialize", $exec_output, $ret_code);
 
-	if ($ret_output = unserialize($serialized_output[0])) {
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		return $ret_output;
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
 
 	}
 
 	// Consumers expect an array...
-	return array();
+	return $ret_output;
 
 }
 
 // Only for calling service stop from the CLI
-function wg_service_cli_stop($serialize_output = true) {
+function wg_service_cli_stop($serialize = true) {
 	global $wgg;
 
 	$ret_code = 0;
@@ -138,7 +173,7 @@ function wg_service_cli_stop($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		// Terminate early...
 		return $ret_code;
@@ -150,7 +185,7 @@ function wg_service_cli_stop($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 	}
 
@@ -162,25 +197,29 @@ function wg_service_cli_stop($serialize_output = true) {
 function wg_service_fpm_start() {
 	global $wgg;
 
-	$serialized_output = $ret_output = array();
+	$exec_output = $unserialize_output = $ret_output = array();
 
 	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
-	exec("{$wgg['wg_daemon']} start serialize", $serialized_output, $ret_code);
+	exec("{$wgg['wg_daemon']} start serialize", $exec_output, $ret_code);
 
 	// Catch unserialization results before returning
-	if ($ret_output = unserialize($serialized_output[0])) {
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		return $ret_output;
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
 
 	}
 
-	// Consumers expect an array type
-	return array();
+	// Consumers expect an array...
+	return $ret_output;
 
 }
 
 // Only for calling service start from the CLI
-function wg_service_cli_start($serialize_output = true) {
+function wg_service_cli_start($serialize = true) {
 	global $g, $wgg;
 
 	// Set the process name
@@ -192,7 +231,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_START;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		return $ret_code;
 
@@ -202,7 +241,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 		$ret_code |= WG_ERROR_SVC_RUNNING;
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		return $ret_code;
 
@@ -213,10 +252,7 @@ function wg_service_cli_start($serialize_output = true) {
 
 	if (platform_booting()) {
 
-		// This absolutely needs to be a file on disk to remain accessible between process instances
-		mark_subsystem_dirty('wireguard_firststart');
-
-		// Output during booting must be STDERR for some reason
+		// Output during booting must be to STDERR for some reason
 		fwrite(STDERR, "Configuring WireGuard tunnels...");
 
 		// Supresses ifconfig spew 
@@ -224,13 +260,18 @@ function wg_service_cli_start($serialize_output = true) {
 
 	}
 
-	// Build all (i.e. null) the tunnels
-	$sync_all_status = wg_tunnel_sync(null);
+	// We don't need to do this if we are in postboot
+	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
-	if ($sync_all_status['ret_code'] <> 0 ) {
+		// Build all (i.e. null) the tunnels
+		$sync_status = wg_tunnel_sync(null, false);
 
-		$ret_code |= WG_ERROR_SVC_BUILD;
+		if ($sync_status['ret_code'] <> 0 ) {
 
+			$ret_code |= WG_ERROR_SVC_BUILD;
+
+		}
+	
 	}
 
 	if (platform_booting()) {
@@ -238,6 +279,9 @@ function wg_service_cli_start($serialize_output = true) {
 		unmute_kernel_msgs();
 
 		fwrite(STDERR, "done. \n");
+
+		// Set postboot state
+		mark_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
 
@@ -252,13 +296,13 @@ function wg_service_cli_start($serialize_output = true) {
 
 		wg_destroy_tunnels();
 
-		wg_service_error_handler($ret_code, $serialize_output);
+		wg_service_error_handler($ret_code, $serialize);
 
 		return $ret_code;
 
 	} elseif ($newpid) {
 
-		wg_service_error_handler($ret_code, $serialize_output, array('sync_all_status' => $sync_all_status));
+		wg_service_error_handler($ret_code, $serialize, array('sync_status' => $sync_status));
 
 		return $ret_code;
 
@@ -303,17 +347,16 @@ function wg_service_cli_start($serialize_output = true) {
 
 	} else {
 
-		// We don't need to restart additional services ifw we just finished booting...
-		if (is_subsystem_dirty('wireguard_firststart')) {
+		// We don't need to restart additional services if we are in postboot
+		if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
 
-			clear_subsystem_dirty('wireguard_firststart');
-
-			return 0;
+			// Restart any additional services
+			$ret_code = wg_restart_extra_services();
 
 		}
 
-		// Restart any additional services
-		$ret_code = wg_restart_extra_services();
+		// Clear postboot state
+		clear_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
 
@@ -324,13 +367,18 @@ function wg_service_cli_start($serialize_output = true) {
 
 }
 
+// This is where we restart any extra services
 function wg_restart_extra_services() {
 
-	// dpinger
-	setup_gateways_monitor();
+	if (!platform_booting()) {
 
-	// unbound
-	services_unbound_configure();
+		// dpinger
+		setup_gateways_monitor();
+
+		// unbound
+		services_unbound_configure();
+
+	}
 
 	// This is currently just a best effort attempt...
 	return 0;

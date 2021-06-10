@@ -235,6 +235,10 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 
 	$tun_idx = wg_get_tunnel_array_index($wg_ifname);
 
+	$tunnel = $wgg['tunnels'][$tun_idx];
+
+	wg_init_config_arr($tunnel, array('addresses', 'row'));
+
 	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
 
@@ -242,7 +246,7 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 		$current = pfSense_getall_interface_addresses($wg_ifname);
 
 		// Get an array of the addresses to be assigned to the interface
-		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $wgg['tunnels'][$tun_idx]['addresses']['row']);
+		$desired = array_map(fn(&$x) => "{$x['address']}/{$x['mask']}", $tunnel['addresses']['row']);
 
 		// Determine the addresses to remove
 		$addresses_to_remove = array_diff($current, array_intersect($current, $desired));
@@ -481,27 +485,68 @@ function wg_gen_keypair($json = false) {
 
 	$privkey = exec("{$wgg['wg']} genkey");
 
-	$pubkey = wg_gen_publickey($privkey);
+	$res = wg_gen_publickey($privkey, $json);
 
-	$res = array('privkey' => $privkey, 'pubkey' => $pubkey);
+	return $res;
+
+}
+
+// Compose the public key from a provided private key
+function wg_gen_publickey($privkey, $json = false) {
+	global $wgg;
+
+	// We want to pass the unmodified privkey through to the return array
+	$safe_privkey = $privkey;
+
+	$was_clamped 		= wg_is_key_clamped($privkey);
+
+	$privkey_clamped 	= wg_clamp_key($privkey);
+
+	wg_escapeshellarg($safe_privkey);
+
+	$pubkey = exec("echo {$safe_privkey} | {$wgg['wg']} pubkey");
+
+	$res = array('privkey' => $privkey, 'privkey_clamped' => $privkey_clamped, 'pubkey' => $pubkey, 'was_clamped' => $was_clamped);
 
 	return $json ? json_encode($res) : $res;
 
 }
 
-// Compose the public key from a provided private key
-function wg_gen_publickey($privkey) {
-	global $wgg;
+function wg_clamp_key($key) {
 
-	wg_escapeshellarg($privkey);
+	if (wg_is_valid_key($key)) {
 
-	$pubkey = exec("echo {$privkey} | {$wgg['wg']} pubkey");
+		$decoded_key = base64_decode($key);
 
-	return $pubkey;
+		$key_bytes = array_slice(unpack("C*", "\0{$decoded_key}"), 1);
+
+		$key_bytes[0] &= 248;
+
+		$key_bytes[31] = ($key_bytes[31] & 127) | 64;
+
+		$decoded_clamped_key = pack("C*", ...$key_bytes);
+
+		return base64_encode($decoded_clamped_key);
+
+	}
+
+	return null;
 
 }
 
-// Checks if a given private or public key is valid
+function wg_is_key_clamped($key) {
+
+	if (wg_is_valid_key($key)) {
+
+		return ($key == wg_clamp_key($key));
+
+	}
+
+	return true;
+
+}
+
+// Checks if a given private, public, or pre-shared key is valid
 function wg_is_valid_key($key) {
 
 	// Reference: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html
@@ -670,6 +715,7 @@ function is_wg_enabled() {
 	}
 
 	return false;
+	
 }
 
 /*

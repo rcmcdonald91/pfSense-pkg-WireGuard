@@ -30,6 +30,7 @@
 // pfSense includes
 require_once('functions.inc');
 require_once('guiconfig.inc');
+require_once('pfsense-utils.inc');
 require_once('service-utils.inc');
 
 // WireGuard includes
@@ -46,13 +47,14 @@ if ($_POST) {
 
 		$ret_code = 0;
 
-		if (is_subsystem_dirty($wgg['subsystem'])) {
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
 			if (wg_is_service_running()) {
 
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-				$sync_status = wg_tunnel_sync($tunnels_to_apply);
+				// TODO: Make extra services restart (true) a package setting
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true);
 
 				$ret_code |= $sync_status['ret_code'];
 
@@ -60,7 +62,7 @@ if ($_POST) {
 
 			if ($ret_code == 0) {
 
-				clear_subsystem_dirty('wireguard');
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
 
 			}
 
@@ -72,42 +74,47 @@ if ($_POST) {
 
 		$tun_name = $_POST['tun'];
 
-		if (isset($_POST['act'])) {
+		switch ($_POST['act']) {
 
-			switch ($_POST['act']) {
+			case 'download':
 
-				case 'toggle':
-					
-					$res = wg_toggle_tunnel($tun_name);
-					
-					break;
+				wg_download_tunnel($tun_name, '/wg/vpn_wg_tunnels.php');
 
-				case 'delete':
+				exit();
 
-					$res = wg_delete_tunnel($tun_name);
+				break;
 
-					break;
+			case 'toggle':
+				
+				$res = wg_toggle_tunnel($tun_name);
+				
+				break;
 
-				default:
+			case 'delete':
 
-					// Shouldn't be here, so bail out.
-					header("Location: /wg/vpn_wg_tunnels.php");
+				$res = wg_delete_tunnel($tun_name);
 
-					break;
+				break;
 
-			}
+			default:
 
-			$input_errors = $res['input_errors'];
+				// Shouldn't be here, so bail out.
+				header("Location: /wg/vpn_wg_tunnels.php");
 
-			$changes = $res['changes'];
+				break;
 
-			if (empty($input_errors)) {
+		}
 
-				if (wg_is_service_running() && $changes) {
+		$input_errors = $res['input_errors'];
 
-					mark_subsystem_dirty($wgg['subsystem']);
-	
-				}
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $res['changes']) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add($res['tun_to_sync'], 'tunnels');
 
 			}
 
@@ -151,17 +158,10 @@ display_top_tabs($tab_array);
 ?>
 
 <form name="mainform" method="post">
-<?php
-	if (is_array($wgg['tunnels']) && count($wgg['tunnels']) == 0):
-
-		print_info_box(gettext('No WireGuard tunnels have been configured. Click the "Add Tunnel" button below to create one.'), 'warning', false);
-		
-	else:
-?>
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Tunnels')?></h2></div>
 		<div class="panel-body table-responsive">
-			<table class="table table-striped table-hover">
+			<table class="table table-hover table-striped table-condensed">
 				<thead>
 					<tr>
 						<th class="peer-entries"></th>
@@ -176,6 +176,8 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
+if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
+
 		foreach ($wgg['tunnels'] as $tunnel):
 
 			$peers = wg_get_tunnel_peers($tunnel['name']);
@@ -192,23 +194,23 @@ display_top_tabs($tab_array);
 						<td><?=count($peers)?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-user-plus" title="<?=gettext("Add Peer")?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
-							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-user-plus" title="<?=gettext('Add Peer')?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-pencil" title="<?=gettext('Edit Tunnel')?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-download" title="<?=gettext('Download Configuration')?>" href="<?="?act=download&tun={$tunnel['name']}"?>" usepost></a>
 							<?=wg_generate_toggle_icon_link($tunnel, 'Click to toggle enabled/disabled status', "?act=toggle&tun={$tunnel['name']}")?>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Yunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
 						</td>
 					</tr>
 
 					<tr class="peer-entries peerbg_color">
 						<td><?=gettext("Peers")?></td>
 <?php
-
 			if (count($peers) > 0):
 ?>
 						<td colspan="6">
-							<table class="table table-hover peerbg_color">
+							<table class="table table-hover">
 								<thead>
-									<tr class="peerbg_color">
+									<tr>
 										<th><?=gettext("Description")?></th>
 										<th><?=gettext("Public key")?></th>
 										<th><?=gettext("Allowed IPs")?></th>
@@ -220,7 +222,7 @@ display_top_tabs($tab_array);
 <?php
 				foreach ($peers as $peer):
 ?>
-									<tr class="peerbg_color">
+									<tr>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 										<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
@@ -242,20 +244,26 @@ display_top_tabs($tab_array);
 					</tr>
 <?php
 		endforeach;
+
+else:
+?>
+					<tr>
+						<td colspan="8">
+							<?php print_info_box(gettext('No WireGuard tunnels have been configured. Click the "Add Tunnel" button below to create one.'), 'warning', null); ?>
+						</td>
+					</tr>
+<?php
+endif;
 ?>
 				</tbody>
 			</table>
 		</div>
 	</div>
-<?php
-	endif;
-?>
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
 			<?=gettext("Show Peers")?>
 		</a>
-
 		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>
 			<?=gettext("Add Tunnel")?>
