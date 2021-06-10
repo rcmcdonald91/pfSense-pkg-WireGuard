@@ -130,11 +130,15 @@ function wg_status_json($pretty = false) {
 function wg_get_peer_id($public_key, $tunnel_name) {
 	global $wgg;
 
-	foreach ($wgg['peers'] as $peer_id => $peer){
+	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
 
-		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
+		foreach ($wgg['peers'] as $peer_id => $peer){
 
-			return $peer_id;
+			if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
+
+				return $peer_id;
+
+			}
 
 		}
 
@@ -732,15 +736,19 @@ function wg_get_tunnel_peers($tunnel_name) {
 
 	if (isset($wgg['tunnels'][$tun_idx])) {
 
-		// Look through array of peers for matching tunnel name
-		foreach ($wgg['peers'] as $peer_idx => $peer) {
+		if (isset($wgg['peers']) && is_array($wgg['peers'])) {
 
-			if ($peer['tun'] == $tunnel_name) {
+			// Look through array of peers for matching tunnel name
+			foreach ($wgg['peers'] as $peer_idx => $peer) {
 
-				// We need the array index for future manipulations
-				$peer['index'] = $peer_idx;
+				if ($peer['tun'] == $tunnel_name) {
 
-				$a_ret[] = $peer;
+					// We need the array index for future manipulations
+					$peer['index'] = $peer_idx;
+
+					$a_ret[] = $peer;
+
+				}
 
 			}
 
