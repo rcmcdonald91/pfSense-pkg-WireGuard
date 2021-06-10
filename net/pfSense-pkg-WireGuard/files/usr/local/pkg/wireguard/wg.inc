@@ -228,6 +228,9 @@ function wg_delete_tunnel($tunnel_name) {
 
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_name']}] Tunnel {$tunnel['name']} deleted.");
+			
+			// Mark any peers as unassigned
+			wg_tunnel_unassign_peers($tunnel['name']);
 
 			// We've got meaningful changes...
 			$changes = true;
@@ -240,6 +243,32 @@ function wg_delete_tunnel($tunnel_name) {
 	}
 
 	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
+
+}
+
+function wg_tunnel_unassign_peers($tunnel_name) {
+	global $wgg;
+
+	wg_globals();
+
+	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
+
+		$peers = $wgg['peers'];
+
+		foreach ($peers as $peer_idx => $peer) {
+
+			if ($peer['tun'] == $tunnel_name) {
+
+				$wgg['peers'][$peer_idx]['tun'] = 'unassigned';
+
+			}
+
+		}
+
+		// Sync with configuration backend
+		write_config("[{$wgg['pkg_name']}] Tunnel {$tunnel_name} peers unassigned.");
+
+	}
 
 }
 
@@ -1018,11 +1047,17 @@ function wg_download_tunnel($tunnel_name, $failure_redirect) {
 	// Make sure conf files are current
 	wg_resync();
 
+	$now = new DateTimeImmutable();
+
+	$stamp = $now->format('YmdHis');
+
 	$conf_path = "{$wgg['conf_path']}/{$tunnel_name}.conf";
+
+	$name = "tunnel-{$tunnel_name}-{$stamp}.conf";
 
 	if (file_exists($conf_path)) {
 
-		send_user_download('file', $conf_path);
+		send_user_download('file', $conf_path, $name);
 
 	}
 
