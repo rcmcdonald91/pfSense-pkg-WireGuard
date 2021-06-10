@@ -95,7 +95,7 @@ if ($_POST) {
 			default:
 
 				// Shouldn't be here, so bail out.
-				header("Location: /wg/vpn_wg_settings.php");
+				header('Location: /wg/vpn_wg_settings.php');
 
 				break;
 

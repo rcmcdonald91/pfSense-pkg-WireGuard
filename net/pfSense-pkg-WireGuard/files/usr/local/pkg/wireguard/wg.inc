@@ -79,9 +79,6 @@ function wg_toggle_tunnel($tunnel_name) {
 			// We've got meaningful changes...
 			$changes = true;
 
-			// Add tunnel to the list to apply
-			wg_apply_list_add($tunnel['name'], 'tunnels');
-
 		}
 
 	}
@@ -231,9 +228,6 @@ function wg_delete_tunnel($tunnel_name) {
 
 			// We've got meaningful changes...
 			$changes = true;
-
-			// Add tunnel to the list to apply
-			wg_apply_list_add($tunnel['name'], 'tunnels');
 
 		}
 
@@ -419,7 +413,7 @@ function wg_do_peer_post($post) {
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes,  'pconfig' => $pconfig);
 
 }
 
@@ -475,9 +469,6 @@ function wg_do_tunnel_post($post) {
 
 			// We've got meaningful changes...
 			$changes = true;
-
-			// Add tunnel to the list to apply
-			wg_apply_list_add($pconfig['name'], 'tunnels');
 
 		}
 
@@ -537,7 +528,11 @@ function wg_apply_list_add($entry, $list) {
 
 		file_put_contents($listpath, serialize($toapplylist));
 
+		$toapplylist = unserialize(file_get_contents($listpath));
+
 	}
+
+	return $toapplylist
 
 }
 

@@ -147,13 +147,6 @@ display_top_tabs($tab_array);
 ?>
 
 <form name="mainform" method="post">
-<?php
-	if (is_array($wgg['peers']) && count($wgg['peers']) == 0):
-
-		print_info_box(gettext('No WireGuard peers have been configured. Click the "Add Peer" button below to create one.'), 'warning', false);
-		
-	else:
-?>
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Peers')?></h2></div>
 		<div class="panel-body table-responsive">
@@ -170,6 +163,8 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
+if (is_array($wgg['peers']) && count($wgg['peers']) > 0):
+
 		foreach ($wgg['peers'] as $peer_idx => $peer):
 ?>
 					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>';" class="<?=wg_entrystatus_class($peer)?>">
@@ -189,17 +184,21 @@ display_top_tabs($tab_array);
 
 <?php
 		endforeach;
+
+else:
+?>
+					<tr>
+						<td colspan="6">
+							<?php print_info_box(gettext('No WireGuard peers have been configured. Click the "Add Peer" button below to create one.'), 'warning', null); ?>
+						</td>
+					</tr>
+<?php
+endif;
 ?>
 				</tbody>
 			</table>
 		</div>
 	</div>
-
-
-<?php
-	endif;
-?>
-
 	<nav class="action-buttons">
 		<a href="vpn_wg_peers_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>

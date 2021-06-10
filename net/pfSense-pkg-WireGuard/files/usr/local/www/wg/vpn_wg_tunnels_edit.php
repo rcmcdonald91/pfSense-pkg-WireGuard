@@ -90,22 +90,23 @@ if ($_POST) {
 				$res = wg_do_tunnel_post($_POST);
 			
 				$input_errors = $res['input_errors'];
-
-				$changes = $res['changes'];
 		
 				$pconfig = $res['pconfig'];
 		
 				if (empty($input_errors)) {
 
-					if (wg_is_service_running() && $changes) {
+					if (wg_is_service_running() && $res['changes']) {
 
 						// Everything looks good so far, so mark the subsystem dirty
 						mark_subsystem_dirty($wgg['subsystems']['wg']);
 
+						// Add tunnel to the list to apply
+						wg_apply_list_add($pconfig['name'], 'tunnels');
+
 					}
 		
 					// Save was successful
-					header("Location: /wg/vpn_wg_tunnels.php");
+					header('Location: /wg/vpn_wg_tunnels.php');
 		
 				}
 
@@ -132,7 +133,7 @@ if ($_POST) {
 			default:
 
 				// Shouldn't be here, so bail out.
-				header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$tun}");
+				header('Location: /wg/vpn_wg_tunnels.php');
 
 				break;
 
@@ -161,7 +162,7 @@ if ($_POST) {
 			default:
 				
 				// Shouldn't be here, so bail out.
-				header("Location: /wg/vpn_wg_tunnels_edit.php?tun={$tun}");
+				header('Location: /wg/vpn_wg_tunnels.php');
 
 				break;
 				
@@ -169,11 +170,9 @@ if ($_POST) {
 
 		$input_errors = $res['input_errors'];
 
-		$changes = $res['changes'];
-
 		if (empty($input_errors)) {
 
-			if (wg_is_service_running() && $changes) {
+			if (wg_is_service_running() && $res['changes']) {
 
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
@@ -444,12 +443,6 @@ $form->addGlobal(new Form_Input(
 
 print($form);
 
-if ($is_new):
-
-	print_info_box("New tunnels must be saved before adding or assigning peers.", 'warning', null);
-
-else:
-
 ?>
 
 <div class="panel panel-default">
@@ -469,6 +462,8 @@ else:
 			</thead>
 			<tbody>
 <?php
+	if (!$is_new):
+
 		$peers = wg_get_tunnel_peers($pconfig['name']);
 
 		if (!empty($peers)):
@@ -492,15 +487,20 @@ else:
 <?php
 			endforeach;
 		endif;
+	else:
+?>
+				<tr>
+					<td colspan="5">
+						<?php print_info_box("New tunnels must be saved before adding or assigning peers.", 'warning', null); ?>
+					</td>
+				</tr>
+<?php
+	endif;
 ?>
 			</tbody>
 		</table>
 	</div>
 </div>
-
-<?php
-endif;
-?>
 
 <nav class="action-buttons">
 <?php

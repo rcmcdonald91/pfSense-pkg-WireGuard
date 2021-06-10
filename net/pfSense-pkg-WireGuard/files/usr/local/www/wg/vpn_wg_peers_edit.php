@@ -75,6 +75,9 @@ if ($_POST) {
 					// Everything looks good so far, so mark the subsystem dirty
 					mark_subsystem_dirty($wgg['subsystems']['wg']);
 
+					// Add tunnel to the list to apply
+					wg_apply_list_add($pconfig['name'], 'tunnels');
+
 				}
 
 				// Save was successful

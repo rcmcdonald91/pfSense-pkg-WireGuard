@@ -98,13 +98,14 @@ if ($_POST) {
 
 		$input_errors = $res['input_errors'];
 
-		$changes = $res['changes'];
-
 		if (empty($input_errors)) {
 
-			if (wg_is_service_running() && $changes) {
+			if (wg_is_service_running() && $res['changes']) {
 
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add($tun_name, 'tunnels');
 
 			}
 
@@ -148,13 +149,6 @@ display_top_tabs($tab_array);
 ?>
 
 <form name="mainform" method="post">
-<?php
-	if (is_array($wgg['tunnels']) && count($wgg['tunnels']) == 0):
-
-		print_info_box(gettext('No WireGuard tunnels have been configured. Click the "Add Tunnel" button below to create one.'), 'warning', false);
-		
-	else:
-?>
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Tunnels')?></h2></div>
 		<div class="panel-body table-responsive">
@@ -173,6 +167,8 @@ display_top_tabs($tab_array);
 				</thead>
 				<tbody>
 <?php
+if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
+
 		foreach ($wgg['tunnels'] as $tunnel):
 
 			$peers = wg_get_tunnel_peers($tunnel['name']);
@@ -199,7 +195,6 @@ display_top_tabs($tab_array);
 					<tr class="peer-entries peerbg_color">
 						<td><?=gettext("Peers")?></td>
 <?php
-
 			if (count($peers) > 0):
 ?>
 						<td colspan="6">
@@ -239,20 +234,26 @@ display_top_tabs($tab_array);
 					</tr>
 <?php
 		endforeach;
+
+else:
+?>
+					<tr>
+						<td colspan="8">
+							<?php print_info_box(gettext('No WireGuard tunnels have been configured. Click the "Add Tunnel" button below to create one.'), 'warning', null); ?>
+						</td>
+					</tr>
+<?php
+endif;
 ?>
 				</tbody>
 			</table>
 		</div>
 	</div>
-<?php
-	endif;
-?>
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
 			<?=gettext("Show Peers")?>
 		</a>
-
 		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>
 			<?=gettext("Add Tunnel")?>
