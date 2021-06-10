@@ -1047,11 +1047,17 @@ function wg_download_tunnel($tunnel_name, $failure_redirect) {
 	// Make sure conf files are current
 	wg_resync();
 
+	$now = new DateTimeImmutable();
+
+	$stamp = $now->format('YmdHis');
+
 	$conf_path = "{$wgg['conf_path']}/{$tunnel_name}.conf";
+
+	$name = "tunnel-{$tunnel_name}-{$stamp}.conf";
 
 	if (file_exists($conf_path)) {
 
-		send_user_download('file', $conf_path);
+		send_user_download('file', $conf_path, $name);
 
 	}
 
