@@ -532,7 +532,7 @@ function wg_apply_list_add($entry, $list) {
 
 	}
 
-	return $toapplylist
+	return $toapplylist;
 
 }
 
