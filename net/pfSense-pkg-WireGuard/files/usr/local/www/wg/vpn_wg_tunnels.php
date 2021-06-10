@@ -30,6 +30,7 @@
 // pfSense includes
 require_once('functions.inc');
 require_once('guiconfig.inc');
+require_once('pfsense-utils.inc');
 require_once('service-utils.inc');
 
 // WireGuard includes
@@ -74,6 +75,14 @@ if ($_POST) {
 		$tun_name = $_POST['tun'];
 
 		switch ($_POST['act']) {
+
+			case 'download':
+
+				wg_download_tunnel($tun_name, '/wg/vpn_wg_tunnels.php');
+
+				exit();
+
+				break;
 
 			case 'toggle':
 				
@@ -185,10 +194,11 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 						<td><?=count($peers)?></td>
 
 						<td style="cursor: pointer;">
-							<a class="fa fa-user-plus" title="<?=gettext("Add Peer")?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
-							<a class="fa fa-pencil" title="<?=gettext("Edit tunnel")?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-user-plus" title="<?=gettext('Add Peer')?>" href="<?="vpn_wg_peers_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-pencil" title="<?=gettext('Edit Tunnel')?>" href="<?="vpn_wg_tunnels_edit.php?tun={$tunnel['name']}"?>"></a>
+							<a class="fa fa-download" title="<?=gettext('Download Configuration')?>" href="<?="?act=download&tun={$tunnel['name']}"?>" usepost></a>
 							<?=wg_generate_toggle_icon_link($tunnel, 'Click to toggle enabled/disabled status', "?act=toggle&tun={$tunnel['name']}")?>
-							<a class="fa fa-trash text-danger" title="<?=gettext('Delete tunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
+							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Yunnel')?>" href="<?="?act=delete&tun={$tunnel['name']}"?>" usepost></a>
 						</td>
 					</tr>
 

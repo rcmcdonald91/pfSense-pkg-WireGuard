@@ -1012,4 +1012,23 @@ function make_wg_conf($tunnel) {
 
 }
 
+function wg_download_tunnel($tunnel_name, $failure_redirect) {
+	global $wgg;
+
+	// Make sure conf files are current
+	wg_resync();
+
+	$conf_path = "{$wgg['conf_path']}/{$tun_name}.conf";
+
+	if (file_exists($conf_path)) {
+
+		send_user_download('file', $conf_path);
+
+	}
+
+	// If something goes wrong, bail out to the failure redirect location
+	header("Location: {$failure_redirect}");
+
+}
+
 ?>
