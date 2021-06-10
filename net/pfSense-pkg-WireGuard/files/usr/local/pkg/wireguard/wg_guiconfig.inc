@@ -30,7 +30,8 @@ require_once('wireguard/wg_globals.inc');
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;
 
-	if ((!$only_with_tunnels || count($wgg['tunnels']) > 0) && !wg_is_service_running()) {
+	if (!wg_is_service_running() &&
+		(!$only_with_tunnels || count($wgg['tunnels']) > 0)) {
 
 		print_info_box(gettext('The WireGuard service is not running.'), 'danger', null);
 	

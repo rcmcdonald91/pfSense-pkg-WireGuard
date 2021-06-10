@@ -85,7 +85,7 @@ $tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
 include("head.inc");
 
-wg_print_service_warning(false);
+wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
 

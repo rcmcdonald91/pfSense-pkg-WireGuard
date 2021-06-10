@@ -89,7 +89,7 @@ if ($_POST) {
 			default:
 				
 				// Shouldn't be here, so bail out.
-				header("Location: /wg/vpn_wg_peers.php");
+				header('Location: /wg/vpn_wg_peers.php');
 
 				break;
 				
@@ -97,13 +97,14 @@ if ($_POST) {
 
 		$input_errors = $res['input_errors'];
 
-		$changes = $res['changes'];
-
 		if (empty($input_errors)) {
 
-			if (wg_is_service_running() && $changes) {
+			if (wg_is_service_running() && $res['changes']) {
 
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add($res['tun_to_sync'], 'tunnels');
 
 			}
 

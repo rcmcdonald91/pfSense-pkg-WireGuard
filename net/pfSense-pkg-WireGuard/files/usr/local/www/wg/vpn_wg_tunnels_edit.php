@@ -101,7 +101,7 @@ if ($_POST) {
 						mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 						// Add tunnel to the list to apply
-						wg_apply_list_add($pconfig['name'], 'tunnels');
+						wg_apply_list_add($res['tun_to_sync'], 'tunnels');
 
 					}
 		
@@ -175,6 +175,9 @@ if ($_POST) {
 			if (wg_is_service_running() && $res['changes']) {
 
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add($res['tun_to_sync'], 'tunnels');
 
 			}
 

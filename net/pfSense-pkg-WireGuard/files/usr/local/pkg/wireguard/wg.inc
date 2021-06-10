@@ -79,11 +79,14 @@ function wg_toggle_tunnel($tunnel_name) {
 			// We've got meaningful changes...
 			$changes = true;
 
+			// What tunnel would we need to sync to apply these changes?
+			$tun_to_sync = $tunnel['name'];
+
 		}
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
 
 }
 
@@ -127,8 +130,8 @@ function wg_toggle_peer($peer_idx) {
 				// We've got meaningful changes...
 				$changes = true;
 
-				// Add peer's tunnel to the list to apply
-				wg_apply_list_add($peer['tun'], 'tunnels');
+				// What tunnel would we need to sync to apply these changes?
+				$tun_to_sync = $peer['tun'];
 
 			}
 
@@ -136,7 +139,7 @@ function wg_toggle_peer($peer_idx) {
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
 
 }
 
@@ -175,8 +178,8 @@ function wg_delete_peer($peer_idx) {
 				// We've got meaningful changes...
 				$changes = true;
 
-				// Add peer's tunnel to the list to apply
-				wg_apply_list_add($peer['tun'], 'tunnels');
+				// What tunnel would we need to sync to apply these changes?
+				$tun_to_sync = $peer['tun'];
 
 			}
 
@@ -184,7 +187,7 @@ function wg_delete_peer($peer_idx) {
 		
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
 
 }
 
@@ -229,11 +232,14 @@ function wg_delete_tunnel($tunnel_name) {
 			// We've got meaningful changes...
 			$changes = true;
 
+			// What tunnel would we need to sync to apply these changes?
+			$tun_to_sync = $tunnel['name'];
+
 		}
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
 
 }
 
@@ -396,16 +402,18 @@ function wg_do_peer_post($post) {
 
 				// We've got meaningful changes...
 				$changes = true;
+							
+				// What tunnel would we need to sync to apply these changes?
+				$tun_to_sync = $pconfig['tun'];
 
-				wg_apply_list_add($pconfig['tun'], 'tunnels');
-
-			// Now try the old_config tunnel...
+			// Now try the old_config tunnel?
 			} elseif (in_array($old_config['tun'], $tunnel_names)) {
 
 				// We've got meaningful changes...
 				$changes = true;
 
-				wg_apply_list_add($old_config['tun'], 'tunnels');
+				// What tunnel would we need to sync to apply these changes?
+				$tun_to_sync = $old_config['tun'];
 
 			}
  
@@ -413,7 +421,7 @@ function wg_do_peer_post($post) {
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes,  'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync, 'pconfig' => $pconfig);
 
 }
 
@@ -470,11 +478,14 @@ function wg_do_tunnel_post($post) {
 			// We've got meaningful changes...
 			$changes = true;
 
+			// What tunnel would we need to sync to apply these changes?
+			$tun_to_sync = $pconfig['name'];
+
 		}
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync, 'pconfig' => $pconfig);
 
 }
 
