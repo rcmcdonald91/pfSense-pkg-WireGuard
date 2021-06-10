@@ -462,6 +462,7 @@ function wg_earlyshellcmd_install() {
 		// Install the earlyshellcmd
 		if (!preg_grep("/{$escaped_cmd}/", $a_earlyshellcmd)) {
 
+			// Put our entry at the top of the list
 			array_unshift($a_earlyshellcmd, $shellcmd['cmd']);
 
 		}
@@ -469,7 +470,8 @@ function wg_earlyshellcmd_install() {
 		// Update the shellcmd package too
 		if (!preg_grep("/{$escaped_cmd}/", $shellcmd_pkg_cmds)) {
 
-			array_unshift($a_shellcmdsettings, $shllcmd);
+			// Put our entry at the top of the list
+			array_unshift($a_shellcmdsettings, $shellcmd);
 
 		}
 
@@ -544,6 +546,7 @@ function wg_ifgroup_install() {
 
 	if (!preg_grep("/{$wgg['ifgroupentry']['ifname']}/", $ifgroup_names)) {
 
+		// Put our entry at the top of the list
 		array_unshift($a_ifgroups, $wgg['ifgroupentry']);
 
 	}
@@ -641,6 +644,7 @@ function wg_unbound_acl_install() {
 
 			}
 
+			// Put our entry at the top of the list
 			array_unshift($a_unbound_acls, $wgg['unboundaclentry']);
 
 		}
