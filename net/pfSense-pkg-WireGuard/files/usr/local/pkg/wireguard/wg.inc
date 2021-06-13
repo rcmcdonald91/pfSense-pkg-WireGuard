@@ -125,7 +125,7 @@ function wg_toggle_peer($peer_idx) {
 			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
 			// This checks if the peer tunnel is a valid tunnel
-			if (in_array($peer['tun'], $tunnel_names)) {
+			if (wg_is_valid_tunnel($peer['tun'])) {
 
 				// We've got meaningful changes...
 				$changes = true;
@@ -170,10 +170,8 @@ function wg_delete_peer($peer_idx) {
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_name']}] Peer {$peer_idx} deleted.");
 
-			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
-
 			// This checks if the peer's tunnel was a valid tunnel
-			if (in_array($peer['tun'], $tunnel_names)) {
+			if (wg_is_valid_tunnel($peer['tun'])) {
 
 				// We've got meaningful changes...
 				$changes = true;
@@ -427,7 +425,7 @@ function wg_do_peer_post($post) {
 			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
 			// This checks if the pconfig tunnel is a valid tunnel
-			if (in_array($pconfig['tun'], $tunnel_names)) {
+			if (wg_is_valid_tunnel($pconfig['tun'])) {
 
 				// We've got meaningful changes...
 				$changes = true;
@@ -436,7 +434,7 @@ function wg_do_peer_post($post) {
 				$tun_to_sync = $pconfig['tun'];
 
 			// Now try the old_config tunnel?
-			} elseif (in_array($old_config['tun'], $tunnel_names)) {
+			} elseif (wg_is_valid_tunnel($old_config['tun'])) {
 
 				// We've got meaningful changes...
 				$changes = true;
@@ -847,12 +845,8 @@ function wg_create_config_files($clean = true) {
 function wg_delete_config_files() {
 	global $wgg;
 
-	$confpaths = array();
-
-	$confpaths = array_merge(array($wgg['conf_path']), $wgg['conf_paths_to_clean']);
-
 	// Loop through each potential conf path and delete all .conf files
-	foreach ($confpaths as $path) {
+	foreach ($wgg['conf_paths_to_clean'] as $path) {
 
 		unlink_if_exists("{$path}/*.conf");
 
@@ -871,7 +865,7 @@ function wg_htmlspecialchars(&...$vars) {
 
 		if (isset($var) && is_array($var)) {
 
-			array_walk($var, function(&$x) {
+			array_walk_recursive($var, function(&$x) {
 
 				$x = htmlspecialchars($x);
 
@@ -898,7 +892,7 @@ function wg_escapeshellarg(&...$vars) {
 
 		if (isset($var) && is_array($var)) {
 
-			array_walk($var, function(&$x) {
+			array_walk_recursive($var, function(&$x) {
 
 				$x = escapeshellarg($x);
 
@@ -920,12 +914,8 @@ function wg_escapeshellarg(&...$vars) {
 function wg_remove_config_settings() {
 	global $config, $wgg;
 
-	$confpaths = array();
-
-	$confpaths = array_merge(array($wgg['xml_path']), $wgg['xml_paths_to_clean']);
-
 	// Loop through each potential conf path and unset it
-	foreach ($confpaths as $path) {
+	foreach ($wgg['xml_paths_to_clean'] as $path) {
 
 		array_unset_value($config, $path);
 

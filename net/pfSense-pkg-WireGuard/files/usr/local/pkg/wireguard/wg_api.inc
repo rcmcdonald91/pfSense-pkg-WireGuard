@@ -315,6 +315,40 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 
 }
 
+/*
+ * This re-resolve peer endpoint addresses and updates the kernel
+ */
+function wg_reresolve_dns($ret_posix_style = true) {
+	global $wgg;
+
+	$ret_val = 1;
+
+	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
+
+		foreach ($wgg['peers'] as $peer) {
+			
+			if (isset($peer['endpoint'])) {
+
+				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
+
+				if (wg_is_valid_tunnel($peer['tun'])) {
+
+					wg_escapeshellarg($peer, $endpoint)
+		
+					$ret_val = mwexec("{$wgg['wg']} set {$peer['tun']} peer {$peer['publickey']} endpoint {$endpoint}");
+				
+				}
+
+			}
+
+		}
+
+	}
+
+	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+
+}
+
 function wg_interface_syncconf($wg_ifname, $ret_posix_style = true) {
 	global $wgg;
 
@@ -516,6 +550,27 @@ function wg_gen_publickey($privkey, $json = false) {
 
 }
 
+/*
+ * Reference0: https://lists.zx2c4.com/pipermail/wireguard/2021-June/006787.html
+ * Reference1: https://git.zx2c4.com/wireguard-freebsd/tree/src/crypto.h#n100
+ * 
+ * Even though any 256-bit bitstring generated from a csprng is a fine private key,
+ * the kernel clamps private keys according to the transformation implemented here.
+ * Some WireGuard key generators aren't properly pre-clamping generated keys and this
+ * can cause confusion for some users who might stumble across both configuration files 
+ * and wg(8) output and see 'different' private keys, even though these keys result in
+ * the same public key.
+ * 
+ * The way WireGuard is implemented, you can technically have two valid private keys,
+ * one that is pre-clamped and one that is not, that can result in the same public key.
+ * 
+ * These routines detect if the key is clamped or not, so we can at least include a note
+ * in the .conf file so users who stumble onto them during troubleshooting won't freak out.
+ * 
+ * These routines might also become useful in the future for logging facilities.
+ * 
+ */
+
 function wg_clamp_key($key) {
 
 	if (wg_is_valid_key($key)) {
@@ -668,6 +723,22 @@ function is_wg_tunnel_assigned($tunnel_name, $disabled = true) {
 
 	return $is_assigned;
 	
+}
+
+// Check if a wg tunnel is valid
+function wg_is_valid_tunnel($tunnel_name) {
+	global $wgg;
+
+	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
+
+		$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
+
+		return in_array($tunnel_name, $tunnel_names);
+
+	}
+
+	return false;
+
 }
 
 // Check if at least one tunnel is assigned

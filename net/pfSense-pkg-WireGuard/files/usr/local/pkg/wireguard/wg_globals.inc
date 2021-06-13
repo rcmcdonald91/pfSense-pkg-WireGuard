@@ -27,6 +27,8 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
+define('WG_ERROR_PEER_DNS', 	1);
+
 define('WG_ERROR_IF_NAME',	1);
 define('WG_ERROR_IF_CREATE',	2);
 define('WG_ERROR_IF_GROUP',	4);
@@ -72,6 +74,8 @@ $wgg = array(
 					300 => array('class' => 'text-warning', 'title' => gettext('Greater than 5 minutes')),
 					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
+					'peer' => array(
+						WG_ERROR_PEER_DNS	=> gettext('Unable to resolve peer endpoint')),
 					'tunnel' => array(
 						WG_ERROR_IF_NAME	=> gettext('Invalid WireGuard tunnel name'),
 						WG_ERROR_IF_CREATE	=> gettext('Unable to create WireGuard tunnel interface'),
