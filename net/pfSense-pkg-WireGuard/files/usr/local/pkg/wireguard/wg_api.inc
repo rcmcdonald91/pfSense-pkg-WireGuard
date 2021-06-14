@@ -316,6 +316,41 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 }
 
 /*
+ * This re-resolves a peer endpoint address and updates the kernel
+ */
+function wg_peer_reresolve_dns($public_key, $tunnel_name, $ret_posix_style = true) {
+	global $wgg;
+
+	$ret_val = 1;
+
+	$peer_idx = wg_get_peer_id($public_key, $tunnel_name);
+
+	if (isset($wgg['peers'][$peer_idx])) {
+
+		$peer = $wgg['peers'][$peer_idx];
+
+		if (isset($peer['endpoint']) &&
+			wg_is_valid_tunnel($peer['tun'])) {
+
+			// Just to make sure we always have an endpoint port because wg(8) expects one
+			$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
+
+			// Smash the peer endpoint address + port
+			$endpoint = "{$peer['endpoint']}:{$peer['port']}";
+
+			wg_escapeshellarg($peer, $endpoint);
+
+			$ret_val = mwexec("{$wgg['wg']} set {$peer['tun']} peer {$peer['publickey']} endpoint {$endpoint}");
+
+		}
+
+	}
+
+	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+
+}
+
+/*
  * This re-resolves peer endpoint addresses and updates the kernel
  */
 function wg_reresolve_dns($ret_posix_style = true) {
@@ -327,16 +362,7 @@ function wg_reresolve_dns($ret_posix_style = true) {
 
 		foreach ($wgg['peers'] as $peer) {
 			
-			if (isset($peer['endpoint']) &&
-				wg_is_valid_tunnel($peer['tun'])) {
-
-				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
-
-				wg_escapeshellarg($peer, $endpoint);
-	
-				$ret_val = mwexec("{$wgg['wg']} set {$peer['tun']} peer {$peer['publickey']} endpoint {$endpoint}");
-
-			}
+			$ret_val = wg_peer_reresolve_dns($peer['publickey'], $peer['tun'], true)
 
 		}
 
@@ -554,20 +580,21 @@ function wg_gen_publickey($privkey, $json = false) {
  * Even though any 256-bit bitstring generated from a csprng is a fine private key,
  * the kernel clamps private keys according to the transformation implemented here.
  * Some WireGuard key generators aren't properly pre-clamping generated keys and this
- * can cause confusion for some users who might stumble across both configuration files 
+ * can cause confusion for some users who might stumble across local .conf files 
  * and wg(8) output and see 'different' private keys, even though these keys result in
  * the same public key.
  * 
  * The way WireGuard is implemented, you can technically have two valid private keys,
- * one that is pre-clamped and one that is not, that can result in the same public key.
+ * one that is pre-clamped and one that is not, that can both result in the same public key.
  * 
  * These routines detect if the key is clamped or not, so we can at least include a note
  * in the .conf file so users who stumble onto them during troubleshooting won't freak out.
  * 
  * These routines might also become useful in the future for logging facilities.
  * 
+ * Private keys and pre-shared Keys must undergo this transformaton.
+ * 
  */
-
 function wg_clamp_key($key) {
 
 	if (wg_is_valid_key($key)) {
@@ -590,6 +617,9 @@ function wg_clamp_key($key) {
 
 }
 
+/*
+ * Checks if a given $key is clamped
+ */
 function wg_is_key_clamped($key) {
 
 	if (wg_is_valid_key($key)) {
@@ -602,16 +632,20 @@ function wg_is_key_clamped($key) {
 
 }
 
-// Checks if a given private, public, or pre-shared key is valid
+/*
+ * Reference0: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html
+ * 
+ * Checks if a given private, public, or pre-shared key is valid
+ */
 function wg_is_valid_key($key) {
-
-	// Reference: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html
 
 	return preg_match('/^[A-Za-z0-9+\/]{42}[A|E|I|M|Q|U|Y|c|g|k|o|s|w|4|8|0]=$/', $key);
 
 }
 
-// Generate a pre-shared key
+/*
+ * Generate a pre-shared key
+ */
 function wg_gen_psk() {
 	global $wgg;
 
@@ -621,7 +655,9 @@ function wg_gen_psk() {
 	
 }
 
-// Return the next available WireGuard port
+/*
+ * Return the next available WireGuard port
+ */
 function next_wg_port() {
 	global $wgg;
 

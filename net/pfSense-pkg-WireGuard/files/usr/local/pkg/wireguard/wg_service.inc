@@ -128,7 +128,7 @@ function wg_service_cli_restart($serialize = true) {
 
 		if ($ret_code <> 0) {
 
-			return $ret_Code;
+			return $ret_code;
 		}
 
 	}
@@ -406,8 +406,14 @@ function wg_service_daemon() {
 
 	}
 
+	wg_reresolve_dns();
+
+	$last_time = new DateTime();
+
 	// Main WireGuard service loop
 	while (true) {
+
+		$current_time = new DateTime();
 
 		// The whole point of this daemon...
 		if (!is_module_loaded($wgg['kmod'])) {
@@ -415,11 +421,22 @@ function wg_service_daemon() {
 			break;
 
 		}
+		
+		// Check if we should update DNS
+		if ($last_time->getTimestamp() + $wgg['endpoint_dns_ttl'] <= $current_time->getTimestamp()) {
+
+			wg_reresolve_dns();
+
+			$last_time = new DateTime();
+
+		}
 
 		// Wait a bit before trying again
 		sleep(1);
 
 	}
+
+	unset($last_time, $current_time);
 
 	// Execute SIGTERM handler to exit gracefully
 	wg_daemon_sig_handler(SIGTERM);
