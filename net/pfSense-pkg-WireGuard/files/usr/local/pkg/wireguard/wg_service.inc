@@ -260,18 +260,13 @@ function wg_service_cli_start($serialize = true) {
 
 	}
 
-	// We don't need to do this if we are in postboot
-	if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
+	// Build all (i.e. null) the tunnels
+	$sync_status = wg_tunnel_sync(null, false);
 
-		// Build all (i.e. null) the tunnels
-		$sync_status = wg_tunnel_sync(null, false);
+	if ($sync_status['ret_code'] <> 0 ) {
 
-		if ($sync_status['ret_code'] <> 0 ) {
+		$ret_code |= WG_ERROR_SVC_BUILD;
 
-			$ret_code |= WG_ERROR_SVC_BUILD;
-
-		}
-	
 	}
 
 	if (platform_booting()) {
@@ -279,9 +274,6 @@ function wg_service_cli_start($serialize = true) {
 		unmute_kernel_msgs();
 
 		fwrite(STDERR, "done. \n");
-
-		// Set postboot state
-		mark_subsystem_dirty($wgg['subsystems']['postboot']);
 
 		return $ret_code;
 
@@ -347,16 +339,8 @@ function wg_service_cli_start($serialize = true) {
 
 	} else {
 
-		// We don't need to restart additional services if we are in postboot
-		if (!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
-
-			// Restart any additional services
-			$ret_code = wg_restart_extra_services();
-
-		}
-
-		// Clear postboot state
-		clear_subsystem_dirty($wgg['subsystems']['postboot']);
+		// Restart any additional services
+		$ret_code = wg_restart_extra_services();
 
 		return $ret_code;
 

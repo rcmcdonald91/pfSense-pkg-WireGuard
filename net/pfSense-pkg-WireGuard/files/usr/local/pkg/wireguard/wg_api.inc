@@ -332,10 +332,10 @@ function wg_peer_reresolve_dns($public_key, $tunnel_name, $ret_posix_style = tru
 
 		$peer = $wgg['peers'][$peer_idx];
 
-		if (isset($peer['endpoint']) &&
+		if (!empty($peer['endpoint']) &&
 			wg_is_valid_tunnel($peer['tun'])) {
 
-			// Just to make sure we always have an endpoint port because wg(8) expects one
+			// Make sure we always have an endpoint port because wg(8) expects one
 			$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
 
 			// Smash the peer endpoint address + port
