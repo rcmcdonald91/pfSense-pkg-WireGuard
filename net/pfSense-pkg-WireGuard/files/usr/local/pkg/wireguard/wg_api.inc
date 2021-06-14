@@ -362,7 +362,7 @@ function wg_reresolve_dns($ret_posix_style = true) {
 
 		foreach ($wgg['peers'] as $peer) {
 			
-			$ret_val = wg_peer_reresolve_dns($peer['publickey'], $peer['tun'], true)
+			$ret_val = wg_peer_reresolve_dns($peer['publickey'], $peer['tun'], true);
 
 		}
 
