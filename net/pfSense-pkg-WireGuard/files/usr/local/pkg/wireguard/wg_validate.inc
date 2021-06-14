@@ -172,7 +172,7 @@ function wg_validate_peer_post($pconfig) {
 
 		$peers = wg_get_tunnel_peers($pconfig['tun']);
 
-		$peer_idx = wg_get_peer_id($pconfig['publickey'], $pconfig['tun']);
+		$peer_idx = wg_get_peer_idx($pconfig['publickey'], $pconfig['tun']);
 
 		foreach ($peers as $peer) {
 

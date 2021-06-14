@@ -120,7 +120,7 @@ function wg_toggle_peer($peer_idx) {
 			$action_text = $enabled ? 'disabled' : 'enabled';
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_name']}] Peer {$peer_id} {$action_text}.");
+			write_config("[{$wgg['pkg_name']}] Peer {$peer_idx} {$action_text}.");
 
 			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
@@ -364,12 +364,45 @@ function wg_parse_post_repeatables($post, $fields = null) {
 }
 
 /*
- * Determines if the endpoint DNS should be re-resolved
+ * This re-resolves peer endpoint addresses per tunnel and updates the kernel accordingly
+ * This returns a DateTime object corresponding to the last update time
+ */
+function wg_reresolve_dns() {
+	global $wgg;
+
+	// Get the latest info
+	wg_globals();
+
+	// Do we have any peers?
+	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
+
+		foreach ($wgg['peers'] as $peer) {
+
+			if (!empty($peer['endpoint'])) {
+
+				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
+
+				wg_set_peer_endpoint($peer['publickey'], $peer['tun'], $endpoint);
+
+			}
+
+		}
+
+	}
+
+	$last_update_time = new DateTime();
+
+	return $last_update_time;
+
+}
+
+/*
+ * Determines if endpoint DNS should be re-resolved
  * based on the last time the DNS was re-resolved
  * 
  * A DNS TTL of 0 will effectively disable DNS updating
  */
-function wg_should_update_dns($last_update_time) {
+function wg_should_reresolve_dns($last_update_time) {
 	global $wgg;
 
 	try {
@@ -406,7 +439,7 @@ function wg_get_dns_ttl() {
 
 	}
 
-	// Something is wrong, so just return 0
+	// Something is wrong, so just return 0 (u.e. disable re-resolving DNS)
 	return 0;
 
 }
@@ -663,10 +696,12 @@ function wg_apply_list_add($entry, $list) {
 
 /*
  * This builds, rebuilds, or destroys tunnel interfaces
- * If $tunnels is empty, this will apply to all configured tunnel interfaces
+ * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
 function wg_tunnel_sync($tunnel_names = null, $restart_services = false) {
 	global $wgg;
+
+	wg_globals();
 
 	$tunnels = array();
 
@@ -699,24 +734,23 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false) {
 		// Build (or destroy) each tunnel
 		foreach ($tunnel_names as $tunnel_name) {
 
-			$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
 			$tun_sync_status = wg_tunnel_sync_by_name($tunnel_name);
 
 			// Build an aggregated return code
 			$ret_code |= $tun_sync_status['ret_code'];
 
 			$tunnels[] = array(
-					'name' => $tunnel_name,
-					'ret_code' => $tun_sync_status['ret_code'], 
-					'errors' => $tun_sync_status['errors'],
-					'config' => $tun_sync_status['config']);
+					'name' 		=> $tun_sync_status['name'],
+					'ret_code' 	=> $tun_sync_status['ret_code'], 
+					'errors' 	=> $tun_sync_status['errors'],
+					'config' 	=> $tun_sync_status['config']);
 
 		}
 		
 		// Reload the filter
 		filter_configure();
 
+		// Handle any extra services that need restarting
 		if ($restart_services) {
 
 			wg_restart_extra_services();
@@ -794,8 +828,8 @@ function wg_tunnel_sync_by_name($tunnel_name) {
 
 		}
 
-	// We've got a tunnel we need to destroy...
-	} elseif (in_array($tunnel_name, wg_get_real_ifs())) {
+	// We've got a running tunnel that we need to destroy...
+	} elseif (wg_is_valid_tunnel($tunnel_name, true)) {
 
 		if (wg_interface_destroy($tunnel_name) <> 0) {
 
@@ -851,8 +885,7 @@ function wg_resync() {
 	
 	// We don't want active tunnels when the service isn't running
 	if (!wg_is_service_running() &&
-		is_module_loaded($wgg['kmod']) &&
-			!is_subsystem_dirty($wgg['subsystems']['postboot'])) {
+		is_module_loaded($wgg['kmod'])) {
 
 		wg_destroy_tunnels();
 

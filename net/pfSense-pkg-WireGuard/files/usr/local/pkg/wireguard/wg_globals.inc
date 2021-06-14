@@ -27,21 +27,21 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
-define('WG_ERROR_PEER_DNS', 	1);
+define('WG_ERROR_PEER_ENDPOINT',	1);
 
-define('WG_ERROR_IF_NAME',	1);
-define('WG_ERROR_IF_CREATE',	2);
-define('WG_ERROR_IF_GROUP',	4);
-define('WG_ERROR_IF_ADDRESSES',	8);
-define('WG_ERROR_IF_UP',	16);
-define('WG_ERROR_IF_DOWN',	32);
-define('WG_ERROR_IF_SYNC',	64);
-define('WG_ERROR_IF_DESTROY',	128);
+define('WG_ERROR_IF_NAME',		1);
+define('WG_ERROR_IF_CREATE',		2);
+define('WG_ERROR_IF_GROUP',		4);
+define('WG_ERROR_IF_ADDRESSES',		8);
+define('WG_ERROR_IF_UP',		16);
+define('WG_ERROR_IF_DOWN',		32);
+define('WG_ERROR_IF_SYNC',		64);
+define('WG_ERROR_IF_DESTROY',		128);
 
-define('WG_ERROR_SVC_RUNNING',	1);
-define('WG_ERROR_SVC_START',	2);
-define('WG_ERROR_SVC_STOP',	4);
-define('WG_ERROR_SVC_BUILD',	8);
+define('WG_ERROR_SVC_RUNNING',		1);
+define('WG_ERROR_SVC_START',		2);
+define('WG_ERROR_SVC_STOP',		4);
+define('WG_ERROR_SVC_BUILD',		8);
 
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
@@ -75,7 +75,7 @@ $wgg = array(
 					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
 					'peer' => array(
-						WG_ERROR_PEER_DNS	=> gettext('Unable to resolve peer endpoint')),
+						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint')),
 					'tunnel' => array(
 						WG_ERROR_IF_NAME	=> gettext('Invalid WireGuard tunnel name'),
 						WG_ERROR_IF_CREATE	=> gettext('Unable to create WireGuard tunnel interface'),

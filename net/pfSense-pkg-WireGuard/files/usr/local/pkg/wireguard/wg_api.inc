@@ -39,13 +39,13 @@ function wg_status() {
 	$tunnel_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
 
 	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
-	
+
 	$ret_array = $wg_output_rows = array();
-	
+
 	exec("{$wgg['wg']} show all dump", $wg_output_rows, $ret_code);
 
 	if ($ret_code == 0) {
-	
+
 		foreach ($wg_output_rows as $wg_index => $wg_row) {
 
 			$tmp_tunnel = $tmp_peer = array();
@@ -83,10 +83,10 @@ function wg_status() {
 
 				// Add the tunnel to the array
 				$ret_array[$current_device] = $tmp_tunnel;
-				
+
 				// Now provision an empty peer array
 				$ret_array[$current_device]['peers'] = array();
-				
+
 				$last_device = $a_device[0];
 
 			} else {
@@ -98,13 +98,13 @@ function wg_status() {
 				}
 
 				// Gets some extra information about peers not returned by `wg show all dump`
-				$peer_id = wg_get_peer_id($tmp_peer['public_key'], $last_device);
+				$peer_idx = wg_get_peer_idx($tmp_peer['public_key'], $last_device);
 
-				$tmp_peer['config']		= $wgg['peers'][$peer_id];
-				
+				$tmp_peer['config']		= $wgg['peers'][$peer_idx];
+
 				// Add the peer to the array
 				$ret_array[$last_device]['peers'][$a_device[1]] = $tmp_peer;
-				
+
 			}
 
 
@@ -127,16 +127,16 @@ function wg_status_json($pretty = false) {
 }
 
 // Returns a peer array index by public key and tunnel name
-function wg_get_peer_id($public_key, $tunnel_name) {
+function wg_get_peer_idx($public_key, $tunnel_name) {
 	global $wgg;
 
 	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
 
-		foreach ($wgg['peers'] as $peer_id => $peer){
+		foreach ($wgg['peers'] as $peer_idx => $peer){
 
 			if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
 
-				return $peer_id;
+				return $peer_idx;
 
 			}
 
@@ -316,65 +316,22 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 }
 
 /*
- * This re-resolves a peer endpoint address and updates the kernel
+ * Wrapper for 'wg set <tun> peer <pubkey> endpoint <endpoint>'
  */
-function wg_peer_reresolve_dns($public_key, $tunnel_name, $ret_posix_style = true) {
+function wg_set_peer_endpoint($peer_public_key, $tunnel_name, $endpoint, $ret_posix_style = true) {
 	global $wgg;
 
-	// Get the latest info
-	wg_globals();
+	$ret_code = 0;
 
-	$ret_val = 1;
+	if (wg_is_valid_tunnel($tunnel_name, true)) {
 
-	$peer_idx = wg_get_peer_id($public_key, $tunnel_name);
+		wg_escapeshellarg($tunnel_name, $peer_public_key, $endpoint);
 
-	if (isset($wgg['peers'][$peer_idx])) {
-
-		$peer = $wgg['peers'][$peer_idx];
-
-		if (!empty($peer['endpoint']) &&
-			wg_is_valid_tunnel($peer['tun'])) {
-
-			// Make sure we always have an endpoint port because wg(8) expects one
-			$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
-
-			// Smash the peer endpoint address + port
-			$endpoint = "{$peer['endpoint']}:{$peer['port']}";
-
-			wg_escapeshellarg($peer, $endpoint);
-
-			$ret_val = mwexec("{$wgg['wg']} set {$peer['tun']} peer {$peer['publickey']} endpoint {$endpoint}");
-
-		}
+		$ret_code = mwexec("{$wgg['wg']} set {$tunnel_name} peer {$peer_public_key} endpoint {$endpoint}");
 
 	}
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
-
-}
-
-/*
- * This re-resolves peer endpoint addresses and updates the kernel
- */
-function wg_reresolve_dns($ret_posix_style = true) {
-	global $wgg;
-
-	// Get the latest info
-	wg_globals();
-
-	$ret_val = 1;
-
-	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
-
-		foreach ($wgg['peers'] as $peer) {
-			
-			$ret_val = wg_peer_reresolve_dns($peer['publickey'], $peer['tun'], true);
-
-		}
-
-	}
-
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	return ($ret_posix_style ? ($ret_code <> 0) : ($ret_code == 0));
 
 }
 
@@ -519,7 +476,7 @@ function wg_pkg_info() {
 
 	// Each package needs to be escaped individually before imploding
 	wg_escapeshellarg($field_string, $a_packages);
-	
+
 	$packages_string = implode(" ", $a_packages);
 
 	exec("{$wgg['pkg']} query {$field_string} {$packages_string}", $packages, $ret_code);
@@ -533,7 +490,6 @@ function wg_pkg_info() {
 			foreach ($fields as $field_index => $field) {
 
 				$ret_array[$pkg_index][$a_return_keys[$field_index]] = $field;
-
 
 			}
 
@@ -690,7 +646,7 @@ function next_wg_port() {
 		if (!$found) {
 
 			return $idx;
-			
+
 		}
 
 	}
@@ -740,7 +696,7 @@ function next_wg_if() {
 	for ($ifnum = 0; $ifnum < $wgg['max_tunnels']; $ifnum++) {
 
 		$want_if = "{$wgg['if_prefix']}{$ifnum}";
-		
+
 		if (!in_array($want_if, $used_ifs)) {
 
 			return $want_if;
@@ -750,7 +706,7 @@ function next_wg_if() {
 	}
 
 	return -1;
-	
+
 }
 
 // Check if wg tunnel is assigned to an interface
@@ -761,22 +717,29 @@ function is_wg_tunnel_assigned($tunnel_name, $disabled = true) {
 	$is_assigned = array_key_exists($tunnel_name, $if_list);
 
 	return $is_assigned;
-	
+
 }
 
-// Check if a wg tunnel is valid
-function wg_is_valid_tunnel($tunnel_name) {
+/*
+ * Check if a wg tunnel is valid
+ */
+function wg_is_valid_tunnel($tunnel_name, $running_state = false) {
 	global $wgg;
 
-	if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
+	$tunnel_names = array();
 
+	if (isset($wgg['tunnels']) && is_array($wgg['tunnels']) && !$running_state) {
+
+		// Checks desired state tunnels
 		$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
-		return in_array($tunnel_name, $tunnel_names);
+	} elseif ($running_state) {
 
+		// Checks running state tunnels
+		$tunnel_names = wg_get_real_ifs();
 	}
 
-	return false;
+	return in_array($tunnel_name, $tunnel_names);
 
 }
 
@@ -793,14 +756,14 @@ function is_wg_assigned($disabled = true) {
 
 		// We found one, no need to keep checking
 		if (substr($realif, 0, strlen($wgg['if_prefix'])) == $wgg['if_prefix']) {
-	
+
 			$is_assigned = true;
 
 			break;
-	
+
 		}
-	    
-	    }
+
+	}
 
 	return $is_assigned;
 
