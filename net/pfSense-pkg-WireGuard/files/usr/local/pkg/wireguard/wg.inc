@@ -498,7 +498,7 @@ function wg_do_peer_post($post) {
 	// Assume no changes will be made...
 	$changes = false;
 
-	$peer_idx = $post['index'];
+	$peer_idx 			= $post['index'];
 
 	wg_init_config_arr($wgg['peers'][$peer_idx], array('allowedips', 'row'));
 
@@ -530,7 +530,7 @@ function wg_do_peer_post($post) {
 
 	}
 
-	$input_errors = wg_validate_peer_post($pconfig);
+	$input_errors = wg_validate_peer_post($pconfig, $peer_idx);
 
 	if (empty($input_errors)) {
 
