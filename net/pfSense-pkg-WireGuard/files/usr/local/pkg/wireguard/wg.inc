@@ -380,7 +380,7 @@ function wg_do_settings_post($post) {
 					
 	$pconfig['hide_secrets']	= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
-	$pconfig['dns_ttl']		= empty($post['dns_ttl'] ? $wgg['default_dns_ttl'] : $post['dns_ttl'];
+	$pconfig['dns_ttl']		= empty($post['dns_ttl']) ? $wgg['default_dns_ttl'] : $post['dns_ttl'];
 
 	$input_errors = wg_validate_settings_post($pconfig);
 
