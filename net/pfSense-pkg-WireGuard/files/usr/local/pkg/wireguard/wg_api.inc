@@ -321,6 +321,9 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 function wg_peer_reresolve_dns($public_key, $tunnel_name, $ret_posix_style = true) {
 	global $wgg;
 
+	// Get the latest info
+	wg_globals();
+
 	$ret_val = 1;
 
 	$peer_idx = wg_get_peer_id($public_key, $tunnel_name);
@@ -355,6 +358,9 @@ function wg_peer_reresolve_dns($public_key, $tunnel_name, $ret_posix_style = tru
  */
 function wg_reresolve_dns($ret_posix_style = true) {
 	global $wgg;
+
+	// Get the latest info
+	wg_globals();
 
 	$ret_val = 1;
 

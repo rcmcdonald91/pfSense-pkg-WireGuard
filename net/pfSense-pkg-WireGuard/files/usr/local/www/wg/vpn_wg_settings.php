@@ -168,7 +168,7 @@ $section->addInput(new Form_Input(
 	'Endpoint DNS TTL',
 	'text',
 	$pconfig['dns_ttl']
-))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names. The default is {$wgg['default_dns_ttl']} seconds.");
+))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names. The default is {$wgg['default_dns_ttl']} seconds. Enter 0 to disable.");
 
 $form->add($section);
 

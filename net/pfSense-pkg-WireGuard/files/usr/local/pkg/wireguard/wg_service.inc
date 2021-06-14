@@ -406,10 +406,10 @@ function wg_service_daemon() {
 
 	}
 
-	// Go ahead and reresolve at the beginning...
+	// Go ahead and re-resolve endpoint DNS at the beginning...
 	wg_reresolve_dns();
 
-	$last_time = new DateTime();
+	$last_update_time = new DateTime();
 
 	// Main WireGuard service loop
 	while (true) {
@@ -422,13 +422,13 @@ function wg_service_daemon() {
 		}
 		
 		// Check if we should update DNS
-		if (wg_should_update_dns($last_time)) {
+		if (wg_should_update_dns($last_update_time)) {
 
 			// Re-resolve endpoint DNS
 			wg_reresolve_dns();
 
 			// Save last update time
-			$last_time = new DateTime();
+			$last_update_time = new DateTime();
 
 		}
 

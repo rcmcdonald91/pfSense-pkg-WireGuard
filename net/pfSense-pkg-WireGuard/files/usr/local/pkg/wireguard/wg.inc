@@ -393,7 +393,7 @@ function wg_should_update_dns($last_update_time) {
 }
 
 /*
- * Gets the endpoint DNS TTL
+ * Gets the endpoint DNS TTL value (in secconds)
  * Returns 0 if something is wrong with the configuration
  */
 function wg_get_dns_ttl() {
@@ -406,6 +406,7 @@ function wg_get_dns_ttl() {
 
 	}
 
+	// Something is wrong, so just return 0
 	return 0;
 
 }
