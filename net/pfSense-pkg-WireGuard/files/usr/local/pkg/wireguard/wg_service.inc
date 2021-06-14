@@ -406,6 +406,7 @@ function wg_service_daemon() {
 
 	}
 
+	// Re-resolve endpoint DNS
 	wg_reresolve_dns();
 
 	$last_time = new DateTime();
@@ -423,8 +424,9 @@ function wg_service_daemon() {
 		}
 		
 		// Check if we should update DNS
-		if ($last_time->getTimestamp() + $wgg['endpoint_dns_ttl'] <= $current_time->getTimestamp()) {
+		if ($last_time->getTimestamp() + $wgg['default_dns_ttl'] <= $current_time->getTimestamp()) {
 
+			// Re-resolve endpoint DNS
 			wg_reresolve_dns();
 
 			$last_time = new DateTime();

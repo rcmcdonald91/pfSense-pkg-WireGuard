@@ -76,15 +76,13 @@ if ($_POST) {
 
 			case 'save':
 
-				if (empty($input_errors)) {
+				$res = wg_do_settings_post($_POST);
 
-					$pconfig = $_POST;
+				$input_errors = $res['input_errors'];
 
-					$wgg['config']['keep_conf'] 	= $pconfig['keep_conf'] ? 'yes' : 'no';
-					
-					$wgg['config']['hide_secrets'] 	= $pconfig['hide_secrets'] ? 'yes' : 'no';
+				$pconfig = $res['pconfig'];
 
-					write_config("[{$wgg['pkg_name']}] Package settings saved.");
+				if (empty($input_errors) && $res['changes']) {
 
 					$save_success = true;
 
@@ -110,6 +108,9 @@ $pconfig['keep_conf'] = (isset($wgg['config']['keep_conf'])) ? $wgg['config']['k
 
 // Default yes for new installations (i.e. hide_secrets is empty)
 $pconfig['hide_secrets'] = (isset($wgg['config']['hide_secrets'])) ? $wgg['config']['hide_secrets'] : 'yes';
+
+// Default for new installations (i.e. dns_ttl is empty)
+$pconfig['dns_ttl'] = (isset($wgg['config']['dns_ttl'])) ? $wgg['config']['dns_ttl'] : $wgg['default_dns_ttl'];
 
 $shortcut_section = "wireguard";
 
@@ -150,7 +151,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section("General Settings");
+$section = new Form_Section('General Settings');
 
 $section->addInput(new Form_Checkbox(
 	'keep_conf',
@@ -161,9 +162,17 @@ $section->addInput(new Form_Checkbox(
 		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
 );
 
+
+$section->addInput(new Form_Input(
+	'endpoint_dns_ttl',
+	'Endpoint DNS TTL',
+	'text',
+	$pconfig['dns_ttl']
+))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names. The default is {$wgg['default_dns_ttl']} seconds.");
+
 $form->add($section);
 
-$section = new Form_Section("User Interface Settings");
+$section = new Form_Section('User Interface Settings');
 
 $section->addInput(new Form_Checkbox(
 	'hide_secrets',

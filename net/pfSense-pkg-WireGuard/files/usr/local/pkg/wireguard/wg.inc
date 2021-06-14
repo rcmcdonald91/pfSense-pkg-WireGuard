@@ -363,6 +363,47 @@ function wg_parse_post_repeatables($post, $fields = null) {
 
 }
 
+function wg_do_settings_post($post) {
+	global $wgg;
+
+	wg_globals();
+
+	$pconfig = $input_errors = array();
+
+	// Assume no changes will be made...
+	$changes = false;
+
+	// We need to save the "old config" to compare against later...
+	$pconfig = $old_config = $wgg['config'];
+
+	$pconfig['keep_conf'] 		= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
+					
+	$pconfig['hide_secrets']	= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
+
+	$pconfig['dns_ttl']		= empty($post['dns_ttl'] ? $wgg['default_dns_ttl'] : $post['dns_ttl']
+
+	$input_errors = wg_validate_settings_post($pconfig);
+
+	if (empty($input_errors)) {
+
+		$wgg['config'] = $pconfig;
+
+		// Sync with configuration backend
+		write_config("[{$wgg['pkg_name']}] Package settings saved.");
+
+		// Check if anything actually changed or was this just a clean re-save?
+		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
+
+			$changes = true;
+
+		}
+
+	}
+
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'pconfig' => $pconfig);
+
+}
+
 /*
  * Takes a raw post for a peer, validates it, and saves it to the configuration system
  */
@@ -384,8 +425,6 @@ function wg_do_peer_post($post) {
 	$pconfig = $old_config = $wgg['peers'][$peer_idx];
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
-
-	$old_tun 			= $pconfig['tun'];
 
 	$pconfig['tun'] 		= $post['tun'];
 

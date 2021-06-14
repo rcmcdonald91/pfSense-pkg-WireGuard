@@ -31,6 +31,27 @@ require_once('wireguard/wg_api.inc');
 wg_globals();
 
 /*
+ * Validate package settings
+ */
+function wg_validate_settings_post($pconfig) {
+
+	$input_errors = array();
+
+	// Check dns ttl
+	$dns_ttl = $pconfig['dns_ttl'];
+
+	if (!empty($dns_ttl) && !is_numericint($dns_ttl)) {
+
+		$input_errors[] = "Invalid endpoint DNS TTL interval ({$dns_ttl}).";
+
+	}
+
+	// Consumers expect an array
+	return $input_errors;
+
+}
+
+/*
  * Valildate a tunnel
  * These validation checks should be in the same order as the UI for consistency
  */
