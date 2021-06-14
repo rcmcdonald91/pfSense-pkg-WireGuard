@@ -316,7 +316,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 }
 
 /*
- * This re-resolve peer endpoint addresses and updates the kernel
+ * This re-resolves peer endpoint addresses and updates the kernel
  */
 function wg_reresolve_dns($ret_posix_style = true) {
 	global $wgg;
@@ -327,17 +327,14 @@ function wg_reresolve_dns($ret_posix_style = true) {
 
 		foreach ($wgg['peers'] as $peer) {
 			
-			if (isset($peer['endpoint'])) {
+			if (isset($peer['endpoint']) &&
+				wg_is_valid_tunnel($peer['tun'])) {
 
 				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
 
-				if (wg_is_valid_tunnel($peer['tun'])) {
-
-					wg_escapeshellarg($peer, $endpoint)
-		
-					$ret_val = mwexec("{$wgg['wg']} set {$peer['tun']} peer {$peer['publickey']} endpoint {$endpoint}");
-				
-				}
+				wg_escapeshellarg($peer, $endpoint);
+	
+				$ret_val = mwexec("{$wgg['wg']} set {$peer['tun']} peer {$peer['publickey']} endpoint {$endpoint}");
 
 			}
 
