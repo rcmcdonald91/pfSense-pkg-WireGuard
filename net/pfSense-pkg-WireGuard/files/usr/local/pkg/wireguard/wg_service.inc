@@ -406,15 +406,13 @@ function wg_service_daemon() {
 
 	}
 
-	// Re-resolve endpoint DNS
+	// Go ahead and reresolve at the beginning...
 	wg_reresolve_dns();
 
 	$last_time = new DateTime();
 
 	// Main WireGuard service loop
 	while (true) {
-
-		$current_time = new DateTime();
 
 		// The whole point of this daemon...
 		if (!is_module_loaded($wgg['kmod'])) {
@@ -424,11 +422,12 @@ function wg_service_daemon() {
 		}
 		
 		// Check if we should update DNS
-		if ($last_time->getTimestamp() + $wgg['default_dns_ttl'] <= $current_time->getTimestamp()) {
+		if (wg_should_update_dns($last_time)) {
 
 			// Re-resolve endpoint DNS
 			wg_reresolve_dns();
 
+			// Save last update time
 			$last_time = new DateTime();
 
 		}
@@ -437,8 +436,6 @@ function wg_service_daemon() {
 		sleep(1);
 
 	}
-
-	unset($last_time, $current_time);
 
 	// Execute SIGTERM handler to exit gracefully
 	wg_daemon_sig_handler(SIGTERM);

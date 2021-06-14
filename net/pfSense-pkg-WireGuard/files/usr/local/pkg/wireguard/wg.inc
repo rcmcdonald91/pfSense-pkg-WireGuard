@@ -363,6 +363,53 @@ function wg_parse_post_repeatables($post, $fields = null) {
 
 }
 
+/*
+ * Determines if the endpoint DNS should be re-resolved
+ * based on the last time the DNS was re-resolved
+ * 
+ * A DNS TTL of 0 will effectively disable DNS updating
+ */
+function wg_should_update_dns($last_update_time) {
+	global $wgg;
+
+	try {
+
+		// Get the current timestamp
+		$current_time = (new DateTime)->getTimestamp();
+
+		// Calculate the time for the next update event
+		$time_to_update = $last_update_time->getTimestamp() + wg_get_dns_ttl();
+
+		// Should we update? A 0 TTL means disabled.
+		return (wg_get_dns_ttl() > 0 && ($time_to_update <= $current_time));
+
+	} catch (Exception $e) {
+
+		// Something probably went wrong with DateTime, just bail out...
+		return false;
+
+	}
+
+}
+
+/*
+ * Gets the endpoint DNS TTL
+ * Returns 0 if something is wrong with the configuration
+ */
+function wg_get_dns_ttl() {
+	global $wgg;
+
+	if (isset($wgg['config']['dns_ttl']) && 
+		is_numericint($wgg['config']['dns_ttl'])) {
+
+		return $wgg['config']['dns_ttl'];
+
+	}
+
+	return 0;
+
+}
+
 function wg_do_settings_post($post) {
 	global $wgg;
 
@@ -380,7 +427,7 @@ function wg_do_settings_post($post) {
 					
 	$pconfig['hide_secrets']	= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
-	$pconfig['dns_ttl']		= empty($post['dns_ttl']) ? $wgg['default_dns_ttl'] : $post['dns_ttl'];
+	$pconfig['dns_ttl']		= empty($post['dns_ttl']) && ($post['dns_ttl'] !== '0') ? $wgg['default_dns_ttl'] : $post['dns_ttl'];
 
 	$input_errors = wg_validate_settings_post($pconfig);
 

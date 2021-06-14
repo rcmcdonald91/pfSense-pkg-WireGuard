@@ -164,7 +164,7 @@ $section->addInput(new Form_Checkbox(
 
 
 $section->addInput(new Form_Input(
-	'endpoint_dns_ttl',
+	'dns_ttl',
 	'Endpoint DNS TTL',
 	'text',
 	$pconfig['dns_ttl']
