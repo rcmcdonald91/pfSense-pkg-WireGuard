@@ -472,6 +472,9 @@ function wg_do_settings_post($post) {
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_name']}] Package settings saved.");
 
+		// Resync the package
+		wg_resync();
+
 		// Check if anything actually changed or was this just a clean re-save?
 		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
 
@@ -538,6 +541,9 @@ function wg_do_peer_post($post) {
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_name']}] Peer {$pconfig['descr']} updated.");
+
+		// Resync the package
+		wg_resync();
 
 		// Check if anything actually changed or was this just a clean re-save?
 		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
@@ -618,6 +624,9 @@ function wg_do_tunnel_post($post) {
 
 		// Sync with configuration backend
 		write_config("[{$wgg['pkg_name']}] Tunnel {$pconfig['name']} updated.");
+
+		// Resync the package
+		wg_resync();
 
 		// Check if anything actually changed or was this just a clean re-save?
 		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
