@@ -364,10 +364,10 @@ function wg_parse_post_repeatables($post, $fields = null) {
 }
 
 /*
- * This re-resolves peer endpoint addresses per tunnel and updates the kernel accordingly
+ * This re-resolves peer endpoint hostnames per tunnel and updates the kernel accordingly
  * This returns a DateTime object corresponding to the last update time
  */
-function wg_reresolve_dns() {
+function wg_reresolve_hostnames() {
 	global $wgg;
 
 	// Get the latest info
@@ -395,12 +395,12 @@ function wg_reresolve_dns() {
 }
 
 /*
- * Determines if endpoint DNS should be re-resolved
- * based on the last time the DNS was re-resolved
+ * Determines if endpoint hostnames should be re-resolved
+ * based on the last time the hostnames were re-resolved
  * 
- * A DNS TTL of 0 will effectively disable DNS updating
+ * An interval of 0 will effectively disable re-resolving
  */
-function wg_should_reresolve_dns($last_update_time) {
+function wg_should_reresolve_hostnames($last_update_time) {
 	global $wgg;
 
 	try {
@@ -424,21 +424,36 @@ function wg_should_reresolve_dns($last_update_time) {
 }
 
 /*
- * Gets the endpoint DNS TTL value (in secconds)
+ * Gets the hostname reresolve interval (in secconds)
  * Returns 0 if something is wrong with the configuration
  */
-function wg_get_dns_ttl() {
-	global $wgg;
+function wg_get_reresolve_interval() {
+	global $config, $wgg;
 
-	if (isset($wgg['config']['dns_ttl'])
-		&& is_numericint($wgg['config']['dns_ttl'])) {
+	if (isset($wgg['config']['resolve_interval_track']) 
+		&& ($wgg['config']['resolve_interval_track'] == 'yes')) {
 
-		return $wgg['config']['dns_ttl'];
+		if (isset($config['system']['aliasesresolveinterval']) 
+			&& is_numeric($config['system']['aliasesresolveinterval'])) {
+
+			return $config['system']['aliasesresolveinterval'];
+
+		}
+			
+		// pfSense default
+		return 300;
 
 	}
 
-	// Something is wrong, so just return 0 (disables re-resolving DNS)
-	return 0;
+	if (isset($wgg['config']['resolve_interval'])
+		&& is_numericint($wgg['config']['resolve_interval'])) {
+
+		return $wgg['config']['resolve_interval'];
+
+	}
+
+	// Something is wrong, so just return the default
+	return $wgg['default_resolve_interval'];
 
 }
 
@@ -455,11 +470,13 @@ function wg_do_settings_post($post) {
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['config'];
 
-	$pconfig['keep_conf'] 		= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
+	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
 					
-	$pconfig['hide_secrets']	= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
+	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
-	$pconfig['dns_ttl']		= empty($post['dns_ttl']) && ($post['dns_ttl'] !== '0') ? $wgg['default_dns_ttl'] : $post['dns_ttl'];
+	$pconfig['resolve_interval']		= empty($post['resolve_interval']) && ($post['resolve_interval'] !== '0') ? $wgg['default_resolve_interval'] : $post['resolve_interval'];
+
+	$pconfig['resolve_interval_track']	= empty($post['resolve_interval_track']) ? 'no' : $post['resolve_interval_track'];
 
 	$input_errors = wg_validate_settings_post($pconfig);
 

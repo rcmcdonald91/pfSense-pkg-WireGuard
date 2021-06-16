@@ -301,7 +301,8 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 function wg_generate_tunnel_address_popover_link($tunnel_name) {
 	global $wgg;
 
-	$getText = function($text) { return gettext($text); };
+	$getText = function($s) { return gettext($s); };	
+	$hsc= function($s) { return htmlspecialchars($s); };
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -311,14 +312,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 		wg_init_config_arr($tunnel, array('addresses', 'row'));
 
-		// Smash address + mask
-		$addresses = array_map(function($x) {
-			
-			return array(
-				'address' => "{$x['address']}/{$x['mask']}", 
-				'descr' => $x['descr']);
-			
-		}, $tunnel['addresses']['row']);
+		$addresses = $tunnel['addresses']['row'];
 
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
 			
@@ -340,12 +334,12 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 		
 					foreach ($addresses as $address) {
 
-						wg_htmlspecialchars($address);
+						$address['address'] = "{$address['address']}/{$address['mask']}";
 
 						$data_html .= 	<<<"ROW"
 										<tr>
-											<td>{$address['address']}</td>
-											<td style='padding-left: 10px;'>{$address['descr']}</td>
+											<td>{$hsc($address['address'])}</td>
+											<td style='padding-left: 10px;'>{$hsc($address['descr'])}</td>
 										</tr>
 		
 								ROW;
@@ -375,9 +369,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 				$href = "vpn_wg_tunnels_edit.php?tun={$tunnel['name']}";
 
-				wg_htmlspecialchars($href, $title, $hint);
-
-				$ret_html = "<a href=\"{$href}\" title=\"{$title}\"{$popover_params}>{$hint}</a>";
+				$ret_html = "<a href=\"{$hsc($href)}\" title=\"{$hsc($title)}\"{$popover_params}>{$hsc($hint)}</a>";
 		
 			} else {
 
@@ -391,11 +383,9 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
 
-			wg_htmlspecialchars($wg_pfsense_if);
-
 			$ret_html = 	<<<"RET"
 					<i class="fa fa-sitemap" style="vertical-align: middle;"></i>
-					<a style="padding-left: 3px" href="../../interfaces.php?if={$wg_pfsense_if['name']}">{$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})</a>
+					<a style="padding-left: 3px" href="../../interfaces.php?if={$hsc($wg_pfsense_if['name'])}">{$hsc($wg_pfsense_if['descr'])} ({$hsc($wg_pfsense_if['name'])})</a>
 					
 					RET;
 
@@ -410,7 +400,8 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	global $wgg;
 
-	$getText = function($text) { return gettext($text); };
+	$getText = function($s) { return gettext($s); };	
+	$hsc= function($s) { return htmlspecialchars($s); };
 
 	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
 
@@ -418,14 +409,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 		wg_init_config_arr($peer, array('allowedips', 'row'));
 
-		// Smash address + mask
-		$allowedips = array_map(function($x) {
-			
-			return array(
-				'address' => "{$x['address']}/{$x['mask']}", 
-				'descr' => $x['descr']);
-			
-		}, $peer['allowedips']['row']);
+		$allowedips = $peer['allowedips']['row'];
 
 		if (is_array($allowedips) && count($allowedips) > 0) {
 
@@ -445,12 +429,13 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 				foreach ($allowedips as $allowedip) {
 
-					wg_htmlspecialchars($allowedip);
+					// Smash the address + mask for the UI
+					$allowedip['address'] = "{$allowedip['address']}/{$allowedip['mask']}";
 	
 					$data_html .= 	<<<"ROW"
 							<tr>
-								<td>{$allowedip['address']}</td>
-								<td style='padding-left: 10px;'>{$allowedip['descr']}</td>
+								<td>{$hsc($allowedip['address'])}</td>
+								<td style='padding-left: 10px;'>{$hsc($allowedip['descr'])}</td>
 							</tr>
 
 							ROW;
@@ -480,9 +465,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 			$href ="vpn_wg_peers_edit.php?peer={$peer_idx}";
 
-			wg_htmlspecialchars($href, $title, $hint);
-
-			$ret_html = "<a href=\"{$href}\" title=\"{$title}\"{$popover_params}>{$hint}</a>";
+			$ret_html = "<a href=\"{$hsc($href)}\" title=\"{$hsc($title)}\"{$popover_params}>{$hsc($hint)}</a>";
 
 		} else {
 
@@ -490,9 +473,11 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 			
 		}
 
-	return $ret_html;
+		return $ret_html;
 
 	}
+
+	return null;
 
 }
 

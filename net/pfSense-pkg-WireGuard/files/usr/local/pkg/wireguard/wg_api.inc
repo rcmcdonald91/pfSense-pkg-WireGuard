@@ -34,17 +34,22 @@ require_once('wireguard/wg_install.inc');
 
 /*
  * A wrapper for wg_show_dump to export everything plus extras for the status page
+ * 
+ * $json returns format in json format
  */
 function wg_get_status($json = false) {
 
-	return wg_get_running_config($json);
+	return wg_get_running_config(true, $json);
 
 }
 
 /*
  * Returns a massive associative array of current wg status
+ * 
+ * $extras returns additional info not provided by `wg show all dump`
+ * $json returns format in json format
  */
-function wg_get_running_config($json = false) {
+function wg_get_running_config($extras = false, $json = false) {
 	global $wgg;
 
 	$tunnel_output_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
@@ -73,24 +78,28 @@ function wg_get_running_config($json = false) {
 
 				}
 
-				// Gets some extra information about tunnels not returned by `wg show all dump`
-				$tunnel_if_stats 		= pfSense_get_interface_stats($current_device);
+				if ($extras) {
 
-				$tun_idx			= wg_get_tunnel_array_index($current_device);
+					// Gets some extra information about tunnels not returned by `wg show all dump`
+					$tunnel_if_stats		= pfSense_get_interface_stats($current_device);
 
-				$tmp_tunnel['status'] 		= wg_interface_status($current_device) ? 'up' : 'down';
+					$tun_idx			= wg_get_tunnel_array_index($current_device);
 
-				$tmp_tunnel['transfer_rx'] 	= $tunnel_if_stats['inbytes'];
+					$tmp_tunnel['status']		= wg_interface_status($current_device) ? 'up' : 'down';
 
-				$tmp_tunnel['transfer_tx'] 	= $tunnel_if_stats['outbytes'];
+					$tmp_tunnel['transfer_rx']	= $tunnel_if_stats['inbytes'];
 
-				$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
+					$tmp_tunnel['transfer_tx']	= $tunnel_if_stats['outbytes'];
 
-				$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
+					$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
 
-				$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
+					$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
 
-				$tmp_tunnel['desired_config']	= $wgg['tunnels'][$tun_idx];
+					$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
+
+					$tmp_tunnel['config']		= $wgg['tunnels'][$tun_idx];
+
+				}
 
 				// Add the tunnel to the array
 				$ret_config[$current_device] = $tmp_tunnel;
@@ -108,16 +117,19 @@ function wg_get_running_config($json = false) {
 
 				}
 
-				// Gets some extra information about peers not returned by `wg show all dump`
-				$peer_idx = wg_get_peer_idx($tmp_peer['public_key'], $last_device);
+				if ($extras) {
 
-				$tmp_peer['desired_config']	= $wgg['peers'][$peer_idx];
+					// Gets some extra information about peers not returned by `wg show all dump`
+					$peer_idx = wg_get_peer_idx($tmp_peer['public_key'], $last_device);
+
+					$tmp_peer['config']		= $wgg['peers'][$peer_idx];
+
+				}
 
 				// Add the peer to the array
 				$ret_config[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 
 			}
-
 
 		}
 
@@ -127,7 +139,9 @@ function wg_get_running_config($json = false) {
 
 }
 
-// Returns a peer array index by public key and tunnel name
+/*
+ * Returns a peer array index by public key and tunnel name
+ */
 function wg_get_peer_idx($public_key, $tunnel_name) {
 	global $wgg;
 

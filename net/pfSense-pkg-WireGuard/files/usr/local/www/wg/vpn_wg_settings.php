@@ -102,14 +102,15 @@ if ($_POST) {
 
 }
 
-// Default yes for new installations (i.e. keep_conf is empty)
-$pconfig['keep_conf'] = (isset($wgg['config']['keep_conf'])) ? $wgg['config']['keep_conf'] : 'yes';
+// Defaults for new installations
 
-// Default yes for new installations (i.e. hide_secrets is empty)
-$pconfig['hide_secrets'] = (isset($wgg['config']['hide_secrets'])) ? $wgg['config']['hide_secrets'] : 'yes';
+$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
-// Default for new installations (i.e. dns_ttl is empty)
-$pconfig['dns_ttl'] = (isset($wgg['config']['dns_ttl'])) ? $wgg['config']['dns_ttl'] : $wgg['default_dns_ttl'];
+$pconfig['hide_secrets'] = isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
+
+$pconfig['resolve_interval'] = isset($wgg['config']['resolve_interval']) ? $wgg['config']['default_resolve_interval'] : $wgg['resolve_interval'];
+
+$pconfig['resolve_interval_track'] = isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
 
 $shortcut_section = "wireguard";
 
@@ -155,19 +156,31 @@ $section = new Form_Section('General Settings');
 $section->addInput(new Form_Checkbox(
 	'keep_conf',
 	'Keep Configuration',
-    	gettext('Enable'),
-    	$pconfig['keep_conf'] == 'yes'
-))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Keep Configurations\' enabled (default), all tunnel configurations and package settings will persist on install/de-install.'
+	gettext('Enable'),
+	$pconfig['keep_conf'] == 'yes'
+))->setHelp("<span class=\"text-danger\">Note: </span>
+		With 'Keep Configurations' enabled (default), all tunnel configurations and package settings will persist on install/de-install."
 );
 
+$group = new Form_Group('Endpoint Hostname Resolve Interval');
 
-$section->addInput(new Form_Input(
-	'dns_ttl',
-	'Endpoint DNS TTL',
+$group->add(new Form_Input(
+	'resolve_interval',
+	'Endpoint Hostname Resolve Interval',
 	'text',
-	$pconfig['dns_ttl']
-))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names. The default is {$wgg['default_dns_ttl']} seconds. Enter 0 to disable.");
+	wg_get_reresolve_interval(),
+	['placeholder' => wg_get_reresolve_interval()]
+))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names.<br />
+		<span class=\"text-danger\">Note: </span> The default is {$wgg['default_resolve_interval']} seconds (0 to disable).");
+
+$group->add(new Form_Checkbox(
+	'resolve_interval_track',
+	null,
+	gettext('Track System'),
+	($pconfig['resolve_interval_track'] == 'yes')
+))->setHelp('Tracks the system \'Aliases Hostnames Resolve Interval\' setting.');
+
+$section->add($group);
 
 $form->add($section);
 
@@ -178,8 +191,8 @@ $section->addInput(new Form_Checkbox(
 	'Hide Secrets',
     	gettext('Enable'),
     	$pconfig['hide_secrets'] == 'yes'
-))->setHelp('<span class="text-danger">Note: </span>'
-		. 'With \'Hide Secrets\' enabled, all secrets (private and pre-shared keys) are hidden in the user interface.');
+))->setHelp("<span class=\"text-danger\">Note: </span>
+		With 'Hide Secrets' enabled, all secrets (private and pre-shared keys) are hidden in the user interface.");
 
 $form->add($section);
 
@@ -211,6 +224,20 @@ events.push(function() {
 		$(form).submit();
 
 	});
+
+	$('#resolve_interval_track').click(function () {
+
+		updateResolveInterval(this.checked);
+
+	});
+
+	function updateResolveInterval(state) {
+
+		$('#resolve_interval').prop( "disabled", state);
+
+	}
+
+	updateResolveInterval($('#resolve_interval_track').prop('checked'));
 
 });
 //]]>

@@ -92,11 +92,11 @@ $wgg = array(
 						WG_ERROR_SVC_START	=> gettext('Unable to start WireGuard service'),
 						WG_ERROR_SVC_STOP	=> gettext('Unable to stop WireGuard service'),
 						WG_ERROR_SVC_BUILD	=> gettext('Unable to build WireGuard tunnel(s)'))),
-	'default_dns_ttl'	=> 300,
-	'default_mtu'		=> 1420,
-	'default_port'		=> 51820,
-	'max_port'		=> 65535,
-	'max_tunnels'		=> 32768
+	'default_mtu'			=> 1420,
+	'default_port'			=> 51820,
+	'default_resolve_interval'	=> 300,
+	'max_port'			=> 65535,
+	'max_tunnels'			=> 32768
 );
 
 // These all depend on one more more of the above values
