@@ -367,7 +367,7 @@ function wg_parse_post_repeatables($post, $fields = null) {
  * This resolves peer endpoint hostnames per tunnel and updates the kernel accordingly
  * This returns a DateTime object corresponding to the last update time
  */
-function wg_resolve_endpoint() {
+function wg_resolve_endpoints() {
 	global $wgg;
 
 	// Get the latest info
@@ -427,7 +427,7 @@ function wg_should_reresolve_endpoints($last_update_time) {
 }
 
 /*
- * Gets the hostname reresolve interval (in seconds)
+ * Gets the hostname resolve interval (in seconds)
  * Returns 0 if something is wrong with the configuration
  */
 function wg_get_endpoint_resolve_interval() {
@@ -727,7 +727,7 @@ function wg_apply_list_add($entry, $list) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $reresolve_hostnames = true) {
+function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolve_endpoints = true) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -784,10 +784,10 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $rereso
 
 		}
 
-		// Handle reresolving endpoint DNS
-		if ($reresolve_hostnames) {
+		// Handle resolving endpoints
+		if ($resolve_endpoints) {
 
-			wg_reresolve_dns();
+			wg_resolve_endpoints();
 			
 		}
 

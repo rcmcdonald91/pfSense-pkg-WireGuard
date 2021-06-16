@@ -391,7 +391,7 @@ function wg_service_daemon() {
 	}
 
 	// Go ahead and resolve endpoint hostnames at the beginning...
-	$last_update_time = wg_resolve_endpoint();
+	$last_update_time = wg_resolve_endpoints();
 
 	// Main WireGuard service loop
 	while (true) {
@@ -407,7 +407,7 @@ function wg_service_daemon() {
 		if (wg_should_reresolve_endpoints($last_update_time)) {
 
 			// Reresolve endpoint hostnames again
-			$last_update_time = wg_resolve_endpoint();
+			$last_update_time = wg_resolve_endpoints();
 
 		}
 
