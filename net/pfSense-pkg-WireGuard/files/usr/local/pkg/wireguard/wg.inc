@@ -380,8 +380,10 @@ function wg_resolve_endpoints() {
 
 			if (!empty($peer['endpoint'])) {
 
-				// Smash endpoint + port
-				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
+				// Strip port if empty
+				$peer['port'] = !empty($peer['port']) ? ":{$peer['port']}" : null;
+
+				$endpoint = "{$peer['endpoint']}{$peer['port']}";
 
 				wg_set_peer_config($peer['tun'], $peer['publickey'], 'endpoint', $endpoint);
 
