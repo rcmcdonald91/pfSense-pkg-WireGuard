@@ -64,8 +64,7 @@ if ($_POST) {
 
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-				// TODO: Make extra services restart (true) a package setting
-				$sync_status = wg_tunnel_sync($tunnels_to_apply, true);
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
 
 				$ret_code |= $sync_status['ret_code'];
 

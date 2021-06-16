@@ -396,9 +396,9 @@ function wg_set_peer_config($wg_ifname, $public_key, $key = null, $value = null)
 
 	$cmd_output = $errors = array();
 
-	$key = (!is_null($key)) ? " {$esa($key)}": null;
+	$key = (!is_null($key)) ? " {$esa($key)}" : null;
 
-	$value = (!is_null($value)) ? " {$esa($value)}": null;
+	$value = (!is_null($value)) ? " {$esa($value)}" : null;
 
 	$cmd = "{$wgg['wg']} set {$esa($wg_ifname)} peer {$esa($public_key)}{$key}{$value} 2>&1";
 

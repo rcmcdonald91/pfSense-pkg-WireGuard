@@ -380,9 +380,7 @@ function wg_reresolve_dns() {
 
 			if (!empty($peer['endpoint'])) {
 
-				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
-
-				wg_set_peer_endpoint($peer['publickey'], $peer['tun'], $endpoint);
+				wg_set_peer_config($peer['tun'], $peer['publickey'], 'endpoint', "{$peer['endpoint']}:{$peer['port']}");
 
 			}
 
@@ -432,14 +430,14 @@ function wg_should_reresolve_dns($last_update_time) {
 function wg_get_dns_ttl() {
 	global $wgg;
 
-	if (isset($wgg['config']['dns_ttl']) && 
-		is_numericint($wgg['config']['dns_ttl'])) {
+	if (isset($wgg['config']['dns_ttl'])
+		&& is_numericint($wgg['config']['dns_ttl'])) {
 
 		return $wgg['config']['dns_ttl'];
 
 	}
 
-	// Something is wrong, so just return 0 (u.e. disable re-resolving DNS)
+	// Something is wrong, so just return 0 (disables re-resolving DNS)
 	return 0;
 
 }
@@ -707,7 +705,7 @@ function wg_apply_list_add($entry, $list) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names = null, $restart_services = false) {
+function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $reresolve_dns = true) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -762,6 +760,13 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false) {
 
 			wg_restart_extra_services();
 
+		}
+
+		// Handle reresolving endpoint DNS
+		if ($reresolve_dns) {
+
+			wg_reresolve_dns();
+			
 		}
 
 	}
