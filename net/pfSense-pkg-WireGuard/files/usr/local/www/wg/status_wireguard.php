@@ -97,7 +97,7 @@ wg_print_config_apply_box();
 
 display_top_tabs($tab_array);
 
-$a_devices = wg_status();
+$a_devices = wg_get_status();
 
 ?>
 

@@ -246,7 +246,8 @@ function wg_secret_input_type() {
 
 	$type = 'text';
 
-	if (isset($wgg['config']['hide_secrets']) && $wgg['config']['hide_secrets'] =='yes') {
+	if (isset($wgg['config']['hide_secrets'])
+		&& $wgg['config']['hide_secrets'] =='yes') {
 
 		$type = 'password';
 
@@ -262,9 +263,9 @@ function wg_entrystatus_class($target_device) {
 
 	$class = 'disabled';
 
-	if (isset($target_device) && 
-		$target_device['enabled'] == 'yes' &&
-			is_module_loaded($wgg['kmod'])) {
+	if (wg_is_service_running() 
+		&& isset($target_device) 
+		&& ($target_device['enabled'] == 'yes')) {
 
 		$class = 'enabled';
 

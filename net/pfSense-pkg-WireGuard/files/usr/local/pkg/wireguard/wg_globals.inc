@@ -32,11 +32,12 @@ define('WG_ERROR_PEER_ENDPOINT',	1);
 define('WG_ERROR_IF_NAME',		1);
 define('WG_ERROR_IF_CREATE',		2);
 define('WG_ERROR_IF_GROUP',		4);
-define('WG_ERROR_IF_ADDRESSES',		8);
-define('WG_ERROR_IF_UP',		16);
-define('WG_ERROR_IF_DOWN',		32);
-define('WG_ERROR_IF_SYNC',		64);
-define('WG_ERROR_IF_DESTROY',		128);
+define('WG_ERROR_IF_SETADDR',		8);
+define('WG_ERROR_IF_DELADDR',		16);
+define('WG_ERROR_IF_UP',		32);
+define('WG_ERROR_IF_DOWN',		64);
+define('WG_ERROR_IF_SYNC',		128);
+define('WG_ERROR_IF_DESTROY',		256);
 
 define('WG_ERROR_SVC_RUNNING',		1);
 define('WG_ERROR_SVC_START',		2);
@@ -76,11 +77,12 @@ $wgg = array(
 	'error_flags'		=> array(
 					'peer' => array(
 						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint')),
-					'tunnel' => array(
+					'interface' => array(
 						WG_ERROR_IF_NAME	=> gettext('Invalid WireGuard tunnel name'),
 						WG_ERROR_IF_CREATE	=> gettext('Unable to create WireGuard tunnel interface'),
 						WG_ERROR_IF_GROUP	=> gettext('Unable to add WireGuard tunnel interface to the WireGuard interface group'),
-						WG_ERROR_IF_ADDRESSES	=> gettext('Unable to update WireGuard tunnel interface addresses'),
+						WG_ERROR_IF_SETADDR	=> gettext('Unable to set WireGuard tunnel interface address(es)'),
+						WG_ERROR_IF_DELADDR	=> gettext('Unable to delete WireGuard tunnel interface address(es)'),
 						WG_ERROR_IF_UP		=> gettext('Unable to bring up WireGuard tunnel interface'),
 						WG_ERROR_IF_DOWN	=> gettext('Unable to bring down WireGuard tunnel interface'),
 						WG_ERROR_IF_SYNC	=> gettext('Unable to sync WireGuard tunnel configuration with wg(8)'),

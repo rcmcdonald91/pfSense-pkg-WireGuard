@@ -701,15 +701,13 @@ function wg_apply_list_add($entry, $list) {
 function wg_tunnel_sync($tunnel_names = null, $restart_services = false) {
 	global $wgg;
 
-	wg_globals();
+	// Fetch and build the latest info
+	wg_resync();
 
 	$tunnels = array();
 
 	// Let's assume everything will be fine
 	$ret_code = 0;
-
-	// Fetch and build latest config files
-	wg_resync();
 
 	// This is only necessary if the sevice is running
 	if (wg_is_service_running()) {
@@ -773,90 +771,102 @@ function wg_tunnel_sync_by_name($tunnel_name) {
 
 	$ret_code = 0;
 
-	$errors = $tunnel = array();
+	$cmds = $errors = $tunnel = array();
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-	// We've got a tunnel we need to build...
+	// We've got a tunnel that we need to build...
 	if (isset($wgg['tunnels'][$tun_idx])) {
 
 		$tunnel = $wgg['tunnels'][$tun_idx];
 
 		// Create the tunnel interface if it does not yet exist
-		if (wg_interface_create($tunnel['name']) <> 0) {
+		if ($res = wg_interface_create($tunnel['name'])) {
 
-			$ret_code |= WG_ERROR_IF_CREATE;
+			$cmds[] = $res;
+
+			$ret_code |= $res['ret_code'];
 
 		}
 
 		// Add the tunnel interface to the WireGuard interface group
-		if (wg_interface_group_add($tunnel['name']) <> 0) {
+		if ($res = wg_interface_group_add($tunnel['name'])) {
 
-			$ret_code |= WG_ERROR_IF_GROUP;
+			$cmds[] = $res;
+
+			$ret_code |= $res['ret_code'];
 
 		}
 
 		// Update the addresses on the tunnel interface
-		if (wg_interface_update_addresses($tunnel['name']) <> 0) {
+		if ($res = wg_interface_update_addresses($tunnel['name'])) {
 
-			$ret_code |= WG_ERROR_IF_ADDRESSES;
+			$cmds[] = $res;
+
+			$ret_code |= $res['ret_code'];
 
 		}
 
 		// Toggle the interface accordingly instead of tearing it down completely
 		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-			if (wg_ifconfig_up_interface($tunnel['name']) <> 0) { 
+			if ($res = wg_ifconfig_up_interface($tunnel['name'])) {
 
-				$ret_code |= WG_ERROR_IF_UP;
+				$cmds[] = $res;
+
+				$ret_code |= $res['ret_code'];
 
 			}
 
 		} else {
 
-			if (wg_ifconfig_down_interface($tunnel['name']) <> 0) {
+			if ($res = wg_ifconfig_down_interface($tunnel['name'])) {
 
-				$ret_code |= WG_ERROR_IF_DOWN;
+				$cmds[] = $res;
+
+				$ret_code |= $res['ret_code'];
 
 			}
+
 		}
 
 		// Sync interface with WireGuard wg(8)
-		if (wg_interface_syncconf($tunnel['name']) <> 0) {
+		if ($res = wg_interface_syncconf($tunnel['name'])) {
 
-			$ret_code |= WG_ERROR_IF_SYNC;
+			$cmds[] = $res;
+
+			$ret_code |= $res['ret_code'];
 
 		}
 
 	// We've got a running tunnel that we need to destroy...
 	} elseif (wg_is_valid_tunnel($tunnel_name, true)) {
 
-		if (wg_interface_destroy($tunnel_name) <> 0) {
+		if ($res = wg_interface_destroy($tunnel_name)) {
 
-			$ret_code |= WG_ERROR_IF_DESTROY;
+			$cmds[] = $res;
+
+			$ret_code |= $res['ret_code'];
 
 		}
 
 	// No idea what's going on...
 	} else {
 
-		$ret_code |= WG_ERROR_IF_NAME;
+		$ret_code = WG_ERROR_IF_NAME;
 
 	}
 
-	// Now collect the errors...
-	foreach ($wgg['error_flags']['tunnel'] as $error_mask => $error_text) {
-
-		if (($ret_code & $error_mask) > 0) {
-
-			$errors[$error_mask] = $error_text;
-
-		}
-
-	}
+	// Collect the errors
+	$errors = wg_get_errors('interface', $ret_code);
 
 	// Build the return array
-	return array('name' => $tunnel_name, 'ret_code' => $ret_code, 'errors' => $errors, 'config' => $tunnel);
+	return array(
+			'name'		=> $tunnel_name, 
+			'ret_code'	=> $ret_code, 
+			'errors'	=> $errors, 
+			'cmds'		=> $cmds,
+			'config'	=> $tunnel);
 
 }
 
@@ -865,6 +875,9 @@ function wg_tunnel_sync_by_name($tunnel_name) {
  */
 function wg_resync() {
 	global $g, $wgg;
+
+	// Update globals
+	wg_globals();
 
 	// Create WireGuard configuration files
 	wg_create_config_files();
@@ -951,7 +964,7 @@ function wg_create_config_files($clean = true) {
 
 		foreach ($wgg['tunnels'] as $tunnel) {
 
-			make_wg_conf($tunnel);
+			wg_make_tunnel_conf_file($tunnel, false);
 
 		}
 
@@ -1049,7 +1062,7 @@ function wg_remove_config_settings() {
 /*
  * Writes a WireGuard configuration file for a given tunnel to the configuration path
  */
-function make_wg_conf($tunnel) {
+function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	global $wgg;
 
 	$txt = "# This WireGuard config file has been created automatically. Do not edit!\n\n";
@@ -1124,7 +1137,10 @@ function make_wg_conf($tunnel) {
 
 					$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
 
-					$txt .= "Endpoint = {$peer['endpoint']}:{$peer['port']}\n";
+					$comment = $include_endpoint ? null : '# ';
+
+					// NOTE: Endpoint needs to be commented out to avoid potential failures caused by DNS
+					$txt .= "{$comment}Endpoint = {$peer['endpoint']}:{$peer['port']}\n";
 
 				}
 
@@ -1154,7 +1170,7 @@ function make_wg_conf($tunnel) {
 function wg_download_tunnel($tunnel_name, $failure_redirect) {
 	global $wgg;
 
-	// Make sure conf files are current
+	// Fetch and build the latest info
 	wg_resync();
 
 	$now = new DateTimeImmutable();

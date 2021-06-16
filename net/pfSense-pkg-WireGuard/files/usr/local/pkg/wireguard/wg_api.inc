@@ -32,33 +32,44 @@ require_once('service-utils.inc');
 require_once('wireguard/wg_globals.inc');
 require_once('wireguard/wg_install.inc');
 
-// Returns a massive associative array of current wg status
-function wg_status() {
+/*
+ * A wrapper for wg_show_dump to export everything plus extras for the status page
+ */
+function wg_get_status($json = false) {
+
+	return wg_get_running_config($json);
+
+}
+
+/*
+ * Returns a massive associative array of current wg status
+ */
+function wg_get_running_config($json = false) {
 	global $wgg;
 
-	$tunnel_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
+	$tunnel_output_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
 
-	$peer_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
+	$peer_output_keys = array('public_key', 'preshared_key', 'endpoint', 'allowed_ips', 'latest_handshake', 'transfer_rx', 'transfer_tx', 'persistent_keepalive');
 
-	$ret_array = $wg_output_rows = array();
+	$ret_config = $cmd_output_rows = array();
 
-	exec("{$wgg['wg']} show all dump", $wg_output_rows, $ret_code);
+	exec("{$wgg['wg']} show all dump", $cmd_output_rows, $ret_code);
 
 	if ($ret_code == 0) {
 
-		foreach ($wg_output_rows as $wg_index => $wg_row) {
+		foreach ($cmd_output_rows as $row) {
 
 			$tmp_tunnel = $tmp_peer = array();
 
-			$a_device = explode("\t", $wg_row);
+			$a_device = explode("\t", $row);
 
 			$current_device = $a_device[0];
 
 			if (strcmp($current_device, $last_device)) {
 
-				foreach ($tunnel_keys as $index => $key) {
+				foreach ($tunnel_output_keys as $key_index => $key) {
 
-					$tmp_tunnel[$key] = $a_device[$index + 1];
+					$tmp_tunnel[$key] = $a_device[$key_index + 1];
 
 				}
 
@@ -79,31 +90,31 @@ function wg_status() {
 
 				$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
 
-				$tmp_tunnel['config']		= $wgg['tunnels'][$tun_idx];
+				$tmp_tunnel['desired_config']	= $wgg['tunnels'][$tun_idx];
 
 				// Add the tunnel to the array
-				$ret_array[$current_device] = $tmp_tunnel;
+				$ret_config[$current_device] = $tmp_tunnel;
 
 				// Now provision an empty peer array
-				$ret_array[$current_device]['peers'] = array();
+				$ret_config[$current_device]['peers'] = array();
 
 				$last_device = $a_device[0];
 
 			} else {
 
-				foreach ($peer_keys as $index => $key) {
+				foreach ($peer_output_keys as $key_index => $key) {
 
-					$tmp_peer[$key] = $a_device[$index + 1];
+					$tmp_peer[$key] = $a_device[$key_index + 1];
 
 				}
 
 				// Gets some extra information about peers not returned by `wg show all dump`
 				$peer_idx = wg_get_peer_idx($tmp_peer['public_key'], $last_device);
 
-				$tmp_peer['config']		= $wgg['peers'][$peer_idx];
+				$tmp_peer['desired_config']	= $wgg['peers'][$peer_idx];
 
 				// Add the peer to the array
-				$ret_array[$last_device]['peers'][$a_device[1]] = $tmp_peer;
+				$ret_config[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 
 			}
 
@@ -112,17 +123,7 @@ function wg_status() {
 
 	}
 
-	// Consumers of this function always expect an array type
-	return $ret_array;
-
-}
-
-// Wrapper for wg_status to output json
-function wg_status_json($pretty = false) {
-
-	$a_json = wg_status();
-
-	return json_encode($a_json, ($pretty ? JSON_PRETTY_PRINT : null) | JSON_UNESCAPED_SLASHES);
+	return ($json ? json_encode($ret_config, JSON_UNESCAPED_SLASHES) : $ret_config);
 
 }
 
@@ -166,82 +167,117 @@ function wg_get_address_family($address) {
 
 }
 
-function wg_ifconfig_del_address($wg_ifname, $masked_address, $ret_posix_style = true) {
+function wg_ifconfig_del_address($wg_ifname, $masked_address) {
 	global $wgg;
 
+	$esa = function($s) { return escapeshellarg($s); };
+
 	// Assume family validation will fail...
-	$ret_val = 1;
+	$ret_code = 1;
+
+	$cmd_output = $errors = array();
 
 	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family = wg_get_address_family($masked_address)) {
 
 		list($address, $address_subnet) = explode('/', $masked_address);
 
-		wg_escapeshellarg($wg_ifname, $address);
+		$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} {$esa($family)} {$esa($address)} delete 2>&1";
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$address} delete");
+		exec($cmd, $cmd_output, $ret_code);
 
 	}
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_DELADDR : $ret_code;
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
 function wg_ifconfig_set_address($wg_ifname, $masked_address, $ret_posix_style = true) {
 	global $wgg;
 
+	$esa = function($s) { return escapeshellarg($s); };
+
 	// Assume family validation will fail...
-	$ret_val = 1;
+	$ret_code = 1;
+
+	$cmd_output = $errors = array();
 
 	// Gets the ifconfig address family while also validating the input at the same time
 	if ($family = wg_get_address_family($masked_address)) {
 
-		wg_escapeshellarg($wg_ifname, $masked_address);
+		$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} {$esa($family)} {$esa($masked_address)} add 2>&1";
 
-		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} {$family} {$masked_address} add");
+		exec($cmd, $cmd_output, $ret_code);
 
 	}
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_SETADDR : $ret_code;
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
-function wg_ifconfig_down_interface($wg_ifname, $ret_posix_style = true) {
+function wg_ifconfig_down_interface($wg_ifname) {
 	global $wgg;
 
-	wg_escapeshellarg($wg_ifname);
+	$esa = function($s) { return escapeshellarg($s); };
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} down");
+	$ret_code = 0;
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	$cmd_output = $errors = $ret_array = array();
+
+	$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} down 2>&1";
+
+	exec($cmd, $cmd_output, $ret_code);
+
+	$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_DOWN : $ret_code;
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
-function wg_ifconfig_up_interface($wg_ifname, $ret_posix_style = true) {
+function wg_ifconfig_up_interface($wg_ifname) {
 	global $wgg;
 
-	wg_escapeshellarg($wg_ifname);
+	$esa = function($s) { return escapeshellarg($s); };
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} up");
+	$ret_code = 0;
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	$cmd_output = $errors = $ret_array = array();
+
+	$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} up 2>&1";
+
+	exec($cmd, $cmd_output, $ret_code);
+
+	$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_UP : $ret_code;
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
 /*
  * This updates the addresses of the specified interface without tearing it down
  */
-function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
+function wg_interface_update_addresses($wg_ifname) {
 	global $wgg;
-
-	// Assume everything will be okay...
-	$ret_val = 0;
 
 	$tun_idx = wg_get_tunnel_array_index($wg_ifname);
 
 	$tunnel = $wgg['tunnels'][$tun_idx];
 
 	wg_init_config_arr($tunnel, array('addresses', 'row'));
+
+	$cmds = array();
 
 	// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 	if (!is_wg_tunnel_assigned($wg_ifname)) {
@@ -258,7 +294,11 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 		// Now remove them
 		foreach ($addresses_to_remove as $address) {
 
-			$ret_val |= wg_ifconfig_del_address($wg_ifname, $address);
+			if ($res = wg_ifconfig_del_address($wg_ifname, $address)) {
+
+				
+
+			}
 
 		}
 
@@ -268,7 +308,10 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 		// Now add them
 		foreach ($addresses_to_add as $address) {
 
-			$ret_val |= wg_ifconfig_set_address($wg_ifname, $address);
+			if ($res = wg_ifconfig_set_address($wg_ifname, $address)) {
+
+
+			}
 
 		}
 
@@ -283,7 +326,7 @@ function wg_interface_update_addresses($wg_ifname, $ret_posix_style = true) {
 
 	}
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
@@ -304,7 +347,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 
 		$ret_array['name'] 	= $tmp_name;
 
-		$ret_array['descr']	=  $ifdescr[$tmp_name];
+		$ret_array['descr']	= $ifdescr[$tmp_name];
 
 		return $ret_array;
 
@@ -316,77 +359,178 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 }
 
 /*
- * Wrapper for 'wg set <tun> peer <pubkey> endpoint <endpoint>'
+ * A wrapper for `wg set <wg_ifname> <key> <value>`
  */
-function wg_set_peer_endpoint($peer_public_key, $tunnel_name, $endpoint, $ret_posix_style = true) {
+function wg_set_interface_config($wg_ifname, $key, $value = null) {
 	global $wgg;
+
+	$esa = function($s) { return escapeshellarg($s); };
 
 	$ret_code = 0;
 
-	if (wg_is_valid_tunnel($tunnel_name, true)) {
+	$cmd_output = $errors = array();
 
-		wg_escapeshellarg($tunnel_name, $peer_public_key, $endpoint);
+	$value = (!is_null($value)) ? " {$esa($value)}": $value;
 
-		$ret_code = mwexec("{$wgg['wg']} set {$tunnel_name} peer {$peer_public_key} endpoint {$endpoint}");
+	$cmd = "{$wgg['wg']} set {$esa($wg_ifname)} {$esa($key)}{$value} 2>&1";
 
-	}
+	exec($cmd, $cmd_output, $ret_code);
 
-	return ($ret_posix_style ? ($ret_code <> 0) : ($ret_code == 0));
+	$errors = ($ret_code <> 0) ? $cmd_output : array();
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
-function wg_interface_syncconf($wg_ifname, $ret_posix_style = true) {
+/*
+ * A wrapper for `wg set <wg_ifname> peer <public_key> <key> <value>`
+ */
+function wg_set_peer_config($wg_ifname, $public_key, $key = null, $value = null) {
 	global $wgg;
 
-	$ret_val = 1;
+	$esa = function($s) { return escapeshellarg($s); };
+
+	$ret_code = 0;
+
+	$cmd_output = $errors = array();
+
+	$key = (!is_null($key)) ? " {$esa($key)}": null;
+
+	$value = (!is_null($value)) ? " {$esa($value)}": null;
+
+	$cmd = "{$wgg['wg']} set {$esa($wg_ifname)} peer {$esa($public_key)}{$key}{$value} 2>&1";
+
+	exec($cmd, $cmd_output, $ret_code);
+
+	$errors = ($ret_code <> 0) ? $cmd_output : array();
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
+
+}
+
+function wg_interface_syncconf($wg_ifname) {
+	global $wgg;
+
+	$esa = function($s) { return escapeshellarg($s); };
+
+	wg_resync();
+
+	$ret_code = 0;
+
+	$cmd_output = $errors = array();
 
 	$wg_conf_path = "{$wgg['conf_path']}/{$wg_ifname}.conf";
 
 	if (file_exists($wg_conf_path)) {
 
-		wg_escapeshellarg($wg_ifname, $wg_conf_path);
+		exec("{$wgg['wg']} syncconf {$esa($wg_ifname)} {$esa($wg_conf_path)}", $cmd_output, $ret_code);
 
-		$ret_val = mwexec("{$wgg['wg']} syncconf {$wg_ifname} {$wg_conf_path}");
+		$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_SYNC : $ret_code;
 
 	}
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	// Collect the errors
+	$errors = wg_get_errors('interface', $ret_code);
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
 /*
  * This creates a WireGuard interface of a specified name
  */
-function wg_interface_create($wg_ifname, $ret_posix_style = true) {
+function wg_interface_create($wg_ifname) {
 	global $wgg;
 
-	wg_escapeshellarg($wg_ifname);
+	$esa = function($s) { return escapeshellarg($s); };
+
+	$ret_code = 0;
+
+	$cmd_output = $errors = $ret_array = array();
+
+	$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} 2>&1";
 
 	// First check if the interface already exists
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname}");
+	exec($cmd, $cmd_output, $ret_code);
 
-	if ($ret_val <> 0) {
+	// If not, try to create it...
+	if ($ret_code <> 0) {
+
+		$ret_code = 0;
+
+		$cmd_output = $errors = array();
 		
-		// Create the interface with the specified name
-		$ret_val = mwexec("{$wgg['ifconfig']} wg create name {$wg_ifname}");
+		$cmd = "{$wgg['ifconfig']} wg create name {$esa($wg_ifname)} 2>&1";
+
+		// Attempt to create the interface
+		exec($cmd, $cmd_output, $ret_code);
+
+		$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_CREATE : $ret_code;
 
 	}
-	
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+
+	// Collect the errors
+	$errors = wg_get_errors('interface', $ret_code);
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
+
+}
+
+function wg_get_errors($type, $ret_code) {
+	global $wgg;
+
+	$errors = array();
+
+	if (isset($wgg['error_flags'][$type])) {
+
+		// Now collect the errors...
+		foreach ($wgg['error_flags'][$type] as $error_mask => $error_text) {
+
+			if (($ret_code & $error_mask) > 0) {
+
+				$errors[$error_mask] = $error_text;
+
+			}
+
+		}
+
+	}
+
+	return $errors;
 
 }
 
 /*
  * This destroys a WireGuard interface of a specified name
  */
-function wg_interface_destroy($wg_ifname, $ret_posix_style = true) {
+function wg_interface_destroy($wg_ifname) {
 	global $wgg;
 
-	wg_escapeshellarg($wg_ifname);
+	$esa = function($s) { return escapeshellarg($s); };
 
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} destroy");
+	$ret_code = 0;
 
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	$cmd_output = $errors = array();
+
+	$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} destroy 2>&1";
+
+	exec($cmd, $cmd_output, $ret_code);
+
+	if ($ret_code <> 0) {
+
+		$errors[WG_ERROR_IF_DESTROY] = $wgg['errors']['interface'][WG_ERROR_IF_DESTROY];
+
+	}
+
+	return array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
 
 }
 
@@ -407,24 +551,25 @@ function wg_get_real_ifs() {
 /*
  * This adds a WireGuard interface to the WireGuard interface group
  */
-function wg_interface_group_add($wg_ifname, $ret_posix_style = true) {
+function wg_interface_group_add($wg_ifname) {
 	global $wgg;
 
-	$wg_ifgroup = $wgg['ifgroupentry']['ifname'];
+	$esa = function($s) { return escapeshellarg($s); };
 
-	wg_escapeshellarg($wg_ifname, $wg_ifgroup);
+	$ret_code = 0;
 
-	// First check if the interface already exists
-	$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname}");
+	$cmd_output = $errors = $ret_array = array();
 
-	if ($ret_val == 0) {
+	$cmd = "{$wgg['ifconfig']} {$esa($wg_ifname)} group {$esa($wgg['ifgroupentry']['ifname'])}";
 
-		// Add interface to interface group
-		$ret_val = mwexec("{$wgg['ifconfig']} {$wg_ifname} group {$wg_ifgroup}");
+	// Add interface to interface group
+	exec($cmd, $cmd_output, $ret_code);
 
-	}
-		
-	return ($ret_posix_style ? ($ret_val <> 0) : ($ret_val == 0));
+	$ret_code = ($ret_code <> 0) ? WG_ERROR_IF_GROUP : $ret_code;
+
+	$ret_array = array('cmd' => $cmd, 'cmd_output' => $cmd_output, 'ret_code' => $ret_code, 'errors' => $errors);
+
+	return (!empty($ret_array) ? $ret_array : null);
 
 }
 
@@ -439,24 +584,22 @@ function wg_interface_status($wg_ifname) {
 function wg_ifconfig_interface_flags($wg_ifname) {
 	global $wgg;
 
-	wg_escapeshellarg($wg_ifname);
+	$esa = function($s) { return escapeshellarg($s); };
 
-	$ret_array = $output = array();
+	$ret_code = 0;
 
-	exec("{$wgg['ifconfig']} {$wg_ifname}", $output, $ret_code);
+	$flags = $cmd_output = array();
 
-	if ($ret_code == 0) {
+	exec("{$wgg['ifconfig']} {$esa($wg_ifname)}", $cmd_output, $ret_code);
 
-		if (preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
+	if (($ret_code == 0) && preg_match("/flags=.*<(?P<flags>.*)>/", $cmd_output[0], $matches)) {
 
-			$ret_array = explode(',', $matches['flags']);
-
-		}
+		$flags = explode(',', $matches['flags']);
 
 	}
 
 	// Consumers of this function always expect an array type
-	return $ret_array;
+	return $flags;
 
 }
 
@@ -803,7 +946,7 @@ function wg_get_tunnel_peers($tunnel_name) {
 
 	wg_globals();
 
-	$a_ret = array();
+	$ret_peers = array();
 
 	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
@@ -819,7 +962,7 @@ function wg_get_tunnel_peers($tunnel_name) {
 					// We need the array index for future manipulations
 					$peer['index'] = $peer_idx;
 
-					$a_ret[] = $peer;
+					$ret_peers[$peer['publickey']] = $peer;
 
 				}
 
@@ -830,7 +973,7 @@ function wg_get_tunnel_peers($tunnel_name) {
 	}
 
 	// Return the list of filtered peers
-	return $a_ret;
+	return $ret_peers;
 
 }
 
