@@ -168,8 +168,8 @@ $group->add(new Form_Input(
 	'resolve_interval',
 	'Endpoint Hostname Resolve Interval',
 	'text',
-	wg_get_reresolve_interval(),
-	['placeholder' => wg_get_reresolve_interval()]
+	wg_get_endpoint_resolve_interval(),
+	['placeholder' => wg_get_endpoint_resolve_interval()]
 ))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names.<br />
 		<span class=\"text-danger\">Note: </span> The default is {$wgg['default_resolve_interval']} seconds (0 to disable).");
 

@@ -373,9 +373,6 @@ function wg_restart_extra_services() {
 function wg_service_daemon() {
 	global $wgg;
 
-	// Save last endpoint DNS update time
-	$last_update_time = new DateTime();
-
 	// Re-register the service environment
 	wg_register_service_env(true);
 
@@ -393,8 +390,8 @@ function wg_service_daemon() {
 
 	}
 
-	// Go ahead and re-resolve endpoint DNS at the beginning...
-	$last_update_time = wg_reresolve_dns();
+	// Go ahead and resolve endpoint hostnames at the beginning...
+	$last_update_time = wg_resolve_endpoint();
 
 	// Main WireGuard service loop
 	while (true) {
@@ -406,11 +403,11 @@ function wg_service_daemon() {
 
 		}
 		
-		// Check if we should re-resolve DNS
-		if (wg_should_reresolve_dns($last_update_time)) {
+		// Check if we should reresolve hostnames
+		if (wg_should_reresolve_endpoints($last_update_time)) {
 
-			// Re-resolve endpoint DNS again
-			$last_update_time = wg_reresolve_dns();
+			// Reresolve endpoint hostnames again
+			$last_update_time = wg_resolve_endpoint();
 
 		}
 

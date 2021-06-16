@@ -364,10 +364,10 @@ function wg_parse_post_repeatables($post, $fields = null) {
 }
 
 /*
- * This re-resolves peer endpoint hostnames per tunnel and updates the kernel accordingly
+ * This resolves peer endpoint hostnames per tunnel and updates the kernel accordingly
  * This returns a DateTime object corresponding to the last update time
  */
-function wg_reresolve_hostnames() {
+function wg_resolve_endpoint() {
 	global $wgg;
 
 	// Get the latest info
@@ -380,7 +380,10 @@ function wg_reresolve_hostnames() {
 
 			if (!empty($peer['endpoint'])) {
 
-				wg_set_peer_config($peer['tun'], $peer['publickey'], 'endpoint', "{$peer['endpoint']}:{$peer['port']}");
+				// Smash endpoint + port
+				$endpoint = "{$peer['endpoint']}:{$peer['port']}";
+
+				wg_set_peer_config($peer['tun'], $peer['publickey'], 'endpoint', $endpoint);
 
 			}
 
@@ -400,7 +403,7 @@ function wg_reresolve_hostnames() {
  * 
  * An interval of 0 will effectively disable re-resolving
  */
-function wg_should_reresolve_hostnames($last_update_time) {
+function wg_should_reresolve_endpoints($last_update_time) {
 	global $wgg;
 
 	try {
@@ -409,10 +412,10 @@ function wg_should_reresolve_hostnames($last_update_time) {
 		$current_time = (new DateTime)->getTimestamp();
 
 		// Calculate the time for the next update event
-		$time_to_update = $last_update_time->getTimestamp() + wg_get_dns_ttl();
+		$time_to_update = $last_update_time->getTimestamp() + wg_get_endpoint_resolve_interval();
 
 		// Should we update? A 0 TTL means disabled.
-		return (wg_get_dns_ttl() > 0 && ($time_to_update <= $current_time));
+		return (wg_get_endpoint_resolve_interval() > 0 && ($time_to_update <= $current_time));
 
 	} catch (Exception $e) {
 
@@ -424,12 +427,13 @@ function wg_should_reresolve_hostnames($last_update_time) {
 }
 
 /*
- * Gets the hostname reresolve interval (in secconds)
+ * Gets the hostname reresolve interval (in seconds)
  * Returns 0 if something is wrong with the configuration
  */
-function wg_get_reresolve_interval() {
+function wg_get_endpoint_resolve_interval() {
 	global $config, $wgg;
 
+	// Are we tracking the system value?
 	if (isset($wgg['config']['resolve_interval_track']) 
 		&& ($wgg['config']['resolve_interval_track'] == 'yes')) {
 
@@ -445,6 +449,7 @@ function wg_get_reresolve_interval() {
 
 	}
 
+	// Looks like we are using our own value...
 	if (isset($wgg['config']['resolve_interval'])
 		&& is_numericint($wgg['config']['resolve_interval'])) {
 
@@ -452,7 +457,7 @@ function wg_get_reresolve_interval() {
 
 	}
 
-	// Something is wrong, so just return the default
+	// Something is wrong, so just return the default...
 	return $wgg['default_resolve_interval'];
 
 }
@@ -722,7 +727,7 @@ function wg_apply_list_add($entry, $list) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $reresolve_dns = true) {
+function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $reresolve_hostnames = true) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -780,7 +785,7 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $rereso
 		}
 
 		// Handle reresolving endpoint DNS
-		if ($reresolve_dns) {
+		if ($reresolve_hostnames) {
 
 			wg_reresolve_dns();
 			
