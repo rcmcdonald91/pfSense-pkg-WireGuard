@@ -43,7 +43,7 @@ function wg_print_service_warning($only_with_tunnels = true) {
 function wg_print_config_apply_box() {
 	global $wgg;
 
-	$getText = function($text) { return gettext($text); };
+	$getText = fn($s) => gettext($text);
 
 	if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
@@ -58,7 +58,7 @@ function wg_print_config_apply_box() {
 // Formats peer endpoint address and port for the UI
 function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
 
-	$getText = function($text) { return gettext($text); };
+	$getText = fn($s) => gettext($text);
 
 	if ($header) {
 
@@ -86,13 +86,13 @@ function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpo
 function wg_get_tun_list() {
 	global $config, $wgg;
 
+	// Format tunnel description if one is configured
+	$tunDescr = fn($tunnel) => !empty($tunnel['descr']) ? " ({$tunnel['descr']})" : null;
+
 	$a_ret = array();
 
 	// Always include the unassigned option first
 	$a_ret['unassigned'] = 'Unassigned';
-
-	// Format tunnel description if one is configured
-	$tunDescr = function($tunnel) { return (!empty($tunnel['descr'])) ? " ({$tunnel['descr']})" : null; };
 
 	if (is_array($wgg['tunnels'])) {
 
@@ -217,9 +217,9 @@ function wg_human_time_diff($start, $end = null, $num_units = 2, $from_epoch = f
 
 	$interval = $end->diff($start);
 
-	$doPlural = function($nb, $str) { return ($nb > 1) ? gettext("{$str}s") : gettext($str); };
+	$doPlural = fn($nb, $str) => ($nb > 1) ? gettext("{$str}s") : gettext($str);
 
-	$doTense = function($interval) { return ($interval->invert) ? gettext('ago') : gettext('from now'); };
+	$doTense = fn($interval) => ($interval->invert) ? gettext('ago') : gettext('from now');
 
 	$a_format = array();
 
@@ -430,9 +430,9 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	global $wgg;
 
-	$getText = function($s) { return gettext($s); };
+	$getText = fn($s) => gettext($s);
 
-	$hsc= function($s) { return htmlspecialchars($s); };
+	$hsc= fn($s) => htmlspecialchars($s);
 
 	if ($peer = wg_peer_get_config($peer_idx)) {
 

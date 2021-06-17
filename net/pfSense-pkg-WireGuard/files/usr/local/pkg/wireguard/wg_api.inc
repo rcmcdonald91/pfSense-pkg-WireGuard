@@ -181,7 +181,7 @@ function wg_get_address_family($address) {
 function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ret_code = 0;
 
@@ -207,7 +207,7 @@ function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &
 function wg_interface_in_group($if_name, $group = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ifs = array();
 
@@ -234,9 +234,9 @@ function wg_interface_in_group($if_name, $group = null) {
 function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 	
-	$state = function($up) { return $up ? 'up' : 'down'; };
+	$state = fn($up) => $up ? 'up' : 'down';
 
 	$ret_code = 0;
 
@@ -369,7 +369,7 @@ function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = nul
 function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = null, $error_flag = 0, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$key = (!is_null($key)) ? " {$esa($key)}" : $key;
 
@@ -392,7 +392,7 @@ function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = nul
 function wg_wg_if_sync($if_name, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ret_code = 0;
 
@@ -422,7 +422,7 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 function wg_ifconfig_if_create($if_name, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ret_code = 0;
 
@@ -486,7 +486,7 @@ function wg_get_errors($type, $ret_code) {
 function wg_ifconfig_if_destroy($if_name, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ret_code = 0;
 
@@ -534,7 +534,7 @@ function wg_get_configured_ifs() {
 function wg_ifconfig_if_group_add($if_name, $group, &$cmds = null) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ret_code = 0;
 
@@ -592,7 +592,7 @@ function wg_interface_status($if_name) {
 function wg_ifconfig_get_flags($if_name) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$flags = $output = array();
 
@@ -617,7 +617,7 @@ function wg_ifconfig_get_flags($if_name) {
 function wg_pkg_info() {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$ret_array = array();
 
@@ -669,7 +669,7 @@ function wg_gen_keypair($json = false) {
 function wg_gen_publickey($privkey, $json = false) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$was_clamped = wg_is_key_clamped($privkey);
 
@@ -1033,7 +1033,7 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 function wg_tunnel_get_peers_running_keys($tunnel_name) {
 	global $wgg;
 
-	$esa = function($s) { return escapeshellarg($s); };
+	$esa = fn($s) => escapeshellarg($s);
 
 	$output = $res = array();
 
