@@ -43,7 +43,7 @@ function wg_print_service_warning($only_with_tunnels = true) {
 function wg_print_config_apply_box() {
 	global $wgg;
 
-	$getText = fn($s) => gettext($text);
+	$getText = fn($s) => gettext($s);
 
 	if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
 
@@ -58,8 +58,8 @@ function wg_print_config_apply_box() {
 // Formats peer endpoint address and port for the UI
 function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
 
-	$getText = fn($s) => gettext($text);
-
+	$getText = fn($s) => gettext($s);
+	
 	if ($header) {
 
 		return "{$getText('Endpoint')} : {$getText('Port')}";
