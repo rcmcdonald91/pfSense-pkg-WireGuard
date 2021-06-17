@@ -43,7 +43,7 @@ define('WG_ERROR_IF_DESTROY',		256);
 define('WG_ERROR_SVC_RUNNING',		1);
 define('WG_ERROR_SVC_START',		2);
 define('WG_ERROR_SVC_STOP',		4);
-define('WG_ERROR_SVC_BUILD',		8);
+define('WG_ERROR_SVC_CREATE',		8);
 
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
@@ -93,7 +93,7 @@ $wgg = array(
 						WG_ERROR_SVC_RUNNING	=> gettext('WireGuard service is already running'),
 						WG_ERROR_SVC_START	=> gettext('Unable to start WireGuard service'),
 						WG_ERROR_SVC_STOP	=> gettext('Unable to stop WireGuard service'),
-						WG_ERROR_SVC_BUILD	=> gettext('Unable to build WireGuard tunnel(s)'))),
+						WG_ERROR_SVC_CREATE	=> gettext('Unable to create WireGuard tunnel(s)'))),
 	'default_mtu'			=> 1420,
 	'default_port'			=> 51820,
 	'default_resolve_interval'	=> 300,

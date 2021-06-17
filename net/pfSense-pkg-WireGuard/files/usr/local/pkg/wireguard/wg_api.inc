@@ -594,8 +594,7 @@ function wg_ifconfig_get_flags($if_name) {
 
 		exec("{$wgg['ifconfig']} {$esa($if_name)}", $output, $ret_code);
 
-		if (($ret_code == 0) 
-			&& preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
+		if (($ret_code == 0) && preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
 
 			$flags = explode(',', $matches['flags']);
 
@@ -616,28 +615,28 @@ function wg_pkg_info() {
 
 	$ret_array = array();
 
-	$a_fields = array('name'=> '%n', 'version' => '%v', 'comment' => '%c');
+	$fields = array('name'=> '%n', 'version' => '%v', 'comment' => '%c');
 
-	$a_return_keys = array_values(array_flip($a_fields));
+	$return_keys = array_values(array_flip($fields));
 
-	$field_string = implode("\t", $a_fields);
+	$field_string = implode("\t", $fields);
 
 	// Each package needs to be escaped individually before imploding
-	$a_packages = array_map(fn($x) => escapeshellarg($x), $wgg['depends_names']);
+	$packages = array_map(fn($x) => escapeshellarg($x), $wgg['depends_names']);
 
-	$packages_string = implode(' ', $a_packages);
+	$packages_string = implode(' ', $packages);
 
-	exec("{$wgg['pkg']} query {$esa($field_string)} {$packages_string}", $packages, $ret_code);
+	exec("{$wgg['pkg']} query {$esa($field_string)} {$packages_string}", $output, $ret_code);
 
 	if ($ret_code == 0) {
 
-		foreach ($packages as $pkg_index => $package) {
+		foreach ($output as $pkg_index => $package) {
 
 			$fields = explode("\t", $package);
 
 			foreach ($fields as $field_index => $field) {
 
-				$ret_array[$pkg_index][$a_return_keys[$field_index]] = $field;
+				$ret_array[$pkg_index][$return_keys[$field_index]] = $field;
 
 			}
 
@@ -880,22 +879,6 @@ function wg_peer_is_valid($tunnel_name, $public_key, $running_state = false) {
 
 }
 
-function wg_tunnel_get_peers_running_keys($wg_ifname) {
-	global $wgg;
-
-	$esa = function($s) { return escapeshellarg($s); };
-
-	$output = $res = array();
-
-	$cmd = "{$wgg['wg']} show {$esa($wg_ifname)} peers 2>&1";
-
-	exec($cmd, $output, $ret_code);
-
-	$res = ($ret_code <> 0) ? $res : $output;
-
-	return $res;
-
-}
 
 /*
  * Check if a wg tunnel is valid
@@ -905,7 +888,7 @@ function wg_is_valid_tunnel($tunnel_name, $running_state = false) {
 
 	$tunnels = array();
 
-	// Checks desired tunnels
+	// Checks desired/configured tunnels
 	if (isset($wgg['tunnels']) && is_array($wgg['tunnels']) && !$running_state) {
 
 		$tunnels = wg_get_configured_ifs();
@@ -918,29 +901,6 @@ function wg_is_valid_tunnel($tunnel_name, $running_state = false) {
 	}
 
 	return in_array($tunnel_name, $tunnels);
-
-}
-
-// Check if at least one tunnel is assigned
-function is_wg_assigned($disabled = true) {
-	global $wgg;
-
-	$if_list = get_configured_interface_list_by_realif($disabled);
-
-	foreach ($if_list as $realif => $name) {
-
-		// We found one, no need to keep checking
-		if (substr($realif, 0, strlen($wgg['if_prefix'])) == $wgg['if_prefix']) {
-
-			return true;
-
-			break;
-
-		}
-
-	}
-
-	return false;
 
 }
 
@@ -1010,6 +970,30 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 
 /*
  * This returns an array of peer keys for a given tunnel
+ * 
+ * These are actually running and bound to a tunnel
+ */
+function wg_tunnel_get_peers_running_keys($tunnel_name) {
+	global $wgg;
+
+	$esa = function($s) { return escapeshellarg($s); };
+
+	$output = $res = array();
+
+	$cmd = "{$wgg['wg']} show {$esa($tunnel_name)} peers 2>&1";
+
+	exec($cmd, $output, $ret_code);
+
+	$res = ($ret_code <> 0) ? $res : $output;
+
+	return $res;
+
+}
+
+/*
+ * This returns an array of peer keys for a given tunnel
+ * 
+ * These are actually configured and bound to a tunnel
  */
 function wg_tunnel_get_peers_config_keys($tunnel_name) {
 
@@ -1023,11 +1007,11 @@ function wg_tunnel_get_peers_config_keys($tunnel_name) {
  * Return WireGuard tunnel networks for a given address family
  */
 function wg_get_tunnel_networks($family = 'both') {
-	global $config, $wgg;
+	global $wgg;
 
 	$wg_tunnel_networks = array();
 
-	if (is_wg_enabled()) {
+	if (is_wg_enabled() && isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
 
 		foreach ($wgg['tunnels'] as $tunnel) {
 

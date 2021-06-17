@@ -743,18 +743,18 @@ function wg_destroy_rogue_tunnels(&$cmds = null) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolve_endpoints = true) {
+function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolve_endpoints = true, $json = false) {
 	global $wgg;
 
 	// Fetch and build the latest info
 	wg_resync();
 
-	$tunnels = array();
-
 	// Let's assume everything will be fine
 	$ret_code = 0;
 
-	// We need to destroy any rogue tunnels
+	$tunnels = array();
+
+	// We need to destroy any rogue tunnels not created by pfSense
 	wg_destroy_rogue_tunnels();
 
 	// This is only necessary if the sevice is running
@@ -766,12 +766,12 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolv
 		foreach ($tunnel_names as $tunnel_name) {
 
 			// Attempt to sync the tunnel
-			$tun_sync_status = wg_tunnel_sync_by_name($tunnel_name);
+			$tun_sync_status = wg_tunnel_sync_by_name($tunnel_name, false);
 
 			// Build an aggregated return code
 			$ret_code |= $tun_sync_status['ret_code'];
 
-			// Collect the status from each individual tunnel
+			// Collect the return from each individual tunnel
 			$tunnels[] = array(
 					'name' 		=> $tun_sync_status['config']['name'],
 					'ret_code' 	=> $tun_sync_status['ret_code'], 
@@ -799,7 +799,9 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolv
 
 	}
 
-	return array('ret_code' => $ret_code, 'tunnels' => $tunnels);
+	$res = array('ret_code' => $ret_code, 'tunnels' => $tunnels);
+
+	return $json ? json_encode($res) : $res;
 
 }
 
@@ -866,13 +868,13 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 	$parsed_cmds = wg_parse_cmds_array($cmds);
 
 	// Build the return array
-	$ret_status = array(
-			'ret_code'	=> $parsed_cmds['ret_code'], 
-			'errors'	=> $parsed_cmds['errors'], 
-			'cmds'		=> $parsed_cmds['cmds'],
-			'config'	=> $tunnel);
+	$res = array(
+		'ret_code'	=> $parsed_cmds['ret_code'], 
+		'errors'	=> $parsed_cmds['errors'], 
+		'cmds'		=> $parsed_cmds['cmds'],
+		'config'	=> $tunnel);
 
-	return $json ? json_encode($ret_status, JSON_PRETTY_PRINT) : $ret_status;
+	return $json ? json_encode($res, JSON_PRETTY_PRINT) : $res;
 
 }
 
