@@ -235,20 +235,26 @@ function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 	global $wgg;
 
 	$esa = function($s) { return escapeshellarg($s); };
+	
+	$state = function($up) { return $up ? 'up' : 'down'; };
 
 	$ret_code = 0;
 
-	$state = $up ? 'up' : 'down';
+	// Is this even a real interface?
+	if (wg_is_valid_tunnel($if_name, true)) { 
 
-	$error = $up ? WG_ERROR_IF_UP : WG_ERROR_IF_DOWN;
+		// Are we trying to down-an-up or up-a-down? Anything else is wrong in this context...
+		if ((!wg_interface_status($if_name) && $up) || (wg_interface_status($if_name) && !$up)) {
 
-	if (wg_is_valid_tunnel($if_name, true) && !wg_interface_status($if_name)) {
+			$cmd = "{$wgg['ifconfig']} {$esa($if_name)} {$esa($state($up))} 2>&1";
 
-		$cmd = "{$wgg['ifconfig']} {$esa($if_name)} {$esa($state)} 2>&1";
+			$error = $up ? WG_ERROR_IF_UP : WG_ERROR_IF_DOWN;
 
-		$cmds[] = $res = wg_exec($cmd, 'interface', $error);
+			$cmds[] = $res = wg_exec($cmd, 'interface', $error);
 
-		$ret_code = $res['ret_code'];
+			$ret_code = $res['ret_code'];
+
+		}
 
 	}
 
@@ -930,8 +936,56 @@ function is_wg_enabled() {
 	
 }
 
+function wg_peer_get_config($peer_idx) {
+	global $wgg;
+
+	if (isset($wgg['peers'][$peer_idx]) 
+		&& is_array($wgg['peers'][$peer_idx])) {
+
+		$peer = $wgg['peers'][$peer_idx];
+
+		$peer['index'] = $peer_idx;
+
+		// Just to make sure...
+		wg_init_config_arr($tunnel, array('allowedips', 'row'));
+
+		return $peer;
+
+	}
+
+	return false;
+
+}
+
+function wg_tunnel_get_config($tunnel_name) {
+	global $wgg;
+
+	if (wg_is_valid_tunnel($tunnel_name, false)) {
+
+		$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+
+		if (isset($wgg['tunnels'][$tun_idx])) {
+
+			$tunnel = $wgg['tunnels'][$tun_idx];
+
+			// We need the array index for future manipulations
+			$tunnel['index'] = $tun_idx;
+
+			// Just to make sure...
+			wg_init_config_arr($tunnel, array('addresses', 'row'));
+
+			return $tunnel;
+
+		}
+
+	}
+
+	return false;
+
+}
+
 /*
- * This returns an array of peers for a given tunnel
+ * This returns an array of peer configs for a given tunnel
  */
 function wg_tunnel_get_peers_config($tunnel_name) {
 	global $wgg;
@@ -951,6 +1005,9 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 
 					// We need the array index for future manipulations
 					$peer['index'] = $peer_idx;
+
+					// Just to make sure...
+					wg_init_config_arr($peer, array('allowedips', 'row'));
 
 					// Array key is the peer public key
 					$ret_peers[$peer['publickey']] = $peer;

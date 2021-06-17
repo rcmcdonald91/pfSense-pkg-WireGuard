@@ -120,28 +120,40 @@ function wg_truncate_pretty($text, $max_length) {
 
 }
 
-function wg_interface_status_icon($status, $enabled_class = "fa fa-arrow-up text-success", $disabled_class = "fa fa-arrow-down text-danger") {
+function wg_interface_status_icon($status = 'up', $enabled_class = "fa fa-arrow-up text-success", $disabled_class = "fa fa-arrow-down text-danger") {
 	global $wgg;
 
-	$ret_class = ($status === "up" || $status === true) ? " {$enabled_class}" : " {$disabled_class}";
+	$hsa = fn($s) => htmlspecialchars($s);
 
-	wg_htmlspecialchars($ret_class, $status);
+	$ret_class = ($status === 'up') ? $enabled_class : $disabled_class;
 
-	$ret_html = "<i class=\"{$ret_class}\" style=\"vertical-align: middle;\" title=\"{$status}\"></i>";
+	$ret_html = "<i class=\"{$hsa($ret_class)}\" style=\"vertical-align: middle;\" title=\"{$hsa($status)}\"></i>";
 
 	return $ret_html;
 
 }
 
-// Returns the appropriate fa icon class for handshake status icon
-function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-handshake") {
+/* 
+ * Returns the appropriate icon for peer handshake status based on latest handshake time
+ * 
+ * $latest_handshake should be format compatible with DateTime
+ */
+function wg_handshake_status_icon($latest_handshake = '@0', $tunnel_status = 'up', $fa_icon = "fa-handshake") {
 	global $wgg;
 
-	$end_time = new DateTimeImmutable;
+	$hsa = fn($s) => htmlspecialchars($s);
 
-	$start_time = new DateTime();
+	try {
 
-	$start_time->setTimestamp($latest_handshake_stamp);
+		$end_time = new DateTimeImmutable;
+
+		$start_time = new DateTime($latest_handshake);
+
+	} catch (Exception $e) {
+
+		return null;
+
+	}
 
 	$diff_time = $end_time->diff($start_time);
 
@@ -163,9 +175,7 @@ function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-ha
 
 	}
 
-	wg_htmlspecialchars($fa_icon, $ret_class, $ret_title);
-
-	$ret_html = "<i class=\"fa {$fa_icon} {$ret_class}\" style=\"vertical-align: middle;\" title=\"{$ret_title}\"></i>";
+	$ret_html = "<i class=\"fa {$hsa($fa_icon)} {$hsa($ret_class)}\" style=\"vertical-align: middle;\" title=\"{$hsa($ret_title)}\"></i>";
 
 	return $ret_html;
 
@@ -173,6 +183,7 @@ function wg_handshake_status_icon($latest_handshake_stamp = 0, $fa_icon = "fa-ha
 
 /* 
  * Formats a given time difference in a human-friendly way
+ * 
  * $start and $end should be format compatible with DateTime
  */
 function wg_human_time_diff($start, $end = null, $num_units = 2, $from_epoch = false) {
@@ -257,40 +268,64 @@ function wg_secret_input_type() {
 	
 }
 
-// Gets the appropriate class based on whether or not the target is enabled or disabled
-function wg_entrystatus_class($target_device) {
+function wg_tunnel_status_class($tunnel = null) {
 	global $wgg;
 
-	$class = 'disabled';
+	if (isset($tunnel) && is_array($tunnel)) {
 
-	if (wg_is_service_running() 
-		&& isset($target_device) 
-		&& ($target_device['enabled'] == 'yes')) {
+		if (wg_is_service_running() && ($tunnel['enabled'] == 'yes')) {
 
-		$class = 'enabled';
+			return 'enabled';
+
+		}
 
 	}
 
-	return $class;
+	return 'disabled';
+
+}
+
+function wg_peer_status_class($peer = null) {
+	global $wgg;
+
+	if (isset($peer) && is_array($peer)) {
+
+		$tunnel_state = true;
+
+		if ($tunnel = wg_tunnel_get_config($peer['tun'])) {
+
+			$tunnel_state = ($tunnel['enabled'] == 'yes');
+
+		}
+
+		if (wg_is_service_running() && ($peer['enabled'] == 'yes') && $tunnel_state) {
+
+			return 'enabled';
+
+		}
+
+	}
+
+	return 'disabled';
 
 }
 
 // Generates a toggle icon link based on the status of the target
-function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', $usepost = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
+function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', $post = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
+
+	$hsc = fn($s) => htmlspecialchars($s);
 
 	$ret_html = null;
 
 	if (isset($target_device)) {
 	
-		$s_icon = (isset($target_device['enabled']) && $target_device['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
+		$icon = (isset($target_device['enabled']) && $target_device['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
 
-		$s_title = gettext($title);
+		$title = gettext($title);
 
-		$s_usepost = $usepost ? 'usepost' : '';
+		$usepost = $post ? ' usepost' : null;
 
-		wg_htmlspecialchars($s_icon, $s_title, $href, $s_usepost);
-
-		$ret_html = "<a class=\"fa {$s_icon}\" title=\"{$s_title}\" href=\"{$href}\" {$s_usepost}></a>";
+		$ret_html = "<a class=\"fa {$hsc($icon)}\" title=\"{$hsc($title)}\" href=\"{$hsc($href)}\"{$hsc($usepost)}></a>";
 
 	}
 
@@ -301,16 +336,11 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 function wg_generate_tunnel_address_popover_link($tunnel_name) {
 	global $wgg;
 
-	$getText = function($s) { return gettext($s); };	
-	$hsc= function($s) { return htmlspecialchars($s); };
+	$getText = fn($s) => gettext($s);
 
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+	$hsc = fn($s) => htmlspecialchars($s);
 
-	if (isset($wgg['tunnels'][$tun_idx]) && is_array($wgg['tunnels'][$tun_idx])) {
-
-		$tunnel = $wgg['tunnels'][$tun_idx];
-
-		wg_init_config_arr($tunnel, array('addresses', 'row'));
+	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
 
 		$addresses = $tunnel['addresses']['row'];
 
@@ -400,14 +430,11 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 function wg_generate_peer_allowedips_popup_link($peer_idx) {
 	global $wgg;
 
-	$getText = function($s) { return gettext($s); };	
+	$getText = function($s) { return gettext($s); };
+
 	$hsc= function($s) { return htmlspecialchars($s); };
 
-	if (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx])) {
-
-		$peer = $wgg['peers'][$peer_idx];
-
-		wg_init_config_arr($peer, array('allowedips', 'row'));
+	if ($peer = wg_peer_get_config($peer_idx)) {
 
 		$allowedips = $peer['allowedips']['row'];
 

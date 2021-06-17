@@ -159,7 +159,7 @@ if (!empty($a_devices)):
 ?>
 								<tr>
 									<td>
-										<?=wg_handshake_status_icon($peer['latest_handshake'])?>
+										<?=wg_handshake_status_icon("@{$peer['latest_handshake']}")?>
 										<?=htmlspecialchars(wg_truncate_pretty($peer['config']['descr'], 16))?>
 									</td>
 									<td><?=htmlspecialchars(wg_human_time_diff("@{$peer['latest_handshake']}"))?></td>

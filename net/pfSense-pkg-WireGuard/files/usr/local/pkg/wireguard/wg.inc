@@ -50,6 +50,8 @@ function wg_toggle_tunnel($tunnel_name) {
 
 	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
 
+		$tun_idx = $tunnel['index'];
+
 		$enabled = ($tunnel['enabled'] == 'yes');
 
 		if ($enabled && is_wg_tunnel_assigned($tunnel['name'])) {
@@ -85,7 +87,7 @@ function wg_toggle_tunnel($tunnel_name) {
 }
 
 /*
- * This toggles a given peer based on peerid
+ * This toggles a given peer based on config array index
  */
 function wg_toggle_peer($peer_idx) {
 	global $wgg;
@@ -115,8 +117,6 @@ function wg_toggle_peer($peer_idx) {
 
 			// Sync with configuration backend
 			write_config("[{$wgg['pkg_name']}] Peer {$peer_idx} {$action_text}.");
-
-			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
 
 			// This checks if the peer tunnel is a valid tunnel
 			if (wg_is_valid_tunnel($peer['tun'])) {
@@ -197,6 +197,8 @@ function wg_delete_tunnel($tunnel_name) {
 	$input_errors = array();
 
 	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
+
+		$tun_idx = $tunnel['index'];
 
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
@@ -434,7 +436,7 @@ function wg_get_endpoint_resolve_interval() {
 
 		}
 			
-		// pfSense default
+		// The pfSense default interval
 		return 300;
 
 	}
@@ -485,12 +487,8 @@ function wg_do_settings_post($post) {
 		// Resync the package
 		wg_resync();
 
-		// Check if anything actually changed or was this just a clean re-save?
-		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
-
-			$changes = true;
-
-		}
+		// Do we have meaningful changes?
+		$changes = ($pconfig != $old_config);
 
 	}
 
@@ -555,31 +553,20 @@ function wg_do_peer_post($post) {
 		// Resync the package
 		wg_resync();
 
-		// Check if anything actually changed or was this just a clean re-save?
-		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
+		// Do we have meaningful changes?
+		$changes = ($pconfig != $old_config);
 
-			$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
+		// Figure out what tunnel to sync to make these changes (if any)...
+		foreach (array($pconfig['tun'], $old_config['tun']) as $tun) {
 
-			// This checks if the pconfig tunnel is a valid tunnel
-			if (wg_is_valid_tunnel($pconfig['tun'])) {
+			if (wg_is_valid_tunnel($tun)) {
 
-				// We've got meaningful changes...
-				$changes = true;
-							
-				// What tunnel would we need to sync to apply these changes?
-				$tun_to_sync = $pconfig['tun'];
+				$tun_to_sync = $tun;
 
-			// Now try the old_config tunnel?
-			} elseif (wg_is_valid_tunnel($old_config['tun'])) {
-
-				// We've got meaningful changes...
-				$changes = true;
-
-				// What tunnel would we need to sync to apply these changes?
-				$tun_to_sync = $old_config['tun'];
+				break;
 
 			}
- 
+
 		}
 
 	}
@@ -638,16 +625,11 @@ function wg_do_tunnel_post($post) {
 		// Resync the package
 		wg_resync();
 
-		// Check if anything actually changed or was this just a clean re-save?
-		if (md5(serialize($pconfig)) != md5(serialize($old_config))) {
+		// Do we have meaningful changes?
+		$changes = ($pconfig != $old_config);
 
-			// We've got meaningful changes...
-			$changes = true;
-
-			// What tunnel would we need to sync to apply these changes?
-			$tun_to_sync = $pconfig['name'];
-
-		}
+		// What tunnel would we need to sync to apply these changes?
+		$tun_to_sync = $pconfig['name'];
 
 	}
 
@@ -802,30 +784,6 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolv
 	$res = array('ret_code' => $ret_code, 'tunnels' => $tunnels);
 
 	return $json ? json_encode($res) : $res;
-
-}
-
-function wg_tunnel_get_config($tunnel_name) {
-	global $wgg;
-
-	if (wg_is_valid_tunnel($tunnel_name, false)) {
-
-		$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
-		if (isset($wgg['tunnels'][$tun_idx])) {
-
-			$tunnel = $wgg['tunnels'][$tun_idx];
-
-			// Just to make sure...
-			wg_init_config_arr($tunnel, array('addresses', 'row'));
-
-			return $tunnel;
-
-		}
-
-	}
-
-	return false;
 
 }
 

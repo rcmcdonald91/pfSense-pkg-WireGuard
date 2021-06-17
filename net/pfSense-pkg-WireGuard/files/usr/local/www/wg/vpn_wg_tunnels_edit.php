@@ -472,7 +472,7 @@ print($form);
 
 			foreach ($peers as $peer):
 ?>
-				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_entrystatus_class($peer)?>">
+				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_peer_status_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td title="<?=htmlspecialchars($peer['publickey'])?>">
 						<?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?>
