@@ -466,7 +466,7 @@ print($form);
 <?php
 	if (!$is_new):
 
-		$peers = wg_get_tunnel_peers($pconfig['name']);
+		$peers = wg_tunnel_get_peers_config($pconfig['name']);
 
 		if (!empty($peers)):
 

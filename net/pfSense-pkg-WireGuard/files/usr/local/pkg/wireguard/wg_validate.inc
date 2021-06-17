@@ -170,7 +170,7 @@ function wg_validate_peer_post($pconfig, $idx_from_post) {
 
 	} elseif (!empty($pconfig['tun'])) {
 
-		$tunnel_peers = wg_get_tunnel_peers($pconfig['tun']);
+		$tunnel_peers = wg_tunnel_get_peers_config($pconfig['tun']);
 
 		foreach ($tunnel_peers as $peer) {
 

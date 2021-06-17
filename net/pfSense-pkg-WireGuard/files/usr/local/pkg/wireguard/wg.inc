@@ -48,13 +48,7 @@ function wg_toggle_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	// Get the config array index
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
-	// Make sure we have a valid tunnel in the xml
-	if (isset($wgg['tunnels'][$tun_idx])) {
-
-		$tunnel = $wgg['tunnels'][$tun_idx];
+	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
 
 		$enabled = ($tunnel['enabled'] == 'yes');
 
@@ -202,13 +196,7 @@ function wg_delete_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	// Get the config array index
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
-	// Make sure we have a valid tunnel
-	if (isset($wgg['tunnels'][$tun_idx])) {
-
-		$tunnel = $wgg['tunnels'][$tun_idx];
+	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
 
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
@@ -385,7 +373,7 @@ function wg_resolve_endpoints() {
 
 				$endpoint = "{$peer['endpoint']}{$peer['port']}";
 
-				wg_set_peer_config($peer['tun'], $peer['publickey'], 'endpoint', $endpoint);
+				wg_peer_set_endpoint($peer['tun'], $peer['publickey'], $endpoint);
 
 			}
 
@@ -726,6 +714,32 @@ function wg_apply_list_add($entry, $list) {
 }
 
 /*
+ * This compares the running vs configured tunnels and destroys any rogues
+ */
+function wg_destroy_rogue_tunnels(&$cmds = null) {
+	global $wgg;
+
+	$ret_code = 0;
+
+	$running_ifs = wg_get_running_ifs();
+
+	$config_ifs = wg_get_configured_ifs();
+
+	$rogue_tunnels = array_diff($running_ifs, $config_ifs);
+
+	foreach ($rogue_tunnels as $tunnel) {
+
+		$cmds[] = $res = wg_ifconfig_if_destroy($tunnel);
+
+		$ret_code = $res['ret_code'];
+
+	}
+
+	return ($ret_code == 0);
+
+}
+
+/*
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
@@ -740,36 +754,26 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolv
 	// Let's assume everything will be fine
 	$ret_code = 0;
 
+	// We need to destroy any rogue tunnels
+	wg_destroy_rogue_tunnels();
+
 	// This is only necessary if the sevice is running
 	if (wg_is_service_running()) {
 
-		// Should we build all the tunnels?
-		if (is_null($tunnel_names) || !is_array($tunnel_names)) {
+		$tunnel_names = (is_null($tunnel_names) || !is_array($tunnel_names)) ? wg_get_configured_ifs() : $tunnel_names;
 
-			// Are there any tunnels to build?
-			if (isset($wgg['tunnels']) && is_array($wgg['tunnels'])) {
-
-				$tunnel_names = array_map(fn($x) => $x['name'], $wgg['tunnels']);
-
-			} else {
-
-				// Nope...
-				$tunnel_names = array();
-
-			}
-
-		}
-
-		// Build (or destroy) each tunnel
+		// Sync each tunnel
 		foreach ($tunnel_names as $tunnel_name) {
 
+			// Attempt to sync the tunnel
 			$tun_sync_status = wg_tunnel_sync_by_name($tunnel_name);
 
 			// Build an aggregated return code
 			$ret_code |= $tun_sync_status['ret_code'];
 
+			// Collect the status from each individual tunnel
 			$tunnels[] = array(
-					'name' 		=> $tun_sync_status['name'],
+					'name' 		=> $tun_sync_status['config']['name'],
 					'ret_code' 	=> $tun_sync_status['ret_code'], 
 					'errors' 	=> $tun_sync_status['errors'],
 					'config' 	=> $tun_sync_status['config']);
@@ -799,112 +803,102 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolv
 
 }
 
-/*
- * This builds, rebuilds, or destroys a specific tunnel interface by name
- */
-function wg_tunnel_sync_by_name($tunnel_name) {
+function wg_tunnel_get_config($tunnel_name) {
 	global $wgg;
 
-	wg_globals();
+	if (wg_is_valid_tunnel($tunnel_name, false)) {
 
-	$ret_code = 0;
+		$tun_idx = wg_get_tunnel_array_index($tunnel_name);
 
-	$cmds = $errors = $tunnel = array();
+		if (isset($wgg['tunnels'][$tun_idx])) {
 
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+			$tunnel = $wgg['tunnels'][$tun_idx];
 
-	// We've got a tunnel that we need to build...
-	if (isset($wgg['tunnels'][$tun_idx])) {
+			// Just to make sure...
+			wg_init_config_arr($tunnel, array('addresses', 'row'));
 
-		$tunnel = $wgg['tunnels'][$tun_idx];
-
-		// Create the tunnel interface if it does not yet exist
-		if ($res = wg_interface_create($tunnel['name'])) {
-
-			$cmds[] = $res;
-
-			$ret_code |= $res['ret_code'];
+			return $tunnel;
 
 		}
-
-		// Add the tunnel interface to the WireGuard interface group
-		if ($res = wg_interface_group_add($tunnel['name'])) {
-
-			$cmds[] = $res;
-
-			$ret_code |= $res['ret_code'];
-
-		}
-
-		// Update the addresses on the tunnel interface
-		if ($res = wg_interface_update_addresses($tunnel['name'])) {
-
-			$cmds[] = $res;
-
-			$ret_code |= $res['ret_code'];
-
-		}
-
-		// Toggle the interface accordingly instead of tearing it down completely
-		if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
-
-			if ($res = wg_ifconfig_up_interface($tunnel['name'])) {
-
-				$cmds[] = $res;
-
-				$ret_code |= $res['ret_code'];
-
-			}
-
-		} else {
-
-			if ($res = wg_ifconfig_down_interface($tunnel['name'])) {
-
-				$cmds[] = $res;
-
-				$ret_code |= $res['ret_code'];
-
-			}
-
-		}
-
-		// Sync interface with WireGuard wg(8)
-		if ($res = wg_interface_syncconf($tunnel['name'])) {
-
-			$cmds[] = $res;
-
-			$ret_code |= $res['ret_code'];
-
-		}
-
-	// We've got a running tunnel that we need to destroy...
-	} elseif (wg_is_valid_tunnel($tunnel_name, true)) {
-
-		if ($res = wg_interface_destroy($tunnel_name)) {
-
-			$cmds[] = $res;
-
-			$ret_code |= $res['ret_code'];
-
-		}
-
-	// No idea what's going on...
-	} else {
-
-		$ret_code = WG_ERROR_IF_NAME;
 
 	}
 
-	// Collect the errors
-	$errors = wg_get_errors('interface', $ret_code);
+	return false;
+
+}
+
+/*
+ * This builds or rebuilds a specific tunnel interface by name
+ */
+function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
+	global $wgg;
+
+	// Get the latest info
+	wg_globals();
+
+	$cmds = $errors = $tunnel = array();
+
+	// We've got a tunnel that we need to build...
+	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
+
+		// Determine desired state of the tunnel
+		$state = (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes');
+
+		// Create the tunnel interface if it does not yet exist
+		if (wg_ifconfig_if_create($tunnel['name'], $cmds)) {
+
+			// Add the tunnel interface to the WireGuard interface group
+			wg_interface_update_groups($tunnel['name'], $cmds);
+
+			// Update the addresses on the tunnel interface
+			wg_interface_update_addresses($tunnel['name'], $cmds);
+
+			// Toggle the interface accordingly instead of tearing it down completely
+			wg_ifconfig_if_updown($tunnel['name'], $state, $cmds);
+
+			// Sync interface with WireGuard wg(8)
+			wg_wg_if_sync($tunnel['name'], $cmds);
+
+		}
+
+	}
+
+	$parsed_cmds = wg_parse_cmds_array($cmds);
 
 	// Build the return array
-	return array(
-			'name'		=> $tunnel_name, 
-			'ret_code'	=> $ret_code, 
-			'errors'	=> $errors, 
-			'cmds'		=> $cmds,
+	$ret_status = array(
+			'ret_code'	=> $parsed_cmds['ret_code'], 
+			'errors'	=> $parsed_cmds['errors'], 
+			'cmds'		=> $parsed_cmds['cmds'],
 			'config'	=> $tunnel);
+
+	return $json ? json_encode($ret_status, JSON_PRETTY_PRINT) : $ret_status;
+
+}
+
+/*
+ * Parses an array of $cmds
+ */
+function wg_parse_cmds_array($cmds) {
+
+	$ret_code = 0;
+	
+	$errors = array();
+
+	if (isset($cmds) && is_array($cmds)) {
+
+		foreach($cmds as $cmd) {
+
+			$ret_code |= $cmd['ret_code'];
+
+			// Unwrap and collect any errors
+			array_push($errors, ...$cmd['errors']);
+
+		}
+
+	}
+
+	return array('ret_code' => $ret_code, 'errors' => $errors, 'cmds' => $cmds);
 
 }
 
@@ -1137,7 +1131,7 @@ function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	$txt .= "\n";
 
 	// Process peers section
-	$peers = wg_get_tunnel_peers($tunnel['name']);
+	$peers = wg_tunnel_get_peers_config($tunnel['name']);
 
 	if (is_array($peers) && count($peers) > 0) {
 

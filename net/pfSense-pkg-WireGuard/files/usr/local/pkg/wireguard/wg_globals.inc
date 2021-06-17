@@ -27,7 +27,8 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
-define('WG_ERROR_PEER_ENDPOINT',	1);
+define('WG_ERROR_PEER_SET',		1);
+define('WG_ERROR_PEER_ENDPOINT',	2);
 
 define('WG_ERROR_IF_NAME',		1);
 define('WG_ERROR_IF_CREATE',		2);
@@ -76,6 +77,7 @@ $wgg = array(
 					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
 					'peer' => array(
+						WG_ERROR_PEER_SET	=> gettext('Unable to set peer configuration'),
 						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint')),
 					'interface' => array(
 						WG_ERROR_IF_NAME	=> gettext('Invalid WireGuard tunnel name'),
