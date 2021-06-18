@@ -359,7 +359,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
  */
 function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = null) {
 
-	return wg_peer_set_config($tunnel_name, $public_key, 'endpoint', $endpoint, WG_PEER_ERROR_ENDPOINT, $cmds);
+	return wg_peer_set_config($tunnel_name, $public_key, 'endpoint', $endpoint, WG_ERROR_PEER_ENDPOINT, $cmds);
 
 }
 
@@ -371,9 +371,9 @@ function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = nul
 
 	$esa = fn($s) => escapeshellarg($s);
 
-	$key = (!is_null($key)) ? " {$esa($key)}" : $key;
+	$key = (!is_null($key)) ? " {$esa($key)}" : null;
 
-	$value = (!is_null($value)) ? " {$esa($value)}" : $value;
+	$value = (!is_null($value)) ? " {$esa($value)}" : null;
 
 	if (wg_is_valid_tunnel($tunnel_name, true)) {
 
