@@ -392,7 +392,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 					$title = $addresses[0]['descr'];
 
-					$hint = $addresses[0]['address'];
+					$hint = "{$addresses[0]['address']}/{$addresses[0]['mask']}";
 
 					$popover_params = null;
 				
@@ -485,7 +485,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 				$title = $allowedips[0]['descr'];
 
-				$hint = $allowedips[0]['address'];
+				$hint = "{$allowedips[0]['address']}/{$allowedips[0]['mask']}";
 
 				$popover_params = null;
 			
