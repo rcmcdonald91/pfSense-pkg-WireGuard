@@ -59,7 +59,7 @@ function wg_print_config_apply_box() {
 function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpoint', $port_key = 'port') {
 
 	$getText = fn($s) => gettext($s);
-	
+
 	if ($header) {
 
 		return "{$getText('Endpoint')} : {$getText('Port')}";
@@ -434,7 +434,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 	$hsc= fn($s) => htmlspecialchars($s);
 
-	if ($peer = wg_peer_get_config($peer_idx)) {
+	if (list($peer_idx, $peer) = wg_peer_get_config($peer_idx)) {
 
 		$allowedips = $peer['allowedips']['row'];
 

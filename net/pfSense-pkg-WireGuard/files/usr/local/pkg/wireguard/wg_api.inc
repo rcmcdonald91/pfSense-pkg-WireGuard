@@ -377,7 +377,7 @@ function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = nul
 
 	if (wg_is_valid_tunnel($tunnel_name, true)) {
 
-		$cmd = "{$wgg['wg']} set {$esa($wg_ifname)} peer {$esa($public_key)}{$key}{$value} 2>&1";
+		$cmd = "{$wgg['wg']} set {$esa($tunnel_name)} peer {$esa($public_key)}{$key}{$value} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'peer', $error_flag);
 
@@ -936,24 +936,22 @@ function is_wg_enabled() {
 	
 }
 
-function wg_peer_get_config($peer_idx) {
+function wg_peer_get_config($peer_idx, $return_empty = false) {
 	global $wgg;
 
-	if (isset($wgg['peers'][$peer_idx]) 
-		&& is_array($wgg['peers'][$peer_idx])) {
+	$peer = array();
 
-		$peer = $wgg['peers'][$peer_idx];
+	$valid = (isset($wgg['peers'][$peer_idx]) && is_array($wgg['peers'][$peer_idx]));
 
-		$peer['index'] = $peer_idx;
+	$is_new = !$valid;
 
-		// Just to make sure...
-		wg_init_config_arr($tunnel, array('allowedips', 'row'));
+	$peer_idx = !$valid ? max(array_keys($wgg['peers'])) + 1 : $peer_idx;
 
-		return $peer;
+	$peer = $wgg['peers'][$peer_idx];
 
-	}
+	wg_init_config_arr($peer, array('allowedips', 'row'));
 
-	return false;
+	return ($valid || $return_empty) ? array($peer_idx, $peer, $is_new) : false;
 
 }
 

@@ -449,17 +449,18 @@ print($form);
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext("Peer Configuration")?></h2>
+		<h2 class="panel-title"><?=gettext('Peer Configuration')?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
 		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 			<thead>
 				<tr>
-					<th><?=gettext("Description")?></th>
-					<th><?=gettext("Public key")?></th>
-					<th><?=gettext("Allowed IPs")?></th>
+					<th><?=gettext('Description')?></th>
+					<th><?=gettext('Public key')?></th>
+					<th><?=gettext('Keep Alive')?></th>
+					<th><?=gettext('Allowed IPs')?></th>
 					<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
-					<th><?=gettext("Actions")?></th>
+					<th><?=gettext('Actions')?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -477,10 +478,11 @@ print($form);
 					<td title="<?=htmlspecialchars($peer['publickey'])?>">
 						<?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?>
 					</td>
+					<td><?=htmlspecialchars($peer['persistentkeepalive'])?></td>
 					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
-						<a class="fa fa-pencil" title="<?=gettext("Edit Peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
+						<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
 						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer['index']}&tun={$tun}")?>
 						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
 					</td>
@@ -493,7 +495,7 @@ print($form);
 ?>
 				<tr>
 					<td colspan="5">
-						<?php print_info_box("New tunnels must be saved before adding or assigning peers.", 'warning', null); ?>
+						<?php print_info_box('New tunnels must be saved before adding or assigning peers.', 'warning', null); ?>
 					</td>
 				</tr>
 <?php
@@ -511,7 +513,7 @@ if ($is_new):
 ?>
 	<button class="btn btn-success btn-sm" title="<?=gettext('Add Peer')?>" disabled>
 		<i class="fa fa-plus icon-embed-btn"></i>
-		<?=gettext("Add Peer")?>
+		<?=gettext('Add Peer')?>
 	</button>
 <?php
 // Now we show the actual links once the tunnel is actually saved
@@ -519,14 +521,14 @@ else:
 ?>
 	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
-		<?=gettext("Add Peer")?>
+		<?=gettext('Add Peer')?>
 	</a>
 <?php
 endif;
 ?>
 	<button type="submit" id="saveform" name="saveform" class="btn btn-primary btn-sm" value="save" title="<?=gettext('Save tunnel')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
-		<?=gettext("Save Tunnel")?>
+		<?=gettext('Save Tunnel')?>
 	</button>
 </nav>
 

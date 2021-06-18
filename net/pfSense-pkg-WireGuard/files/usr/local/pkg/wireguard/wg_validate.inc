@@ -129,7 +129,7 @@ function wg_validate_tunnel_post($pconfig, $idx_from_post) {
  * Valildate a peer
  * These validation checks should be in the same order as the UI for consistency
  */
-function wg_validate_peer_post($pconfig, $idx_from_post) {
+function wg_validate_peer_post($pconfig, $peer_idx) {
 
 	$input_errors = array();
 
@@ -175,7 +175,7 @@ function wg_validate_peer_post($pconfig, $idx_from_post) {
 		foreach ($tunnel_peers as $peer) {
 
 			// We don't want duplicate public keys per tunnel, but re-saving is okay...
-			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $idx_from_post)) {
+			if (($peer['publickey'] == $pconfig['publickey']) && ($peer['index'] != $peer_idx)) {
 
 				$input_errors[] = "The public key ({$pconfig['publickey']}) is already assigned to a peer on this tunnel ({$pconfig['tun']}).";
 

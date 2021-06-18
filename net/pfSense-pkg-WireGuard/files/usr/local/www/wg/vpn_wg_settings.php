@@ -81,11 +81,7 @@ if ($_POST) {
 
 				$pconfig = $res['pconfig'];
 
-				if (empty($input_errors) && $res['changes']) {
-
-					$save_success = true;
-
-				}
+				$save_success = (empty($input_errors) && $res['changes']);
 
 				break;
 
@@ -112,22 +108,22 @@ $pconfig['resolve_interval'] = isset($wgg['config']['resolve_interval']) ? $wgg[
 
 $pconfig['resolve_interval_track'] = isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Settings"));
-$pglinks = array("", "/wg/vpn_wg_tunnels.php", "@self");
+$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Settings'));
+$pglinks = array('', '/wg/vpn_wg_tunnels.php', '@self');
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
-$tab_array[] = array(gettext("Settings"), true, "/wg/vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
+$tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
+$tab_array[] = array(gettext('Peers'), false, '/wg/vpn_wg_peers.php');
+$tab_array[] = array(gettext('Settings'), true, '/wg/vpn_wg_settings.php');
+$tab_array[] = array(gettext('Status'), false, '/wg/status_wireguard.php');
 
-include("head.inc");
+include('head.inc');
 
 if ($save_success) {
 
-	print_info_box(gettext("The changes have been applied successfully."), 'success');
+	print_info_box(gettext('The changes have been applied successfully.'), 'success');
 	
 }
 
@@ -210,7 +206,7 @@ print($form);
 <nav class="action-buttons">
 	<button type="submit" id="saveform" name="saveform" class="btn btn-sm btn-primary" value="save" title="<?=gettext('Save Settings')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
-		<?=gettext("Save")?>
+		<?=gettext('Save')?>
 	</button>
 </nav>
 

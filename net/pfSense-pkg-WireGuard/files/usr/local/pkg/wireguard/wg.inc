@@ -509,12 +509,10 @@ function wg_do_peer_post($post) {
 	// Assume no changes will be made...
 	$changes = false;
 
-	$peer_idx 			= $post['index'];
-
-	wg_init_config_arr($wgg['peers'][$peer_idx], array('allowedips', 'row'));
+	list($peer_idx, $pconfig, $is_new) = wg_peer_get_config($post['index'], true);
 
 	// We need to save the "old config" to compare against later...
-	$pconfig = $old_config = $wgg['peers'][$peer_idx];
+	$old_pconfig = $pconfig;
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
 
@@ -553,16 +551,20 @@ function wg_do_peer_post($post) {
 		// Resync the package
 		wg_resync();
 
-		// Do we have meaningful changes?
-		$changes = ($pconfig != $old_config);
-
-		// Figure out what tunnel to sync to make these changes (if any)...
-		foreach (array($pconfig['tun'], $old_config['tun']) as $tun) {
+		/*
+		 * Figure out what tunnel to sync to make these changes (if any).
+		 * 
+		 * If the peer is re-unassigned, then $old_pconfig['tun'] needs to be resynced.
+		 */
+		foreach (array($pconfig['tun'], $old_pconfig['tun']) as $tun) {
 
 			if (wg_is_valid_tunnel($tun)) {
 
+				$changes = ($pconfig != $old_pconfig) || $is_new;
+
 				$tun_to_sync = $tun;
 
+				// We found it...
 				break;
 
 			}
@@ -1091,59 +1093,53 @@ function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	$txt .= "\n";
 
 	// Process peers section
-	$peers = wg_tunnel_get_peers_config($tunnel['name']);
+	foreach (wg_tunnel_get_peers_config($tunnel['name']) as $peer) {
 
-	if (is_array($peers) && count($peers) > 0) {
+		if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 
-		foreach ($peers as $peer) {
+			$txt .= "# Peer: {$peer['descr']}\n";
 
-			if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
+			$txt .= "[Peer]\n";
 
-				$txt .= "# Peer: {$peer['descr']}\n";
+			if (!empty($peer['publickey'])) {
 
-				$txt .= "[Peer]\n";
-
-				if (!empty($peer['publickey'])) {
-
-					$txt .= "PublicKey = {$peer['publickey']}\n";
-
-				}
-
-				if (!empty($peer['presharedkey'])) {
-
-					$txt .= "PresharedKey = {$peer['presharedkey']}\n";
-
-				}
-
-				if (is_array($peer['allowedips']['row'])) {
-
-					$allowedips = implode(',', array_map(fn($x) => "{$x['address']}/{$x['mask']}", $peer['allowedips']['row']));
-
-					$txt .= "AllowedIPs = {$allowedips}\n";
-
-				}
-
-				if (!empty($peer['endpoint'])) {
-
-					$peer['endpoint'] = is_ipaddrv6($peer['endpoint']) ? "[{$peer['endpoint']}]" : $peer['endpoint'];
-
-					$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
-
-					$comment = $include_endpoint ? null : '# ';
-
-					// NOTE: Endpoint needs to be commented out to avoid potential failures caused by DNS
-					$txt .= "{$comment}Endpoint = {$peer['endpoint']}:{$peer['port']}\n";
-
-				}
-
-				if (!empty($peer['persistentkeepalive'])) {
-
-					$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
-				}
-
-				$txt .= "\n";
+				$txt .= "PublicKey = {$peer['publickey']}\n";
 
 			}
+
+			if (!empty($peer['presharedkey'])) {
+
+				$txt .= "PresharedKey = {$peer['presharedkey']}\n";
+
+			}
+
+			if (is_array($peer['allowedips']['row']) && count($peer['allowedips']['row']) > 0) {
+
+				$allowedips = implode(', ', array_map(fn($x) => "{$x['address']}/{$x['mask']}", $peer['allowedips']['row']));
+
+				$txt .= "AllowedIPs = {$allowedips}\n";
+
+			}
+
+			if (!empty($peer['endpoint'])) {
+
+				$peer['endpoint'] = is_ipaddrv6($peer['endpoint']) ? "[{$peer['endpoint']}]" : $peer['endpoint'];
+
+				$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
+
+				$comment = $include_endpoint ? null : '# ';
+
+				// NOTE: Endpoint needs to be commented out to avoid potential failures caused by DNS
+				$txt .= "{$comment}Endpoint = {$peer['endpoint']}:{$peer['port']}\n";
+
+			}
+
+			if (!empty($peer['persistentkeepalive'])) {
+
+				$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
+			}
+
+			$txt .= "\n";
 
 		}
 

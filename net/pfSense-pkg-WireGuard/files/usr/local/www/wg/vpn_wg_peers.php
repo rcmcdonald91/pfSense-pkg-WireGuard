@@ -113,18 +113,18 @@ if ($_POST) {
 
 }
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"));
-$pglinks = array("", "/wg/vpn_wg_tunnels.php", "@self");
+$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Peers'));
+$pglinks = array('', '/wg/vpn_wg_tunnels.php', '@self');
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Peers"), true, "/wg/vpn_wg_peers.php");
-$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
+$tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
+$tab_array[] = array(gettext('Peers'), true, '/wg/vpn_wg_peers.php');
+$tab_array[] = array(gettext('Settings'), false, '/wg/vpn_wg_settings.php');
+$tab_array[] = array(gettext('Status'), false, '/wg/status_wireguard.php');
 
-include("head.inc");
+include('head.inc');
 
 wg_print_service_warning();
 
@@ -153,12 +153,13 @@ display_top_tabs($tab_array);
 			<table class="table table-hover table-striped table-condensed">
 				<thead>
 					<tr>
-						<th><?=gettext("Description")?></th>
-						<th><?=gettext("Public key")?></th>
-						<th><?=gettext("Tunnel")?></th>
-						<th><?=gettext("Allowed IPs")?></th>
+						<th><?=gettext('Description')?></th>
+						<th><?=gettext('Public key')?></th>
+						<th><?=gettext('Keep Alive')?></th>
+						<th><?=gettext('Tunnel')?></th>
+						<th><?=gettext('Allowed IPs')?></th>
 						<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
-						<th><?=gettext("Actions")?></th>
+						<th><?=gettext('Actions')?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -172,11 +173,12 @@ if (is_array($wgg['peers']) && count($wgg['peers']) > 0):
 						<td class="pubkey" title="<?=htmlspecialchars($peer['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?>
 						</td>
+						<td><?=htmlspecialchars($peer['persistentkeepalive'])?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
 						<td><?=wg_generate_peer_allowedips_popup_link($peer_idx)?></td>
 						<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 						<td style="cursor: pointer;">
-							<a class="fa fa-pencil" title="<?=gettext("Edit Peer")?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+							<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
 							<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_idx}")?>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}"?>" usepost></a>
 						</td>
@@ -202,7 +204,7 @@ endif;
 	<nav class="action-buttons">
 		<a href="vpn_wg_peers_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>
-			<?=gettext("Add Peer")?>
+			<?=gettext('Add Peer')?>
 		</a>
 	</nav>
 </form>
