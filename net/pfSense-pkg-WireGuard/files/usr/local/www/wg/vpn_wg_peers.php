@@ -155,7 +155,6 @@ display_top_tabs($tab_array);
 					<tr>
 						<th><?=gettext('Description')?></th>
 						<th><?=gettext('Public key')?></th>
-						<th><?=gettext('Keep Alive')?></th>
 						<th><?=gettext('Tunnel')?></th>
 						<th><?=gettext('Allowed IPs')?></th>
 						<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
@@ -173,7 +172,6 @@ if (is_array($wgg['peers']) && count($wgg['peers']) > 0):
 						<td class="pubkey" title="<?=htmlspecialchars($peer['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?>
 						</td>
-						<td><?=htmlspecialchars($peer['persistentkeepalive'])?></td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>
 						<td><?=wg_generate_peer_allowedips_popup_link($peer_idx)?></td>
 						<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>

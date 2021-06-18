@@ -457,7 +457,7 @@ print($form);
 				<tr>
 					<th><?=gettext('Description')?></th>
 					<th><?=gettext('Public key')?></th>
-					<th><?=gettext('Keep Alive')?></th>
+					<th><?=gettext('Tunnel')?></th>
 					<th><?=gettext('Allowed IPs')?></th>
 					<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
 					<th><?=gettext('Actions')?></th>
@@ -478,7 +478,7 @@ print($form);
 					<td title="<?=htmlspecialchars($peer['publickey'])?>">
 						<?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?>
 					</td>
-					<td><?=htmlspecialchars($peer['persistentkeepalive'])?></td>
+					<td><?=htmlspecialchars($peer['tun'])?></td>
 					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">

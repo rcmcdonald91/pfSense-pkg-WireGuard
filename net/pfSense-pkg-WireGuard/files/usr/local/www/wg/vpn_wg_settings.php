@@ -172,9 +172,10 @@ $group->add(new Form_Input(
 $group->add(new Form_Checkbox(
 	'resolve_interval_track',
 	null,
-	gettext('Track System'),
+	gettext('Track System Resolve Interval'),
 	($pconfig['resolve_interval_track'] == 'yes')
-))->setHelp('Tracks the system \'Aliases Hostnames Resolve Interval\' setting.');
+))->setHelp("Tracks the system 'Aliases Hostnames Resolve Interval' setting.<br />
+		<span class=\"text-danger\">Note: </span> See System / Advanced / <a href=\"..\..\system_advanced_firewall.php\">Firewall & NAT</a>");
 
 $section->add($group);
 

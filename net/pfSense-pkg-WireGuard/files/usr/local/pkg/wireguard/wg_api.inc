@@ -936,6 +936,34 @@ function is_wg_enabled() {
 	
 }
 
+function wg_tunnel_get_config_by_name($tunnel_name) {
+	global $wgg;
+
+	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+
+	return wg_tunnel_get_config($tun_idx, false);
+
+}
+
+function wg_tunnel_get_config($tun_idx, $return_empty = false) {
+	global $wgg;
+
+	$tunnel = array();
+
+	$valid = (isset($wgg['tunnels'][$tun_idx]) && is_array($wgg['tunnels'][$tun_idx]));
+
+	$is_new = !$valid;
+
+	$tun_idx = !$valid ? max(array_keys($wgg['tunnels'])) + 1 : $tun_idx;
+
+	$tunnel = $wgg['tunnels'][$tun_idx];
+
+	wg_init_config_arr($tunnel, array('addresses', 'row'));
+
+	return ($valid || $return_empty) ? array($tun_idx, $tunnel, $is_new) : false;
+
+}
+
 function wg_peer_get_config($peer_idx, $return_empty = false) {
 	global $wgg;
 
@@ -955,33 +983,6 @@ function wg_peer_get_config($peer_idx, $return_empty = false) {
 
 }
 
-function wg_tunnel_get_config($tunnel_name) {
-	global $wgg;
-
-	if (wg_is_valid_tunnel($tunnel_name, false)) {
-
-		$tun_idx = wg_get_tunnel_array_index($tunnel_name);
-
-		if (isset($wgg['tunnels'][$tun_idx])) {
-
-			$tunnel = $wgg['tunnels'][$tun_idx];
-
-			// We need the array index for future manipulations
-			$tunnel['index'] = $tun_idx;
-
-			// Just to make sure...
-			wg_init_config_arr($tunnel, array('addresses', 'row'));
-
-			return $tunnel;
-
-		}
-
-	}
-
-	return false;
-
-}
-
 /*
  * This returns an array of peer configs for a given tunnel
  */
@@ -992,7 +993,7 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 
 	$ret_peers = array();
 
-	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
+	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		if (isset($wgg['peers']) && is_array($wgg['peers'])) {
 
@@ -1001,14 +1002,7 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 
 				if ($peer['tun'] == $tunnel['name']) {
 
-					// We need the array index for future manipulations
-					$peer['index'] = $peer_idx;
-
-					// Just to make sure...
-					wg_init_config_arr($peer, array('allowedips', 'row'));
-
-					// Array key is the peer public key
-					$ret_peers[$peer['publickey']] = $peer;
+					$ret_peers[] = wg_peer_get_config($peer_idx, false);
 
 				}
 
@@ -1052,9 +1046,16 @@ function wg_tunnel_get_peers_running_keys($tunnel_name) {
  */
 function wg_tunnel_get_peers_config_keys($tunnel_name) {
 
-	$peers = wg_tunnel_get_peers_config($tunnel_name);
+	// Pull out the public keys
+	$keys = array_map(function($s) { 
+		
+		list($peer_idx, $peer, $is_new) = $s;
 
-	return array_keys($peers);
+		return $peer['publickey'];
+		
+	}, wg_tunnel_get_peers_config($tunnel_name));
+
+	return $keys;
 
 }
 
