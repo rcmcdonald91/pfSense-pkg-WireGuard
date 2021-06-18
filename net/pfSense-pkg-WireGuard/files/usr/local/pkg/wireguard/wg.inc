@@ -48,7 +48,7 @@ function wg_toggle_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config($tunnel_name)) {
+	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		$enabled = ($tunnel['enabled'] == 'yes');
 
@@ -197,7 +197,7 @@ function wg_delete_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config($tunnel_name)) {
+	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
@@ -802,7 +802,7 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 	$cmds = $errors = $tunnel = array();
 
 	// We've got a tunnel that we need to build...
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config($tunnel_name)) {
+	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		// Determine desired state of the tunnel
 		$state = (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes');

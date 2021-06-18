@@ -467,7 +467,7 @@ print($form);
 <?php
 	if (!$is_new):
 
-		foreach (wg_tunnel_get_peers_config($pconfig['name']as $peer_config):
+		foreach (wg_tunnel_get_peers_config($pconfig['name']) as $peer_config):
 
 			list($peer_idx, $peer, $is_new) = $peer_config;
 ?>
