@@ -954,7 +954,7 @@ function wg_tunnel_get_config($tun_idx, $return_empty = false) {
 
 	$is_new = !$valid;
 
-	$tun_idx = !$valid ? max(array_keys($wgg['tunnels'])) + 1 : $tun_idx;
+	$tun_idx = !$valid ? count($wgg['tunnels']) : $tun_idx;
 
 	$tunnel = $wgg['tunnels'][$tun_idx];
 
@@ -973,7 +973,7 @@ function wg_peer_get_config($peer_idx, $return_empty = false) {
 
 	$is_new = !$valid;
 
-	$peer_idx = !$valid ? max(array_keys($wgg['peers'])) + 1 : $peer_idx;
+	$peer_idx = !$valid ? count($wgg['peers']) + 1 : $peer_idx;
 
 	$peer = $wgg['peers'][$peer_idx];
 
