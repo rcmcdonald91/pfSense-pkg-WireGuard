@@ -292,7 +292,7 @@ function wg_peer_status_class($peer = null) {
 
 		$tunnel_state = true;
 
-		if ($tunnel = wg_tunnel_get_config($peer['tun'])) {
+		if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config($peer['tun'])) {
 
 			$tunnel_state = ($tunnel['enabled'] == 'yes');
 
@@ -340,7 +340,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 	$hsc = fn($s) => htmlspecialchars($s);
 
-	if ($tunnel = wg_tunnel_get_config($tunnel_name)) {
+	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name, false)) {
 
 		$addresses = $tunnel['addresses']['row'];
 
@@ -434,7 +434,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 	$hsc= fn($s) => htmlspecialchars($s);
 
-	if (list($peer_idx, $peer) = wg_peer_get_config($peer_idx)) {
+	if (list($peer_idx, $peer, $is_new) = wg_peer_get_config($peer_idx, false)) {
 
 		$allowedips = $peer['allowedips']['row'];
 

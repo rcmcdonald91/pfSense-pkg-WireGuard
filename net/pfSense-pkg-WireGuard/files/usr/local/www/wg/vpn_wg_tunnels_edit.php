@@ -467,34 +467,32 @@ print($form);
 <?php
 	if (!$is_new):
 
-		$peers = wg_tunnel_get_peers_config($pconfig['name']);
+		foreach (wg_tunnel_get_peers_config($pconfig['name']as $peer_config):
 
-		if (!empty($peers)):
-
-			foreach ($peers as $peer):
+			list($peer_idx, $peer, $is_new) = $peer_config;
 ?>
-				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>';" class="<?=wg_peer_status_class($peer)?>">
+				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>';" class="<?=wg_peer_status_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
 					<td title="<?=htmlspecialchars($peer['publickey'])?>">
 						<?=htmlspecialchars(substr($peer['publickey'], 0, 16).'...')?>
 					</td>
 					<td><?=htmlspecialchars($peer['tun'])?></td>
-					<td><?=wg_generate_peer_allowedips_popup_link($peer['index'])?></td>
+					<td><?=wg_generate_peer_allowedips_popup_link($peer_idx)?></td>
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
-						<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer['index']}"?>"></a>
-						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer['index']}&tun={$tun}")?>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer['index']}&tun={$tun}"?>" usepost></a>
+						<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+						<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_idx}&tun={$tun}")?>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}&tun={$tun}"?>" usepost></a>
 					</td>
 				</tr>
 
 <?php
-			endforeach;
-		endif;
+		endforeach;
+
 	else:
 ?>
 				<tr>
-					<td colspan="5">
+					<td colspan="6">
 						<?php print_info_box('New tunnels must be saved before adding or assigning peers.', 'warning', null); ?>
 					</td>
 				</tr>
