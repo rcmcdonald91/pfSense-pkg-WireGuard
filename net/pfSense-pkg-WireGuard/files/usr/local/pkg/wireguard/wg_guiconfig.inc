@@ -292,7 +292,8 @@ function wg_peer_status_class($peer = null) {
 
 		$tunnel_state = true;
 
-		if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config($peer['tun'])) {
+		// We want to visually disable peers if the tunnel is disabled...
+		if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($peer['tun'])) {
 
 			$tunnel_state = ($tunnel['enabled'] == 'yes');
 
