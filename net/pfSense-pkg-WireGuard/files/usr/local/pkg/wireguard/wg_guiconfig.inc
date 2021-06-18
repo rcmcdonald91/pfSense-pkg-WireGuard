@@ -384,7 +384,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 					$title = gettext('Interface Addresses');
 
-					$hint = "{$addresses[0]['address']} (+{$extras})";
+					$hint = "{$addresses[0]['address']}/{$addresses[0]['mask']} (+{$extras})";
 
 					$popover_params = " data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\"";
 		
@@ -477,7 +477,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 				$title 	= gettext('Allowed IPs');
 	
-				$hint 	= "{$allowedips[0]['address']} (+{$extras})";
+				$hint 	= "{$allowedips[0]['address']}/{$allowedips[0]['mask']} (+{$extras})";
 
 				$popover_params = " data-toggle=\"popover\" data-trigger=\"hover focus\" data-content=\"{$data_html}\" data-html=\"true\"";
 	

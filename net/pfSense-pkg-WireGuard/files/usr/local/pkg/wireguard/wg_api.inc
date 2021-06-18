@@ -272,7 +272,7 @@ function wg_interface_update_addresses($if_name, &$cmds = null) {
 	$res = true;
 
 	if (wg_is_valid_tunnel($if_name, true)
-		&& ($tunnel = wg_tunnel_get_config($if_name))) {
+		&& (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($if_name))) {
 
 		// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
