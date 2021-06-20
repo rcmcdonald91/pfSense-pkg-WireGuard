@@ -648,10 +648,11 @@ function wg_apply_list_get($list, $delete_after_get = true) {
 
 		if (file_exists($listpath)) {
 
-			$toapplylist = unserialize(file_get_contents($listpath));
+			$toapplylist = (array) unserialize(file_get_contents($listpath));
 
 		}
 
+		// Usually just want to delete the apply list after we read it...
 		if ($delete_after_get) {
 
 			unlink_if_exists($listpath);
@@ -664,7 +665,7 @@ function wg_apply_list_get($list, $delete_after_get = true) {
 
 }
 
-function wg_apply_list_add($list, ...$entries) {
+function wg_apply_list_add($list, $entries) {
 	global $wgg;
 
 	$toapplylist = array();
@@ -673,21 +674,11 @@ function wg_apply_list_add($list, ...$entries) {
 
 		$listpath = $wgg['applylist'][$list];
 
-		if (file_exists($listpath)) {
+		// Get the current list without deleting it...
+		$toapplylist = wg_apply_list_get($list, false);
 
-			$toapplylist = unserialize(file_get_contents($listpath));
-
-		}
-
-		foreach ($entries as $entry) {
-
-			if (!in_array($entry, $toapplylist)) {
-
-				$toapplylist[] = $entry;
-
-			}
-
-		}
+		// Need to type cast $entires to array and remove duplicates
+		$toapplylist = array_unique(array_merge($toapplylist, (array) $entries));
 
 		file_put_contents($listpath, serialize($toapplylist));
 

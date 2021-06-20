@@ -998,7 +998,7 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 		// Look through array of peers for matching tunnel name
 		foreach ($wgg['peers'] as $peer_idx => $peer) {
 
-			if ($peer['tun'] == $tunnel['name']) {
+			if ($peer['tun'] == $tunnel_name) {
 
 				$ret_peers[] = wg_peer_get_config($peer_idx, false);
 
