@@ -100,7 +100,7 @@ if ($_POST) {
 						mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 						// Add tunnel to the list to apply
-						wg_apply_list_add('tunnels', $res['tun_to_sync']);
+						wg_apply_list_add($res['tuns_to_sync'], 'tunnels');
 
 					}
 		
@@ -176,7 +176,7 @@ if ($_POST) {
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 				// Add tunnel to the list to apply
-				wg_apply_list_add($res['tun_to_sync'], 'tunnels');
+				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
 
 			}
 
