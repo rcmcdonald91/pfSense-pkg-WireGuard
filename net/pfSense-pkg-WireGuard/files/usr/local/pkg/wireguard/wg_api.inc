@@ -993,18 +993,14 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 
 	$ret_peers = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
 
-		if (isset($wgg['peers']) && is_array($wgg['peers'])) {
+		// Look through array of peers for matching tunnel name
+		foreach ($wgg['peers'] as $peer_idx => $peer) {
 
-			// Look through array of peers for matching tunnel name
-			foreach ($wgg['peers'] as $peer_idx => $peer) {
+			if ($peer['tun'] == $tunnel['name']) {
 
-				if ($peer['tun'] == $tunnel['name']) {
-
-					$ret_peers[] = wg_peer_get_config($peer_idx, false);
-
-				}
+				$ret_peers[] = wg_peer_get_config($peer_idx, false);
 
 			}
 

@@ -567,9 +567,6 @@ function wg_do_peer_post($post) {
 
 				$tun_to_sync = $tun;
 
-				// We found it...
-				break;
-
 			}
 
 		}
@@ -667,7 +664,7 @@ function wg_apply_list_get($list, $delete_after_get = true) {
 
 }
 
-function wg_apply_list_add($entry, $list) {
+function wg_apply_list_add($list, ...$entries) {
 	global $wgg;
 
 	$toapplylist = array();
@@ -682,9 +679,13 @@ function wg_apply_list_add($entry, $list) {
 
 		}
 
-		if (!in_array($entry, $toapplylist)) {
+		foreach ($entries as $entry) {
 
-			$toapplylist[] = $entry;
+			if (!in_array($entry, $toapplylist)) {
+
+				$toapplylist[] = $entry;
+
+			}
 
 		}
 
