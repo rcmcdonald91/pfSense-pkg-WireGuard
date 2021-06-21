@@ -190,7 +190,7 @@ function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &
 	$error = $add ? WG_ERROR_IF_SETADDR : WG_ERROR_IF_DELADDR;
 
 	if (wg_is_valid_tunnel($if_name, true)
-		&& ($family = wg_get_address_family($masked_address))) {
+	    && ($family = wg_get_address_family($masked_address))) {
 
 		$cmd = "{$wgg['ifconfig']} {$esa($if_name)} {$esa($family)} {$esa($masked_address)} {$esa($action)} 2>&1";
 
@@ -272,7 +272,7 @@ function wg_interface_update_addresses($if_name, &$cmds = null) {
 	$res = true;
 
 	if (wg_is_valid_tunnel($if_name, true)
-		&& ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($if_name))) {
+	    && ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($if_name))) {
 
 		// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
@@ -402,7 +402,7 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 	$conf_path = "{$wgg['conf_path']}/{$if_name}.conf";
 
 	if (file_exists($conf_path)
-		&& wg_is_valid_tunnel($if_name, true)) {
+	    && wg_is_valid_tunnel($if_name, true)) {
 
 		$cmd = "{$wgg['wg']} syncconf {$esa($if_name)} {$esa($conf_path)}";
 
@@ -540,7 +540,7 @@ function wg_ifconfig_if_group_add($if_name, $group, &$cmds = null) {
 
 	// Is this a real interface and not already in the group?
 	if (in_array($if_name, pfSense_interface_listget())
-		&& (!wg_interface_in_group($if_name, $group))) {
+	    && (!wg_interface_in_group($if_name, $group))) {
 
 		$cmd = "{$wgg['ifconfig']} {$esa($if_name)} group {$esa($group)} 2>&1";
 
