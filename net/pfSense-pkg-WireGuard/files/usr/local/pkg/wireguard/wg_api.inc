@@ -272,7 +272,7 @@ function wg_interface_update_addresses($if_name, &$cmds = null) {
 	$res = true;
 
 	if (wg_is_valid_tunnel($if_name, true)
-		&& (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($if_name))) {
+		&& ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($if_name))) {
 
 		// Assigned tunnel interfaces are handled by pfSense and should be ignored here
 		if (!is_wg_tunnel_assigned($tunnel['name'])) {
@@ -1045,7 +1045,7 @@ function wg_tunnel_get_peers_config_keys($tunnel_name) {
 	// Pull out the public keys
 	$keys = array_map(function($s) { 
 		
-		list($peer_idx, $peer, $is_new) = $s;
+		[$peer_idx, $peer, $is_new] = $s;
 
 		return $peer['publickey'];
 		

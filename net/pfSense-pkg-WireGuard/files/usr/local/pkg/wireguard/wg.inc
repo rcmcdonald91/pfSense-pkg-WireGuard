@@ -48,7 +48,7 @@ function wg_toggle_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		$enabled = ($tunnel['enabled'] == 'yes');
 
@@ -101,7 +101,7 @@ function wg_toggle_peer($peer_idx) {
 
 	$input_errors = array();
 
-	if (list($peer_idx, $peer, $is_new) = wg_peer_get_config($peer_idx)) {
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
 		$enabled = ($peer['enabled'] == 'yes');
 
@@ -151,7 +151,7 @@ function wg_delete_peer($peer_idx) {
 
 	$input_errors = array();
 
-	if (list($peer_idx, $peer, $is_new) = wg_peer_get_config($peer_idx)) {
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
 		// Boilerplate...
 		if (empty($input_errors)) {
@@ -197,7 +197,7 @@ function wg_delete_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
@@ -241,15 +241,14 @@ function wg_tunnel_unassign_peers($tunnel_name) {
 
 	wg_globals();
 
+	// Assume there is no peers to unassign...
 	$changes = false;
 	
-	foreach (wg_tunnel_get_peers_config($tunnel_name) as $peer_config) {
-
-		list($peer_idx, $peer, $is_new) = $peer_config;
+	foreach (wg_tunnel_get_peers_config($tunnel_name) as [$peer_idx, $peer, $is_new]) {
 
 		$wgg['peers'][$peer_idx]['tun'] = 'unassigned';
 
-		// We need to sync with backend
+		// We've got at least one, so we need to resync with the backend...
 		$changes = true;
 
 	}
@@ -512,7 +511,7 @@ function wg_do_peer_post($post) {
 	// Assume no changes will be made...
 	$changes = false;
 
-	list($peer_idx, $pconfig, $is_new) = wg_peer_get_config($post['index'], true);
+	[$peer_idx, $pconfig, $is_new] = wg_peer_get_config($post['index'], true);
 
 	// We need to save the "old config" to compare against later...
 	$old_pconfig = $pconfig;
@@ -590,7 +589,7 @@ function wg_do_tunnel_post($post) {
 	// Assume no changes will be made...
 	$changes = false;
 
-	list($tun_idx, $pconfig, $is_new) = wg_tunnel_get_config($post['index'], true);
+	[$tun_idx, $pconfig, $is_new] = wg_tunnel_get_config($post['index'], true);
 
 	// We need to save the "old config" to compare against later...
 	$old_pconfig = $pconfig;
@@ -794,7 +793,7 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 	$cmds = $errors = $tunnel = array();
 
 	// We've got a tunnel that we need to build...
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		// Determine desired state of the tunnel
 		$state = (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes');
@@ -1086,10 +1085,7 @@ function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	$txt .= "\n";
 
 	// Process peers section
-	foreach (wg_tunnel_get_peers_config($tunnel['name']) as $peer_config) {
-
-		// Pull out relevant bits
-		list($peer_idx, $peer, $is_new) = $peer_config;
+	foreach (wg_tunnel_get_peers_config($tunnel['name']) as [$peer_idx, $peer, $is_new]) {
 
 		if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 

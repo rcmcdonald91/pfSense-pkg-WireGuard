@@ -293,7 +293,7 @@ function wg_peer_status_class($peer = null) {
 		$tunnel_state = true;
 
 		// We want to visually disable peers if the tunnel is disabled...
-		if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($peer['tun'])) {
+		if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($peer['tun'])) {
 
 			$tunnel_state = ($tunnel['enabled'] == 'yes');
 
@@ -341,7 +341,7 @@ function wg_generate_tunnel_address_popover_link($tunnel_name) {
 
 	$hsc = fn($s) => htmlspecialchars($s);
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name, false)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name, false)) {
 
 		$addresses = $tunnel['addresses']['row'];
 
@@ -435,7 +435,7 @@ function wg_generate_peer_allowedips_popup_link($peer_idx) {
 
 	$hsc= fn($s) => htmlspecialchars($s);
 
-	if (list($peer_idx, $peer, $is_new) = wg_peer_get_config($peer_idx, false)) {
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx, false)) {
 
 		$allowedips = $peer['allowedips']['row'];
 
