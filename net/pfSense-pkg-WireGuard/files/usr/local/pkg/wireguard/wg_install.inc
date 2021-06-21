@@ -124,7 +124,7 @@ function wg_upgrade_allowedips() {
 
 			foreach ($peer['allowedips']['item'] as $a_index => $item) {
 
-				list($addr, $addr_mask) 			= explode('/', $item['addr']);
+				[$addr, $addr_mask] 				= explode('/', $item['addr']);
 
 				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
 
@@ -231,7 +231,7 @@ function wg_upgrade_addresses() {
 
 			foreach ($tunnel['addresses']['item'] as $a_index => $item) {
 
-				list($addr, $addr_mask) 			= explode('/', $item['addr']);
+				[$addr, $addr_mask] 				= explode('/', $item['addr']);
 
 				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
 

@@ -48,7 +48,7 @@ function wg_toggle_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		$enabled = ($tunnel['enabled'] == 'yes');
 
@@ -77,13 +77,13 @@ function wg_toggle_tunnel($tunnel_name) {
 			$changes = true;
 
 			// What tunnel would we need to sync to apply these changes?
-			$tun_to_sync = $tunnel['name'];
+			$tuns_to_sync[] = $tunnel['name'];
 
 		}
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync);
 
 }
 
@@ -101,7 +101,7 @@ function wg_toggle_peer($peer_idx) {
 
 	$input_errors = array();
 
-	if (list($peer_idx, $peer, $is_new) = wg_peer_get_config($peer_idx)) {
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
 		$enabled = ($peer['enabled'] == 'yes');
 
@@ -126,7 +126,7 @@ function wg_toggle_peer($peer_idx) {
 				$changes = true;
 
 				// What tunnel would we need to sync to apply these changes?
-				$tun_to_sync = $peer['tun'];
+				$tuns_to_sync[] = $peer['tun'];
 
 			}
 
@@ -134,7 +134,7 @@ function wg_toggle_peer($peer_idx) {
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync);
 
 }
 
@@ -151,7 +151,7 @@ function wg_delete_peer($peer_idx) {
 
 	$input_errors = array();
 
-	if (list($peer_idx, $peer, $is_new) = wg_peer_get_config($peer_idx)) {
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
 		// Boilerplate...
 		if (empty($input_errors)) {
@@ -172,7 +172,7 @@ function wg_delete_peer($peer_idx) {
 				$changes = true;
 
 				// What tunnel would we need to sync to apply these changes?
-				$tun_to_sync = $peer['tun'];
+				$tuns_to_sync[] = $peer['tun'];
 
 			}
 
@@ -180,7 +180,7 @@ function wg_delete_peer($peer_idx) {
 		
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync);
 
 }
 
@@ -197,7 +197,7 @@ function wg_delete_tunnel($tunnel_name) {
 
 	$input_errors = array();
 
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		// We can't delete assigned tunnels
 		if (is_wg_tunnel_assigned($tunnel['name'])) {
@@ -226,13 +226,13 @@ function wg_delete_tunnel($tunnel_name) {
 			$changes = true;
 
 			// What tunnel would we need to sync to apply these changes?
-			$tun_to_sync = $tunnel['name'];
+			$tuns_to_sync[] = $tunnel['name'];
 
 		}
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync);
 
 }
 
@@ -241,15 +241,14 @@ function wg_tunnel_unassign_peers($tunnel_name) {
 
 	wg_globals();
 
+	// Assume there is no peers to unassign...
 	$changes = false;
 	
-	foreach (wg_tunnel_get_peers_config($tunnel_name) as $peer_config) {
-
-		list($peer_idx, $peer, $is_new) = $peer_config;
+	foreach (wg_tunnel_get_peers_config($tunnel_name) as [$peer_idx, $peer, $is_new]) {
 
 		$wgg['peers'][$peer_idx]['tun'] = 'unassigned';
 
-		// We need to sync with backend
+		// We've got at least one, so we need to resync with the backend...
 		$changes = true;
 
 	}
@@ -512,7 +511,7 @@ function wg_do_peer_post($post) {
 	// Assume no changes will be made...
 	$changes = false;
 
-	list($peer_idx, $pconfig, $is_new) = wg_peer_get_config($post['index'], true);
+	[$peer_idx, $pconfig, $is_new] = wg_peer_get_config($post['index'], true);
 
 	// We need to save the "old config" to compare against later...
 	$old_pconfig = $pconfig;
@@ -565,10 +564,7 @@ function wg_do_peer_post($post) {
 
 				$changes = ($pconfig != $old_pconfig) || $is_new;
 
-				$tun_to_sync = $tun;
-
-				// We found it...
-				break;
+				$tuns_to_sync[] = $tun;
 
 			}
 
@@ -576,7 +572,7 @@ function wg_do_peer_post($post) {
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync, 'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync, 'pconfig' => $pconfig);
 
 }
 
@@ -593,7 +589,7 @@ function wg_do_tunnel_post($post) {
 	// Assume no changes will be made...
 	$changes = false;
 
-	list($tun_idx, $pconfig, $is_new) = wg_tunnel_get_config($post['index'], true);
+	[$tun_idx, $pconfig, $is_new] = wg_tunnel_get_config($post['index'], true);
 
 	// We need to save the "old config" to compare against later...
 	$old_pconfig = $pconfig;
@@ -632,11 +628,11 @@ function wg_do_tunnel_post($post) {
 		$changes = ($pconfig != $old_pconfig);
 
 		// What tunnel would we need to sync to apply these changes?
-		$tun_to_sync = $pconfig['name'];
+		$tuns_to_sync[] = $pconfig['name'];
 
 	}
 
-	return array('input_errors' => $input_errors, 'changes' => $changes, 'tun_to_sync' => $tun_to_sync, 'pconfig' => $pconfig);
+	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync, 'pconfig' => $pconfig);
 
 }
 
@@ -651,10 +647,11 @@ function wg_apply_list_get($list, $delete_after_get = true) {
 
 		if (file_exists($listpath)) {
 
-			$toapplylist = unserialize(file_get_contents($listpath));
+			$toapplylist = (array) unserialize(file_get_contents($listpath));
 
 		}
 
+		// Usually just want to delete the apply list after we read it...
 		if ($delete_after_get) {
 
 			unlink_if_exists($listpath);
@@ -667,7 +664,7 @@ function wg_apply_list_get($list, $delete_after_get = true) {
 
 }
 
-function wg_apply_list_add($entry, $list) {
+function wg_apply_list_add($list, $entries) {
 	global $wgg;
 
 	$toapplylist = array();
@@ -676,17 +673,11 @@ function wg_apply_list_add($entry, $list) {
 
 		$listpath = $wgg['applylist'][$list];
 
-		if (file_exists($listpath)) {
+		// Get the current list without deleting it...
+		$toapplylist = wg_apply_list_get($list, false);
 
-			$toapplylist = unserialize(file_get_contents($listpath));
-
-		}
-
-		if (!in_array($entry, $toapplylist)) {
-
-			$toapplylist[] = $entry;
-
-		}
+		// Need to type cast $entires to array and remove duplicates
+		$toapplylist = array_unique(array_merge($toapplylist, (array) $entries));
 
 		file_put_contents($listpath, serialize($toapplylist));
 
@@ -802,7 +793,7 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 	$cmds = $errors = $tunnel = array();
 
 	// We've got a tunnel that we need to build...
-	if (list($tun_idx, $tunnel, $is_new) = wg_tunnel_get_config_by_name($tunnel_name)) {
+	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
 		// Determine desired state of the tunnel
 		$state = (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes');
@@ -1094,10 +1085,7 @@ function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	$txt .= "\n";
 
 	// Process peers section
-	foreach (wg_tunnel_get_peers_config($tunnel['name']) as $peer_config) {
-
-		// Pull out relevant bits
-		list($peer_idx, $peer, $is_new) = $peer_config;
+	foreach (wg_tunnel_get_peers_config($tunnel['name']) as [$peer_idx, $peer, $is_new]) {
 
 		if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 

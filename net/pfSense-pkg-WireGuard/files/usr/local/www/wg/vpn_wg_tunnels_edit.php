@@ -100,7 +100,7 @@ if ($_POST) {
 						mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 						// Add tunnel to the list to apply
-						wg_apply_list_add($res['tun_to_sync'], 'tunnels');
+						wg_apply_list_add('tunnels', $res['tuns_to_sync']);
 
 					}
 		
@@ -176,7 +176,7 @@ if ($_POST) {
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 				// Add tunnel to the list to apply
-				wg_apply_list_add($res['tun_to_sync'], 'tunnels');
+				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
 
 			}
 
@@ -467,9 +467,7 @@ print($form);
 <?php
 	if (!$is_new):
 
-		foreach (wg_tunnel_get_peers_config($pconfig['name']) as $peer_config):
-
-			list($peer_idx, $peer, $is_new) = $peer_config;
+		foreach (wg_tunnel_get_peers_config($pconfig['name']) as [$peer_idx, $peer, $is_new]):
 ?>
 				<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>';" class="<?=wg_peer_status_class($peer)?>">
 					<td><?=htmlspecialchars($peer['descr'])?></td>
