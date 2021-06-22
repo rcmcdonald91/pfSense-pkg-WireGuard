@@ -1,5 +1,5 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.1.3
+PORTVERSION=	0.1.4
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -28,7 +28,7 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
-	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg/js
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg
 
 	${MKDIR} ${STAGEDIR}${DATADIR}
 
@@ -46,9 +46,6 @@ do-install:
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/*.php \
 		${STAGEDIR}${PREFIX}/www/wg
-
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/js/*.js \
-		${STAGEDIR}${PREFIX}/www/wg/js
 
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
