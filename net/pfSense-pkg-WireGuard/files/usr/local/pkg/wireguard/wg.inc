@@ -422,7 +422,7 @@ function wg_should_reresolve_endpoints($last_update_time) {
 
 /*
  * Gets the hostname resolve interval (in seconds)
- * Returns 0 if something is wrong with the configuration
+ * Returns package default if something is wrong with the configuration
  */
 function wg_get_endpoint_resolve_interval() {
 	global $config, $wgg;
@@ -438,21 +438,23 @@ function wg_get_endpoint_resolve_interval() {
 
 		}
 			
-		// The pfSense default interval
-		return 300;
+		// Package default is the same as pfSense default (300 seconds)
+		return $wgg['default_resolve_interval'];
 
-	}
-
-	// Looks like we are using our own value...
-	if (isset($wgg['config']['resolve_interval'])
-	    && is_numericint($wgg['config']['resolve_interval'])) {
+	} elseif (isset($wgg['config']['resolve_interval'])
+	          && is_numericint($wgg['config']['resolve_interval'])) {
 
 		return $wgg['config']['resolve_interval'];
 
+	} else {
+
+		// Something is wrong, so just return the package default...
+		return $wgg['default_resolve_interval'];
+
 	}
 
-	// Something is wrong, so just return the default...
-	return $wgg['default_resolve_interval'];
+	// Should never be here...
+	return 0;
 
 }
 
@@ -468,6 +470,8 @@ function wg_do_settings_post($post) {
 
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['config'];
+
+	$pconfig['enabled']			= empty($post['enabled']) ? 'no' : $post['enabled'];
 
 	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
 					
@@ -826,7 +830,7 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 		'cmds'		=> $parsed_cmds['cmds'],
 		'config'	=> $tunnel);
 
-	return $json ? json_encode($res, JSON_PRETTY_PRINT) : $res;
+	return $json ? json_encode($res) : $res;
 
 }
 
@@ -881,11 +885,15 @@ function wg_resync() {
 		wg_unbound_acl_install();
 
 	}
-	
-	// We don't want active tunnels when the service isn't running
-	if (!wg_is_service_running() &&
-		is_module_loaded($wgg['kmod'])) {
 
+	if (wg_is_service_running()) {
+
+		// Go ahead and resolve DNS when we call package resync
+		wg_resolve_endpoints();
+
+	} elseif (is_module_loaded($wgg['kmod'])) {
+
+		// We don't want active tunnels when the service isn't running
 		wg_destroy_tunnels();
 
 	}

@@ -37,12 +37,12 @@ function wg_validate_settings_post($pconfig) {
 
 	$input_errors = array();
 
-	// Check dns ttl
-	$dns_ttl = $pconfig['dns_ttl'];
+	// Check endpoint hostname resolve interval
+	$resolve_interval = $pconfig['resolve_interval'];
 
-	if (!empty($dns_ttl) && !is_numericint($dns_ttl)) {
+	if (!empty($resolve_interval) && !is_numericint($resolve_interval)) {
 
-		$input_errors[] = "Invalid endpoint DNS TTL interval ({$dns_ttl}).";
+		$input_errors[] = "Invalid endpoint hostname resolve interval ({$resolve_interval}).";
 
 	}
 
