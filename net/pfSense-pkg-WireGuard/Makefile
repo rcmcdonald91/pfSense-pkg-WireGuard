@@ -47,6 +47,9 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/*.php \
 		${STAGEDIR}${PREFIX}/www/wg
 
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/js/*.js \
+		${STAGEDIR}${PREFIX}/www/wg/js
+
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
 
