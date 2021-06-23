@@ -188,25 +188,28 @@ $section->addInput(new Form_Checkbox(
 
 $group = new Form_Group('Endpoint');
 
+// Used for hiding/showing the group via JS
+$group->addClass("endpoint");
+
 $group->add(new Form_Input(
 	'endpoint',
 	'Endpoint',
 	'text',
 	$pconfig['endpoint']
-))->setWidth(5)
-	->setHelp('Hostname, IPv4, or IPv6 address of this peer.<br />
-			Leave endpoint and port blank if unknown (dynamic endpoints).');
+))->addClass('trim')
+  ->setHelp('Hostname, IPv4, or IPv6 address of this peer.<br />
+	     Leave endpoint and port blank if unknown (dynamic endpoints).')
+  ->setWidth(5);
 
 $group->add(new Form_Input(
 	'port',
 	'Endpoint Port',
 	'text',
 	$pconfig['port']
-))->setWidth(3)
-	->setHelp("Port used by this peer.<br />
-			Leave blank for default ({$wgg['default_port']}).");
-
-$group->addClass("endpoint");
+))->addClass('trim')
+  ->setHelp("Port used by this peer.<br />
+	     Leave blank for default ({$wgg['default_port']}).")
+  ->setWidth(3);
 
 $section->add($group);
 
@@ -215,8 +218,9 @@ $section->addInput(new Form_Input(
 	'Keep Alive',
 	'text',
 	$pconfig['persistentkeepalive']
-))->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer.<br />
-		Default is empty (disabled).');
+))->addClass('trim')
+  ->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer.<br />
+	     Default is empty (disabled).');
 
 $section->addInput(new Form_Input(
 	'publickey',
@@ -224,7 +228,8 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['publickey'],
 	['placeholder' => 'Public Key']
-))->setHelp('WireGuard public key for this peer.');
+))->addClass('trim')
+  ->setHelp('WireGuard public key for this peer.');
 
 $group = new Form_Group('Pre-shared Key');
 
@@ -233,7 +238,8 @@ $group->add(new Form_Input(
 	'Pre-shared Key',
 	wg_secret_input_type(),
 	$pconfig['presharedkey']
-))->setHelp('Optional pre-shared key for this tunnel. (<a id="copypsk" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)');
+))->addClass('trim')
+  ->setHelp('Optional pre-shared key for this tunnel. (<a id="copypsk" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)');
 
 $group->add(new Form_Button(
 	'genpsk',
@@ -241,7 +247,7 @@ $group->add(new Form_Button(
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
-	->setHelp('New Pre-shared Key');
+  ->setHelp('New Pre-shared Key');
 
 $section->add($group);
 
@@ -274,10 +280,10 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 		'Allowed Subnet or Host',
 		$item['address'],
 		'BOTH'
-	))->AddClass('address')
-		->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
-		->addMask("address_subnet{$counter}", $item['mask'], 128, 0)
-		->setWidth(4);
+	))->addClass('trim')
+	  ->setHelp($counter == $last ? 'IPv4 or IPv6 subnet or host reachable via this peer.' : '')
+	  ->addMask("address_subnet{$counter}", $item['mask'], 128, 0)
+	  ->setWidth(4);
 
 	$group->add(new Form_Input(
 		"address_descr{$counter}",
@@ -285,7 +291,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 		'text',
 		$item['descr']
 	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
-		->setWidth(4);
+	  ->setWidth(4);
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
@@ -334,6 +340,8 @@ events.push(function() {
 	// Supress "Delete" button if there are fewer than two rows
 	checkLastRow();
 
+	wgRegTrimHandler();
+
 	$('#copypsk').click(function () {
 
 		var $this = $(this);
@@ -373,19 +381,13 @@ events.push(function() {
 				}
 			});
 		}
-
-	});
-
-	// Trim any whitespace from allowedips input
-	$('#allowedips').on('change', 'input.address', function () {
-
-		$(this).val($(this).val().replace(/\s/g, ''));
-
 	});
 
 	// Save the form
 	$('#saveform').click(function () {
+
 		$(form).submit();
+
 	});
 
 	$('#dynamic').click(function () {
@@ -407,5 +409,6 @@ events.push(function() {
 </script>
 
 <?php
+include('wireguard/wg_foot.inc');
 include('foot.inc');
 ?>

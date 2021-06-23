@@ -100,13 +100,15 @@ if ($_POST) {
 
 // Defaults for new installations
 
-$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
+$pconfig['enabled'] = isset($wgg['config']['enabled']) ? $wgg['config']['enabled'] : 'no';
 
-$pconfig['hide_secrets'] = isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
+$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
 $pconfig['resolve_interval'] = isset($wgg['config']['resolve_interval']) ? $wgg['config']['default_resolve_interval'] : $wgg['resolve_interval'];
 
 $pconfig['resolve_interval_track'] = isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
+
+$pconfig['hide_secrets'] = isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 
 $shortcut_section = 'wireguard';
 
@@ -150,13 +152,19 @@ $form = new Form(false);
 $section = new Form_Section('General Settings');
 
 $section->addInput(new Form_Checkbox(
+	'enabled',
+	'WireGuard Enabled',
+	gettext('Enable'),
+	$pconfig['enabled'] == 'yes'
+));
+
+$section->addInput(new Form_Checkbox(
 	'keep_conf',
 	'Keep Configuration',
 	gettext('Enable'),
 	$pconfig['keep_conf'] == 'yes'
 ))->setHelp("<span class=\"text-danger\">Note: </span>
-		With 'Keep Configurations' enabled (default), all tunnel configurations and package settings will persist on install/de-install."
-);
+	     With 'Keep Configurations' enabled (default), all tunnel configurations and package settings will persist on install/de-install.");
 
 $group = new Form_Group('Endpoint Hostname Resolve Interval');
 
@@ -166,8 +174,9 @@ $group->add(new Form_Input(
 	'text',
 	wg_get_endpoint_resolve_interval(),
 	['placeholder' => wg_get_endpoint_resolve_interval()]
-))->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names.<br />
-		<span class=\"text-danger\">Note: </span> The default is {$wgg['default_resolve_interval']} seconds (0 to disable).");
+))->addClass('trim')
+  ->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names.<br />
+	     <span class=\"text-danger\">Note: </span> The default is {$wgg['default_resolve_interval']} seconds (0 to disable).");
 
 $group->add(new Form_Checkbox(
 	'resolve_interval_track',
@@ -175,7 +184,7 @@ $group->add(new Form_Checkbox(
 	gettext('Track System Resolve Interval'),
 	($pconfig['resolve_interval_track'] == 'yes')
 ))->setHelp("Tracks the system 'Aliases Hostnames Resolve Interval' setting.<br />
-		<span class=\"text-danger\">Note: </span> See System / Advanced / <a href=\"..\..\system_advanced_firewall.php\">Firewall & NAT</a>");
+	     <span class=\"text-danger\">Note: </span> See System / Advanced / <a href=\"..\..\system_advanced_firewall.php\">Firewall & NAT</a>");
 
 $section->add($group);
 
@@ -215,6 +224,8 @@ print($form);
 //<![CDATA[
 events.push(function() {
 
+	wgRegTrimHandler();
+
 	// Save the form
 	$('#saveform').click(function () {
 
@@ -240,6 +251,7 @@ events.push(function() {
 //]]>
 </script>
 
-<?php 
+<?php
+include('wireguard/wg_foot.inc');
 include('foot.inc');
 ?>

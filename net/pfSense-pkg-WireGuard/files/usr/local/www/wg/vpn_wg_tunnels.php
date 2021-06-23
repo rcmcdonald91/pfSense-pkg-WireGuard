@@ -273,15 +273,20 @@ endif;
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
+
 	var peershidden = true;
+
 	var keyshidden = true;
 
 	hideClass('peer-entries', peershidden);
 
 	// Toggle peer visibility
 	$('#showpeers').click(function () {
+
 		peershidden = !peershidden;
+
 		hideClass('peer-entries', peershidden);
+
 	});
 
 	$('.pubkey').click(function () {
@@ -294,6 +299,7 @@ events.push(function() {
 //]]>
 </script>
 
-<?php 
+<?php
+include('wireguard/wg_foot.inc');
 include('foot.inc');
 ?>

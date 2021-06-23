@@ -291,7 +291,8 @@ $section->addInput(new Form_Input(
 	'text',
 	$pconfig['listenport'],
 	['placeholder' => next_wg_port()]
-))->setHelp('Port used by this tunnel to communicate with peers.');
+))->addClass('trim')
+  ->setHelp('Port used by this tunnel to communicate with peers.');
 
 $group = new Form_Group('*Interface Keys');
 
@@ -300,14 +301,16 @@ $group->add(new Form_Input(
 	'Private Key',
 	wg_secret_input_type(),
 	$pconfig['privatekey']
-))->setHelp('Private key for this tunnel. (Required)');
+))->addClass('trim')
+  ->setHelp('Private key for this tunnel. (Required)');
 
 $group->add(new Form_Input(
 	'publickey',
 	'Public Key',
 	'text',
 	$pconfig['publickey']
-))->setHelp('Public key for this tunnel. (<a id="copypubkey" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)')->setReadonly();
+))->addClass('trim')
+  ->setHelp('Public key for this tunnel. (<a id="copypubkey" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)')->setReadonly();
 
 $group->add(new Form_Button(
 	'genkeys',
@@ -315,8 +318,8 @@ $group->add(new Form_Button(
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
-	->setHelp('New Keys')
-	->setWidth(1);
+  ->setHelp('New Keys')
+  ->setWidth(1);
 
 $section->add($group);
 
@@ -366,10 +369,10 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 			'Interface Address',
 			$item['address'],
 			'BOTH'
-		))->addClass('address')
-			->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
-			->addMask("address_subnet{$counter}", $item['mask'])
-			->setWidth(4);
+		))->addClass('trim')
+		  ->setHelp($counter == $last ? 'IPv4 or IPv6 address assigned to the tunnel interface.' : '')
+		  ->addMask("address_subnet{$counter}", $item['mask'])
+		  ->setWidth(4);
 		
 		$group->add(new Form_Input(
 			"address_descr{$counter}",
@@ -377,7 +380,7 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 			'text',
 			$item['descr']
 		))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
-			->setWidth(4);
+		  ->setWidth(4);
 
 		$group->add(new Form_Button(
 			"deleterow{$counter}",
@@ -537,6 +540,8 @@ events.push(function() {
 	// Supress "Delete" button if there are fewer than two rows
 	checkLastRow();
 
+	wgRegTrimHandler();
+
 	$('#copypubkey').click(function () {
 
 		var $this = $(this);
@@ -601,17 +606,11 @@ events.push(function() {
 		$(form).submit();
 	});
 
-	// Trim any whitespace from address input
-	$("#addresses").on("change", "input.address", function () {
-
-		$(this).val($(this).val().replace(/\s/g, ""));
-
-	});
-
 });
 //]]>
 </script>
 
-<?php 
+<?php
+include('wireguard/wg_foot.inc');
 include('foot.inc');
 ?>

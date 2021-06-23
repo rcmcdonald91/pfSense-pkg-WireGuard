@@ -474,13 +474,13 @@ function wg_do_settings_post($post) {
 	$pconfig['enabled']			= empty($post['enabled']) ? 'no' : $post['enabled'];
 
 	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
-					
-	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
 	$pconfig['resolve_interval']		= empty($post['resolve_interval']) && ($post['resolve_interval'] !== '0') ? $wgg['default_resolve_interval'] : $post['resolve_interval'];
 
 	$pconfig['resolve_interval_track']	= empty($post['resolve_interval_track']) ? 'no' : $post['resolve_interval_track'];
 
+	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
+	
 	$input_errors = wg_validate_settings_post($pconfig);
 
 	if (empty($input_errors)) {

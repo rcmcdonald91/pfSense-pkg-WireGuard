@@ -1,6 +1,5 @@
-<?php
 /*
- * wg_foot.inc
+ * WireGuardHelpers.js
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
@@ -18,6 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-?>
 
-<script src="/wg/js/WireGuardHelpers.js?v=<?=filemtime('/usr/local/www/wg/js/WireGuardHelpers.js')?>"></script>
+function wgRegTrimHandler() {
+
+	$('body').on('change', '.trim', function () {
+
+		$(this).val($(this).val().replace(/\s/g, ''));
+
+	});
+
+}

@@ -270,6 +270,7 @@ events.push(function() {
 //]]>
 </script>
 
-<?php 
+<?php
+include('wireguard/wg_foot.inc');
 include('foot.inc');
 ?>

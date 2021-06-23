@@ -28,7 +28,7 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
-	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg/js
 
 	${MKDIR} ${STAGEDIR}${DATADIR}
 
