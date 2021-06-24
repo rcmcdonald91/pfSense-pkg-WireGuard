@@ -37,6 +37,14 @@ function wg_validate_settings_post($pconfig) {
 
 	$input_errors = array();
 
+	$disabled = $pconfig['disabled'];
+
+	if (wg_is_wg_assigned() && (isset($disabled) && ($disabled == 'yes'))) {
+
+		$input_errors[] = gettext('Cannot disable WireGuard when one or more tunnels is assigned to a pfSense interface.');
+	
+	}
+	
 	// Check endpoint hostname resolve interval
 	$resolve_interval = $pconfig['resolve_interval'];
 

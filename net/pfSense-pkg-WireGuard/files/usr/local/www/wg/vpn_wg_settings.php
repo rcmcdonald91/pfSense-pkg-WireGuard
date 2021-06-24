@@ -81,7 +81,13 @@ if ($_POST) {
 
 				$pconfig = $res['pconfig'];
 
-				$save_success = (empty($input_errors) && $res['changes']);
+				if (empty($input_errors) && $res['changes']) {
+
+					wg_toggle_wireguard();
+
+					$save_success = true;
+
+				}
 
 				break;
 
@@ -100,15 +106,15 @@ if ($_POST) {
 
 // Defaults for new installations
 
-$pconfig['enabled'] = isset($wgg['config']['enabled']) ? $wgg['config']['enabled'] : 'no';
+$pconfig['disabled'] 			= isset($wgg['config']['disabled']) ? $wgg['config']['disabled'] : 'no';
 
-$pconfig['keep_conf'] = isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
+$pconfig['keep_conf'] 			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
-$pconfig['resolve_interval'] = isset($wgg['config']['resolve_interval']) ? $wgg['config']['default_resolve_interval'] : $wgg['resolve_interval'];
+$pconfig['resolve_interval'] 		= isset($wgg['config']['resolve_interval']) ? $wgg['config']['default_resolve_interval'] : $wgg['resolve_interval'];
 
-$pconfig['resolve_interval_track'] = isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
+$pconfig['resolve_interval_track']	= isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
 
-$pconfig['hide_secrets'] = isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
+$pconfig['hide_secrets'] 		= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 
 $shortcut_section = 'wireguard';
 
@@ -152,10 +158,10 @@ $form = new Form(false);
 $section = new Form_Section('General Settings');
 
 $section->addInput(new Form_Checkbox(
-	'enabled',
-	'Enable',
-	gettext('Enable WireGuard'),
-	$pconfig['enabled'] == 'yes'
+	'disabled',
+	'Disable',
+	gettext('Disable WireGuard'),
+	$pconfig['disabled'] == 'yes'
 ));
 
 $section->addInput(new Form_Checkbox(

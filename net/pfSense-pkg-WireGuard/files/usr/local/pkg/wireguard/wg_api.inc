@@ -936,6 +936,30 @@ function is_wg_enabled() {
 	
 }
 
+// Check if at least one tunnel is assigned
+function wg_is_wg_assigned($disabled = true) {
+	global $wgg;
+
+	// Assume that no tunnels are assigned
+	$is_assigned = false;
+
+	foreach ($wgg['tunnels'] as ['name' => $name]) {
+
+		if (is_wg_tunnel_assigned($name, $disabled)) {
+
+			$is_assigned = true;
+
+			// We found one, no need to keep checking
+			break;
+
+		}
+
+	}
+
+	return $is_assigned;
+
+}
+
 function wg_tunnel_get_config_by_name($tunnel_name) {
 	global $wgg;
 

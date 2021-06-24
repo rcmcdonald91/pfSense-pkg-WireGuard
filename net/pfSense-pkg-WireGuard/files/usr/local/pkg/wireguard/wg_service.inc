@@ -227,7 +227,7 @@ function wg_service_cli_start($serialize = true) {
 	
 	$ret_code = 0;
 
-	if (!wg_is_cli()) {
+	if (!wg_is_cli() || (isset($wgg['config']['disabled']) && $wgg['config']['disabled']  == 'yes')) {
 
 		$ret_code |= WG_ERROR_SVC_START;
 

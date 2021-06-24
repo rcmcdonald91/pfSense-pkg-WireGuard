@@ -236,6 +236,22 @@ function wg_delete_tunnel($tunnel_name) {
 
 }
 
+function wg_toggle_wireguard() {
+	global $wgg;
+
+	if (wg_is_service_running()
+	    && (isset($wgg['config']['disabled']) && $wgg['config']['disabled'] == 'yes')) {
+
+		wg_service_fpm_stop();
+
+	} else {
+
+		wg_service_fpm_start();
+
+	}
+
+}
+
 function wg_tunnel_unassign_peers($tunnel_name) {
 	global $wgg;
 
@@ -471,7 +487,7 @@ function wg_do_settings_post($post) {
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['config'];
 
-	$pconfig['enabled']			= empty($post['enabled']) ? 'no' : $post['enabled'];
+	$pconfig['disabled']			= empty($post['disabled']) ? 'no' : $post['disabled'];
 
 	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
 
@@ -480,7 +496,7 @@ function wg_do_settings_post($post) {
 	$pconfig['resolve_interval_track']	= empty($post['resolve_interval_track']) ? 'no' : $post['resolve_interval_track'];
 
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
-	
+
 	$input_errors = wg_validate_settings_post($pconfig);
 
 	if (empty($input_errors)) {
