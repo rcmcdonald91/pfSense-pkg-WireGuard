@@ -157,12 +157,23 @@ $form = new Form(false);
 
 $section = new Form_Section('General Settings');
 
-$section->addInput(new Form_Checkbox(
+$wg_disabled = new Form_Checkbox(
 	'disabled',
 	'Disable',
 	gettext('Disable WireGuard'),
 	$pconfig['disabled'] == 'yes'
-));
+);
+
+$wg_disabled->setHelp("<span class=\"text-danger\">Note: </span>
+		       WireGuard cannot be disabled when one or more tunnels is assigned to a pfSense interface.");
+
+if (wg_is_wg_assigned()) {
+
+	$wg_disabled->setDisabled();
+
+}
+
+$section->addInput($wg_disabled);
 
 $section->addInput(new Form_Checkbox(
 	'keep_conf',

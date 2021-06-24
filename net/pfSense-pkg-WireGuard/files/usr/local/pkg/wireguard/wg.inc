@@ -239,16 +239,21 @@ function wg_delete_tunnel($tunnel_name) {
 function wg_toggle_wireguard() {
 	global $wgg;
 
+	$disabled = $wgg['config']['disabled'];
+
 	if (wg_is_service_running()
-	    && (isset($wgg['config']['disabled']) && $wgg['config']['disabled'] == 'yes')) {
+	    && (isset($disabled) && $disabled == 'yes')) {
 
-		wg_service_fpm_stop();
+		return wg_service_fpm_stop();
 
-	} else {
+	// No reason to start the service if it is already running
+	} elseif (!wg_is_service_running() && is_wg_enabled()) {
 
-		wg_service_fpm_start();
+		return wg_service_fpm_start();
 
 	}
+
+	return false;
 
 }
 

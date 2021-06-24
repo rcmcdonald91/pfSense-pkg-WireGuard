@@ -912,7 +912,7 @@ function wg_is_valid_tunnel($tunnel_name, $running_state = false) {
 
 // Check if at least one tunnel is enabled
 function is_wg_enabled() {
-	global $config, $wgg;
+	global $wgg;
 
 	wg_globals();
 
@@ -920,13 +920,12 @@ function is_wg_enabled() {
 
 		foreach ($wgg['tunnels'] as $tunnel) {
 
-			if (empty($tunnel['enabled'])) {
+			if (isset($tunnel['enabled']) && $tunnel['enabled'] == 'yes') {
 
-				continue;
+				// We found one, no need to keep checking
+				return true;
 
 			}
-
-			return true;
 
 		}
 
@@ -940,23 +939,18 @@ function is_wg_enabled() {
 function wg_is_wg_assigned($disabled = true) {
 	global $wgg;
 
-	// Assume that no tunnels are assigned
-	$is_assigned = false;
-
 	foreach ($wgg['tunnels'] as ['name' => $name]) {
 
 		if (is_wg_tunnel_assigned($name, $disabled)) {
 
-			$is_assigned = true;
-
 			// We found one, no need to keep checking
-			break;
+			return true;
 
 		}
 
 	}
 
-	return $is_assigned;
+	return false;
 
 }
 
@@ -1097,8 +1091,8 @@ function wg_get_tunnel_networks($family = 'both') {
 
 					$masked_address = "{$address['address']}/{$address['mask']}";
 
-					if ((is_ipaddrv6($masked_address) && ($family == 'ipv4')) ||
-						(is_ipaddrv4($masked_address) && ($family == 'ipv6'))) {
+					if ((is_ipaddrv6($masked_address) && ($family == 'ipv4')) 
+					    || (is_ipaddrv4($masked_address) && ($family == 'ipv6'))) {
 
 						continue;
 
