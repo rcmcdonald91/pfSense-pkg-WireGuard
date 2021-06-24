@@ -230,14 +230,12 @@ endif;
 			</thead>
 			<tbody>
 <?php
-			$a_packages = wg_pkg_info();
-
-			foreach ($a_packages as $package):
+			foreach (wg_pkg_info() as ['name' => $name, 'version' => $version, 'comment' => $comment]):
 ?>
     				<tr>
-					<td><?=htmlspecialchars($package['name'])?></td>
-					<td><?=htmlspecialchars($package['version'])?></td>
-					<td><?=htmlspecialchars($package['comment'])?></td>
+					<td><?=htmlspecialchars($name)?></td>
+					<td><?=htmlspecialchars($version)?></td>
+					<td><?=htmlspecialchars($comment)?></td>
 
 				</tr>
 <?php

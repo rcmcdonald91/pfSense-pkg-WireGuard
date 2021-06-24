@@ -159,8 +159,8 @@ $form->addGlobal(new Form_Input(
 
 $section->addInput(new Form_Checkbox(
 	'enabled',
-	'Peer Enabled',
-	gettext('Enable'),
+	'Enable',
+	gettext('Enable Peer'),
 	$pconfig['enabled'] == 'yes'
 ))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to disable this peer without removing it from the list.');
 
@@ -254,8 +254,6 @@ $section->add($group);
 $form->add($section);
 
 $section = new Form_Section('Address Configuration');
-
-$section->setAttribute('id', 'allowedips');
 
 // Init the addresses array if necessary
 if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['row'])) {

@@ -251,8 +251,8 @@ $form->addGlobal(new Form_Input(
 
 $tun_enable = new Form_Checkbox(
 	'enabled',
-	'Tunnel Enabled',
-	gettext('Enable'),
+	'Enable',
+	gettext('Enable Tunnel'),
 	$pconfig['enabled'] == 'yes'
 );
 

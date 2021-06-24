@@ -153,8 +153,8 @@ $section = new Form_Section('General Settings');
 
 $section->addInput(new Form_Checkbox(
 	'enabled',
-	'WireGuard Enabled',
-	gettext('Enable'),
+	'Enable',
+	gettext('Enable WireGuard'),
 	$pconfig['enabled'] == 'yes'
 ));
 
