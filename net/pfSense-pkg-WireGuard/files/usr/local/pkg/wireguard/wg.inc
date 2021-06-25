@@ -239,21 +239,18 @@ function wg_delete_tunnel($tunnel_name) {
 function wg_toggle_wireguard() {
 	global $wgg;
 
-	$disabled = $wgg['config']['disabled'];
-
-	if (wg_is_service_running()
-	    && (isset($disabled) && $disabled == 'yes')) {
-
-		return wg_service_fpm_stop();
-
-	// No reason to start the service if it is already running
-	} elseif (!wg_is_service_running() && is_wg_enabled()) {
+	if (wg_is_service_enabled() && !wg_is_service_running()) {
 
 		return wg_service_fpm_start();
 
+	} elseif (!wg_is_service_enabled() && wg_is_service_running()) {
+
+		return wg_service_fpm_stop();
+
 	}
 
-	return false;
+	// Something isn't quite right...
+	return wg_service_fpm_stop();
 
 }
 
@@ -492,7 +489,7 @@ function wg_do_settings_post($post) {
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['config'];
 
-	$pconfig['enable']			= empty($post['enable']) ? 'off' : $post['enable'];
+	$pconfig['enable']			= (!empty($post['enable']) && $post['enable'] == 'yes') ? 'on' : 'off';
 
 	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
 

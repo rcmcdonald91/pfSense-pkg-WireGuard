@@ -312,25 +312,19 @@ function wg_peer_status_class($peer = null) {
 }
 
 // Generates a toggle icon link based on the status of the target
-function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', $post = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
+function wg_generate_toggle_icon_link($enabled = true, $type = null, $href = '#', $post = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
 
 	$hsc = fn($s) => htmlspecialchars($s);
-
-	$ret_html = null;
-
-	if (isset($target_device)) {
 	
-		$icon = (isset($target_device['enabled']) && $target_device['enabled'] == 'yes') ? $icon_enabled : $icon_disabled;
+	$icon = $enabled ? $icon_enabled : $icon_disabled;
 
-		$title = gettext($title);
+	$action = $enabled ? gettext('disable') : gettext('enable');
 
-		$usepost = $post ? ' usepost' : null;
+	$title = "Click to {$action} {$type}.";
 
-		$ret_html = "<a class=\"fa {$hsc($icon)}\" title=\"{$hsc($title)}\" href=\"{$hsc($href)}\"{$hsc($usepost)}></a>";
+	$usepost = $post ? ' usepost' : null;
 
-	}
-
-	return $ret_html;
+	return "<a class=\"fa {$hsc($icon)}\" title=\"{$hsc($title)}\" href=\"{$hsc($href)}\"{$hsc($usepost)}></a>";
 
 }
 

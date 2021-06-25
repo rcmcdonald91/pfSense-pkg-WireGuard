@@ -129,13 +129,13 @@ $tab_array[] = array(gettext('Status'), false, '/wg/status_wireguard.php');
 
 include('head.inc');
 
+wg_print_service_warning();
+
 if ($save_success) {
 
 	print_info_box(gettext('The changes have been applied successfully.'), 'success');
 	
 }
-
-wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
 
