@@ -106,7 +106,7 @@ if ($_POST) {
 
 // Defaults for new installations
 
-$pconfig['disabled'] 			= isset($wgg['config']['disabled']) ? $wgg['config']['disabled'] : 'no';
+$pconfig['enable'] 			= isset($wgg['config']['enable']) ? $wgg['config']['enable'] : 'on';
 
 $pconfig['keep_conf'] 			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
@@ -157,23 +157,23 @@ $form = new Form(false);
 
 $section = new Form_Section('General Settings');
 
-$wg_disabled = new Form_Checkbox(
-	'disabled',
-	'Disable',
-	gettext('Disable WireGuard'),
-	$pconfig['disabled'] == 'yes'
+$wg_enable = new Form_Checkbox(
+	'enable',
+	'Enable',
+	gettext('Enable WireGuard'),
+	$pconfig['enable'] == 'on'
 );
 
-$wg_disabled->setHelp("<span class=\"text-danger\">Note: </span>
-		       WireGuard cannot be disabled when one or more tunnels is assigned to a pfSense interface.");
+$wg_enable->setHelp("<span class=\"text-danger\">Note: </span>
+		     WireGuard cannot be disabled when one or more tunnels is assigned to a pfSense interface.");
 
 if (wg_is_wg_assigned()) {
 
-	$wg_disabled->setDisabled();
+	$wg_enable->setDisabled();
 
 }
 
-$section->addInput($wg_disabled);
+$section->addInput($wg_enable);
 
 $section->addInput(new Form_Checkbox(
 	'keep_conf',

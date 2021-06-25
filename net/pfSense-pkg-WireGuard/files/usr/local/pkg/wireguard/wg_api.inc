@@ -910,6 +910,16 @@ function wg_is_valid_tunnel($tunnel_name, $running_state = false) {
 
 }
 
+// Checks if the service is enabled
+function wg_is_service_enabled() {
+	global $wgg;
+
+	$enable = $wgg['config']['enable'];
+
+	return (isset($enable) && ($enable == 'on'));
+
+}
+
 // Check if at least one tunnel is enabled
 function is_wg_enabled() {
 	global $wgg;

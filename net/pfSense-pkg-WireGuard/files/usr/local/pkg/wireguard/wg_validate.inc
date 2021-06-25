@@ -37,9 +37,9 @@ function wg_validate_settings_post($pconfig) {
 
 	$input_errors = array();
 
-	$disabled = $pconfig['disabled'];
+	$enable = $pconfig['enable'];
 
-	if (wg_is_wg_assigned() && (isset($disabled) && ($disabled == 'yes'))) {
+	if (wg_is_wg_assigned() && (isset($enable) && (empty($enable) || ($enable == 'off')))) {
 
 		$input_errors[] = gettext('Cannot disable WireGuard when one or more tunnels is assigned to a pfSense interface.');
 	

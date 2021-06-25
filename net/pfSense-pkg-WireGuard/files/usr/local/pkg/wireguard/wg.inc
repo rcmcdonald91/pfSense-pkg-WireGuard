@@ -492,7 +492,7 @@ function wg_do_settings_post($post) {
 	// We need to save the "old config" to compare against later...
 	$pconfig = $old_config = $wgg['config'];
 
-	$pconfig['disabled']			= empty($post['disabled']) ? 'no' : $post['disabled'];
+	$pconfig['enable']			= empty($post['enable']) ? 'off' : $post['enable'];
 
 	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
 
