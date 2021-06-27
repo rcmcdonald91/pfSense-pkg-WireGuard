@@ -11,7 +11,9 @@ COMMENT=	pfSense package WireGuard (EXPERIMENTAL)
 LICENSE=	APACHE20
 
 RUN_DEPENDS=	wireguard-kmod>0:net/wireguard-kmod \
-		wireguard-tools-lite>0:net/wireguard-tools@lite
+		wireguard-tools-lite>0:net/wireguard-tools@lite \
+		/usr/local/bin/qrencode:graphics/libqrencode:graphics/libqrencode
+#		libqrencode>0:graphics/libqrencode
 
 NO_BUILD=	yes
 NO_MTREE=	yes
@@ -56,5 +58,9 @@ do-install:
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/wireguard.xml
+
+build-and-upload: package
+	scp work/pkg/pfSense-pkg-WireGuard-0.1.3.txz root@pfsense-wg-dev.genericstudent.com:.
+	ssh root@pfsense-wg-dev.genericstudent.com pkg add -f pfSense-pkg-WireGuard-0.1.3.txz
 
 .include <bsd.port.mk>

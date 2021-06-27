@@ -94,6 +94,23 @@ if ($_POST) {
 
 			break;
 
+		case 'genpriv':
+
+			// Generate a new private (and therefor public) key, to be displayed via QR Code
+			header('Content-Type: application/json');
+
+			$keyPair = wg_gen_keypair();
+
+			$output = array(
+				'publicKey' => $keyPair['pubkey'],
+				'privateKey' => $keyPair['privkey']);
+
+			print(json_encode($output));
+
+			exit;
+
+			break;
+
 		default:
 
 			// Shouldn't be here, so bail out.
@@ -218,13 +235,17 @@ $section->addInput(new Form_Input(
 ))->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer.<br />
 		Default is empty (disabled).');
 
-$section->addInput(new Form_Input(
+$group = new Form_Group('Public Key');
+
+$group->add(new Form_Input(
 	'publickey',
 	'*Public Key',
 	'text',
 	$pconfig['publickey'],
 	['placeholder' => 'Public Key']
 ))->setHelp('WireGuard public key for this peer.');
+
+$section->add($group);
 
 $group = new Form_Group('Pre-shared Key');
 
@@ -242,6 +263,31 @@ $group->add(new Form_Button(
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
 	->setHelp('New Pre-shared Key');
+
+$section->add($group);
+
+$form->add($section);
+
+$section = new Form_Section('Private Key Configuration');
+
+$section->setAttribute('id', 'private-key-conf');
+
+$group = new Form_Group('Private Key');
+
+$group->add(new Form_Input(
+	'privatekey',
+	'Private Key',
+	wg_secret_input_type()
+))->setHelp('Generated private key, not stored in config')
+   ->setAttribute('readonly', 'true');
+
+$group->add(new Form_Button(
+	'genpriv',
+	'Generate',
+	null,
+	'fa-key'
+))->addClass('btn-primary btn-sm')
+	->setHelp('New Private Key (QR Code)');
 
 $section->add($group);
 
@@ -326,6 +372,7 @@ print($form);
 </nav>
 
 <?php $genkeywarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key."); ?>
+<?php $genprivwarning = gettext("Overwrite public key? Click 'ok' to overwrite key."); ?>
 
 <script type="text/javascript">
 //<![CDATA[
@@ -353,6 +400,31 @@ events.push(function() {
 
 		// Prevents the browser from scrolling
 		return false;
+
+	});
+
+	// These are action buttons, not submit buttons
+	$('#genpriv').prop('type','button');
+
+	// Request a new pre-shared key
+	$('#genpriv').click(function(event) {
+		if ($('#publickey').val().length == 0 || confirm("<?=$genprivwarning?>")) {
+			ajaxRequest = $.ajax({
+				url: "/wg/vpn_wg_peers_edit.php",
+				type: "post",
+				dataType: "json",
+				data: {
+					act: "genpriv"
+				},
+				success: function(response, textStatus, jqXHR) {
+					$('#publickey').val(response.publicKey);
+					$('#privatekey').val(response.privateKey);
+				},
+				error: function(response) {
+					console.error('Failed QR Code generation!', response);
+				}
+			});
+		}
 
 	});
 

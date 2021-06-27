@@ -85,13 +85,56 @@ if ($_POST) {
 
 				break;
 
+			case 'qrcode':
+
+				$peer_conf = wg_peer_get_config($peer_idx)[1];
+
+				if (!empty($peer_conf['tun'])) {
+
+					$tunnel_conf = wg_tunnel_get_config_by_name($peer_conf['tun']);
+					$new_key_pair = wg_gen_keypair();
+
+					# Update the public key with our new one
+					$peer_conf['publickey'] = $new_key_pair['pubkey'];
+
+					# Update our peer config
+					$wgg['peers'][$peer_idx] = $peer_conf;
+
+					write_config("[{$wgg['pkg_name']}] Peer {$peer_conf['descr']} updated.");
+
+					wg_resync();
+
+					if (wg_is_service_running() && isset($tunnel_conf)) {
+
+						// Everything looks good so far, so mark the subsystem dirty
+						mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+						// Add tunnel to the list to apply
+						wg_apply_list_add('tunnels', $tunnel_conf);
+
+					}
+
+					# Pass the private key direct to conf generation, not stored  anywhere else
+					$peer_tunnel_conf = wg_make_peer_tunnel_conf($peer_idx, $new_key_pair['privkey']);
+					$output = [];
+
+					$esa = fn($s) => escapeshellarg($s);
+
+					exec("{$wgg['qrencode']} --size=6 --level=M --background=FFFFFF00 -o- {$esa($peer_tunnel_conf)} | {$wgg['base64']} -e",
+						$output);
+
+					$base64_encoded_qr_code = implode($output);
+
+					break;
+				}
+
 			default:
-				
+
 				// Shouldn't be here, so bail out.
 				header('Location: /wg/vpn_wg_peers.php');
 
 				break;
-				
+
 		}
 
 		$input_errors = $res['input_errors'];
@@ -146,10 +189,23 @@ display_top_tabs($tab_array);
 
 ?>
 
+<?php if (isset($base64_encoded_qr_code)) { ?>
+<div class="panel panel-default">
+	<div class="panel-heading"><h2 class="panel-title"><?=gettext("WireGuard Peer ${peer_conf['descr']} Config QR Code")?></h2></div>
+	<div class="panel-body table-responsive">
+
+		<img src="data:image/png;base64,<?=$base64_encoded_qr_code?>"  width="256" height="256" />
+
+	</div>
+</div>
+
+<?php } ?>
+
 <form name="mainform" method="post">
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Peers')?></h2></div>
 		<div class="panel-body table-responsive">
+
 			<table class="table table-hover table-striped table-condensed">
 				<thead>
 					<tr>
@@ -177,6 +233,7 @@ if (is_array($wgg['peers']) && count($wgg['peers']) > 0):
 						<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+							<?=wg_generate_qr_code_icon_link($peer, 'Generate Peer Config QR Code', "?act=qrcode&peer={$peer_idx}")?>
 							<?=wg_generate_toggle_icon_link($peer, 'Click to toggle enabled/disabled status', "?act=toggle&peer={$peer_idx}")?>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}"?>" usepost></a>
 						</td>
@@ -209,11 +266,15 @@ endif;
 
 <script type="text/javascript">
 //<![CDATA[
+events.push(function() {
+
 	$('.pubkey').click(function () {
 
 		navigator.clipboard.writeText($(this).attr('title'));
 
 	});
+
+});
 //]]>
 </script>
 

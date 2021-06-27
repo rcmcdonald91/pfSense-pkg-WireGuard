@@ -334,6 +334,28 @@ function wg_generate_toggle_icon_link($target_device, $title = '', $href = '#', 
 
 }
 
+function wg_generate_qr_code_icon_link($peer, $title = '', $href = '#') {
+
+	$hsc = fn($s) => htmlspecialchars($s);
+
+	$ret_html = null;
+
+	if (isset($peer)) {
+
+		if (!isset($peer['tun']) || $peer['tun'] === 'unassigned') {
+
+			$href = '#';
+
+			$title = 'Cannot generate QR code for unassigned peer';
+
+		}
+
+		$ret_html = "<a class=\"fa fa-qrcode\" title=\"{$hsc($title)}\" href=\"{$hsc($href)}\" usepost></a>";
+	}
+
+	return $ret_html;
+}
+
 function wg_generate_tunnel_address_popover_link($tunnel_name) {
 	global $wgg;
 

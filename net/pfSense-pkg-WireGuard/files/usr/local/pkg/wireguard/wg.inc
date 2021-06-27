@@ -1172,4 +1172,72 @@ function wg_download_tunnel($tunnel_name, $failure_redirect) {
 
 }
 
+/*
+ * Writes a WireGuard peer configuration file for a given peer/tunnel pair
+ */
+function wg_make_peer_tunnel_conf($peer_idx, $private_key) {
+	global $wgg;
+
+	$txt = "";
+
+	$peer = wg_peer_get_config($peer_idx)[1];
+	$tunnel = wg_tunnel_get_config_by_name($peer['tun'])[1];
+
+	// Process the Interface (client side) section
+	$txt .= "[Interface]\n";
+
+	if (isset($peer['endpoint'])) {
+
+		$txt .= "Address = {$peer['endpoint']}/32\n";
+
+		$txt .= "ListenPort = {$peer['port']}\n";
+
+	}
+
+	# TODO: We don't configure this on the peer or tunnel level, but it's available
+	#$txt .= "DNS = 1.1.1.1,1.0.0.1\n";
+	#
+
+	$txt .= "PrivateKey = {$private_key}\n";
+
+	$txt .= "\n";
+
+	// Process the peer (pfSense) section
+	$txt .= "[Peer]\n";
+
+	if (!empty($tunnel['privatekey'])) {
+
+		$key = wg_gen_publickey($tunnel['privatekey']);
+
+		$txt .= "PublicKey = {$key['pubkey']}\n";
+
+	}
+
+	if (!empty($peer['presharedkey'])) {
+
+		$txt .= "PresharedKey = {$peer['presharedkey']}\n";
+
+	}
+
+	if (!empty($peer['persistentkeepalive'])) {
+
+		$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
+	}
+
+
+	$port = empty($tunnel['listenport']) ? $wgg['default_port'] : $tunnel['listenport'];
+
+#	$txt .= "Endpoint = LOL:{$port}\n";
+
+	if (is_array($peer['allowedips']['row']) && count($peer['allowedips']['row']) > 0) {
+
+		$allowedips = implode(', ', array_map(fn($x) => "{$x['address']}/{$x['mask']}", $peer['allowedips']['row']));
+
+		$txt .= "AllowedIPs = {$allowedips}\n";
+
+	}
+
+	return $txt;
+}
+
 ?>
