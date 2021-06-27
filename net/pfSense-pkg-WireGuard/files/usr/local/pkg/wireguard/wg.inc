@@ -247,10 +247,11 @@ function wg_toggle_wireguard() {
 
 		return wg_service_fpm_stop();
 
-	}
+	} else {
+		
+		return false;
 
-	// Something isn't quite right...
-	return wg_service_fpm_stop();
+	}
 
 }
 

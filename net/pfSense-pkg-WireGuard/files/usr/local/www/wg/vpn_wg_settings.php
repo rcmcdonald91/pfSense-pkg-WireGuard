@@ -171,6 +171,14 @@ if (wg_is_wg_assigned()) {
 
 	$wg_enable->setDisabled();
 
+	// We still want to POST this field, make it a hidden field now
+	$form->addGlobal(new Form_Input(
+		'enable',
+		'',
+		'hidden',
+		'yes'
+	));
+
 }
 
 $section->addInput($wg_enable);

@@ -916,7 +916,7 @@ function wg_is_service_enabled() {
 
 	$enable = $wgg['config']['enable'];
 
-	return (isset($enable) && ($enable == 'on'));
+	return (isset($enable) && (($enable === 'on') || $enable === 'yes'));
 
 }
 
