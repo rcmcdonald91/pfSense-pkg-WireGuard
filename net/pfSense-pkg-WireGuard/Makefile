@@ -59,8 +59,4 @@ do-install:
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/wireguard.xml
 
-build-and-upload: package
-	scp work/pkg/pfSense-pkg-WireGuard-0.1.3.txz root@pfsense-wg-dev.genericstudent.com:.
-	ssh root@pfsense-wg-dev.genericstudent.com pkg add -f pfSense-pkg-WireGuard-0.1.3.txz
-
 .include <bsd.port.mk>
