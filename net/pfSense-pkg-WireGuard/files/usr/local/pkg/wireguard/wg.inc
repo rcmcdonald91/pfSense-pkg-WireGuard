@@ -920,13 +920,6 @@ function wg_resync() {
 
 	}
 
-	// One last thing during installation, try to start the service if the service is enabled...
-	if ($g['wireguard_installing'] && wg_is_service_enabled()) {
-
-		wg_service_fpm_start();
-
-	}
-
 	// We definitely aren't installing at this point...
 	unset($g['wireguard_installing']);
 
