@@ -368,9 +368,9 @@ function wg_service_rcfile() {
 
 	$start = $stop = array();
 
-	$start[] = "{$wgg['wg_daemon']} start";
+	$start[] 		= "{$wgg['wg_daemon']} start";
 
-	$stop[] = "{$wgg['wg_daemon']} stop";
+	$stop[] 		= "{$wgg['wg_daemon']} stop";
 
 	$rcfile['file'] 	= $wgg['service_name'];
 

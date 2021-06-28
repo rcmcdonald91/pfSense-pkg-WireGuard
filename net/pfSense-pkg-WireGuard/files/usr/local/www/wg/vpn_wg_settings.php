@@ -106,7 +106,7 @@ if ($_POST) {
 
 // Defaults for new installations
 
-$pconfig['enable'] 			= isset($wgg['config']['enable']) ? $wgg['config']['enable'] : 'on';
+$pconfig['enable'] 			= isset($wgg['config']['enable']) ? $wgg['config']['enable'] : 'off';
 
 $pconfig['keep_conf'] 			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
