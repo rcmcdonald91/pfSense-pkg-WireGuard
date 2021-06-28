@@ -217,7 +217,7 @@ $section->addInput(new Form_Input(
 	'persistentkeepalive',
 	'Keep Alive',
 	'text',
-	$pconfig['persistentkeepalive']
+	$pconfig['persistentkeepalive'],
 	['placeholder' => 'Keep Alive']
 ))->addClass('trim')
   ->setHelp('Interval (in seconds) for Keep Alive packets sent to this peer.<br />
