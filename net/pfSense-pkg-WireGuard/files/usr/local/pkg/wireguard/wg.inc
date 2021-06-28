@@ -1156,10 +1156,11 @@ function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 
 			}
 
-			if (!empty($peer['persistentkeepalive'])) {
+			$keepalive = $peer['persistentkeepalive'];
 
-				$txt .= "PersistentKeepalive = {$peer['persistentkeepalive']}\n";
-			}
+			$keepalive = (!empty($keepalive) && is_numericint($keepalive)) ? $keepalive : 0;
+
+			$txt .= "PersistentKeepalive = {$keepalive}\n";
 
 			$txt .= "\n";
 
