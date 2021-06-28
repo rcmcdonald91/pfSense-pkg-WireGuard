@@ -387,8 +387,6 @@ function wg_defaults_install() {
 	
 	write_config("[{$wgg['pkg_name']}] Package default settings applied as necessary.");
 
-	sleep(15);
-
 }
 
 function wg_service_rcfile() {
