@@ -318,9 +318,9 @@ function wg_generate_toggle_icon_link($enabled = true, $type = null, $href = '#'
 	
 	$icon = $enabled ? $icon_enabled : $icon_disabled;
 
-	$action = $enabled ? gettext('disable') : gettext('enable');
+	$action = $enabled ? gettext('Disable') : gettext('Enable');
 
-	$title = "Click to {$action} {$type}.";
+	$title = "{$action} {$type}";
 
 	$usepost = $post ? ' usepost' : null;
 
