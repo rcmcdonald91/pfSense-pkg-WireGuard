@@ -104,15 +104,8 @@ if ($_POST) {
 
 }
 
-// Defaults for new installations
-
-$pconfig['keep_conf'] 			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
-
-$pconfig['resolve_interval'] 		= isset($wgg['config']['resolve_interval']) ? $wgg['config']['default_resolve_interval'] : $wgg['resolve_interval'];
-
-$pconfig['resolve_interval_track']	= isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
-
-$pconfig['hide_secrets'] 		= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
+// Grab current configuration from the XML
+$pconfig = $wgg['config'];
 
 $shortcut_section = 'wireguard';
 

@@ -248,7 +248,7 @@ function wg_toggle_wireguard() {
 		return wg_service_fpm_stop();
 
 	} else {
-		
+
 		return false;
 
 	}
@@ -902,6 +902,9 @@ function wg_resync() {
 
 		// Update Unbound ACL by recreating it
 		wg_unbound_acl_install();
+
+		// Just as a clarity check...
+		wg_defaults_install();
 
 	}
 

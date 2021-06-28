@@ -66,6 +66,10 @@ function wg_install() {
 	// Create the WireGuard service
 	wg_service_install();
 
+	update_status("done.\n  Applying WireGuard default settings as necessary...");
+
+	wg_defaults_install();
+
 	update_status("done.\n");
 
 }
@@ -360,6 +364,26 @@ function wg_delete_temp_files() {
 		clear_subsystem_dirty($subsystem);
 
 	}
+
+}
+
+/*
+ * This just ensures that there are defaults in the XMLs.
+ * The package should function correctly without these being set at all.
+ * This is just to make sure the XML is reflecting the running behavior.
+ */
+function wg_defaults_install() {
+	global $wgg;
+
+	$wgg['config']['keep_conf']			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
+
+	$wgg['config']['resolve_interval']		= isset($wgg['config']['resolve_interval']) ? $wgg['config']['resolve_interval'] : $wgg['default_resolve_interval'];
+	
+	$wgg['config']['resolve_interval_track']	= isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
+	
+	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
+
+	write_config("[{$wgg['pkg_name']}] Package default settings applied as necessary.");
 
 }
 
