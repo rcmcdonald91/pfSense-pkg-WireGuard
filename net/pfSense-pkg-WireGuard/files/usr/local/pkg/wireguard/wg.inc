@@ -885,8 +885,6 @@ function wg_parse_cmds_array($cmds) {
 function wg_resync() {
 	global $g, $wgg;
 
-	return;
-
 	// Update globals
 	wg_globals();
 

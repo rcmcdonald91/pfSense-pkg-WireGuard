@@ -375,6 +375,9 @@ function wg_delete_temp_files() {
 function wg_defaults_install() {
 	global $wgg;
 
+	// Read latest settings
+	wg_globals();
+
 	$wgg['config']['enable']			= wg_is_service_enabled() ? $wgg['config']['enable'] : 'off';
 
 	$wgg['config']['keep_conf']			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
