@@ -910,13 +910,17 @@ function wg_is_valid_tunnel($tunnel_name, $running_state = false) {
 
 }
 
-// Checks if the service is enabled
+// Checks if the service is or should be enabled
 function wg_is_service_enabled() {
 	global $wgg;
 
 	$enable = $wgg['config']['enable'];
 
-	return (isset($enable) && (($enable === 'on') || $enable === 'yes'));
+	$is_enabled = (isset($enable) && (($enable === 'on') || $enable === 'yes'));
+
+	$should_be_enabled = wg_is_wg_assigned();
+
+	return ($is_enabled || $should_be_enabled);
 
 }
 

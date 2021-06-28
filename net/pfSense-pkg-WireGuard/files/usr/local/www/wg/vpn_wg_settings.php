@@ -106,8 +106,6 @@ if ($_POST) {
 
 // Defaults for new installations
 
-$pconfig['enable'] 			= isset($wgg['config']['enable']) ? $wgg['config']['enable'] : 'off';
-
 $pconfig['keep_conf'] 			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
 $pconfig['resolve_interval'] 		= isset($wgg['config']['resolve_interval']) ? $wgg['config']['default_resolve_interval'] : $wgg['resolve_interval'];
@@ -161,7 +159,7 @@ $wg_enable = new Form_Checkbox(
 	'enable',
 	'Enable',
 	gettext('Enable WireGuard'),
-	$pconfig['enable'] == 'on'
+	wg_is_service_enabled()
 );
 
 $wg_enable->setHelp("<span class=\"text-danger\">Note: </span>
@@ -176,7 +174,7 @@ if (wg_is_wg_assigned()) {
 		'enable',
 		'',
 		'hidden',
-		'yes'
+		(wg_is_service_enabled() ? 'yes' : 'no')
 	));
 
 }
