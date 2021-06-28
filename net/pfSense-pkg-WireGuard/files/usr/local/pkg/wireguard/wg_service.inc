@@ -227,9 +227,9 @@ function wg_service_cli_start($serialize = true) {
 	
 	$ret_code = 0;
 
-	if (!wg_is_cli() || (!wg_is_service_enabled())) {
+	if (!wg_is_service_enabled()) {
 
-		$ret_code |= WG_ERROR_SVC_START;
+		$ret_code |= WG_ERROR_SVC_DISABLED;
 
 		wg_service_parse_errors($ret_code, $serialize);
 
@@ -240,6 +240,16 @@ function wg_service_cli_start($serialize = true) {
 	if (wg_is_service_running()) {
 
 		$ret_code |= WG_ERROR_SVC_RUNNING;
+
+		wg_service_parse_errors($ret_code, $serialize);
+
+		return $ret_code;
+
+	}
+
+	if (!wg_is_cli()) {
+
+		$ret_code |= WG_ERROR_SVC_START;
 
 		wg_service_parse_errors($ret_code, $serialize);
 
@@ -380,6 +390,8 @@ function wg_restart_extra_services() {
 function wg_service_daemon() {
 	global $wgg;
 
+	$esa = fn($s) => escapeshellarg($s);
+
 	// Re-register the service environment
 	wg_register_service_env(true);
 
@@ -389,11 +401,7 @@ function wg_service_daemon() {
 	// Attempt to load the kmod, required to run the service without any tunnels configured
 	if (!is_module_loaded($wgg['kmod'])) {
 
-		$kmod = $wgg['kmod'];
-
-		wg_escapeshellarg($kmod);
-
-		mwexec("{$wgg['kldload']} {$kmod}");
+		mwexec("{$wgg['kldload']} {$esa($wgg['kmod'])}");
 
 	}
 

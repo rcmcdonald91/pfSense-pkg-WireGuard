@@ -40,10 +40,11 @@ define('WG_ERROR_IF_DOWN',		64);
 define('WG_ERROR_IF_SYNC',		128);
 define('WG_ERROR_IF_DESTROY',		256);
 
-define('WG_ERROR_SVC_RUNNING',		1);
-define('WG_ERROR_SVC_START',		2);
-define('WG_ERROR_SVC_STOP',		4);
-define('WG_ERROR_SVC_CREATE',		8);
+define('WG_ERROR_SVC_DISABLED',		1);
+define('WG_ERROR_SVC_RUNNING',		2);
+define('WG_ERROR_SVC_START',		4);
+define('WG_ERROR_SVC_STOP',		8);
+define('WG_ERROR_SVC_CREATE',		16);
 
 $wgg = array(
 	'wg'			=> '/usr/local/bin/wg',
@@ -90,6 +91,7 @@ $wgg = array(
 						WG_ERROR_IF_SYNC	=> gettext('Unable to sync WireGuard tunnel configuration with wg(8)'),
 						WG_ERROR_IF_DESTROY	=> gettext('Unable to destroy WireGuard tunnel interface')),
 					'service' => array(
+						WG_ERROR_SVC_DISABLED	=> gettext('WireGuard service is diabled'),
 						WG_ERROR_SVC_RUNNING	=> gettext('WireGuard service is already running'),
 						WG_ERROR_SVC_START	=> gettext('Unable to start WireGuard service'),
 						WG_ERROR_SVC_STOP	=> gettext('Unable to stop WireGuard service'),
