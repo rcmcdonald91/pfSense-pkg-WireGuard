@@ -375,6 +375,8 @@ function wg_delete_temp_files() {
 function wg_defaults_install() {
 	global $wgg;
 
+	$wgg['config']['enable']			= wg_is_service_enabled() ? $wgg['config']['enable'] : 'off';
+
 	$wgg['config']['keep_conf']			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
 	$wgg['config']['resolve_interval']		= isset($wgg['config']['resolve_interval']) ? $wgg['config']['resolve_interval'] : $wgg['default_resolve_interval'];
