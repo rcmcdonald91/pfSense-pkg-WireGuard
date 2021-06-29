@@ -810,7 +810,7 @@ function next_wg_port() {
 	}
 
 	// We've run out of ports
-	return false
+	return false;
 
 }
 
