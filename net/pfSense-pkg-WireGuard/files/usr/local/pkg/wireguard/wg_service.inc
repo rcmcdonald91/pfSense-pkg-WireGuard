@@ -399,11 +399,7 @@ function wg_service_daemon() {
 	wg_register_daemon_sig_handler();
 
 	// Attempt to load the kmod, required to run the service without any tunnels configured
-	if (!is_module_loaded($wgg['kmod'])) {
-
-		mwexec("{$wgg['kldload']} {$esa($wgg['kmod'])}");
-
-	}
+	wg_kld_loadunload(true);
 
 	// Now we resolve endpoint hostnames here...
 	$last_update_time = wg_resolve_endpoints();

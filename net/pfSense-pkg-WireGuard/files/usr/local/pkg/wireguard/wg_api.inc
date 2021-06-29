@@ -144,7 +144,7 @@ function wg_get_peer_idx($public_key, $tunnel_name) {
 
 	foreach ((array) $wgg['peers'] as $peer_idx => $peer){
 
-		if ($public_key == $peer['publickey'] && $tunnel_name = $peer['tun']) {
+		if ($public_key == $peer['publickey'] && $tunnel_name == $peer['tun']) {
 
 			return $peer_idx;
 
@@ -234,6 +234,8 @@ function wg_kld_loadunload($load = true, &$cmds = null) {
 
 	$ret_code = 0;
 
+	$kmod = $wgg['kmod'];
+
 	// Determine which binary to use
 	$kldbin = $load ? $wgg['kldload'] : $wgg['kldunload'];
 
@@ -242,7 +244,7 @@ function wg_kld_loadunload($load = true, &$cmds = null) {
 	if (($load && !is_module_loaded($kmod))
 	    || (!$load && is_module_loaded($kmod))) {
 
-		$cmd = "{$kldbin} {$esa($wgg['kmod'])} 2>&1";
+		$cmd = "{$kldbin} {$esa($kmod)} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'kld', $error);
 
