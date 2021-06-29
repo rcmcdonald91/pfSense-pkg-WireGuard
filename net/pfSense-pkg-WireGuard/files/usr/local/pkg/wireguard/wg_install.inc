@@ -388,7 +388,7 @@ function wg_defaults_install() {
 	
 	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 	
-	wg_write_config('Package default settings applied as necessary.', true);
+	wg_write_config('Package default settings applied as necessary.', false);
 
 }
 

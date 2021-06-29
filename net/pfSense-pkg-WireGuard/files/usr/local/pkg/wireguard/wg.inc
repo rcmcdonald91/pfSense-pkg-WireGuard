@@ -507,7 +507,7 @@ function wg_do_settings_post($post) {
 		$wgg['config'] = $pconfig;
 
 		// Sync with configuration backend
-		wg_write_config("Package settings saved.", true);
+		wg_write_config('Package settings saved.', true);
 
 		// Resync the package
 		wg_resync();
@@ -1071,7 +1071,7 @@ function wg_remove_config_settings() {
 	}
 
 	// Now write out the new config to disk
-	wg_write_config("Package configuration removed.", true);
+	wg_write_config('Package configuration removed.', false);
 
 }
 
