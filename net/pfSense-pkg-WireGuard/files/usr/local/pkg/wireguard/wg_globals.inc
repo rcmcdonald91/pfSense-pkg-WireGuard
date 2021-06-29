@@ -61,6 +61,7 @@ $wgg = array(
 	'kmod'			=> 'if_wg.ko',
 	'subsystem_prefix'	=> 'wireguard',
 	'service_name'		=> 'wireguardd',
+	'nrb'			=> '-NoReMoTeBaCkUp',
 	'applylist'		=> array(
 					'tunnels' => "{$g['tmp_path']}/.wireguard_tunnel.apply"),
 	'pkg_name'		=> 'pfSense-pkg-WireGuard',
@@ -214,6 +215,18 @@ function wg_init_config_arr(&$a_config, $keys) {
 
 	}
 	
+}
+
+/*
+ * A wrapper for write_config() to easily toggle ACB on or off
+ */
+function wg_write_config($do_acb = false, $desc = "Unknown", $backup = true, $write_config_only = false) {
+	global $wgg;
+
+	$desc = $do_acb ? $desc : "{$desc}{$wgg['nrb']}";
+
+	return write_config($desc, $backup, $write_config_only);
+
 }
 
 /*

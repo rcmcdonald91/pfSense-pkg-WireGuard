@@ -378,7 +378,7 @@ function wg_defaults_install() {
 	// Read latest settings
 	wg_globals();
 
-	$wgg['config']['enable']			= wg_is_service_enabled() ? $wgg['config']['enable'] : 'off';
+	$wgg['config']['enable']			= wg_is_service_enabled() ? 'on' : 'off';
 
 	$wgg['config']['keep_conf']			= isset($wgg['config']['keep_conf']) ? $wgg['config']['keep_conf'] : 'yes';
 
