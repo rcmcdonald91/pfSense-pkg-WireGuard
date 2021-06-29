@@ -68,7 +68,7 @@ function wg_toggle_tunnel($tunnel_name) {
 			$action_txt = $enabled ? 'disabled' : 'enabled';
 			
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_name']}] Tunnel {$tunnel['name']} {$action_txt}.");
+			wg_write_config("Tunnel {$tunnel['name']} {$action_txt}.", true);
 
 			// Resync the package
 			wg_resync();
@@ -114,7 +114,7 @@ function wg_toggle_peer($peer_idx) {
 			$action_text = $enabled ? 'disabled' : 'enabled';
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_name']}] Peer {$peer_idx} {$action_text}.");
+			wg_write_config("Peer {$peer_idx} {$action_text}.", true);
 
 			// Resync the package
 			wg_resync();
@@ -160,7 +160,7 @@ function wg_delete_peer($peer_idx) {
 			unset($wgg['peers'][$peer_idx]);
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_name']}] Peer {$peer_idx} deleted.");
+			wg_write_config("Peer {$peer_idx} deleted.", true);
 
 			// Resync the package
 			wg_resync();
@@ -214,7 +214,7 @@ function wg_delete_tunnel($tunnel_name) {
 			unset($wgg['tunnels'][$tun_idx]);
 
 			// Sync with configuration backend
-			write_config("[{$wgg['pkg_name']}] Tunnel {$tunnel['name']} deleted.");
+			wg_write_config("Tunnel {$tunnel['name']} deleted.", true);
 			
 			// Mark any peers as unassigned
 			wg_tunnel_unassign_peers($tunnel['name']);
@@ -275,7 +275,7 @@ function wg_tunnel_unassign_peers($tunnel_name) {
 	if ($changes) {
 
 		// Sync with configuration backend
-		write_config("[{$wgg['pkg_name']}] Tunnel {$tunnel_name} peers unassigned.");
+		wg_write_config("Tunnel {$tunnel_name} peers unassigned.", true);
 
 	}
 
@@ -507,7 +507,7 @@ function wg_do_settings_post($post) {
 		$wgg['config'] = $pconfig;
 
 		// Sync with configuration backend
-		write_config("[{$wgg['pkg_name']}] Package settings saved.");
+		wg_write_config("Package settings saved.", true);
 
 		// Resync the package
 		wg_resync();
@@ -571,7 +571,7 @@ function wg_do_peer_post($post) {
 		$wgg['peers'][$peer_idx] = $pconfig;
 
 		// Sync with configuration backend
-		write_config("[{$wgg['pkg_name']}] Peer {$pconfig['descr']} updated.");
+		wg_write_config("Peer {$pconfig['descr']} updated.", true);
 
 		// Resync the package
 		wg_resync();
@@ -642,7 +642,7 @@ function wg_do_tunnel_post($post) {
 		$wgg['tunnels'][$tun_idx] = $pconfig;
 
 		// Sync with configuration backend
-		write_config("[{$wgg['pkg_name']}] Tunnel {$pconfig['name']} updated.");
+		wg_write_config("Tunnel {$pconfig['name']} updated.", true;
 
 		// Resync the package
 		wg_resync();
@@ -1071,7 +1071,7 @@ function wg_remove_config_settings() {
 	}
 
 	// Now write out the new config to disk
-	write_config("[{$wgg['pkg_name']}] Package configuration removed");
+	wg_write_config("Package configuration removed.", true.);
 
 }
 

@@ -110,7 +110,7 @@ function wg_upgrade_allowedips() {
 	}
 
 	// Write the changes out to disk
-	write_config("[{$wgg['pkg_name']}] Upgraded peer allowed ips XML structure.");
+	wg_write_config('Upgraded peer allowed ips XML structure.', false);
 
 	// Read latest settings
 	wg_globals();
@@ -145,7 +145,7 @@ function wg_upgrade_allowedips() {
 	}
 	
 	// Write the changes out to disk
-	write_config("[{$wgg['pkg_name']}] Upgraded peer allowed ips XML structure.");
+	wg_write_config('Upgraded peer allowed ips XML structure.', false);
 
 	// Read latest settings
 	wg_globals();
@@ -178,7 +178,7 @@ function wg_upgrade_allowedips() {
 	}
 
 	// Write the changes out to disk
-	write_config("[{$wgg['pkg_name']}] Upgraded peer allowed ips XML structure.");
+	wg_write_config('Upgraded peer allowed ips XML structure.', false);
 
 }
 
@@ -217,7 +217,7 @@ function wg_upgrade_addresses() {
 	}
 
 	// Write the changes out to disk
-	write_config("[{$wgg['pkg_name']}] Upgraded tunnel addresses XML structure.");
+	wg_write_config('Upgraded tunnel addresses XML structure.', false);
 
 	// Read latest settings
 	wg_globals();
@@ -252,7 +252,7 @@ function wg_upgrade_addresses() {
 	}
 
 	// Write the changes out to disk
-	write_config("[{$wgg['pkg_name']}] Upgraded tunnel addresses XML structure.");
+	wg_write_config('Upgraded tunnel addresses XML structure.', false);
 
 	// Read latest settings
 	wg_globals();
@@ -285,7 +285,7 @@ function wg_upgrade_addresses() {
 	}
 
 	// Write the changes out to disk
-	write_config("[{$wgg['pkg_name']}] Upgraded tunnel addresses XML structure.");
+	wg_write_config('Upgraded tunnel addresses XML structure.', false);
 
 }
 
@@ -388,7 +388,7 @@ function wg_defaults_install() {
 	
 	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 	
-	write_config("[{$wgg['pkg_name']}] Package default settings applied as necessary.");
+	wg_write_config('Package default settings applied as necessary.', true);
 
 }
 
@@ -502,7 +502,7 @@ function wg_earlyshellcmd_install() {
 
 	}
 
-	write_config("[{$wgg['pkg_name']}] earlyshellcmd(s) installed.");
+	wg_write_config('earlyshellcmd(s) installed.', false);
 
 }
 
@@ -553,7 +553,7 @@ function wg_earlyshellcmd_deinstall() {
 
 	}
 
-	write_config("[{$wgg['pkg_name']}] earlyshellcmd(s) de-installed.");
+	wg_write_config('earlyshellcmd(s) de-installed.', false);
 
 }
 
@@ -580,7 +580,7 @@ function wg_ifgroup_install() {
 
 	}
 
-	write_config("[{$wgg['pkg_name']}] Interface group ({$wgg['ifgroupentry']['ifname']}) installed.");
+	wg_write_config("Interface group ({$wgg['ifgroupentry']['ifname']}) installed.", false);
 
 }
 
@@ -608,7 +608,7 @@ function wg_ifgroup_deinstall() {
 
 	}
 
-	write_config("[{$wgg['pkg_name']}] Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.");
+	wg_write_config("Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.", false);
 
 }
 
@@ -636,7 +636,7 @@ function wg_unbound_acl_deinstall() {
 
 	}
 
-	write_config("[{$wgg['pkg_name']}] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) de-installed.");
+	wg_write_config("Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) de-installed.", false);
 
 }
 
@@ -686,7 +686,7 @@ function wg_unbound_acl_install() {
 
 	}
 
-	write_config("[{$wgg['pkg_name']}] Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) installed.");
+	wg_write_config("Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) installed.", false);
 
 }
 

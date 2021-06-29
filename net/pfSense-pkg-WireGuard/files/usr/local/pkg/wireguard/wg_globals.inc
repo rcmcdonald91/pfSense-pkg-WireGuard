@@ -218,12 +218,18 @@ function wg_init_config_arr(&$a_config, $keys) {
 }
 
 /*
- * A wrapper for write_config() to easily toggle ACB on or off
+ * A wrapper for write_config() with the ability to easily toggle ACB on or off
+ * 
+ * Ephemeral changes to the config should not hammer the ACB system. Only changes
+ * to <installedpackages><wireguard>...</wireguard></installedpackages> tree should
+ * invoke a ACB backup event.
  */
-function wg_write_config($do_acb = false, $desc = "Unknown", $backup = true, $write_config_only = false) {
+function wg_write_config($desc = 'unknown', $do_acb = false, $backup = true, $write_config_only = false) {
 	global $wgg;
 
-	$desc = $do_acb ? $desc : "{$desc}{$wgg['nrb']}";
+	$descACB = fn($desc, $do_acb) => $do_acb ? $desc : "{$desc}{$wgg['nrb']}";
+
+	$desc = "[{$wgg['pkg_name']}] {$descACB($desc, $do_acb)}";
 
 	return write_config($desc, $backup, $write_config_only);
 
