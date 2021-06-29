@@ -642,7 +642,7 @@ function wg_do_tunnel_post($post) {
 		$wgg['tunnels'][$tun_idx] = $pconfig;
 
 		// Sync with configuration backend
-		wg_write_config("Tunnel {$pconfig['name']} updated.", true;
+		wg_write_config("Tunnel {$pconfig['name']} updated.", true);
 
 		// Resync the package
 		wg_resync();
@@ -1071,7 +1071,7 @@ function wg_remove_config_settings() {
 	}
 
 	// Now write out the new config to disk
-	wg_write_config("Package configuration removed.", true.);
+	wg_write_config("Package configuration removed.", true);
 
 }
 
