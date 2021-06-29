@@ -435,37 +435,27 @@ function wg_service_deinstall($force_stop = false) {
 
 }
 
-function wg_destroy_tunnels() {
+function wg_destroy_tunnels(&$cmds = null) {
 	global $wgg;
 
-	$cmds = array();
-
-	// We only care about the ones that are actually running
-	$tunnels_to_destroy = wg_get_running_ifs();
+	// Assume this will be successful...
+	$res = true;
 
 	// Tear down interfaces
-	foreach ($tunnels_to_destroy as $tunnel) {
+	foreach (wg_get_running_ifs() as $tunnel) {
 
-		if ($res = wg_ifconfig_if_destroy($tunnel)) {
+		$res &= wg_ifconfig_if_destroy($tunnel, $cmds);
 		
-			$cmds[] = $res;
+	}
 
-		}
+	// Now attempt to unload the module if the above was successful
+	if ($res) {
+
+		$res &= wg_kld_loadunload(false, $cmds);
 
 	}
 
-	// Now unload the kernel module if it is still loaded
-	if ($ret_code == 0 && is_module_loaded($wgg['kmod'])) {
-
-		$kmod = $wgg['kmod'];
-
-		wg_escapeshellarg($kmod);
-
-		$ret_code |= mwexec("{$wgg['kldunload']} {$kmod}");
-
-	}
-
-	return $ret_code;
+	return $res;
 
 }
 
@@ -474,6 +464,8 @@ function wg_destroy_tunnels() {
  */
 function wg_earlyshellcmd_install() {
 	global $config, $wgg;
+
+	wg_globals();
 
 	wg_earlyshellcmd_deinstall();
 
@@ -519,6 +511,8 @@ function wg_earlyshellcmd_install() {
  */
 function wg_earlyshellcmd_deinstall() {
 	global $config, $wgg;
+
+	wg_globals();
 
 	init_config_arr(array('system', 'earlyshellcmd'));
 	
@@ -569,6 +563,8 @@ function wg_earlyshellcmd_deinstall() {
 function wg_ifgroup_install() {
 	global $config, $wgg;
 
+	wg_globals();
+
 	wg_ifgroup_deinstall();
 
 	init_config_arr(array('ifgroups', 'ifgroupentry'));
@@ -593,6 +589,8 @@ function wg_ifgroup_install() {
  */
 function wg_ifgroup_deinstall() {
 	global $config, $wgg;
+
+	wg_globals();
 
 	init_config_arr(array('ifgroups', 'ifgroupentry'));
 
@@ -620,6 +618,8 @@ function wg_ifgroup_deinstall() {
 function wg_unbound_acl_deinstall() {
 	global $config, $wgg;
 
+	wg_globals();
+
 	init_config_arr(array('unbound', 'acls'));
 
 	$a_unbound_acls = &$config['unbound']['acls'];
@@ -645,6 +645,8 @@ function wg_unbound_acl_deinstall() {
  */
 function wg_unbound_acl_install() {
 	global $config, $wgg;
+
+	wg_globals();
 
 	wg_unbound_acl_deinstall();
 

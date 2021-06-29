@@ -27,9 +27,6 @@ require_once('globals.inc');
 
 global $g, $wgg;
 
-define('WG_ERROR_PEER_SET',		1);
-define('WG_ERROR_PEER_ENDPOINT',	2);
-
 define('WG_ERROR_IF_NAME',		1);
 define('WG_ERROR_IF_CREATE',		2);
 define('WG_ERROR_IF_GROUP',		4);
@@ -39,6 +36,12 @@ define('WG_ERROR_IF_UP',		32);
 define('WG_ERROR_IF_DOWN',		64);
 define('WG_ERROR_IF_SYNC',		128);
 define('WG_ERROR_IF_DESTROY',		256);
+
+define('WG_ERROR_KLD_LOAD',		1);
+define('WG_ERROR_KLD_UNLOAD',		2);
+
+define('WG_ERROR_PEER_SET',		1);
+define('WG_ERROR_PEER_ENDPOINT',	2);
 
 define('WG_ERROR_SVC_DISABLED',		1);
 define('WG_ERROR_SVC_RUNNING',		2);
@@ -77,9 +80,6 @@ $wgg = array(
 					300 => array('class' => 'text-warning', 'title' => gettext('Greater than 5 minutes')),
 					0 => array('class' => 'text-success', 'title' => gettext('Less than 5 minutes'))),
 	'error_flags'		=> array(
-					'peer' => array(
-						WG_ERROR_PEER_SET	=> gettext('Unable to set peer configuration'),
-						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint')),
 					'interface' => array(
 						WG_ERROR_IF_NAME	=> gettext('Invalid WireGuard tunnel name'),
 						WG_ERROR_IF_CREATE	=> gettext('Unable to create WireGuard tunnel interface'),
@@ -90,6 +90,12 @@ $wgg = array(
 						WG_ERROR_IF_DOWN	=> gettext('Unable to bring down WireGuard tunnel interface'),
 						WG_ERROR_IF_SYNC	=> gettext('Unable to sync WireGuard tunnel configuration with wg(8)'),
 						WG_ERROR_IF_DESTROY	=> gettext('Unable to destroy WireGuard tunnel interface')),
+					'kld' => array(
+						WG_ERROR_KLD_LOAD	=> gettext('Unable to load WireGuard kernel module'),
+						WG_ERROR_KLD_UNLOAD	=> gettext('Unable to unload WireGuard kernel module')),
+					'peer' => array(
+						WG_ERROR_PEER_SET	=> gettext('Unable to set peer configuration'),
+						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint')),
 					'service' => array(
 						WG_ERROR_SVC_DISABLED	=> gettext('WireGuard service is disabled'),
 						WG_ERROR_SVC_RUNNING	=> gettext('WireGuard service is already running'),

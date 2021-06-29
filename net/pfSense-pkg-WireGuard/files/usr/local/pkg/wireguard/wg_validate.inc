@@ -99,7 +99,7 @@ function wg_validate_tunnel_post($pconfig, $idx_from_post) {
 	// Assigned tunnels don't need these validation checks
 	if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
-		foreach ($pconfig['addresses']['row'] as $address) {
+		foreach ((array) $pconfig['addresses']['row'] as $address) {
 
 			// Remove any accidental whitespace
 			$address['address'] = trim($address['address']);
@@ -203,7 +203,7 @@ function wg_validate_peer_post($pconfig, $posted_peer_idx) {
 	// Check allowed ips
 	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 
-		foreach ($pconfig['allowedips']['row'] as $row) {
+		foreach ((array) $pconfig['allowedips']['row'] as $row) {
 
 			$row['address'] = trim($row['address']);
 
