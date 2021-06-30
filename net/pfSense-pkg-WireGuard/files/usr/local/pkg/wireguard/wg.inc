@@ -50,25 +50,21 @@ function wg_toggle_tunnel($tunnel_name) {
 
 	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
-		$enabled = ($tunnel['enabled'] == 'yes');
+		$is_enabled = (isset($tunnel['enabled']) && ($tunnel['enabled']) == 'yes');
 
-		if ($enabled && is_wg_tunnel_assigned($tunnel['name'])) {
+		// Toggle the tunnel state
+		$tunnel['enabled']	= $is_enabled ? 'no' : 'yes';
 
-			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
-
-			$input_errors[] = "Cannot disable {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
-
-		}
+		$input_errors		= wg_validate_tunnel_toggle($tunnel);
 
 		if (empty($input_errors)) {
 
-			// Now we toggle the tunnel
-			$wgg['tunnels'][$tun_idx]['enabled'] = $enabled ? 'no' : 'yes';
+			$wgg['tunnels'][$tun_idx] = $tunnel;
 
-			$action_txt = $enabled ? 'disabled' : 'enabled';
+			$action_txt = $is_enabled ? 'Disabled' : 'Enabled';
 			
 			// Sync with configuration backend
-			wg_write_config("Tunnel {$tunnel['name']} {$action_txt}.", true);
+			wg_write_config("{$action_text} tunnel {$tunnel['name']}.", true);
 
 			// Resync the package
 			wg_resync();
@@ -103,18 +99,22 @@ function wg_toggle_peer($peer_idx) {
 
 	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
-		$enabled = ($peer['enabled'] == 'yes');
+		$is_enabled = (isset($peer['enabled']) && ($peer['enabled']) == 'yes');
+
+		// Toggle the peer state
+		$peer['enabled']	= $is_enabled ? 'no' : 'yes';
+
+		$input_errors		= wg_validate_peer_toggle($peer);
 
 		// Boilerplate...
 		if (empty($input_errors)) {
 
-			// Toggle the peer
-			$wgg['peers'][$peer_idx]['enabled'] = $enabled ? 'no' : 'yes';
+			$wgg['peers'][$peer_idx] = $peer;
 
-			$action_text = $enabled ? 'disabled' : 'enabled';
+			$action_text = $is_enabled ? 'Disabled' : 'Enabled';
 
 			// Sync with configuration backend
-			wg_write_config("Peer {$peer_idx} {$action_text}.", true);
+			wg_write_config("{$action_text} peer {$peer['publickey']} on {$peer['tun']}.", true);
 
 			// Resync the package
 			wg_resync();
@@ -153,6 +153,8 @@ function wg_delete_peer($peer_idx) {
 
 	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
+		$input_errors		wg_validate_peer_delete($peer);
+
 		// Boilerplate...
 		if (empty($input_errors)) {
 
@@ -160,7 +162,7 @@ function wg_delete_peer($peer_idx) {
 			unset($wgg['peers'][$peer_idx]);
 
 			// Sync with configuration backend
-			wg_write_config("Peer {$peer_idx} deleted.", true);
+			wg_write_config("Deleted peer {$peer_idx} ({$peer['publickey']}).", true);
 
 			// Resync the package
 			wg_resync();
@@ -199,14 +201,7 @@ function wg_delete_tunnel($tunnel_name) {
 
 	if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($tunnel_name)) {
 
-		// We can't delete assigned tunnels
-		if (is_wg_tunnel_assigned($tunnel['name'])) {
-
-			$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
-
-			$input_errors[] = "Cannot delete {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
-
-		}
+		$input_errors		= wg_validate_tunnel_delete($tunnel);
 
 		if (empty($input_errors)) {
 
@@ -214,7 +209,7 @@ function wg_delete_tunnel($tunnel_name) {
 			unset($wgg['tunnels'][$tun_idx]);
 
 			// Sync with configuration backend
-			wg_write_config("Tunnel {$tunnel['name']} deleted.", true);
+			wg_write_config("Deleted tunnel {$tunnel['name']}.", true);
 			
 			// Mark any peers as unassigned
 			wg_tunnel_unassign_peers($tunnel['name']);
@@ -275,7 +270,7 @@ function wg_tunnel_unassign_peers($tunnel_name) {
 	if ($changes) {
 
 		// Sync with configuration backend
-		wg_write_config("Tunnel {$tunnel_name} peers unassigned.", true);
+		wg_write_config("Unassigned tunnel {$tunnel_name} peers.", true);
 
 	}
 
@@ -507,7 +502,7 @@ function wg_do_settings_post($post) {
 		$wgg['config'] = $pconfig;
 
 		// Sync with configuration backend
-		wg_write_config('Package settings saved.', true);
+		wg_write_config('Saved package settings.', true);
 
 		// Resync the package
 		wg_resync();
@@ -571,7 +566,7 @@ function wg_do_peer_post($post) {
 		$wgg['peers'][$peer_idx] = $pconfig;
 
 		// Sync with configuration backend
-		wg_write_config("Peer {$pconfig['descr']} updated.", true);
+		wg_write_config("Updated peer {$peer_idx} ({$peer['publickey']}).", true);
 
 		// Resync the package
 		wg_resync();
@@ -642,7 +637,7 @@ function wg_do_tunnel_post($post) {
 		$wgg['tunnels'][$tun_idx] = $pconfig;
 
 		// Sync with configuration backend
-		wg_write_config("Tunnel {$pconfig['name']} updated.", true);
+		wg_write_config("Updated tunnel {$pconfig['name']}.", true);
 
 		// Resync the package
 		wg_resync();
@@ -1071,7 +1066,7 @@ function wg_remove_config_settings() {
 	}
 
 	// Now write out the new config to disk
-	wg_write_config('Package configuration removed.', false);
+	wg_write_config('Removed package configuration and settings.', false);
 
 }
 

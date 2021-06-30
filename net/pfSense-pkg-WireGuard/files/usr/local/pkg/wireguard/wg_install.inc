@@ -388,7 +388,7 @@ function wg_defaults_install() {
 	
 	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 	
-	wg_write_config('Package default settings applied as necessary.', false);
+	wg_write_config('Applied package default settings as necessary.', false);
 
 }
 
@@ -502,7 +502,7 @@ function wg_earlyshellcmd_install() {
 
 	}
 
-	wg_write_config('earlyshellcmd(s) installed.', false);
+	wg_write_config('Installed earlyshellcmd(s).', false);
 
 }
 
@@ -553,7 +553,7 @@ function wg_earlyshellcmd_deinstall() {
 
 	}
 
-	wg_write_config('earlyshellcmd(s) de-installed.', false);
+	wg_write_config('De-installed earlyshellcmd(s).', false);
 
 }
 
@@ -580,7 +580,7 @@ function wg_ifgroup_install() {
 
 	}
 
-	wg_write_config("Interface group ({$wgg['ifgroupentry']['ifname']}) installed.", false);
+	wg_write_config("Installed interface group ({$wgg['ifgroupentry']['ifname']}).", false);
 
 }
 
@@ -608,7 +608,7 @@ function wg_ifgroup_deinstall() {
 
 	}
 
-	wg_write_config("Interface group ({$wgg['ifgroupentry']['ifname']}) de-installed.", false);
+	wg_write_config("De-installed interface group ({$wgg['ifgroupentry']['ifname']}).", false);
 
 }
 
@@ -636,7 +636,7 @@ function wg_unbound_acl_deinstall() {
 
 	}
 
-	wg_write_config("Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) de-installed.", false);
+	wg_write_config("De-installed Unbound ACL group ({$wgg['unboundaclentry']['aclname']}).", false);
 
 }
 
@@ -686,7 +686,7 @@ function wg_unbound_acl_install() {
 
 	}
 
-	wg_write_config("Unbound ACL group ({$wgg['unboundaclentry']['aclname']}) installed.", false);
+	wg_write_config("Installed Unbound ACL group ({$wgg['unboundaclentry']['aclname']}).", false);
 
 }
 

@@ -28,7 +28,61 @@ require_once('util.inc'); 		// is_subnet, is_port, is_hostname, is_ipaddr
 // WireGuard includes
 require_once('wireguard/wg_api.inc');
 
-wg_globals();
+function wg_validate_peer_toggle($peer) {
+
+	$input_errors = array();
+
+	// Boilerplate...
+
+	return $input_errors;
+
+}
+
+function wg_validate_peer_delete($peer) {
+
+	$input_errors = array();
+
+	// Boilerplate...
+
+	return $input_errors;
+	
+}
+
+function wg_validate_tunnel_delete($tunnel) {
+
+	$input_errors = array();
+
+	// We can't delete assigned tunnels
+	if (is_wg_tunnel_assigned($tunnel['name'])) {
+
+		$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+		$input_errors[] = "Cannot delete {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})";
+
+	}
+
+	return $input_errors;
+
+}
+
+function wg_validate_tunnel_toggle($tunnel) {
+
+	$input_errors = array();
+
+	$is_enabled = (isset($tunnel['enabled']) && ($tunnel['enabled']) == 'yes');
+
+	if (!$is_enabled && is_wg_tunnel_assigned($tunnel['name'])) {
+
+		$wg_pfsense_if = wg_get_pfsense_interface_info($tunnel['name']);
+
+		$input_errors[] = "Cannot disable {$tunnel['name']} while it is assigned to {$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']}).";
+
+	}
+
+	// Consumers expect an array
+	return $input_errors;
+
+}
 
 /*
  * Validate package settings
