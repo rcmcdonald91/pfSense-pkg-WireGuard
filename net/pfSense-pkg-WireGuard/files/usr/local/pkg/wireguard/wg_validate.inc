@@ -22,8 +22,8 @@
 
 // pfSense includes 
 require_once('config.inc');
-require_once('pfsense-utils.inc');	// where_is_ipaddr_configured
-require_once('util.inc'); 		// is_subnet, is_port, is_hostname, is_ipaddr
+require_once('pfsense-utils.inc');
+require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/wg_api.inc');

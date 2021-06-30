@@ -167,7 +167,7 @@ if (!empty($a_devices)):
 										<?=htmlspecialchars(wg_truncate_pretty($peer['public_key'], 16))?>
 									</td>
 									<td><?=htmlspecialchars($peer['endpoint'])?></td>
-									<td><?=wg_generate_peer_allowedips_popup_link(wg_get_peer_idx($peer['config']['publickey'], $peer['config']['tun']))?></td>
+									<td><?=wg_generate_peer_allowedips_popup_link(wg_peer_get_array_idx($peer['config']['publickey'], $peer['config']['tun']))?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_rx']))?></td>
 									<td><?=htmlspecialchars(format_bytes($peer['transfer_tx']))?></td>
 								</tr>

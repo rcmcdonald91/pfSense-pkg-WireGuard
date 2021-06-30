@@ -31,6 +31,8 @@ require_once('service-utils.inc');
 // WireGuard includes
 require_once('wireguard/wg.inc');
 
+global $wgg;
+
 if (isset($argv[1])) {
 
 	$ret_code = 0;

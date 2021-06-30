@@ -23,8 +23,8 @@
 
 // pfSense includes
 require_once('config.inc');
-require_once('interfaces.inc');		// interface_configure
-require_once('util.inc');		// get_configured_interface_list_by_realif, mwexec
+require_once('interfaces.inc');
+require_once('util.inc');
 require_once('services.inc');
 require_once('service-utils.inc');
 
@@ -80,8 +80,6 @@ function wg_get_running_config($extras = false, $json = false) {
 					// Gets some extra information about tunnels not returned by `wg show all dump`
 					$tunnel_if_stats		= pfSense_get_interface_stats($current_device);
 
-					$tun_idx			= wg_get_tunnel_array_index($current_device);
-
 					$tmp_tunnel['status']		= wg_interface_status($current_device) ? 'up' : 'down';
 
 					$tmp_tunnel['transfer_rx']	= $tunnel_if_stats['inbytes'];
@@ -94,7 +92,7 @@ function wg_get_running_config($extras = false, $json = false) {
 
 					$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
 
-					$tmp_tunnel['config']		= $wgg['tunnels'][$tun_idx];
+					[$tun_idx, $tmp_tunnel['config'], $is_new] = wg_tunnel_get_config_by_name($current_device);
 
 				}
 
@@ -116,11 +114,8 @@ function wg_get_running_config($extras = false, $json = false) {
 
 				if ($extras) {
 
-					// Gets some extra information about peers not returned by `wg show all dump`
-					$peer_idx = wg_get_peer_idx($tmp_peer['public_key'], $last_device);
-
-					$tmp_peer['config']		= $wgg['peers'][$peer_idx];
-
+					[$peer_idx, $tmp_peer['config'], $is_new] = wg_peer_get_config_by_name($last_device, $tmp_peer['public_key']);
+			
 				}
 
 				// Add the peer to the array
@@ -132,14 +127,14 @@ function wg_get_running_config($extras = false, $json = false) {
 
 	}
 
-	return ($json ? json_encode($ret_config, JSON_UNESCAPED_SLASHES) : $ret_config);
+	return ($json ? json_encode($ret_config) : $ret_config);
 
 }
 
 /*
  * Returns a peer's config array index by public key and tunnel name
  */
-function wg_get_peer_idx($public_key, $tunnel_name) {
+function wg_peer_get_array_idx($public_key, $tunnel_name) {
 	global $wgg;
 
 	foreach ((array) $wgg['peers'] as $peer_idx => $peer){
@@ -817,7 +812,7 @@ function next_wg_port() {
 }
 
 // Wrapper to return just the xml array index
-function wg_get_tunnel_array_index($tunnel_name) {
+function wg_tunnel_get_array_idx($tunnel_name) {
 	global $wgg;
 
 	foreach ((array) $wgg['tunnels'] as $tun_idx => $tunnel) {
@@ -943,10 +938,19 @@ function wg_is_wg_assigned($disabled = true) {
 
 }
 
+function wg_peer_get_config_by_name($tunnel_name, $public_key) {
+	global $wgg;
+
+	$peer_idx = wg_peer_get_array_idx($public_key, $tunnel_name);
+
+	return wg_peer_get_config($peer_idx, false);
+
+}
+
 function wg_tunnel_get_config_by_name($tunnel_name) {
 	global $wgg;
 
-	$tun_idx = wg_get_tunnel_array_index($tunnel_name);
+	$tun_idx = wg_tunnel_get_array_idx($tunnel_name);
 
 	return wg_tunnel_get_config($tun_idx, false);
 
@@ -954,6 +958,8 @@ function wg_tunnel_get_config_by_name($tunnel_name) {
 
 function wg_tunnel_get_config($tun_idx, $return_empty = false) {
 	global $wgg;
+
+	wg_globals();
 
 	$tunnel = array();
 
@@ -973,6 +979,8 @@ function wg_tunnel_get_config($tun_idx, $return_empty = false) {
 
 function wg_peer_get_config($peer_idx, $return_empty = false) {
 	global $wgg;
+
+	wg_globals();
 
 	$peer = array();
 

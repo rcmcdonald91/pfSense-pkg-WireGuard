@@ -48,7 +48,7 @@ if (isset($_REQUEST['tun'])) {
 
 	$tun = $_REQUEST['tun'];
 
-	$tun_idx = wg_get_tunnel_array_index($_REQUEST['tun']);
+	$tun_idx = wg_tunnel_get_array_idx($_REQUEST['tun']);
 
 }
 
