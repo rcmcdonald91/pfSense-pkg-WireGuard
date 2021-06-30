@@ -153,7 +153,7 @@ function wg_delete_peer($peer_idx) {
 
 	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
 
-		$input_errors		wg_validate_peer_delete($peer);
+		$input_errors		= wg_validate_peer_delete($peer);
 
 		// Boilerplate...
 		if (empty($input_errors)) {
