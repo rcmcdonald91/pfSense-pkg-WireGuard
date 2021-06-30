@@ -224,6 +224,8 @@ function wg_service_fpm_start() {
 function wg_service_cli_start($serialize = true) {
 	global $g, $wgg;
 
+	$getText = fn($s) => gettext($s);
+
 	// Set the process name
 	cli_set_process_title('WireGuard service');
 	
@@ -265,7 +267,7 @@ function wg_service_cli_start($serialize = true) {
 	if (platform_booting()) {
 
 		// Output during booting must be to STDERR for some reason
-		fwrite(STDERR, "Configuring WireGuard tunnels...");
+		fwrite(STDERR, gettext('Configuring WireGuard tunnels...'));
 
 		// Supresses ifconfig spew 
 		mute_kernel_msgs();
@@ -288,7 +290,7 @@ function wg_service_cli_start($serialize = true) {
 
 		unmute_kernel_msgs();
 
-		fwrite(STDERR, "done. \n");
+		fwrite(STDERR, "{$getText('done.')}\n");
 
 		return $ret_code;
 
