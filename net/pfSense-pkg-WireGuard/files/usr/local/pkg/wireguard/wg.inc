@@ -737,7 +737,7 @@ function wg_destroy_rogue_tunnels(&$cmds = null) {
  * This builds, rebuilds, or destroys tunnel interfaces
  * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolve_endpoints = true, $json = false) {
+function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpoints = true, $json = false) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -754,10 +754,8 @@ function wg_tunnel_sync($tunnel_names = null, $restart_services = false, $resolv
 	// This is only necessary if the sevice is running
 	if (wg_is_service_running()) {
 
-		$tunnel_names = (is_null($tunnel_names) || !is_array($tunnel_names)) ? wg_get_configured_ifs() : $tunnel_names;
-
 		// Sync each tunnel
-		foreach ($tunnel_names as $tunnel_name) {
+		foreach ((array) $tunnel_names as $tunnel_name) {
 
 			// Attempt to sync the tunnel
 			$tun_sync_status = wg_tunnel_sync_by_name($tunnel_name, false);

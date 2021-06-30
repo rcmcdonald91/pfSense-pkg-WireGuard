@@ -272,13 +272,11 @@ function wg_service_cli_start($serialize = true) {
 
 	}
 
-	/*
-	 * Build all (i.e. null) the tunnels
-	 *
-	 * NOTE: Don't restart services, they will be restarted later...
-	 * NOTE: Don't resolve endpoints, they will be resolved later...
-	 */
-	$sync_status = wg_tunnel_sync(null, false, false);
+	// Get the tunnel interfaces to build
+	$ifs_to_build = wg_get_configured_ifs();
+
+	// Now build them...
+	$sync_status = wg_tunnel_sync($ifs_to_build, false, false);
 
 	if ($sync_status['ret_code'] <> 0 ) {
 
@@ -356,7 +354,7 @@ function wg_service_cli_start($serialize = true) {
 
 	} else {
 
-		// Nowe we restart any additional services
+		// Now we restart any additional services
 		$ret_code = wg_restart_extra_services();
 
 		return $ret_code;
