@@ -76,6 +76,10 @@ $wgg = array(
 					'aclname' => 'WireGuard',
 					'aclaction' => 'allow',
 					'description' => 'WireGuard Unbound ACL (DO NOT EDIT/DELETE!)'),
+	'listenportalias'	=> array(
+					'name' => 'WireGuardListenPorts',
+					'type' => 'port',
+					'descr' => 'WireGuard ListenPort Alias (DO NOT EDIT/DELETE!)'),
 	'handshake_thresholds' 	=> array(
 					86400 => array('class' => 'text-danger', 'title' => gettext('Greater than 1 day')),
 					300 => array('class' => 'text-warning', 'title' => gettext('Greater than 5 minutes')),

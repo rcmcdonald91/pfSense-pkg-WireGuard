@@ -896,6 +896,9 @@ function wg_resync() {
 		// Update Unbound ACL by recreating it
 		wg_unbound_acl_install();
 
+		// Update ListenPort Alias by recreating it
+		wg_listenport_alias_install();
+
 		// Just as a clarity check...
 		wg_defaults_install();
 

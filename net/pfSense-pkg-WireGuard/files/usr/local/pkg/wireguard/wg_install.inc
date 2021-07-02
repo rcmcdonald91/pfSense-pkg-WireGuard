@@ -459,6 +459,14 @@ function wg_destroy_tunnels(&$cmds = null) {
 
 }
 
+function wg_listenport_alias_install() {
+	global $config, $wgg;
+
+	wg_globals();
+
+}
+
+
 /*
  * This function creates earlyshellcmd entries in the config
  */
@@ -646,6 +654,9 @@ function wg_unbound_acl_deinstall() {
 function wg_unbound_acl_install() {
 	global $config, $wgg;
 
+	// Format tunnel description if one is configured
+	$tunDescr = fn($tunnel) => !empty($tunnel['descr']) ? " ({$tunnel['descr']})" : null;
+
 	wg_globals();
 
 	wg_unbound_acl_deinstall();
@@ -673,7 +684,7 @@ function wg_unbound_acl_install() {
 
 				$tmp_acls[$network_idx]['mask']		= $network['mask'];
 
-				$tmp_acls[$network_idx]['description']	= "{$network['tun']} ({$network['descr']})";
+				$tmp_acls[$network_idx]['description']	= "{$network['tun']}{$tunDescr($network['descr'])}";
 
 				$wgg['unboundaclentry']['row'] = $tmp_acls;
 
