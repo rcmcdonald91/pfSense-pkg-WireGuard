@@ -1,6 +1,6 @@
 <?php
 /*
- * wg.inc
+ * wg_wgconfig.inc
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
@@ -31,8 +31,9 @@ class wgconfig {
 	const LINE_COMMENT		= '_comment';
 
 	const KEY_ATTR			= 'PublicKey';
-	const PEER_ATTR			= 'Peer';
+
 	const INTERFACE_ATTR		= 'Interface';
+	const PEER_ATTR			= 'Peer';
 
 	protected $tunnel_path;
 
@@ -199,7 +200,7 @@ class wgconfig {
 
 		$last_empty_line_in_section = -1;
 
-		foreach ($this->lines as $i => $line) {
+		foreach ((array) $this->lines as $i => $line) {
 
 			$line = trim($line);
 
@@ -397,15 +398,23 @@ class wgconfig {
 
 			$section_data[self::SECTION_RAW] = array_slice($this->lines, $section_data[self::SECTION_FIRSTLINE], ($section_data[self::SECTION_LASTLINE] - $section_data[self::SECTION_FIRSTLINE] + 1));
 
-			if ($section == 'interface') {
+			switch (strtolower($section)) {
 
-				$this->interface = $section_data;
+				// Interface Section
+				case (strtolower(self::INTERFACE_ATTR)):
 
-			} elseif ($section == 'peer') {
+					$this->interface = $section_data;
 
-				[self::LINE_VALUE => $value, self::LINE_COMMENT => $comment] = $section_data[self::KEY_ATTR];
+					break;
 
-				$this->peers[$value[0]] = $section_data;
+				// Peer Section
+				case (strtolower(self::PEER_ATTR)):
+
+					[self::LINE_VALUE => $value, self::LINE_COMMENT => $comment] = $section_data[self::KEY_ATTR];
+
+					$this->peers[$value[0]] = $section_data;
+
+					break;
 
 			}
 
@@ -493,3 +502,5 @@ class wgconfig {
 	}
 
 }
+
+?>
