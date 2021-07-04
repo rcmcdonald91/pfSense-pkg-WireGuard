@@ -22,35 +22,72 @@
 
 class wgconfig {
 
-	const SECTION_FIRSTLINE		= '_index_firstline';
-	const SECTION_LASTLINE		= '_index_lastline';
-	const SECTION_RAW		= '_rawdata';
+	private const SECTION_FIRSTLINE		= '_index_firstline';
+	private const SECTION_LASTLINE		= '_index_lastline';
+	private const SECTION_RAW		= '_rawdata';
 
-	const LINE_ATTR			= '_attr';
-	const LINE_VALUE		= '_value';
-	const LINE_COMMENT		= '_comment';
+	private const LINE_ATTR			= '_attr';
+	private const LINE_VALUE		= '_value';
+	private const LINE_COMMENT		= '_comment';
 
-	const KEY_ATTR			= 'PublicKey';
+	private const KEY_ATTR			= 'PublicKey';
 
-	const INTERFACE_ATTR		= 'Interface';
-	const PEER_ATTR			= 'Peer';
+	private const INTERFACE_ATTR		= 'Interface';
+	private const PEER_ATTR			= 'Peer';
 
-	const VALID_SECTIONS		= array(
-						'interface' => self::INTERFACE_ATTR,
-						'peer' => self::PEER_ATTR);
+	private const VALID_SECTIONS		= array(
+							'interface' => self::INTERFACE_ATTR,
+							'peer' => self::PEER_ATTR);
 	protected $tunnel_path;
 
-	protected $lines		= array();
-	protected $comment_lines	= array();
+	protected $lines			= array();
+	protected $comment_lines		= array();
 
-	protected $interface		= array();
-	protected $peers		= array();
+	protected $interface			= array();
+	protected $peers			= array();
 
 	function __construct($tunnel_path = null, $default_local = true) {
 
 		$this->tunnel_path = self::tunnel_absolute_path($tunnel_path, $default_local);
 
 		$this->initialize_file();
+
+	}
+
+	function initialize_file($leading_comment = null) {
+
+		$this->lines = array();
+
+		$this->_add_leading_comment($leading_comment);
+
+		$this->lines[] = sprintf('[%s]', self::INTERFACE_ATTR);
+
+	}
+
+	function read_file() {
+
+		// Flush lines cache before reading the file
+		unset($this->lines);
+
+		if (file_exists($this->tunnel_path)) {
+
+			$this->lines = explode(PHP_EOL, file_get_contents($this->tunnel_path));
+
+		}
+
+	}
+
+	function write_file() {
+
+		if (!empty($this->lines)) {
+
+			$old_mask = umask(077);
+
+			file_put_contents($this->tunnel_path, implode(PHP_EOL, $this->lines), LOCK_EX);
+
+			umask($old_mask);
+
+		}
 
 	}
 
@@ -72,26 +109,39 @@ class wgconfig {
 
 	}
 
-	function write_file() {
+	function get_path() {
 
-		if (!empty($this->lines)) {
-
-			file_put_contents($this->tunnel_path, implode(PHP_EOL, $this->lines), LOCK_EX);
-
-		}
+		return $this->tunnel_path;
 
 	}
 
-	function read_file() {
+	function set_path($tunnel_path = null, $default_local = true) {
 
-		// Flush lines cache before reading the file
-		unset($this->lines);
+		$this->tunnel_path = self::tunnel_absolute_path($tunnel_path, $default_local);
 
-		if (file_exists($this->tunnel_path)) {
+	}
 
-			$this->lines = explode(PHP_EOL, file_get_contents($this->tunnel_path));
+	function get_peers() {
 
-		}
+		$this->_parse_lines();
+
+		return $this->peers;
+
+	}
+
+	function get_interface() {
+
+		$this->_parse_lines();
+
+		return $this->interface;
+
+	}
+
+	function get_peer($key) {
+
+		$peers = $this->get_peers();
+
+		return $peers[$key];
 
 	}
 
@@ -113,41 +163,23 @@ class wgconfig {
 
 	}
 
-	function set_path($tunnel_path = null, $default_local = true) {
+	function get_interface_attr($attr, $as_line = false) {
 
-		$this->tunnel_path = self::tunnel_absolute_path($tunnel_path, $default_local);
+		$interface = $this->get_interface();
 
-	}
+		$value = $interface[$attr][self::LINE_VALUE];
 
-	function get_path() {
-
-		return $this->tunnel_path;
+		return $as_line ? implode(',', (array) $value) : $value;
 
 	}
 
-	function get_interface() {
+	function get_peer_attr($key, $attr, $as_line = false) {
 
-		$this->_parse_lines();
+		$peers = $this->get_peers();
 
-		return $this->interface;
+		$value = $peers[$key][$attr][self::LINE_VALUE];
 
-	}
-	
-	function get_peers() {
-
-		$this->_parse_lines();
-
-		return $this->peers;
-
-	}
-
-	function initialize_file($leading_comment = null) {
-
-		$this->lines = array();
-
-		$this->_add_leading_comment($leading_comment);
-
-		$this->lines[] = sprintf('[%s]', self::INTERFACE_ATTR);
+		return $as_line ? implode(',', (array) $value) : $value;
 
 	}
 
@@ -186,28 +218,6 @@ class wgconfig {
 		$this->_add_attr($key, $attr, $value, $leading_comment, $append_as_line);
 
 	}
-
-	function get_interface_attr($attr, $as_line = false) {
-
-		$interface = $this->get_interface();
-
-		$value = $interface[$attr][self::LINE_VALUE];
-
-		return $as_line ? implode(',', (array) $value) : $value;
-
-	}
-
-	function get_peer_attr($key, $attr, $as_line = false) {
-
-		$peers = $this->get_peers();
-
-		$value = $peers[$key][$attr][self::LINE_VALUE];
-
-		return $as_line ? implode(',', (array) $value) : $value;
-
-	}
-
-
 
 	/*
 	 * Below are the private functions
@@ -379,7 +389,9 @@ class wgconfig {
 
 		$line_found = false;
 
-		if ([self::SECTION_FIRSTLINE => $section_firstline, self::SECTION_LASTLINE => $section_lastline] = $this->_get_section_range($key)) {
+		// Check if the section is valid and if the desired attribute value is valid...
+		if (([self::SECTION_FIRSTLINE => $section_firstline, self::SECTION_LASTLINE => $section_lastline] = $this->_get_section_range($key))
+		    && (!empty($value))) {
 
 			foreach (range($section_firstline + 1, $section_lastline + 1) as $i) {
 
@@ -411,7 +423,7 @@ class wgconfig {
 
 				$line_value[] = $value;
 
-				$line_values = implode(', ', $line_value);
+				$line_values = implode(',', $line_value);
 
 				$line_comment = (strlen($line_comment) > 0) ? " # {$line_comment}" : null;
 
@@ -549,5 +561,6 @@ class wgconfig {
 	}
 
 }
+
 
 ?>

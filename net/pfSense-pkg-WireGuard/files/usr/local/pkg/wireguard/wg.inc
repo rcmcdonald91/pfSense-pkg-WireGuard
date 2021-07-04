@@ -31,6 +31,7 @@ require_once('wireguard/wg_api.inc');
 require_once('wireguard/wg_install.inc');
 require_once('wireguard/wg_service.inc');
 require_once('wireguard/wg_validate.inc');
+require_once('wireguard/wg_wgconfig.inc');
 
 global $wgg;
 
@@ -1077,100 +1078,51 @@ function wg_remove_config_settings() {
 function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	global $wgg;
 
-	$txt = "# This WireGuard config file has been created automatically. Do not edit!\n\n";
+	// Init new wgconfig object
+	$wc = new wgconfig($tunnel['name'], true);
 
-	$txt .= "# Description: {$tunnel['descr']}\n";
+	$wc->set_path("{$wgg['conf_path']}/{$tunnel['name']}.conf");
 
-	// Process Interfaces section
-	$txt .= "[Interface]\n";
+	$wc->initialize_file("Description: {$tunnel['descr']}");
 
-	if (!empty($tunnel['privatekey'])) {
+	// Process interface PrivateKey
+	$key = wg_gen_publickey($tunnel['privatekey']);
 
-		$key = wg_gen_publickey($tunnel['privatekey']);
+	$wc->set_interface_attr('PrivateKey', $key['privkey_clamped']);
 
-		if (!$key['was_clamped']) {
+	// Process interface ListenPort
+	$wc->set_interface_attr('ListenPort', $tunnel['listenport']);
 
-			$txt .= "# The provided PrivateKey was not pre-clamped by the key generator.\n";
-
-			$txt .= "# PrivateKey = {$key['privkey']}\n";
-
-			$txt .= "# PublicKey = {$key['pubkey']}\n";
-
-		}
-
-		$txt .= "PrivateKey = {$key['privkey_clamped']}\n";
-
-	}
-
-	if (!empty($tunnel['listenport'])) {
-
-		$txt .= "ListenPort = {$tunnel['listenport']}\n";
-
-	}
-
-	$txt .= "\n";
-
-	// Process peers section
+	// Process peer sections
 	foreach (wg_tunnel_get_peers_config($tunnel['name']) as [$peer_idx, $peer, $is_new]) {
 
 		if (isset($peer['enabled']) && $peer['enabled'] == 'yes') {
 
-			$txt .= "# Peer: {$peer['descr']}\n";
+			// Process peer entry and PublicKey
+			$wc->add_peer($peer['publickey'], "Peer: {$peer['descr']}");
 
-			$txt .= "[Peer]\n";
+			// Process PresharedKey
+			$wc->set_peer_attr($peer['publickey'], 'PresharedKey', $peer['presharedkey']);
 
-			if (!empty($peer['publickey'])) {
+			// Process AllowedIPs
+			foreach ((array) $peer['allowedips']['row'] as $ip) {
 
-				$txt .= "PublicKey = {$peer['publickey']}\n";
-
-			}
-
-			if (!empty($peer['presharedkey'])) {
-
-				$txt .= "PresharedKey = {$peer['presharedkey']}\n";
+				$wc->add_peer_attr($peer['publickey'], 'AllowedIPs', "{$ip['address']}/{$ip['mask']}");
 
 			}
 
-			if (is_array($peer['allowedips']['row']) && count($peer['allowedips']['row']) > 0) {
-
-				$allowedips = implode(', ', array_map(fn($x) => "{$x['address']}/{$x['mask']}", $peer['allowedips']['row']));
-
-				$txt .= "AllowedIPs = {$allowedips}\n";
-
-			}
-
-			if (!empty($peer['endpoint'])) {
-
-				$peer['endpoint'] = is_ipaddrv6($peer['endpoint']) ? "[{$peer['endpoint']}]" : $peer['endpoint'];
-
-				$peer['port'] = empty($peer['port']) ? $wgg['default_port'] : $peer['port'];
-
-				$comment = $include_endpoint ? null : '# ';
-
-				// NOTE: Endpoint needs to be commented out to avoid potential failures caused by DNS
-				$txt .= "{$comment}Endpoint = {$peer['endpoint']}:{$peer['port']}\n";
-
-			}
-
+			// Process PersistentKeepalive
 			$keepalive = $peer['persistentkeepalive'];
 
 			$keepalive = (!empty($keepalive) && is_numericint($keepalive)) ? $keepalive : 0;
 
-			$txt .= "PersistentKeepalive = {$keepalive}\n";
-
-			$txt .= "\n";
+			$wc->set_peer_attr($peer['publickey'], 'PersistentKeepalive', $keepalive);
 
 		}
 
 	}
 
-	$conf_path = "{$wgg['conf_path']}/{$tunnel['name']}.conf";
-
-	$old_mask = umask(077);
-
-	file_put_contents($conf_path, $txt);
-
-	umask($old_mask);
+	$wc->write_file();
 
 }
 
