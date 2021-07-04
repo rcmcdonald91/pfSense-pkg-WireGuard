@@ -35,6 +35,9 @@ class wgconfig {
 	const INTERFACE_ATTR		= 'Interface';
 	const PEER_ATTR			= 'Peer';
 
+	const VALID_SECTIONS		= array(
+						'interface' => self::INTERFACE_ATTR,
+						'peer' => self::PEER_ATTR);
 	protected $tunnel_path;
 
 	protected $lines		= array();
@@ -43,11 +46,29 @@ class wgconfig {
 	protected $interface		= array();
 	protected $peers		= array();
 
-	function __construct($tunnel_path, $default_local = true) {
+	function __construct($tunnel_path = null, $default_local = true) {
 
 		$this->tunnel_path = self::tunnel_absolute_path($tunnel_path, $default_local);
 
 		$this->initialize_file();
+
+	}
+
+	function get_conf_string() {
+
+		if (!empty($this->lines)) {
+
+			return implode(PHP_EOL, $this->lines);
+
+		}
+
+	}
+
+	function set_conf_string($conf_string) {
+
+		unset($this->lines);
+
+		$this->lines = explode(PHP_EOL, $conf_string);
 
 	}
 
@@ -92,7 +113,7 @@ class wgconfig {
 
 	}
 
-	function set_path($tunnel_path, $default_local = true) {
+	function set_path($tunnel_path = null, $default_local = true) {
 
 		$this->tunnel_path = self::tunnel_absolute_path($tunnel_path, $default_local);
 
@@ -165,6 +186,28 @@ class wgconfig {
 		$this->_add_attr($key, $attr, $value, $leading_comment, $append_as_line);
 
 	}
+
+	function get_interface_attr($attr, $as_line = false) {
+
+		$interface = $this->get_interface();
+
+		$value = $interface[$attr][self::LINE_VALUE];
+
+		return $as_line ? implode(',', (array) $value) : $value;
+
+	}
+
+	function get_peer_attr($key, $attr, $as_line = false) {
+
+		$peers = $this->get_peers();
+
+		$value = $peers[$key][$attr][self::LINE_VALUE];
+
+		return $as_line ? implode(',', (array) $value) : $value;
+
+	}
+
+
 
 	/*
 	 * Below are the private functions
@@ -240,7 +283,7 @@ class wgconfig {
 
 				$section_data[self::SECTION_LASTLINE] = $i;
 				
-				if (!in_array($section, array('interface', 'peer'))) {
+				if (!in_array($section, array_keys(self::VALID_SECTIONS))) {
 
 					continue;
 
@@ -473,21 +516,25 @@ class wgconfig {
 	 * Below are static helper functions
 	*/
 
-	static function tunnel_absolute_path($tunnel_path, $default_local = true) {
+	static function tunnel_absolute_path($tunnel_path = null, $default_local = true) {
 
-		$path = pathinfo($tunnel_path);
+		if (!is_null($tunnel_path)) {
 
-		if ($path['basename'] == $tunnel_path) {
+			$path = pathinfo($tunnel_path);
 
-			if (empty($path['extension'])) {
+			if ($path['basename'] == $tunnel_path) {
 
-				$tunnel_path .= '.conf';
+				if (empty($path['extension'])) {
+
+					$tunnel_path .= '.conf';
+
+				}
+
+				$root = $default_local ? '/usr/local' : null;
+
+				$tunnel_path = "{$root}/etc/wireguard/{$tunnel_path}";
 
 			}
-
-			$root = $default_local ? '/usr/local' : null;
-
-			$tunnel_path = "{$root}/etc/wireguard/{$tunnel_path}";
 
 		}
 
