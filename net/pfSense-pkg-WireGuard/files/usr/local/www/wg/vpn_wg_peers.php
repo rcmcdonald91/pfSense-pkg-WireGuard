@@ -209,11 +209,15 @@ endif;
 
 <script type="text/javascript">
 //<![CDATA[
+events.push(function() {
+
 	$('.pubkey').click(function () {
 
 		navigator.clipboard.writeText($(this).attr('title'));
 
 	});
+
+});
 //]]>
 </script>
 
