@@ -29,6 +29,8 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/widgets/include
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/widgets/widgets
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg/js
 
 	${MKDIR} ${STAGEDIR}${DATADIR}
@@ -44,6 +46,12 @@ do-install:
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/pkg_wireguard.inc \
 		${STAGEDIR}${PREFIX}/www/shortcuts
+
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/widgets/include/wireguard.inc \
+		${STAGEDIR}${PREFIX}/www/widgets/include
+
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/widgets/widgets/wireguard.widget.php \
+		${STAGEDIR}${PREFIX}/www/widgets/widgets
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/wg/*.php \
 		${STAGEDIR}${PREFIX}/www/wg
