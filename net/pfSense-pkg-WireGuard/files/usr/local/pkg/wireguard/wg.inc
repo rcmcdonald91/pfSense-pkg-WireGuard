@@ -773,7 +773,10 @@ function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpo
 
 		}
 		
-		// Reload the filter
+		// Reconfigure system routing
+		system_routing_configure();
+		
+		// Reconfigure pf packet filter
 		filter_configure();
 
 		// Handle any extra services that need restarting
