@@ -49,41 +49,36 @@ else:
 
 ?>
 <div class="table-responsive panel-body">
-        <table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
-                <thead>
-                        <th><?=gettext('Tunnel')?></th>
-                        <th><?=gettext('Description')?></th>
-                        <th><?=gettext('# Peers')?></th>
-                        <th><?=gettext('Listen Port')?></th>
-                        <th><?=gettext('RX')?></th>
-                        <th><?=gettext('TX')?></th>
-                </thead>
-                <tbody>
+	<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
+		<thead>
+			<th><?=gettext('Tunnel')?></th>
+			<th><?=gettext('Description')?></th>
+			<th><?=gettext('# Peers')?></th>
+			<th><?=gettext('Listen Port')?></th>
+			<th><?=gettext('RX')?></th>
+			<th><?=gettext('TX')?></th>
+		</thead>
+		<tbody>
 <?php
-
-	        foreach ($a_devices as $device_name => $device):
+foreach ($a_devices as $device_name => $device):
 ?>
-                        <tr class="tunnel-entry">
-                                <td>
-                                        <?=wg_interface_status_icon($device['status'])?>
-                                        <a href="wg/vpn_wg_tunnels_edit.php?tun=<?=htmlspecialchars($device_name)?>"><?=htmlspecialchars($device_name)?>
-                                </td>
-                                <td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
-                                <td><?=count($device['peers'])?></td>
-                                <td><?=htmlspecialchars($device['listen_port'])?></td>
-                                <td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
-                                <td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
+			<tr class="tunnel-entry">
+				<td>
+					<?=wg_interface_status_icon($device['status'])?>
+					<a href="wg/vpn_wg_tunnels_edit.php?tun=<?=htmlspecialchars($device_name)?>"><?=htmlspecialchars($device_name)?>
+				</td>
+				<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
+				<td><?=count($device['peers'])?></td>
+				<td><?=htmlspecialchars($device['listen_port'])?></td>
+				<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
+				<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 			</tr>
 <?php
-	endforeach;
-
+endforeach;
 ?>
-	</tbody>
-
-</table>
-
+		</tbody>
+	</table>
+</div>
 <?php
-
 endif;
-
 ?>
