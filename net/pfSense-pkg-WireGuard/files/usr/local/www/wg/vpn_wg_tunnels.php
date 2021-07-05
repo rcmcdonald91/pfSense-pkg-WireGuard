@@ -300,6 +300,6 @@ events.push(function() {
 </script>
 
 <?php
-include('wireguard/wg_foot.inc');
+include('wireguard/includes/wg_foot.inc');
 include('foot.inc');
 ?>
