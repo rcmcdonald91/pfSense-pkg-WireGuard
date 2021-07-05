@@ -124,7 +124,7 @@ function wg_get_running_config($extras = false, $connected_peers = false, $json 
 				if ($connected_peers) {
 
 					// Compare time since latest handshake time to threshold time
-					if (($current_time - $tmp_peer['peer']['latest_handshake']) <= $wgg['connected_threshold']) {
+					if (($current_time - $tmp_peer['latest_handshake']) <= $wgg['connected_threshold']) {
 
 						// Add the peer to the array
 						$ret_config[$last_device]['peers'][$a_device[1]] = $tmp_peer;
