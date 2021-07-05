@@ -1,6 +1,6 @@
 <?php
 /*
- * wg_wgconfig.inc
+ * wgconfig.class.php
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
