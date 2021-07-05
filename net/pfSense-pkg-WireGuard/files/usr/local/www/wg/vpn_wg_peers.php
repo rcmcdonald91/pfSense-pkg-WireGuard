@@ -32,8 +32,8 @@ require_once('functions.inc');
 require_once('guiconfig.inc');
 
 // WireGuard includes
-require_once('wireguard/wg.inc');
-require_once('wireguard/wg_guiconfig.inc');
+require_once('wireguard/includes/wg.inc');
+require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
@@ -209,11 +209,15 @@ endif;
 
 <script type="text/javascript">
 //<![CDATA[
+events.push(function() {
+
 	$('.pubkey').click(function () {
 
 		navigator.clipboard.writeText($(this).attr('title'));
 
 	});
+
+});
 //]]>
 </script>
 

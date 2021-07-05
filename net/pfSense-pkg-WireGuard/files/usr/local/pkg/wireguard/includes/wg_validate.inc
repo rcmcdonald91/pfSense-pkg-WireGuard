@@ -26,7 +26,7 @@ require_once('pfsense-utils.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wireguard/wg_api.inc');
+require_once('wireguard/includes/wg_api.inc');
 
 function wg_validate_peer_toggle($peer) {
 

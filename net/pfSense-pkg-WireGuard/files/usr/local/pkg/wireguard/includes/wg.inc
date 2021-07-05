@@ -27,11 +27,10 @@ require_once('gwlb.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wireguard/wg_api.inc');
-require_once('wireguard/wg_install.inc');
-require_once('wireguard/wg_service.inc');
-require_once('wireguard/wg_validate.inc');
-require_once('wireguard/wg_wgconfig.inc');
+require_once('wireguard/includes/wg_api.inc');
+require_once('wireguard/includes/wg_install.inc');
+require_once('wireguard/includes/wg_service.inc');
+require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
 
@@ -1081,7 +1080,7 @@ function wg_remove_config_settings() {
 function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 	global $wgg;
 
-	// Init new wgconfig object
+	// Init a new wgconfig object
 	$wc = new wgconfig($tunnel['name'], true);
 
 	$wc->set_path("{$wgg['conf_path']}/{$tunnel['name']}.conf");
@@ -1117,7 +1116,7 @@ function wg_make_tunnel_conf_file($tunnel, $include_endpoint = false) {
 			// Process PersistentKeepalive
 			$keepalive = $peer['persistentkeepalive'];
 
-			$keepalive = (!empty($keepalive) && is_numericint($keepalive)) ? $keepalive : 0;
+			$keepalive = (!empty($keepalive) && is_numericint($keepalive)) ? $keepalive : '0';
 
 			$wc->set_peer_attr($peer['publickey'], 'PersistentKeepalive', $keepalive);
 
@@ -1153,5 +1152,20 @@ function wg_download_tunnel($tunnel_name, $failure_redirect) {
 	header("Location: {$failure_redirect}");
 
 }
+
+function wg_autoloader($classname) {
+	global $wgg;
+
+	$path = "{$wgg['wg_classes']}/{$classname}.class.php";
+
+	if (file_exists($path)){
+
+		require_once($path);
+
+	}
+
+}
+
+spl_autoload_register('wg_autoloader');
 
 ?>

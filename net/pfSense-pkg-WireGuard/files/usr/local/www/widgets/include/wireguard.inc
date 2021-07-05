@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-$wireguard_title = gettext("WireGuard");
-$wireguard_title_link = "/wg/status_wireguard.php";
+$wireguard_title = gettext('WireGuard');
+$wireguard_title_link = '/wg/status_wireguard.php';
 
 ?>
