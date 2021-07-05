@@ -51,7 +51,7 @@ print_info_box(gettext('No WireGuard status information is available.'), 'warnin
 else:
 
 ?>
-<div class="table-responsive panel-body">
+<div class="table-responsive panel-body" id="wireguard_status">
 	<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 		<thead>
 			<th><?=gettext('Tunnel')?></th>
@@ -82,6 +82,46 @@ endforeach;
 		</tbody>
 	</table>
 </div>
+
+<?php
+
+/* for AJAX response, we only need the panels */
+if ($_REQUEST['ajax']) {
+	exit;
+}
+
+?>
+
+<script type="text/javascript">
+//<![CDATA[
+
+	events.push(function(){
+
+		// Callback function called by refresh system when data is retrieved
+		function wireguard_callback(s) {
+			$('#wireguard_status').html(s);
+		}
+
+		// POST data to send via AJAX
+		var postdata = {
+			ajax: "ajax"
+		};
+
+		// Create an object defining the widget refresh AJAX call
+		var wireguardObject = new Object();
+		wireguardObject.name = "wireguard";
+		wireguardObject.url = "/widgets/widgets/wireguard.widget.php";
+		wireguardObject.callback = wireguard_callback;
+		wireguardObject.parms = postdata;
+		wireguardObject.freq = 5;
+
+		// Register the AJAX object
+		register_ajax(wireguardObject);
+
+	});
+
+//]]>
+</script>
 <?php
 endif;
 ?>
