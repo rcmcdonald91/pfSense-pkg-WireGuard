@@ -24,8 +24,8 @@ require_once('guiconfig.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wireguard/wg.inc');
-require_once('wireguard/wg_globals.inc');
+require_once('wireguard/includes/wg.inc');
+require_once('wireguard/includes/wg_globals.inc');
 
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;

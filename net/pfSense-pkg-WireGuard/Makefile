@@ -26,7 +26,8 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
-	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/classes
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/includes
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/widgets/include
@@ -41,8 +42,11 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard.xml \
 		${STAGEDIR}${PREFIX}/pkg
 
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/*.inc \
-		${STAGEDIR}${PREFIX}/pkg/wireguard
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/classes/*.class.php \
+		${STAGEDIR}${PREFIX}/pkg/wireguard/classes
+
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/includes/*.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard/includes
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/pkg_wireguard.inc \
 		${STAGEDIR}${PREFIX}/www/shortcuts

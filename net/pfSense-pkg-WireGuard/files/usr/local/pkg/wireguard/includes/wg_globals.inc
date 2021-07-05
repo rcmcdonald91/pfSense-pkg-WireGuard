@@ -57,7 +57,7 @@ $wgg = array(
 	'kldunload'		=> '/sbin/kldunload',
 	'php'			=> '/usr/local/bin/php',
 	'php_wg'		=> '/usr/local/bin/php_wg',
-	'wg_includes'		=> '/usr/local/pkg/wireguard',
+	'wg_pkg_root'		=> '/usr/local/pkg/wireguard',
 	'kmod'			=> 'if_wg.ko',
 	'subsystem_prefix'	=> 'wireguard',
 	'service_name'		=> 'wireguardd',
@@ -115,6 +115,9 @@ $wgg = array(
 );
 
 // These all depend on one more more of the above values
+
+$wgg['wg_classes']		= "{$wgg['wg_pkg_root']}/classes";
+$wgg['wg_includes']		= "{$wgg['wg_pkg_root']}/includes";
 
 $wgg['conf_paths_to_clean']	= array($wgg['conf_path'], '/etc/wireguard', '/etc/wg');
 $wgg['xml_paths_to_clean']	= array($wgg['xml_path'], array('wireguard'));
