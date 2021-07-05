@@ -417,7 +417,7 @@ function wg_should_reresolve_endpoints($last_update_time) {
 	try {
 
 		// Get the current timestamp
-		$current_time = (new DateTime)->getTimestamp();
+		$current_time = (new DateTimeImmutable)->getTimestamp();
 
 		// Calculate the time for the next update event
 		$time_to_update = $last_update_time->getTimestamp() + wg_get_endpoint_resolve_interval();

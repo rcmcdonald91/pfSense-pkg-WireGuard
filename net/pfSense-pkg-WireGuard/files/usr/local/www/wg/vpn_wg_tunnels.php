@@ -169,7 +169,7 @@ display_top_tabs($tab_array);
 						<th><?=gettext("Public Key")?></th>
 						<th><?=gettext("Address / Assignment")?></th>
 						<th><?=gettext("Listen Port")?></th>
-						<th><?=gettext("# Peers")?></th>
+						<th><?=gettext("Peers")?></th>
 						<th><?=gettext("Actions")?></th>
 					</tr>
 				</thead>

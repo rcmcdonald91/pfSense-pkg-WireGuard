@@ -108,7 +108,7 @@ $a_devices = wg_get_status();
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
-				<th><?=gettext('# Peers')?></th>
+				<th><?=gettext('Peers')?></th>
 				<th><?=gettext('Public Key')?></th>
 				<th><?=gettext('Address / Assignment')?></th>
 				<th><?=gettext('MTU')?></th>

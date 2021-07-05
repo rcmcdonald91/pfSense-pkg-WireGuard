@@ -37,7 +37,8 @@ global $wgg;
 
 wg_globals();
 
-$a_devices = wg_get_status();
+// For the wideget we only want the number of active peers
+$a_devices = wg_get_status(true);
 
 if (empty($wgg['tunnels'])):
 
@@ -55,7 +56,7 @@ else:
 		<thead>
 			<th><?=gettext('Tunnel')?></th>
 			<th><?=gettext('Description')?></th>
-			<th><?=gettext('# Peers')?></th>
+			<th><?=gettext('Active Peers')?></th>
 			<th><?=gettext('Listen Port')?></th>
 			<th><?=gettext('RX')?></th>
 			<th><?=gettext('TX')?></th>
