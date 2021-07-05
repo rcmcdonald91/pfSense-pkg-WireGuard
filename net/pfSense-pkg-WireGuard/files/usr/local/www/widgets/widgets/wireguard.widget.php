@@ -24,12 +24,14 @@
 // pfSense includes
 require_once('guiconfig.inc');
 require_once('util.inc');
-require_once('/usr/local/www/widgets/include/wireguard.inc');
 
 // WireGuard includes
-require_once('wireguard/wg.inc');
-require_once('wireguard/wg_guiconfig.inc');
-require_once('wireguard/wg_service.inc');
+require_once('wireguard/includes/wg.inc');
+require_once('wireguard/includes/wg_guiconfig.inc');
+require_once('wireguard/includes/wg_service.inc');
+
+// Widget includes
+require_once('/usr/local/www/widgets/include/wireguard.inc');
 
 global $wgg;
 
