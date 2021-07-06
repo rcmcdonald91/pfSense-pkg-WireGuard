@@ -79,6 +79,12 @@ if ($_POST) {
 
 				break;
 
+			case 'qrcode':
+
+				$qrcode = wg_generate_peer_config($peer_idx);
+
+				break;
+
 			case 'delete':
 				
 				$res = wg_delete_peer($peer_idx);
@@ -146,6 +152,40 @@ display_top_tabs($tab_array);
 
 ?>
 
+<?php if (isset($qrcode)) { ?>
+
+<?=print_info_box(gettext('Scanning may fail if the distance is too great'), 'info', null)?>
+
+<div class="panel panel-default">
+	<div class="panel-heading"><h2 class="panel-title"><?=gettext("WireGuard Peer Config QR Code")?></h2></div>
+	<div class="panel-body table-responsive">
+
+		<div id="peer-qr-code"></div>
+
+		<script type="text/javascript" src="js/qrcode.min.js"></script>
+		<script type="text/javascript">
+
+			//<![CDATA[
+			events.push(function() {
+
+				var qrcode = new QRCode(document.getElementById("peer-qr-code"), {
+					text: <?=json_encode($qrcode)?>,
+					width: 200,
+					height: 200,
+					colorDark : "#000000",
+					colorLight : "#ffffff",
+					correctLevel : QRCode.CorrectLevel.H
+				});
+
+			});
+
+		</script>	
+
+	</div>
+</div>
+
+<?php } ?>
+
 <form name="mainform" method="post">
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Peers')?></h2></div>
@@ -177,6 +217,7 @@ if (is_array($wgg['peers']) && count($wgg['peers']) > 0):
 						<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 						<td style="cursor: pointer;">
 							<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+							<?=wg_generate_qr_code_icon_link($peer, 'Generate Peer Config QR Code', "?act=qrcode&peer={$peer_idx}")?>
 							<?=wg_generate_toggle_icon_link(($peer['enabled'] == 'yes'), 'peer', "?act=toggle&peer={$peer_idx}")?>
 							<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}"?>" usepost></a>
 						</td>
