@@ -251,6 +251,34 @@ function wg_peer_status_class($peer = null) {
 	return 'disabled';
 }
 
+// Generates a qr code icon link based on the status of the target and it's associated tunnel
+function wg_generate_qr_code_icon_link($peer, $title = '', $href = '#') {
+
+	$hsc = fn($s) => htmlspecialchars($s);
+
+	$ret_html = null;
+
+	$usepost = 'usepost';
+
+	if (isset($peer)) {
+
+		if (!isset($peer['tun']) || $peer['tun'] === 'unassigned') {
+
+			$href = '#';
+
+			$usepost = '';
+
+			$title = 'Cannot generate QR code for unassigned peer';
+
+		}
+
+		$ret_html = "<a class=\"fa fa-qrcode\" title=\"{$hsc($title)}\" href=\"{$hsc($href)}\" {$usepost}></a>";
+
+	}
+
+	return $ret_html;
+}
+
 // Generates a toggle icon link based on the status of the target
 function wg_generate_toggle_icon_link($enabled = true, $type = null, $href = '#', $post = true, $icon_enabled = 'fa-ban', $icon_disabled = 'fa-check-square-o') {
 	$s = fn($x) => $x;
