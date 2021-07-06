@@ -53,20 +53,22 @@ function wg_do_widget_settings_post($post, $user_settings) {
 function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 	global $wgg;
 
-	$hd = fn($x) => $x;
+	/*
+	 * A simple hack to use functions inside heredoc strings
+	 * This also allows translation scripts to pick up strings normally by scraping gettext() calls
+	 */
 
-	$hsc = fn($s) => htmlspecialchars($s);
+	$hd = fn($x) => $x;
 
 	$a_devices = wg_get_status();
 
-	// We need to filter the list of peers for those recently active
 	$current_time = (new DateTimeImmutable)->getTimestamp();
 
 	if (empty($wgg['tunnels'])) {
 
 		$data_html = 	<<<"ROW"
 				<tr>
-					<td colspan="9">{$hd(gettext('No WireGuard tunnels have been configured.'), 'warning', null)}</td>
+					<td colspan="9">{$hd(gettext('No WireGuard tunnels have been configured.'))}</td>
 				</tr>
 
 				ROW;
@@ -75,7 +77,7 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 
 		$data_html =	<<<"ROW"
 				<tr>
-					<td colspan="9">{$hd(gettext('No WireGuard tunnels have been configured.'), 'warning', null)}</td>
+					<td colspan="9">{$hd(gettext('The WireGuard service is not running.'))}</td>
 				</tr>
 
 				ROW;
@@ -88,7 +90,11 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 
 			$active_peers = array_filter($device['peers'], function ($x) use ($current_time, $wireguard_activity_threshold) {
 
-				// 0 to disable and show all peers
+				/* 
+				 * We need to filter the list of peers for those recently active
+				 * or 0 to disable and show all peers...
+				 */
+				
 				return (($wireguard_activity_threshold == 0) || (($current_time - $x['latest_handshake']) <= $wireguard_activity_threshold));
 
 			});
@@ -97,13 +103,13 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 					<tr>
 						<td>
 							{$hd(wg_interface_status_icon($device['status']))}
-							<a href="wg/vpn_wg_tunnels_edit.php?tun={$hsc($device_name)}">{$hsc($device_name)}</a>
+							<a href="wg/vpn_wg_tunnels_edit.php?tun={$hd(htmlspecialchars($device_name))}">{$hd(htmlspecialchars($device_name))}</a>
 						</td>
-						<td>{$hsc(wg_truncate_pretty($device['config']['descr'], 16))}</td>
-						<td>{$hsc(count($active_peers))}</td>
-						<td>{$hsc($device['listen_port'])}</td>
-						<td>{$hsc(format_bytes($device['transfer_rx']))}</td>
-						<td>{$hsc(format_bytes($device['transfer_tx']))}</td>
+						<td>{$hd(htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16)))}</td>
+						<td>{$hd(htmlspecialchars(count($active_peers)))}</td>
+						<td>{$hd(htmlspecialchars($device['listen_port']))}</td>
+						<td>{$hd(htmlspecialchars(format_bytes($device['transfer_rx'])))}</td>
+						<td>{$hd(htmlspecialchars(format_bytes($device['transfer_tx'])))}</td>
 					</tr>
 
 					ROW;

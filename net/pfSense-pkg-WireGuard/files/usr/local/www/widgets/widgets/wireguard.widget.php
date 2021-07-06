@@ -95,21 +95,23 @@ if (isset($_POST['save'])) {
 		<input type="hidden" name="save" value="save" />
 
 		<div class="form-group">
-			<label for="<?=$widgetkey?>_refresh_interval" class="col-sm-3 control-label"><?=gettext('Refresh Interval')?></label>
-			<div class="col-sm-9">
-				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" min="1" max="10" class="form-control" />
+			<label for="<?=$widgetkey?>_refresh_interval" class="col-sm-4 control-label"><?=gettext('Refresh Interval')?></label>
+			<div class="col-sm-6">
+				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="1" min="1" max="10" class="form-control" />
 			</div>
+			<?=gettext('Ticks')?>
 		</div>
 
 		<div class="form-group">
-			<label for="<?=$widgetkey?>_activity_threshold" class="col-sm-3 control-label"><?=gettext('Activity Threshold')?></label>
-			<div class="col-sm-9">
-				<input type="number" id="<?=$widgetkey?>_activity_threshold" name="<?=$widgetkey?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" class="form-control" />
+			<label for="<?=$widgetkey?>_activity_threshold" class="col-sm-4 control-label"><?=gettext('Activity Threshold')?></label>
+			<div class="col-sm-6">
+				<input type="number" id="<?=$widgetkey?>_activity_threshold" name="<?=$widgetkey?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" placeholder="<?=$wgg['default_activity_threshold']?>" min="0" class="form-control" />
 			</div>
+			<?=gettext('Seconds')?>
 		</div>
 
 		<div class="form-group">
-			<div class="col-sm-offset-3 col-sm-6">
+			<div class="col-sm-offset-4 col-sm-6">
 				<button type="submit" class="btn btn-primary">
 					<i class="fa fa-save icon-embed-btn"></i>
 					<?=gettext('Save')?>
