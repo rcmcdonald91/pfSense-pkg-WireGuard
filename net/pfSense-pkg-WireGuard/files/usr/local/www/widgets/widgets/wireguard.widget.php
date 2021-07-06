@@ -33,6 +33,32 @@ require_once('wireguard/includes/wg_service.inc');
 // Widget includes
 require_once('/usr/local/www/widgets/include/wireguard.inc');
 
+// On user settings save, update preferences
+if ($_POST && !isset($_REQUEST['ajax'])) {
+
+	if (isset($_POST["refresh_interval"]) && is_numeric($_POST["refresh_interval"]) && ($_POST["refresh_interval"] >= 1) && ($_POST["refresh_interval"] <= 10)) {
+
+		$user_settings["widgets"]["wireguard"]["refresh_interval"] = $_POST["refresh_interval"];
+
+	}
+
+	save_widget_settings($_SESSION['Username'], $user_settings["widgets"], gettext("Updated WireGuard widget settings via dashboard."));
+	header("Location: /");
+	exit(0);
+
+}
+
+// Default the refresh interval to every update cycle
+if (isset($user_settings['widgets']['wireguard']['refresh_interval'])) {
+
+	$wireguard_refresh_interval = (int)$user_settings['widgets']['wireguard']['refresh_interval'];
+
+} else {
+
+	$wireguard_refresh_interval = 1;
+
+}
+
 global $wgg;
 
 wg_globals();
@@ -51,7 +77,7 @@ print_info_box(gettext('No WireGuard status information is available.'), 'warnin
 else:
 
 ?>
-<div class="table-responsive panel-body">
+<div class="table-responsive panel-body" id="wireguard_status">
 	<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 		<thead>
 			<th><?=gettext('Tunnel')?></th>
@@ -82,6 +108,66 @@ endforeach;
 		</tbody>
 	</table>
 </div>
+
+<?php
+
+/* for AJAX response, we only need the panels */
+if ($_REQUEST['ajax']) {
+	exit;
+}
+
+?>
+
+<!-- close the body we're wrapped in and add a configuration-panel -->
+</div>
+
+<div id="widget-<?=$widgetname?>_panel-footer" class="panel-footer collapse">
+
+	<form action="/widgets/widgets/wireguard.widget.php" method="post" class="form-horizontal">
+		<div class="form-group">
+			<label for="wireguard-interval" class="col-sm-3 control-label"><?=gettext('Refresh Interval')?></label>
+			<div class="col-sm-9">
+				<input type="number" id="refresh_interval" name="refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" min="1" max="10" class="form-control" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-3 col-sm-6">
+				<button type="submit" class="btn btn-primary"><i class="fa fa-save icon-embed-btn"></i><?=gettext('Save')?></button>
+			</div>
+		</div>
+	</form>
+
+<script type="text/javascript">
+//<![CDATA[
+
+	events.push(function(){
+
+		// Callback function called by refresh system when data is retrieved
+		function wireguard_callback(s) {
+			$('#wireguard_status').html(s);
+		}
+
+		// POST data to send via AJAX
+		var postdata = {
+			ajax: "ajax"
+		};
+
+		// Create an object defining the widget refresh AJAX call
+		var wireguardObject = new Object();
+		wireguardObject.name = "wireguard";
+		wireguardObject.url = "/widgets/widgets/wireguard.widget.php";
+		wireguardObject.callback = wireguard_callback;
+		wireguardObject.parms = postdata;
+		wireguardObject.freq = <?=json_encode($wireguard_refresh_interval)?>;
+
+		// Register the AJAX object
+		register_ajax(wireguardObject);
+
+	});
+
+//]]>
+</script>
 <?php
 endif;
 ?>
