@@ -24,4 +24,96 @@
 $wireguard_title = gettext('WireGuard');
 $wireguard_title_link = '/wg/status_wireguard.php';
 
+function wg_do_widget_settings_post($post, $user_settings) {
+	global $wgg;
+
+	$pconfig = array();
+
+	if (isset($post['widgetkey'])) {
+
+		$widgetkey 		= $post['widgetkey'];
+
+		$refresh_interval 	= $post["{$widgetkey}_refresh_interval"];
+
+		$activity_threshold	= $post["{$widgetkey}_activity_threshold"];
+
+		$pconfig['refresh_interval']	= (isset($refresh_interval) && is_numericint($refresh_interval)) ? $refresh_interval : 1;
+
+		$pconfig['activity_threshold']	= (isset($activity_threshold) && is_numericint($activity_threshold)) ? $activity_threshold : $wgg['default_activity_threshold'];
+
+		// Sync with the configuration backend...
+		$user_settings['widgets'][$widgetkey] = $pconfig;
+
+		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], gettext('Updated WireGuard widget settings via dashboard.'));
+	
+	}
+
+}
+
+function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
+	global $wgg;
+
+	$hd = fn($x) => $x;
+
+	$hsc = fn($s) => htmlspecialchars($s);
+
+	$a_devices = wg_get_status();
+
+	// We need to filter the list of peers for those recently active
+	$current_time = (new DateTimeImmutable)->getTimestamp();
+
+	if (empty($wgg['tunnels'])) {
+
+		$data_html = 	<<<"ROW"
+				<tr>
+					<td colspan="9">{$hd(gettext('No WireGuard tunnels have been configured.'), 'warning', null)}</td>
+				</tr>
+
+				ROW;
+
+	} elseif (empty($a_devices)) {
+
+		$data_html =	<<<"ROW"
+				<tr>
+					<td colspan="9">{$hd(gettext('No WireGuard tunnels have been configured.'), 'warning', null)}</td>
+				</tr>
+
+				ROW;
+
+	} else {
+
+		$data_html = null;
+
+		foreach ($a_devices as $device_name => $device) {
+
+			$active_peers = array_filter($device['peers'], function ($x) use ($current_time, $wireguard_activity_threshold) {
+
+				// 0 to disable and show all peers
+				return (($wireguard_activity_threshold == 0) || (($current_time - $x['latest_handshake']) <= $wireguard_activity_threshold));
+
+			});
+
+			$data_html .= 	<<<"ROW"
+					<tr>
+						<td>
+							{$hd(wg_interface_status_icon($device['status']))}
+							<a href="wg/vpn_wg_tunnels_edit.php?tun={$hsc($device_name)}">{$hsc($device_name)}</a>
+						</td>
+						<td>{$hsc(wg_truncate_pretty($device['config']['descr'], 16))}</td>
+						<td>{$hsc(count($active_peers))}</td>
+						<td>{$hsc($device['listen_port'])}</td>
+						<td>{$hsc(format_bytes($device['transfer_rx']))}</td>
+						<td>{$hsc(format_bytes($device['transfer_tx']))}</td>
+					</tr>
+
+					ROW;
+
+		}
+
+	}
+
+	return $data_html;
+
+}
+
 ?>

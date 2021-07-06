@@ -125,7 +125,7 @@ if (!empty($a_devices)):
 				<tr class="tunnel-entry">
 					<td>
 						<?=wg_interface_status_icon($device['status'])?>
-						<a href="vpn_wg_tunnels_edit.php?tun=<?=htmlspecialchars($device_name)?>"><?=htmlspecialchars($device_name)?>
+						<a href="vpn_wg_tunnels_edit.php?tun=<?=htmlspecialchars($device_name)?>"><?=htmlspecialchars($device_name)?></a>
 					</td>
 					<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
 					<td><?=count($device['peers'])?></td>

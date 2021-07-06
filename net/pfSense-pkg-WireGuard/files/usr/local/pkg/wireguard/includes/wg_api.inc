@@ -35,9 +35,9 @@ require_once('wireguard/includes/wg_install.inc');
 /*
  * A wrapper for wg_get_running_config to export everything plus extras for the status page
  */
-function wg_get_status($connected_peers = false, $json = false) {
+function wg_get_status($json = false) {
 
-	return wg_get_running_config(true, $connected_peers, $json);
+	return wg_get_running_config(true, $json);
 
 }
 
@@ -46,10 +46,8 @@ function wg_get_status($connected_peers = false, $json = false) {
  * 
  * $extras returns additional info not provided by `wg show all dump`
  */
-function wg_get_running_config($extras = false, $connected_peers = false, $json = false) {
+function wg_get_running_config($extras = false, $json = false) {
 	global $wgg;
-
-	$current_time = (new DateTimeImmutable)->getTimestamp();
 
 	$tunnel_output_keys = array('private_key', 'public_key', 'listen_port', 'fwmark');
 
@@ -118,21 +116,6 @@ function wg_get_running_config($extras = false, $connected_peers = false, $json 
 
 					[$peer_idx, $tmp_peer['config'], $is_new] = wg_peer_get_config_by_name($last_device, $tmp_peer['public_key']);
 			
-				}
-
-				// Should we only return recently connected peers?
-				if ($connected_peers) {
-
-					// Compare time since latest handshake time to threshold time
-					if (($current_time - $tmp_peer['latest_handshake']) <= $wgg['connected_threshold']) {
-
-						// Add the peer to the array
-						$ret_config[$last_device]['peers'][$a_device[1]] = $tmp_peer;
-
-					}
-
-					continue;
-
 				}
 
 				// Add the peer to the array

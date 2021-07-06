@@ -33,125 +33,105 @@ require_once('wireguard/includes/wg_service.inc');
 // Widget includes
 require_once('/usr/local/www/widgets/include/wireguard.inc');
 
-// On user settings save, update preferences
-if ($_POST && !isset($_REQUEST['ajax'])) {
-
-	if (isset($_POST["refresh_interval"]) && is_numeric($_POST["refresh_interval"]) && ($_POST["refresh_interval"] >= 1) && ($_POST["refresh_interval"] <= 10)) {
-
-		$user_settings["widgets"]["wireguard"]["refresh_interval"] = $_POST["refresh_interval"];
-
-	}
-
-	save_widget_settings($_SESSION['Username'], $user_settings["widgets"], gettext("Updated WireGuard widget settings via dashboard."));
-	header("Location: /");
-	exit(0);
-
-}
-
-// Default the refresh interval to every update cycle
-if (isset($user_settings['widgets']['wireguard']['refresh_interval'])) {
-
-	$wireguard_refresh_interval = (int)$user_settings['widgets']['wireguard']['refresh_interval'];
-
-} else {
-
-	$wireguard_refresh_interval = 1;
-
-}
-
 global $wgg;
 
 wg_globals();
 
-// For the wideget we only want the number of active peers
-$a_devices = wg_get_status(true);
+$widgetkey 			= (isset($_POST['widgetkey'])) ? $_POST['widgetkey'] : $widgetkey;
 
-if (empty($wgg['tunnels'])):
+$widget_config			= $user_settings['widgets'][$widgetkey];
 
-print_info_box(gettext('No WireGuard tunnels have been configured.'), 'warning', null);
+// Define default widget behavior
+$wireguard_refresh_interval	= (isset($widget_config['refresh_interval']) && is_numericint($widget_config['refresh_interval'])) ? $widget_config['refresh_interval'] : 1;
 
-elseif (empty($a_devices)):
+$wireguard_activity_threshold	= (isset($widget_config['activity_threshold']) && is_numericint($widget_config['activity_threshold'])) ? $widget_config['activity_threshold'] : $wgg['default_activity_threshold'];
 
-print_info_box(gettext('No WireGuard status information is available.'), 'warning', null);
+// Are we handling an ajax refresh?
+if (isset($_POST['ajax'])) {
 
-else:
+	print(wg_compose_widget_body($widgetkey, $wireguard_activity_threshold));
 
-?>
-<div class="table-responsive panel-body" id="wireguard_status">
-	<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
-		<thead>
-			<th><?=gettext('Tunnel')?></th>
-			<th><?=gettext('Description')?></th>
-			<th><?=gettext('Active Peers')?></th>
-			<th><?=gettext('Listen Port')?></th>
-			<th><?=gettext('RX')?></th>
-			<th><?=gettext('TX')?></th>
-		</thead>
-		<tbody>
-<?php
-foreach ($a_devices as $device_name => $device):
-?>
-			<tr class="tunnel-entry">
-				<td>
-					<?=wg_interface_status_icon($device['status'])?>
-					<a href="wg/vpn_wg_tunnels_edit.php?tun=<?=htmlspecialchars($device_name)?>"><?=htmlspecialchars($device_name)?>
-				</td>
-				<td><?=htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16))?></td>
-				<td><?=count($device['peers'])?></td>
-				<td><?=htmlspecialchars($device['listen_port'])?></td>
-				<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
-				<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
-			</tr>
-<?php
-endforeach;
-?>
-		</tbody>
-	</table>
-</div>
+	// We are done here...
+	exit();
 
-<?php
+}
 
-/* for AJAX response, we only need the panels */
-if ($_REQUEST['ajax']) {
-	exit;
+// Are we saving the configurable settings?
+if (isset($_POST['save'])) {
+
+	// Process settings post
+	wg_do_widget_settings_post($_POST, $user_settings);
+	
+	// Redirect back to home...
+	header('Location: /');
+	
+	// We are done here...
+	exit();
+
 }
 
 ?>
-
-<!-- close the body we're wrapped in and add a configuration-panel -->
+	<div class="table-responsive">
+		<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
+			<thead>
+				<th><?=gettext('Tunnel')?></th>
+				<th><?=gettext('Description')?></th>
+				<th><?=gettext('Active Peers')?></th>
+				<th><?=gettext('Listen Port')?></th>
+				<th><?=gettext('RX')?></th>
+				<th><?=gettext('TX')?></th>
+			</thead>
+			<tbody id="<?=htmlspecialchars($widgetkey)?>">
+				<?=wg_compose_widget_body($widgetkey, $wireguard_activity_threshold)?>
+			</tbody>
+		</table>
+	</div>
 </div>
 
-<div id="widget-<?=$widgetname?>_panel-footer" class="panel-footer collapse">
+<div id="widget-<?=$widgetkey?>_panel-footer" class="panel-footer collapse">
 
-	<form action="/widgets/widgets/wireguard.widget.php" method="post" class="form-horizontal">
+	<form action="/widgets/widgets/<?=$widgetconfig['basename']?>.widget.php" method="post" class="form-horizontal">
+		<input type="hidden" name="widgetkey" value="<?=htmlspecialchars($widgetkey)?>" />
+		<input type="hidden" name="save" value="save" />
+
 		<div class="form-group">
-			<label for="wireguard-interval" class="col-sm-3 control-label"><?=gettext('Refresh Interval')?></label>
+			<label for="<?=$widgetkey?>_refresh_interval" class="col-sm-3 control-label"><?=gettext('Refresh Interval')?></label>
 			<div class="col-sm-9">
-				<input type="number" id="refresh_interval" name="refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" min="1" max="10" class="form-control" />
+				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" min="1" max="10" class="form-control" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="<?=$widgetkey?>_activity_threshold" class="col-sm-3 control-label"><?=gettext('Activity Threshold')?></label>
+			<div class="col-sm-9">
+				<input type="number" id="<?=$widgetkey?>_activity_threshold" name="<?=$widgetkey?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" class="form-control" />
 			</div>
 		</div>
 
 		<div class="form-group">
 			<div class="col-sm-offset-3 col-sm-6">
-				<button type="submit" class="btn btn-primary"><i class="fa fa-save icon-embed-btn"></i><?=gettext('Save')?></button>
+				<button type="submit" class="btn btn-primary">
+					<i class="fa fa-save icon-embed-btn"></i>
+					<?=gettext('Save')?>
+				</button>
 			</div>
 		</div>
 	</form>
 
-<script type="text/javascript">
-//<![CDATA[
-
+	<script type="text/javascript">
+	//<![CDATA[
 	events.push(function(){
 
 		// Callback function called by refresh system when data is retrieved
 		function wireguard_callback(s) {
-			$('#wireguard_status').html(s);
+			$(<?=json_encode("#{$widgetkey}")?>).html(s);
 		}
 
 		// POST data to send via AJAX
 		var postdata = {
-			ajax: "ajax"
-		};
+			ajax: "ajax",
+			widgetkey: <?=json_encode($widgetkey)?>
+		 };
 
 		// Create an object defining the widget refresh AJAX call
 		var wireguardObject = new Object();
@@ -165,9 +145,5 @@ if ($_REQUEST['ajax']) {
 		register_ajax(wireguardObject);
 
 	});
-
-//]]>
-</script>
-<?php
-endif;
-?>
+	//]]>
+	</script>
