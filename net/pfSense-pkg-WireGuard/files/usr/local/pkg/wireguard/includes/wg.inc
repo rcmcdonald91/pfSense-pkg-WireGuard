@@ -78,6 +78,73 @@ function wg_toggle_tunnel($tunnel_name) {
 	return array('input_errors' => $input_errors, 'changes' => $changes, 'tuns_to_sync' => $tuns_to_sync);
 }
 
+/**
+ * Generate the config used to describe a Peer's perspective for connecting to a tunnel
+ */
+function wg_generate_peer_config($peer_idx) {
+	global $wgg;
+
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config($peer_idx)) {
+
+		// Validate we have tunnel to create as a Peer
+		if (!isset($peer['tun']) || $peer['tun'] === 'unassigned') {
+
+			return null;
+
+		}
+
+		$wc = new wgconfig();
+
+		if (isset($peer['endpoint'])) {
+
+			$subnet_mask = is_ipaddrv4($peer['endpoint']) ? "32" : "128";
+
+			$wc->set_interface_attr('Address', "{$peer['endpoint']}/{$subnet_mask}");
+
+			$wc->set_interface_attr('ListenPort', $peer['port']);
+
+		}
+
+		$wc->set_interface_attr('PrivateKey', $peer['publickey']);
+
+		// TODO: Add DNS configuration for Tunnel / Peer level (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
+		// $wc->set_interface_attr('DNS', $peer['dns']);
+
+		// TODO: Add MTU configuration for Tunnel / Peer level, or, get it from assigned interface? (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
+		// $wc->set_interface_attr('MTU', 1420);
+
+		$tunnel = wg_tunnel_get_config_by_name($peer['tun'])[1];
+		$tunnel_public_key = wg_gen_publickey($tunnel['privatekey'])['pubkey'];
+
+		$wc->add_peer($tunnel_public_key, "Peer: {$tunnel['descr']}");
+
+		// TODO: Endpoint storage (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
+                // $wc->set_peer_attr($tunnel_public_key, 'Endpoint', ":{$tunnel['listenport']}");
+
+		if (!empty($peer['presharedkey'])) {
+
+			$wc->set_peer_attr($tunnel_public_key, 'PreSharedKey', $peer['presharedkey']);
+
+		}
+
+		// Process AllowedIPs
+                foreach ((array) $peer['allowedips']['row'] as $ip) {
+
+                        $wc->add_peer_attr($tunnel_public_key, 'AllowedIPs', "{$ip['address']}/{$ip['mask']}");
+
+                }
+
+                // Process PersistentKeepalive
+                $keepalive = $peer['persistentkeepalive'];
+
+                $keepalive = (!empty($keepalive) && is_numericint($keepalive)) ? $keepalive : '0';
+
+                $wc->set_peer_attr($tunnel_public_key, 'PersistentKeepalive', $keepalive);
+
+		return $wc->get_conf_string();
+	}
+}
+
 /*
  * This toggles a given peer based on config array index
  */
