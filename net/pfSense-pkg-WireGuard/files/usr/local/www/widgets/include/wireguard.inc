@@ -37,14 +37,14 @@ function wg_do_widget_settings_post($post, $user_settings) {
 
 		$activity_threshold	= $post["{$widgetkey}_activity_threshold"];
 
-		$pconfig['refresh_interval']	= (isset($refresh_interval) && is_numericint($refresh_interval)) ? $refresh_interval : 1;
+		$pconfig['refresh_interval']	= (isset($refresh_interval) && is_numericint($refresh_interval)) ? $refresh_interval : $wgg['default_widget_refresh_interval'];
 
-		$pconfig['activity_threshold']	= (isset($activity_threshold) && is_numericint($activity_threshold)) ? $activity_threshold : $wgg['default_activity_threshold'];
+		$pconfig['activity_threshold']	= (isset($activity_threshold) && is_numericint($activity_threshold)) ? $activity_threshold : $wgg['default_widget_activity_threshold'];
 
 		// Sync with the configuration backend...
 		$user_settings['widgets'][$widgetkey] = $pconfig;
 
-		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], gettext('Updated WireGuard widget settings via dashboard.'));
+		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], sprintf(gettext('Updated %s widget settings via dashboard.'), $wgg['pkg_name']);
 	
 	}
 
@@ -94,7 +94,7 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 				 * We need to filter the list of peers for those recently active
 				 * or 0 to disable and show all peers...
 				 */
-				
+
 				return (($wireguard_activity_threshold == 0) || (($current_time - $x['latest_handshake']) <= $wireguard_activity_threshold));
 
 			});

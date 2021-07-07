@@ -42,9 +42,9 @@ $widgetkey 			= (isset($_POST['widgetkey'])) ? $_POST['widgetkey'] : $widgetkey;
 $widget_config			= $user_settings['widgets'][$widgetkey];
 
 // Define default widget behavior
-$wireguard_refresh_interval	= (isset($widget_config['refresh_interval']) && is_numericint($widget_config['refresh_interval'])) ? $widget_config['refresh_interval'] : 1;
+$wireguard_refresh_interval	= (isset($widget_config['refresh_interval']) && is_numericint($widget_config['refresh_interval'])) ? $widget_config['refresh_interval'] : $wgg['default_widget_refresh_interval'];
 
-$wireguard_activity_threshold	= (isset($widget_config['activity_threshold']) && is_numericint($widget_config['activity_threshold'])) ? $widget_config['activity_threshold'] : $wgg['default_activity_threshold'];
+$wireguard_activity_threshold	= (isset($widget_config['activity_threshold']) && is_numericint($widget_config['activity_threshold'])) ? $widget_config['activity_threshold'] : $wgg['default_widget_activity_threshold'];
 
 // Are we handling an ajax refresh?
 if (isset($_POST['ajax'])) {
@@ -99,28 +99,39 @@ $peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext
 
 		<div class="form-group">
 			<label for="<?=$widgetkey?>_refresh_interval" class="col-sm-4 control-label"><?=gettext('Refresh Interval')?></label>
-			<div class="col-sm-6">
-				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="1" min="1" max="10" class="form-control" />
+			<div class="col-sm-8">
+				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="<?=$wgg['default_widget_refresh_interval']?>" min="1" max="10" class="form-control" />
+				<span class="help-block">
+					<?=gettext('Widget refresh interval (in ticks).')?>
+					<br />
+					<span class="text-danger">Note:</span>
+					<?=sprintf(gettext('The default is %s tick.'), $wgg['default_widget_refresh_interval'])?>
+				</span>
 			</div>
-			<?=gettext('Ticks')?>
 		</div>
 
 		<div class="form-group">
-			<label for="<?=$widgetkey?>_activity_threshold" class="col-sm-4 control-label"><?=gettext('Activity Threshold')?></label>
-			<div class="col-sm-6">
-				<input type="number" id="<?=$widgetkey?>_activity_threshold" name="<?=$widgetkey?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" placeholder="<?=$wgg['default_activity_threshold']?>" min="0" class="form-control" />
+			<label for="<?=$widgetkey?>_activity_threshold" class="col-sm-4 control-label">
+				<span><?=gettext('Activity Threshold')?></span>
+			</label>
+			<div class="col-sm-8">
+				<input type="number" id="<?=$widgetkey?>_activity_threshold" name="<?=$widgetkey?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" placeholder="<?=$wgg['default_widget_activity_threshold']?>" min="0" class="form-control" />
+				<span class="help-block">
+					<?=gettext('Peer activity threshold (in seconds).')?>
+					<br />
+					<span class="text-danger">Note:</span>
+					<?=sprintf(gettext('The default is %s seconds (0 to disable).'), $wgg['default_widget_activity_threshold'])?>
+				</span>
+				
 			</div>
-			<?=gettext('Seconds')?>
 		</div>
-
-		<div class="form-group">
-			<div class="col-sm-offset-4 col-sm-6">
-				<button type="submit" class="btn btn-primary">
-					<i class="fa fa-save icon-embed-btn"></i>
-					<?=gettext('Save')?>
-				</button>
-			</div>
-		</div>
+		
+		<nav class="action-buttons">
+			<button type="submit" class="btn btn-primary">
+				<i class="fa fa-save icon-embed-btn"></i>
+				<?=gettext('Save')?>
+			</button>
+		</nav>
 	</form>
 
 	<script type="text/javascript">
@@ -136,7 +147,7 @@ $peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext
 		var postdata = {
 			ajax: "ajax",
 			widgetkey: <?=json_encode($widgetkey)?>
-		 };
+		};
 
 		// Create an object defining the widget refresh AJAX call
 		var wireguardObject = new Object();
