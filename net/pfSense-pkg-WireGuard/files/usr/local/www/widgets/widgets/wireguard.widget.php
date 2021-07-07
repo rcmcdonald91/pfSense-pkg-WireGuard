@@ -70,13 +70,16 @@ if (isset($_POST['save'])) {
 
 }
 
+// Are we showing all peers or just the active peers?
+$peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext('Active Peers');
+
 ?>
 	<div class="table-responsive">
 		<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
-				<th><?=gettext('Active Peers')?></th>
+				<th><?=$peer_header?></th>
 				<th><?=gettext('Listen Port')?></th>
 				<th><?=gettext('RX')?></th>
 				<th><?=gettext('TX')?></th>
