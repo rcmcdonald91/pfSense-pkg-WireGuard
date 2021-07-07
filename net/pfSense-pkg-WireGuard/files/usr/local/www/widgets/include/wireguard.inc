@@ -44,7 +44,7 @@ function wg_do_widget_settings_post($post, $user_settings) {
 		// Sync with the configuration backend...
 		$user_settings['widgets'][$widgetkey] = $pconfig;
 
-		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], sprintf(gettext('Updated %s widget settings via dashboard.'), $wgg['pkg_name']);
+		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], sprintf(gettext('Updated %s widget settings via dashboard.'), $wgg['pkg_name']));
 	
 	}
 
