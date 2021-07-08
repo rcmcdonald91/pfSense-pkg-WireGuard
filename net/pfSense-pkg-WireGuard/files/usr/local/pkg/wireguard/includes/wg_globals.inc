@@ -42,6 +42,7 @@ define('WG_ERROR_KLD_UNLOAD',		2);
 
 define('WG_ERROR_PEER_SET',		1);
 define('WG_ERROR_PEER_ENDPOINT',	2);
+define('WG_ERROR_PEER_REMOVE',		4);
 
 define('WG_ERROR_SVC_DISABLED',		1);
 define('WG_ERROR_SVC_RUNNING',		2);
@@ -100,7 +101,8 @@ $wgg = array(
 						WG_ERROR_KLD_UNLOAD	=> gettext('Unable to unload WireGuard kernel module')),
 					'peer' => array(
 						WG_ERROR_PEER_SET	=> gettext('Unable to set peer configuration'),
-						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint')),
+						WG_ERROR_PEER_ENDPOINT	=> gettext('Unable to resolve peer endpoint'),
+						WG_ERROR_PEER_REMOVE	=> gettext('Unable to remove peer')),
 					'service' => array(
 						WG_ERROR_SVC_DISABLED	=> gettext('WireGuard service is disabled'),
 						WG_ERROR_SVC_RUNNING	=> gettext('WireGuard service is already running'),

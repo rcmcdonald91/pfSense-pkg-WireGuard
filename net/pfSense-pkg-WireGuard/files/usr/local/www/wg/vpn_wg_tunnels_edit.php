@@ -569,7 +569,7 @@ events.push(function() {
 
 	// Request a new public/private key pair
 	$('#genkeys').click(function(event) {
-		if ($('#privatekey').val().length == 0 || confirm("<?=$genKeyWarning?>")) {
+		if ($('#privatekey').val().length == 0 || confirm(<?=json_encode($genKeyWarning)?>)) {
 			ajaxRequest = $.ajax({
 				url: '/wg/vpn_wg_tunnels_edit.php',
 				type: 'post',

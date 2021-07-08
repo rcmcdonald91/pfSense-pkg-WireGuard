@@ -26,6 +26,9 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/wg
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard
+
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/classes
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/includes
 

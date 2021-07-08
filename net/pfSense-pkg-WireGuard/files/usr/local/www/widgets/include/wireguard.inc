@@ -31,20 +31,40 @@ function wg_do_widget_settings_post($post, $user_settings) {
 
 	if (isset($post['widgetkey'])) {
 
-		$widgetkey 		= $post['widgetkey'];
+		$widgetkey 			= $post['widgetkey'];
 
-		$refresh_interval 	= $post["{$widgetkey}_refresh_interval"];
+		$refresh_interval 		= $post["{$widgetkey}_refresh_interval"];
 
-		$activity_threshold	= $post["{$widgetkey}_activity_threshold"];
+		$activity_threshold		= $post["{$widgetkey}_activity_threshold"];
 
-		$pconfig['refresh_interval']	= (isset($refresh_interval) && is_numericint($refresh_interval)) ? $refresh_interval : $wgg['default_widget_refresh_interval'];
+		$pconfig['refresh_interval'] 	= $wgg['default_widget_refresh_interval'];
+		
+		$pconfig['activity_threshold']	= $wgg['default_widget_activity_threshold'];
 
-		$pconfig['activity_threshold']	= (isset($activity_threshold) && is_numericint($activity_threshold)) ? $activity_threshold : $wgg['default_widget_activity_threshold'];
+		// Check if the posted refresh interval is valid, if so set it...
+		if (isset($refresh_interval)
+		    && is_numericint($refresh_interval) && in_array($refresh_interval, range(0, 10))) {
+
+			$pconfig['refresh_interval'] = $refresh_interval;
+
+		}
+
+		// Check if the posted activity threshold is valid, if so set it...
+		if (isset($activity_threshold)
+		    && is_numericint($activity_threshold) && ($activity_threshold >= 0)) {
+
+			$pconfig['activity_threshold'] = $activity_threshold;
+
+		}
 
 		// Sync with the configuration backend...
 		$user_settings['widgets'][$widgetkey] = $pconfig;
 
-		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], sprintf(gettext('Updated %s widget settings via dashboard.'), $wgg['pkg_name']));
+		// Log entry for write_config()
+		$message = sprintf(gettext('Updated %s widget settings via dashboard.'), $wgg['pkg_name']);
+
+		// Save the widget settings...
+		save_widget_settings($_SESSION['Username'], $user_settings['widgets'], $message);
 	
 	}
 
@@ -56,9 +76,12 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 	/*
 	 * A simple hack to use functions inside heredoc strings
 	 * This also allows translation scripts to pick up strings normally by scraping gettext() calls
+	 * 
+	 * Example: {$s(gettext('my text'))}
+	 * 
 	 */
 
-	$hd = fn($x) => $x;
+	$s = fn($x) => $x;
 
 	$a_devices = wg_get_status();
 
@@ -68,7 +91,7 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 
 		$data_html = 	<<<"ROW"
 				<tr>
-					<td colspan="9">{$hd(gettext('No WireGuard tunnels have been configured.'))}</td>
+					<td colspan="9">{$s(gettext('No WireGuard tunnels have been configured.'))}</td>
 				</tr>
 
 				ROW;
@@ -77,7 +100,7 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 
 		$data_html =	<<<"ROW"
 				<tr>
-					<td colspan="9">{$hd(gettext('The WireGuard service is not running.'))}</td>
+					<td colspan="9">{$s(gettext('The WireGuard service is not running.'))}</td>
 				</tr>
 
 				ROW;
@@ -102,14 +125,14 @@ function wg_compose_widget_body($widgetkey, $wireguard_activity_threshold) {
 			$data_html .= 	<<<"ROW"
 					<tr>
 						<td>
-							{$hd(wg_interface_status_icon($device['status']))}
-							<a href="wg/vpn_wg_tunnels_edit.php?tun={$hd(htmlspecialchars($device_name))}">{$hd(htmlspecialchars($device_name))}</a>
+							{$s(wg_interface_status_icon($device['status']))}
+							<a href="wg/vpn_wg_tunnels_edit.php?tun={$s(htmlspecialchars($device_name))}">{$s(htmlspecialchars($device_name))}</a>
 						</td>
-						<td>{$hd(htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16)))}</td>
-						<td>{$hd(htmlspecialchars(count($active_peers)))}</td>
-						<td>{$hd(htmlspecialchars($device['listen_port']))}</td>
-						<td>{$hd(htmlspecialchars(format_bytes($device['transfer_rx'])))}</td>
-						<td>{$hd(htmlspecialchars(format_bytes($device['transfer_tx'])))}</td>
+						<td>{$s(htmlspecialchars(wg_truncate_pretty($device['config']['descr'], 16)))}</td>
+						<td>{$s(htmlspecialchars(count($active_peers)))}</td>
+						<td>{$s(htmlspecialchars($device['listen_port']))}</td>
+						<td>{$s(htmlspecialchars(format_bytes($device['transfer_rx'])))}</td>
+						<td>{$s(htmlspecialchars(format_bytes($device['transfer_tx'])))}</td>
 					</tr>
 
 					ROW;

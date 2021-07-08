@@ -368,7 +368,7 @@ events.push(function() {
 
 	// Request a new pre-shared key
 	$('#genpsk').click(function(event) {
-		if ($('#presharedkey').val().length == 0 || confirm("<?=$genkeywarning?>")) {
+		if ($('#presharedkey').val().length == 0 || confirm(<?=json_encode($genkeywarning)?>)) {
 			ajaxRequest = $.ajax({
 				url: "/wg/vpn_wg_peers_edit.php",
 				type: "post",

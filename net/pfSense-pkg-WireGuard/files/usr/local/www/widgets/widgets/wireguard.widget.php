@@ -100,12 +100,12 @@ $peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext
 		<div class="form-group">
 			<label for="<?=$widgetkey?>_refresh_interval" class="col-sm-4 control-label"><?=gettext('Refresh Interval')?></label>
 			<div class="col-sm-8">
-				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="<?=$wgg['default_widget_refresh_interval']?>" min="1" max="10" class="form-control" />
+				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="<?=$wgg['default_widget_refresh_interval']?>" min="0" max="10" class="form-control" />
 				<span class="help-block">
 					<?=gettext('Widget refresh interval (in ticks).')?>
 					<br />
 					<span class="text-danger">Note:</span>
-					<?=sprintf(gettext('The default is %s tick.'), $wgg['default_widget_refresh_interval'])?>
+					<?=sprintf(gettext('The default is %s tick (0 to disable).'), $wgg['default_widget_refresh_interval'])?>
 				</span>
 			</div>
 		</div>
@@ -122,10 +122,9 @@ $peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext
 					<span class="text-danger">Note:</span>
 					<?=sprintf(gettext('The default is %s seconds (0 to disable).'), $wgg['default_widget_activity_threshold'])?>
 				</span>
-				
 			</div>
 		</div>
-		
+
 		<nav class="action-buttons">
 			<button type="submit" class="btn btn-primary">
 				<i class="fa fa-save icon-embed-btn"></i>
@@ -138,6 +137,8 @@ $peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext
 	//<![CDATA[
 	events.push(function(){
 
+		var wireguardRefreshInterval = <?=json_encode($wireguard_refresh_interval)?>;
+
 		// Callback function called by refresh system when data is retrieved
 		function wireguard_callback(s) {
 			$(<?=json_encode("#{$widgetkey}")?>).html(s);
@@ -149,16 +150,20 @@ $peer_header = ($wireguard_activity_threshold == 0) ? gettext('Peers') : gettext
 			widgetkey: <?=json_encode($widgetkey)?>
 		};
 
-		// Create an object defining the widget refresh AJAX call
-		var wireguardObject = new Object();
-		wireguardObject.name = "wireguard";
-		wireguardObject.url = "/widgets/widgets/wireguard.widget.php";
-		wireguardObject.callback = wireguard_callback;
-		wireguardObject.parms = postdata;
-		wireguardObject.freq = <?=json_encode($wireguard_refresh_interval)?>;
+		if (wireguardRefreshInterval > 0) {
 
-		// Register the AJAX object
-		register_ajax(wireguardObject);
+			// Create an object defining the widget refresh AJAX call
+			var wireguardObject = new Object();
+			wireguardObject.name = "wireguard";
+			wireguardObject.url = "/widgets/widgets/wireguard.widget.php";
+			wireguardObject.callback = wireguard_callback;
+			wireguardObject.parms = postdata;
+			wireguardObject.freq = wireguardRefreshInterval;
+
+			// Register the AJAX object
+			register_ajax(wireguardObject);
+
+		}
 
 	});
 	//]]>
