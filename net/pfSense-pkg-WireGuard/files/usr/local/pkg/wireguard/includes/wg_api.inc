@@ -383,6 +383,12 @@ function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = nul
 
 }
 
+function wg_peer_set_remove($tunnel_name, $public_key, &$cmds = null) {
+
+	return wg_peer_set_config($tunnel_name, $public_key, 'remove', null, WG_ERROR_PEER_REMOVE, $cmds);
+
+}
+
 /*
  * A wrapper for `wg set <wg_ifname> peer <public_key> <key> <value>`
  */
@@ -858,6 +864,21 @@ function is_wg_tunnel_assigned($tunnel_name, $disabled = true) {
 	$if_list = get_configured_interface_list_by_realif($disabled);
 
 	return array_key_exists($tunnel_name, $if_list);
+
+}
+
+/*
+ * Checks if a peer is enabled
+ */
+function wg_peer_is_enabled($tunnel, $public_key) {
+
+	if ([$peer_idx, $peer, $is_new] = wg_peer_get_config_by_name($tunnel, $public_key)) {
+
+		return (isset($peer['enabled']) && ($peer['enabled'] == 'yes'));
+
+	}
+
+	return false;
 
 }
 

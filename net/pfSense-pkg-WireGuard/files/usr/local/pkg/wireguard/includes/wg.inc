@@ -369,6 +369,29 @@ function wg_parse_post_repeatables($post, $fields = null) {
 
 }
 
+function wg_destroy_rogue_peers($tunnel_name, &$cmds = null) {
+	global $wgg;
+
+	// Assume this will be successful...
+	$res = true;
+
+	$running_peers = wg_tunnel_get_peers_running_keys($tunnel_name);
+
+	foreach ((array) $running_peers as $key) {
+
+		// This will return false for both invalid and disabled peers...
+		if (!wg_peer_is_enabled($tunnel_name, $key)) {
+
+			$res &= wg_peer_set_remove($tunnel_name, $key, $cmds);
+
+		}
+
+	}
+
+	return $res;
+
+}
+
 /*
  * This resolves peer endpoint hostnames per tunnel and updates the kernel accordingly
  * This returns a DateTime object corresponding to the last update time
@@ -713,7 +736,8 @@ function wg_apply_list_add($list, $entries) {
 function wg_destroy_rogue_tunnels(&$cmds = null) {
 	global $wgg;
 
-	$ret_code = 0;
+	// Assume this will be successful
+	$res = true;
 
 	$running_ifs = wg_get_running_ifs();
 
@@ -723,13 +747,11 @@ function wg_destroy_rogue_tunnels(&$cmds = null) {
 
 	foreach ($rogue_tunnels as $tunnel) {
 
-		$cmds[] = $res = wg_ifconfig_if_destroy($tunnel);
-
-		$ret_code = $res['ret_code'];
+		$res &= wg_ifconfig_if_destroy($tunnel, $cmds);
 
 	}
 
-	return ($ret_code == 0);
+	return $res;
 
 }
 
@@ -769,6 +791,9 @@ function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpo
 					'ret_code' 	=> $tun_sync_status['ret_code'], 
 					'errors' 	=> $tun_sync_status['errors'],
 					'config' 	=> $tun_sync_status['config']);
+
+			// We need to destroy any rogue peers too...
+			wg_destroy_rogue_peers($tunnel_name);
 
 		}
 		
