@@ -407,7 +407,7 @@ function wg_resolve_endpoints() {
 
 		foreach ($wgg['peers'] as $peer) {
 
-			if (!empty($peer['endpoint'])) {
+			if (isset($peer['enabled'] && ($peer['enabled'] == 'yes') && !empty($peer['endpoint'])) {
 
 				// Strip port if empty
 				$peer['port'] = !empty($peer['port']) ? ":{$peer['port']}" : null;
