@@ -379,13 +379,23 @@ function wg_get_pfsense_interface_info($tunnel_name) {
  */
 function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = null) {
 
-	return wg_peer_set_config($tunnel_name, $public_key, 'endpoint', $endpoint, WG_ERROR_PEER_ENDPOINT, $cmds);
+	// We only want to run this in running peers...
+	if (in_array($public_key, wg_tunnel_get_peers_running_keys($tunnel_name))) {
+
+		return wg_peer_set_config($tunnel_name, $public_key, 'endpoint', $endpoint, WG_ERROR_PEER_ENDPOINT, $cmds);
+
+	}
 
 }
 
 function wg_peer_set_remove($tunnel_name, $public_key, &$cmds = null) {
 
-	return wg_peer_set_config($tunnel_name, $public_key, 'remove', null, WG_ERROR_PEER_REMOVE, $cmds);
+	// We only want to run this in running peers...
+	if (in_array($public_key, wg_tunnel_get_peers_running_keys($tunnel_name))) {
+
+		return wg_peer_set_config($tunnel_name, $public_key, 'remove', null, WG_ERROR_PEER_REMOVE, $cmds);
+
+	}
 
 }
 
