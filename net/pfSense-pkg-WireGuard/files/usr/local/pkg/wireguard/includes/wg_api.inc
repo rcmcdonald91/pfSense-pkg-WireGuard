@@ -388,6 +388,9 @@ function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = nul
 
 }
 
+/*
+ * A wrapper for just removing peers
+ */
 function wg_peer_set_remove($tunnel_name, $public_key, &$cmds = null) {
 
 	// We only want to run this in running peers...
@@ -401,6 +404,8 @@ function wg_peer_set_remove($tunnel_name, $public_key, &$cmds = null) {
 
 /*
  * A wrapper for `wg set <wg_ifname> peer <public_key> <key> <value>`
+ * 
+ * If $key and $value are null, this will just create a peer entry
  */
 function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = null, $error_flag = 0, &$cmds = null) {
 	global $wgg;

@@ -3,6 +3,7 @@
  * wg_install.inc
  *
  * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * All rights reserved.
  *
@@ -41,11 +42,6 @@ function wg_install() {
 
 	update_status("\n  Upgrading any existing WireGuard XML configuration...");
 
-	// Things to potentially upgrade, these will be removed in future versions.
-	wg_upgrade_addresses();
-
-	wg_upgrade_allowedips();
-
 	update_status("done.\n  Installing WireGuard early shell commands...");
 
 	// Installs the WireGuard earlyshellcmds
@@ -71,221 +67,6 @@ function wg_install() {
 	wg_defaults_install();
 
 	update_status("done.\n");
-
-}
-
-function wg_upgrade_allowedips() {
-	global $wgg;
-
-	// Read latest settings
-	wg_globals();
-
-	// Save a copy for manipulation
-	$peers = $wgg['peers'];
-
-	foreach ($peers as $peer_idx => $peer) {
-
-		if (is_string($peer['allowedips']) && !empty($peer['allowedips'])) {
-
-			unset($wgg['peers'][$peer_idx]['allowedips']);
-
-			$a_allowedips = explode(',', $peer['allowedips']);
-
-			$tmp_addrs = array();
-
-			foreach($a_allowedips as $a_index => $ip) {
-
-				$tmp_addrs['item'][$a_index]['addr'] 		= $ip;
-
-				$tmp_addrs['item'][$a_index]['descr'] 		= null;
-
-				$tmp_addrs['item'][$a_index]['peeraddr'] 	= null;
-
-			}
-
-			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
-
-		}
-
-	}
-
-	// Write the changes out to disk
-	wg_write_config('Upgraded peer allowed ips XML structure.', false);
-
-	// Read latest settings
-	wg_globals();
-
-	// Save a copy for manipulation
-	$peers = $wgg['peers'];
-
-	foreach ($peers as $peer_idx => $peer) {
-
-		if (is_array($peer['allowedips']['item']) && !is_array($peer['allowedips']['row'])) {
-
-			unset($wgg['peers'][$peer_idx]['allowedips']);
-
-			$tmp_addrs = array();
-
-			foreach ($peer['allowedips']['item'] as $a_index => $item) {
-
-				[$addr, $addr_mask] 				= explode('/', $item['addr']);
-
-				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
-
-				$tmp_addrs['row'][$a_index]['mask'] 		= $addr_mask;
-
-				$tmp_addrs['row'][$a_index]['description'] 	= $item['descr'];
-
-			}
-
-			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
-
-		}
-
-	}
-	
-	// Write the changes out to disk
-	wg_write_config('Upgraded peer allowed ips XML structure.', false);
-
-	// Read latest settings
-	wg_globals();
-
-	// Save a copy for manipulation
-	$peers = $wgg['peers'];
-
-	foreach ($peers as $peer_idx => $peer) {
-
-		if (is_array($peer['allowedips']['row'])) {
-
-			$tmp_addrs = array();
-
-			foreach ($peer['allowedips']['row'] as $a_index => $item) {
-
-				$tmp_addrs['row'][$a_index]['address'] 	= $item['address'];
-
-				$tmp_addrs['row'][$a_index]['mask'] 	= $item['mask'];
-
-				$tmp_addrs['row'][$a_index]['descr'] 	= (!isset($item['descr'])) ? $item['description'] : $item['descr'];
-
-				unset($tmp_addrs['row'][$a_index]['description']);
-
-			}
-
-			$wgg['peers'][$peer_idx]['allowedips'] = $tmp_addrs;
-
-		}
-
-	}
-
-	// Write the changes out to disk
-	wg_write_config('Upgraded peer allowed ips XML structure.', false);
-
-}
-
-function wg_upgrade_addresses() {
-	global $wgg;
-
-	// Read latest settings
-	wg_globals();
-
-	// Save a copy for manipulation
-	$tunnels = $wgg['tunnels'];
-
-	foreach ($tunnels as $tun_idx => $tunnel) {
-
-		if (is_string($tunnel['addresses']) && !empty($tunnel['addresses'])) {
-
-			unset($wgg['tunnels'][$tun_idx]['addresses']);
-
-			$a_addresses = explode(',', $tunnel['addresses']);
-
-			$tmp_addrs = array();
-
-			foreach($a_addresses as $a_index=> $address) {
-
-				$tmp_addrs['item'][$a_index]['addr'] 	= $address;
-
-				$tmp_addrs['item'][$a_index]['descr'] 	= null;
-
-			}
-
-			$wgg['tunnels'][$tun_idx]['addresses'] = $tmp_addrs;
-
-		}
-	
-
-	}
-
-	// Write the changes out to disk
-	wg_write_config('Upgraded tunnel addresses XML structure.', false);
-
-	// Read latest settings
-	wg_globals();
-
-	// Save a copy for manipulation
-	$tunnels = $wgg['tunnels'];
-
-	foreach ($tunnels as $t_index => $tunnel) {
-
-		if (is_array($tunnel['addresses']['item']) && !is_array($tunnel['addresses']['row'])) {
-
-			unset($wgg['tunnels'][$t_index]['addresses']);
-
-			$tmp_addrs = array();
-
-			foreach ($tunnel['addresses']['item'] as $a_index => $item) {
-
-				[$addr, $addr_mask] 				= explode('/', $item['addr']);
-
-				$tmp_addrs['row'][$a_index]['address'] 		= $addr;
-
-				$tmp_addrs['row'][$a_index]['mask'] 		= $addr_mask;
-
-				$tmp_addrs['row'][$a_index]['description'] 	= $item['descr'];
-
-			}
-
-			$wgg['tunnels'][$t_index]['addresses'] = $tmp_addrs;
-
-		}
-
-	}
-
-	// Write the changes out to disk
-	wg_write_config('Upgraded tunnel addresses XML structure.', false);
-
-	// Read latest settings
-	wg_globals();
-
-	// Save a copy for manipulation
-	$tunnels = $wgg['tunnels'];
-
-	foreach ($tunnels as $tun_idx => $tunnel) {
-
-		if (is_array($tunnel['addresses']['row'])) {
-
-			$tmp_addrs = array();
-
-			foreach ($tunnel['addresses']['row'] as $a_index => $item) {
-
-				$tmp_addrs['row'][$a_index]['address'] 	= $item['address'];
-
-				$tmp_addrs['row'][$a_index]['mask'] 	= $item['mask'];
-
-				$tmp_addrs['row'][$a_index]['descr'] 	= (!isset($item['descr'])) ? $item['description'] : $item['descr'];
-
-				unset($tmp_addrs['row'][$a_index]['description']);
-
-			}
-
-			$wgg['tunnels'][$tun_idx]['addresses'] = $tmp_addrs;
-
-		}
-
-	}
-
-	// Write the changes out to disk
-	wg_write_config('Upgraded tunnel addresses XML structure.', false);
 
 }
 
@@ -368,7 +149,7 @@ function wg_delete_temp_files() {
 }
 
 /*
- * This just ensures that there are defaults in the XMLs.
+ * This just ensures that there are defaults in the XML.
  * The package should function correctly without these being set at all.
  * This is just to make sure the XML is reflecting the running behavior.
  */
@@ -463,6 +244,8 @@ function wg_listenport_alias_install() {
 	global $config, $wgg;
 
 	wg_globals();
+
+	// TODO ?
 
 }
 
