@@ -295,9 +295,9 @@ function wg_peer_allowedips($post) {
 		if (!empty($row['address'])) {
 
 			$ret_array[] 	= array(
-						'address' 	=> $row['address'], 
-						'mask' 		=> $row['address_subnet'], 
-						'descr' 	=> $row['address_descr']);
+						'address'	=> $row['address'], 
+						'mask'		=> $row['address_subnet'], 
+						'descr'		=> $row['address_descr']);
 
 		}
 
@@ -1018,60 +1018,6 @@ function wg_delete_config_files() {
 	foreach ($wgg['conf_paths_to_clean'] as $path) {
 
 		unlink_if_exists("{$path}/*.conf");
-
-	}
-
-}
-
-/* 
- * Wrapper to sanitize many variables at once
- * Call as wg_htmlspecialchars($var1, $var2, ... $varX)
- * Vars can be a mix of strings and arrays
- */
-function wg_htmlspecialchars(&...$vars) {
-
-	foreach ($vars as &$var) {
-
-		if (isset($var) && is_array($var)) {
-
-			array_walk_recursive($var, function(&$x) {
-
-				$x = htmlspecialchars($x);
-
-			});
-
-			continue;
-
-		}
-
-		$var = htmlspecialchars($var);
-
-	}
-
-}
-
-/* 
- * Wrapper to sanitize many variables at once
- * Call as wg_escapeshellarg($var1, $var2, ... $varX)
- * Vars can be a mix of strings and arrays
- */
-function wg_escapeshellarg(&...$vars) {
-
-	foreach ($vars as &$var) {
-
-		if (isset($var) && is_array($var)) {
-
-			array_walk_recursive($var, function(&$x) {
-
-				$x = escapeshellarg($x);
-
-			});
-
-			continue;
-
-		}
-
-		$var = escapeshellarg($var);
 
 	}
 

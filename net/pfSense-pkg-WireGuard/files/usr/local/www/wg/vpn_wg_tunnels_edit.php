@@ -186,6 +186,8 @@ if ($_POST) {
 
 }
 
+$s = fn($x) => $x;
+
 // Looks like we are editing an existing tunnel
 if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
 
@@ -404,21 +406,19 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
 	$wg_pfsense_if = wg_get_pfsense_interface_info($pconfig['name']);
 
-	wg_htmlspecialchars($wg_pfsense_if);
-
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>{$wg_pfsense_if['descr']} ({$wg_pfsense_if['name']})</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>{$s(htmlspecialchars($wg_pfsense_if['descr']))} ({$s(htmlspecialchars($wg_pfsense_if['name']))})</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Interface',
-		"<i class='fa fa-ethernet' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces.php?if={$wg_pfsense_if['name']}'>Interface Configuration</a>"
+		"<i class='fa fa-ethernet' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces.php?if={$s(htmlspecialchars($wg_pfsense_if['name']))}'>{$s(gettext('Interface Configuration'))}</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$wg_pfsense_if['name']}'>Firewall Configuration</a>"
+		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$s(htmlspecialchars($wg_pfsense_if['name']))}'>{$s(gettext('Firewall Configuration'))}</a>"
 	));
 
 }
