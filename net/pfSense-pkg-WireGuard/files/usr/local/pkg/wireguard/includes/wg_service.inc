@@ -224,7 +224,7 @@ function wg_service_fpm_start() {
 function wg_service_cli_start($serialize = true) {
 	global $g, $wgg;
 
-	$getText = fn($s) => gettext($s);
+	$s = fn($x) => $x;
 
 	// Set the process name
 	cli_set_process_title('WireGuard service');
@@ -290,7 +290,7 @@ function wg_service_cli_start($serialize = true) {
 
 		unmute_kernel_msgs();
 
-		fwrite(STDERR, "{$getText('done.')}\n");
+		fwrite(STDERR, "{$s(gettext('done.'))}\n");
 
 		return $ret_code;
 

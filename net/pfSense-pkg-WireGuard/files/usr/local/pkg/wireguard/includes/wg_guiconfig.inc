@@ -217,7 +217,7 @@ function wg_human_time_diff($start, $end = null, $num_units = 2, $from_epoch = f
 
 	$interval = $end->diff($start);
 
-	$doPlural = fn($nb, $str) => ($nb > 1) ? gettext("{$str}s") : gettext($str);
+	$doPlural = fn($nb, $str) => ($nb <= 1) ? $str[0] : $str[1];
 
 	$doTense = fn($interval) => ($interval->invert) ? gettext('ago') : gettext('from now');
 
@@ -225,11 +225,17 @@ function wg_human_time_diff($start, $end = null, $num_units = 2, $from_epoch = f
 
 	$a_interval = get_object_vars($interval);
 
-	$tokens = array('y' => 'year', 'm' => 'month', 'd' => 'day', 'h' => 'hour', 'i' => 'minute', 's' => 'second');
+	$tokens	= array(
+			'y' => array(gettext('year'), gettext('years')),
+			'm' => array(gettext('month'), gettext('months')),
+			'd' => array(gettext('day'), gettext('days')),
+			'h' => array(gettext('hour'), gettext('hours')),
+			'i' => array(gettext('minute'), gettext('minutes')),
+			's' => array(gettext('second'), gettext('seconds')));
 
 	foreach ($tokens as $key => $value) {
 
-		if ($a_interval[$key] !== 0) {
+		if ($a_interval[$key] != 0) {
 
 			$a_format[] = "%{$key} {$doPlural($a_interval[$key], $value)}";
 
