@@ -405,18 +405,14 @@ function wg_resolve_endpoints() {
 	// Do we have any peers?
 	if (isset($wgg['peers']) && is_array($wgg['peers'])) {
 
-		foreach ($wgg['peers'] as $peer) {
+		foreach ((array) $wgg['peers'] as $peer) {
 
-			if (isset($peer['enabled'] && ($peer['enabled'] == 'yes') && !empty($peer['endpoint'])) {
+			// Strip port if empty
+			$peer['port'] = !empty($peer['port']) ? ":{$peer['port']}" : null;
 
-				// Strip port if empty
-				$peer['port'] = !empty($peer['port']) ? ":{$peer['port']}" : null;
+			$endpoint = "{$peer['endpoint']}{$peer['port']}";
 
-				$endpoint = "{$peer['endpoint']}{$peer['port']}";
-
-				wg_peer_set_endpoint($peer['tun'], $peer['publickey'], $endpoint);
-
-			}
+			wg_peer_set_endpoint($peer['tun'], $peer['publickey'], $endpoint);
 
 		}
 
