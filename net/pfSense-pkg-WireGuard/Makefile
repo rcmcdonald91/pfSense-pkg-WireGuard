@@ -1,12 +1,11 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.1.4
-PORTREVISION=	18
+PORTVERSION=	0.1.5
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
 EXTRACT_ONLY=	# empty
 
-MAINTAINER=	rcmcdonald91@gmail.com
+MAINTAINER=	coreteam@pfsense.org
 COMMENT=	pfSense package WireGuard (EXPERIMENTAL)
 
 LICENSE=	APACHE20
