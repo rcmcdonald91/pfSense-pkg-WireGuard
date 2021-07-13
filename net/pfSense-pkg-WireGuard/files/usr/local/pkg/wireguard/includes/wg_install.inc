@@ -360,6 +360,14 @@ function wg_ifgroup_install() {
 
 	wg_ifgroup_deinstall();
 
+	if (isset($wgg['config']['interface_group'])
+	    && ($wgg['config']['interface_group'] == 'none')) {
+
+		// No point installing the interface group...
+		return;
+
+	}
+
 	init_config_arr(array('ifgroups', 'ifgroupentry'));
 
 	$a_ifgroups = &$config['ifgroups']['ifgroupentry'];

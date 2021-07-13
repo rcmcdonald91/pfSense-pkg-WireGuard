@@ -207,13 +207,15 @@ $group->add(new Form_Checkbox(
 
 $section->add($group);
 
+$interface_group_list = array('all' => gettext('All Tunnels'), 'unassigned' => gettext('Only Unassigned Tunnels'), 'none' => gettext('None'));
+
 $section->addInput($input = new Form_Select(
 	'interface_group',
 	gettext('Interface Group Membership'),
 	$pconfig['interface_group'],
-	array('all' => gettext('All Tunnels'), 'unassigned' => gettext('Only Unassigned Tunnels'), 'none' => gettext('None'))
+	$interface_group_list
 ))->setHelp("{$s(gettext('Configures which WireGuard tunnels are members of the WireGuard interface group.'))}<br />
-	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> {$s(gettext('Group firewall rules are evaluated before interface firewall rules.'))}</a>");
+	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> {$s(sprintf(gettext("Group firewall rules are evaluated before interface firewall rules. Default is '%s.'"), $interface_group_list['all']))}");
 
 $form->add($section);
 
