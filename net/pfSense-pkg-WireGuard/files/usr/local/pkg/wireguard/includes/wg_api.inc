@@ -172,7 +172,7 @@ function wg_get_address_family($address) {
 function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
@@ -183,7 +183,7 @@ function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &
 	if (wg_is_valid_tunnel($if_name, true)
 	    && ($family = wg_get_address_family($masked_address))) {
 
-		$cmd = "{$wgg['ifconfig']} {$esa($if_name)} {$esa($family)} {$esa($masked_address)} {$esa($action)} 2>&1";
+		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($family))} {$s(escapeshellarg($masked_address))} {$s(escapeshellarg($action))} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', $error);
 
@@ -198,7 +198,7 @@ function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &
 function wg_interface_in_group($if_name, $group = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ifs = array();
 
@@ -210,7 +210,7 @@ function wg_interface_in_group($if_name, $group = null) {
 
 	if (wg_is_valid_tunnel($if_name, true)) {
 
-		$cmd = "{$wgg['ifconfig']} -g {$esa($group)} 2>&1";
+		$cmd = "{$wgg['ifconfig']} -g {$s(escapeshellarg($group))} 2>&1";
 
 		exec($cmd, $ifs, $ret_code);
 
@@ -225,7 +225,7 @@ function wg_interface_in_group($if_name, $group = null) {
 function wg_kld_loadunload($load = true, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
@@ -239,7 +239,7 @@ function wg_kld_loadunload($load = true, &$cmds = null) {
 	if (($load && !is_module_loaded($kmod))
 	    || (!$load && is_module_loaded($kmod))) {
 
-		$cmd = "{$kldbin} {$esa($kmod)} 2>&1";
+		$cmd = "{$kldbin} {$s(escapeshellarg($kmod))} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'kld', $error);
 
@@ -254,7 +254,7 @@ function wg_kld_loadunload($load = true, &$cmds = null) {
 function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 	
 	$state = fn($up) => $up ? 'up' : 'down';
 
@@ -266,7 +266,7 @@ function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 		// Are we trying to down-an-up or up-a-down? Anything else is wrong in this context...
 		if ((!wg_interface_status($if_name) && $up) || (wg_interface_status($if_name) && !$up)) {
 
-			$cmd = "{$wgg['ifconfig']} {$esa($if_name)} {$esa($state($up))} 2>&1";
+			$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($state($up)))} 2>&1";
 
 			$error = $up ? WG_ERROR_IF_UP : WG_ERROR_IF_DOWN;
 
@@ -410,15 +410,15 @@ function wg_peer_set_remove($tunnel_name, $public_key, &$cmds = null) {
 function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = null, $error_flag = 0, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
-	$key = (!is_null($key)) ? " {$esa($key)}" : null;
+	$key = (!is_null($key)) ? " {$s(escapeshellarg($key))}" : null;
 
-	$value = (!is_null($value)) ? " {$esa($value)}" : null;
+	$value = (!is_null($value)) ? " {$s(escapeshellarg($value))}" : null;
 
 	if (wg_is_valid_tunnel($tunnel_name, true)) {
 
-		$cmd = "{$wgg['wg']} set {$esa($tunnel_name)} peer {$esa($public_key)}{$key}{$value} 2>&1";
+		$cmd = "{$wgg['wg']} set {$s(escapeshellarg($tunnel_name))} peer {$s(escapeshellarg($public_key))}{$key}{$value} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'peer', $error_flag);
 
@@ -433,7 +433,7 @@ function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = nul
 function wg_wg_if_sync($if_name, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
@@ -445,7 +445,7 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 	if (file_exists($conf_path)
 	    && wg_is_valid_tunnel($if_name, true)) {
 
-		$cmd = "{$wgg['wg']} syncconf {$esa($if_name)} {$esa($conf_path)}";
+		$cmd = "{$wgg['wg']} syncconf {$s(escapeshellarg($if_name))} {$s(escapeshellarg($conf_path))}";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_SYNC);
 
@@ -463,13 +463,13 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 function wg_ifconfig_if_create($if_name, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
 	if (!wg_is_valid_tunnel($if_name, true)) {
 
-		$cmd = "{$wgg['ifconfig']} wg create name {$esa($if_name)} 2>&1";
+		$cmd = "{$wgg['ifconfig']} wg create name {$s(escapeshellarg($if_name))} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_CREATE);
 
@@ -522,13 +522,13 @@ function wg_get_errors($type, $ret_code) {
 function wg_ifconfig_if_destroy($if_name, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
 	if (wg_is_valid_tunnel($if_name, true)) {
 
-		$cmd = "{$wgg['ifconfig']} {$esa($if_name)} destroy 2>&1";
+		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} destroy 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_DESTROY);
 
@@ -562,7 +562,7 @@ function wg_get_configured_ifs() {
 function wg_ifconfig_if_group_add($if_name, $group, &$cmds = null) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
@@ -570,7 +570,7 @@ function wg_ifconfig_if_group_add($if_name, $group, &$cmds = null) {
 	if (in_array($if_name, pfSense_interface_listget())
 	    && (!wg_interface_in_group($if_name, $group))) {
 
-		$cmd = "{$wgg['ifconfig']} {$esa($if_name)} group {$esa($group)} 2>&1";
+		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} group {$s(escapeshellarg($group))} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_GROUP);
 
@@ -620,13 +620,13 @@ function wg_interface_status($if_name) {
 function wg_ifconfig_get_flags($if_name) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$flags = $output = array();
 
 	if (wg_is_valid_tunnel($if_name, true)) {
 
-		exec("{$wgg['ifconfig']} {$esa($if_name)}", $output, $ret_code);
+		exec("{$wgg['ifconfig']} {$s(escapeshellarg($if_name))}", $output, $ret_code);
 
 		if (($ret_code == 0) && preg_match("/flags=.*<(?P<flags>.*)>/", $output[0], $matches)) {
 
@@ -645,7 +645,7 @@ function wg_ifconfig_get_flags($if_name) {
 function wg_pkg_info() {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$ret_array = array();
 
@@ -660,7 +660,7 @@ function wg_pkg_info() {
 
 	$packages_string = implode(' ', $packages);
 
-	exec("{$wgg['pkg']} query {$esa($field_string)} {$packages_string}", $output, $ret_code);
+	exec("{$wgg['pkg']} query {$s(escapeshellarg($field_string))} {$packages_string}", $output, $ret_code);
 
 	if ($ret_code == 0) {
 
@@ -697,13 +697,13 @@ function wg_gen_keypair($json = false) {
 function wg_gen_publickey($privkey, $json = false) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$was_clamped = wg_is_key_clamped($privkey);
 
 	$privkey_clamped = wg_clamp_key($privkey);
 
-	$pubkey = exec("echo {$esa($privkey)} | {$wgg['wg']} pubkey");
+	$pubkey = exec("echo {$s(escapeshellarg($privkey))} | {$wgg['wg']} pubkey");
 
 	$res = array('privkey' => $privkey, 'privkey_clamped' => $privkey_clamped, 'pubkey' => $pubkey, 'was_clamped' => $was_clamped);
 
@@ -1068,11 +1068,11 @@ function wg_tunnel_get_peers_config($tunnel_name) {
 function wg_tunnel_get_peers_running_keys($tunnel_name) {
 	global $wgg;
 
-	$esa = fn($s) => escapeshellarg($s);
+	$s = fn($x) => $x;
 
 	$output = $res = array();
 
-	$cmd = "{$wgg['wg']} show {$esa($tunnel_name)} peers 2>&1";
+	$cmd = "{$wgg['wg']} show {$s(escapeshellarg($tunnel_name))} peers 2>&1";
 
 	exec($cmd, $output, $ret_code);
 
