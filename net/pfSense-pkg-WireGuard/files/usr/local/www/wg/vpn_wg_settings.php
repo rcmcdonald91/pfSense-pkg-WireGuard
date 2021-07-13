@@ -37,8 +37,6 @@ require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
-wg_globals();
-
 $save_success = false;
 
 if ($_POST) {
@@ -105,6 +103,9 @@ if ($_POST) {
 }
 
 $s = fn($x) => $x;
+
+// Just to make sure defaults are properly assigned if anything is missing
+wg_defaults_install();
 
 // Grab current configuration from the XML
 $pconfig = $wgg['config'];
