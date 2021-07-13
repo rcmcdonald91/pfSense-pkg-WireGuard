@@ -512,6 +512,8 @@ function wg_do_settings_post($post) {
 
 	$pconfig['resolve_interval_track']	= empty($post['resolve_interval_track']) ? 'no' : $post['resolve_interval_track'];
 
+	$pconfig['interface_group']		= empty($post['interface_group']) ? 'all' : $post['interface_group'];
+	
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
 	$input_errors = wg_validate_settings_post($pconfig);

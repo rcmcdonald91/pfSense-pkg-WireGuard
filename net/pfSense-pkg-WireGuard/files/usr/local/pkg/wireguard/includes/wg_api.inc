@@ -559,18 +559,20 @@ function wg_get_configured_ifs() {
 
 }
 
-function wg_ifconfig_if_group_add($if_name, $group, &$cmds = null) {
+function wg_ifconfig_if_group_addremove($if_name, $group, $remove = false, &$cmds = null) {
 	global $wgg;
 
 	$s = fn($x) => $x;
 
 	$ret_code = 0;
 
+	$action = $remove ? '-group' : 'group';
+
 	// Is this a real interface and not already in the group?
 	if (in_array($if_name, pfSense_interface_listget())
-	    && (!wg_interface_in_group($if_name, $group))) {
+	    && ((!wg_interface_in_group($if_name, $group) && !$remove) || (wg_interface_in_group($if_name, $group) && $remove))) {
 
-		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} group {$s(escapeshellarg($group))} 2>&1";
+		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($action))} {$s(escapeshellarg($group))} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_GROUP);
 
@@ -588,20 +590,26 @@ function wg_ifconfig_if_group_add($if_name, $group, &$cmds = null) {
 function wg_interface_update_groups($if_name, &$cmds = null) {
 	global $wgg;
 
-	// Need to make sure tunnels land in at *least* these groups
-	$groups = array('wg', $wgg['ifgroupentry']['ifname']);
-
 	// Assume this will be successful...
 	$res = true;
 
 	// Is this a real interface?
 	if (in_array($if_name, pfSense_interface_listget())) {
 
-		foreach ($groups as $group) {
+		$res &= wg_ifconfig_if_group_addremove($if_name, $wgg['ifgroupentry']['ifname'], true, $cmds);
 
-			$res &= wg_ifconfig_if_group_add($if_name, $group, $cmds);
+		$res &= wg_ifconfig_if_group_addremove($if_name, 'wg', false, $cmds);
+
+		if (isset($wgg['config']['interface_group'])
+		    && (($wgg['config']['interface_group'] == 'none') || (($wgg['config']['interface_group'] == 'unassigned') && is_wg_tunnel_assigned($if_name)))) {
+
+			// We don't want to add the tunnel to the WireGuard group...
+			return $res;
 
 		}
+
+		// Default behavior is to just add everything...
+		$res &= wg_ifconfig_if_group_addremove($if_name, $wgg['ifgroupentry']['ifname'], false, $cmds);
 
 	}
 

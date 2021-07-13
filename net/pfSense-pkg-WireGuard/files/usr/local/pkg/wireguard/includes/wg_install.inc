@@ -167,6 +167,8 @@ function wg_defaults_install() {
 	
 	$wgg['config']['resolve_interval_track']	= isset($wgg['config']['resolve_interval_track']) ? $wgg['config']['resolve_interval_track'] : 'no';
 	
+	$wgg['config']['interface_group']		= isset($wgg['config']['interface_group']) ? $wgg['config']['interface_group'] : 'all';
+	
 	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 	
 	wg_write_config('Applied package default settings as necessary.', false);

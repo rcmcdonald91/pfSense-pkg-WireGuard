@@ -104,6 +104,8 @@ if ($_POST) {
 
 }
 
+$s = fn($x) => $x;
+
 // Grab current configuration from the XML
 $pconfig = $wgg['config'];
 
@@ -146,17 +148,17 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section('General Settings');
+$section = new Form_Section(gettext('General Settings'));
 
 $wg_enable = new Form_Checkbox(
 	'enable',
-	'Enable',
+	gettext('Enable'),
 	gettext('Enable WireGuard'),
 	wg_is_service_enabled()
 );
 
-$wg_enable->setHelp("<span class=\"text-danger\">Note: </span>
-		     WireGuard cannot be disabled when one or more tunnels is assigned to a pfSense interface.");
+$wg_enable->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		     {$s(gettext('WireGuard cannot be disabled when one or more tunnels is assigned to a pfSense interface.'))}");
 
 if (wg_is_wg_assigned()) {
 
@@ -176,45 +178,53 @@ $section->addInput($wg_enable);
 
 $section->addInput(new Form_Checkbox(
 	'keep_conf',
-	'Keep Configuration',
+	gettext('Keep Configuration'),
 	gettext('Enable'),
 	$pconfig['keep_conf'] == 'yes'
-))->setHelp("<span class=\"text-danger\">Note: </span>
-	     With 'Keep Configurations' enabled (default), all tunnel configurations and package settings will persist on install/de-install.");
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+	     {$s(gettext("With 'Keep Configurations' enabled (default), all tunnel configurations and package settings will persist on install/de-install."))}");
 
-$group = new Form_Group('Endpoint Hostname Resolve Interval');
+$group = new Form_Group(gettext('Endpoint Hostname Resolve Interval'));
 
 $group->add(new Form_Input(
 	'resolve_interval',
-	'Endpoint Hostname Resolve Interval',
+	gettext('Endpoint Hostname Resolve Interval'),
 	'text',
 	wg_get_endpoint_resolve_interval(),
 	['placeholder' => wg_get_endpoint_resolve_interval()]
 ))->addClass('trim')
-  ->setHelp("Interval (in seconds) for re-resolving endpoint host/domain names.<br />
-	     <span class=\"text-danger\">Note: </span> The default is {$wgg['default_resolve_interval']} seconds (0 to disable).");
+  ->setHelp("{$s(gettext('Interval (in seconds) for re-resolving endpoint host/domain names.'))}<br />
+	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> {$s(sprintf('The default is %s seconds (0 to disable).', $wgg['default_resolve_interval']))}");
 
 $group->add(new Form_Checkbox(
 	'resolve_interval_track',
 	null,
 	gettext('Track System Resolve Interval'),
 	($pconfig['resolve_interval_track'] == 'yes')
-))->setHelp("Tracks the system 'Aliases Hostnames Resolve Interval' setting.<br />
-	     <span class=\"text-danger\">Note: </span> See System / Advanced / <a href=\"..\..\system_advanced_firewall.php\">Firewall & NAT</a>");
+))->setHelp("{$s(gettext("Tracks the system 'Aliases Hostnames Resolve Interval' setting."))}<br />
+	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> See System / Advanced / <a href=\"..\..\system_advanced_firewall.php\">Firewall & NAT</a>");
 
 $section->add($group);
 
+$section->addInput($input = new Form_Select(
+	'interface_group',
+	gettext('Interface Group Membership'),
+	$pconfig['interface_group'],
+	array('all' => gettext('All Tunnels'), 'unassigned' => gettext('Only Unassigned Tunnels'), 'none' => gettext('None'))
+))->setHelp("{$s(gettext('Configures which WireGuard tunnels are members of the WireGuard interface group.'))}<br />
+	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> {$s(gettext('Group firewall rules are evaluated before interface firewall rules.'))}</a>");
+
 $form->add($section);
 
-$section = new Form_Section('User Interface Settings');
+$section = new Form_Section(gettext('User Interface Settings'));
 
 $section->addInput(new Form_Checkbox(
 	'hide_secrets',
-	'Hide Secrets',
+	gettext('Hide Secrets'),
     	gettext('Enable'),
     	$pconfig['hide_secrets'] == 'yes'
-))->setHelp("<span class=\"text-danger\">Note: </span>
-		With 'Hide Secrets' enabled, all secrets (private and pre-shared keys) are hidden in the user interface.");
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("With 'Hide Secrets' enabled, all secrets (private and pre-shared keys) are hidden in the user interface."))}");
 
 $form->add($section);
 
