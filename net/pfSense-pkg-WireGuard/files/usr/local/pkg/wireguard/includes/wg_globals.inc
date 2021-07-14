@@ -56,6 +56,7 @@ $wgg = array(
 	'pkg'			=> '/usr/sbin/pkg',
 	'kldload'		=> '/sbin/kldload',
 	'kldunload'		=> '/sbin/kldunload',
+	'netstat'		=> '/usr/bin/netstat',
 	'php'			=> '/usr/local/bin/php',
 	'php_wg'		=> '/usr/local/bin/php_wg',
 	'wg_pkg_root'		=> '/usr/local/pkg/wireguard',

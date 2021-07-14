@@ -424,6 +424,9 @@ function wg_service_daemon() {
 
 		}
 
+		// Keep running state consistent...
+		wg_destroy_rogue_tunnels();
+
 		// Wait a bit before trying again
 		sleep(1);
 

@@ -102,13 +102,13 @@ if ($_POST) {
 
 }
 
-$s = fn($x) => $x;
-
 // Just to make sure defaults are properly assigned if anything is missing
 wg_defaults_install();
 
 // Grab current configuration from the XML
 $pconfig = $wgg['config'];
+
+$s = fn($x) => $x;
 
 $shortcut_section = 'wireguard';
 
@@ -119,7 +119,7 @@ $tab_array = array();
 $tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
 $tab_array[] = array(gettext('Peers'), false, '/wg/vpn_wg_peers.php');
 $tab_array[] = array(gettext('Settings'), true, '/wg/vpn_wg_settings.php');
-$tab_array[] = array(gettext('Status'), false, '/wg/status_wireguard.php');
+$tab_array[] = array("[{$s(gettext('Status'))}]", false, "/wg/status_wireguard.php");
 
 include('head.inc');
 

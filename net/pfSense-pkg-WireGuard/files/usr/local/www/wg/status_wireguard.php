@@ -3,6 +3,7 @@
  * status_wireguard.php
  *
  * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * Copyright (c) 2021 Vajonam
  * Copyright (c) 2020 Ascrod
@@ -70,16 +71,18 @@ if ($_POST) {
 
 }
 
+$s = fn($x) => $x;
+
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("Status"), gettext("WireGuard"));
 $pglinks = array("", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
-$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
+$tab_array[] = array(gettext("WireGuard"), true, '/wg/status_wireguard.php');
+$tab_array[] = array(gettext("Routes"), false, '/wg/status_wireguard_routes.php');
+$tab_array[] = array(gettext("Package"), false, '/wg/status_wireguard_package.php');
+$tab_array[] = array("[{$s(gettext('Configuration'))}]", false, '/wg/vpn_wg_tunnels.php');
 
 include("head.inc");
 
@@ -213,38 +216,6 @@ endif;
 		<?=gettext("Show Peers")?>
 	</a>
 </nav>
-
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
-	</div>
-	<div class="table-responsive panel-body">
-		<table class="table table-hover table-striped table-condensed">
-			<thead>
-				<tr>
-					<th><?=gettext('Name')?></th>
-					<th><?=gettext('Version')?></th>
-    					<th><?=gettext('Comment')?></th>
-				</tr>
-			</thead>
-			<tbody>
-<?php
-			foreach (wg_pkg_info() as ['name' => $name, 'version' => $version, 'comment' => $comment]):
-?>
-    				<tr>
-					<td><?=htmlspecialchars($name)?></td>
-					<td><?=htmlspecialchars($version)?></td>
-					<td><?=htmlspecialchars($comment)?></td>
-
-				</tr>
-<?php
-			endforeach;
-?>
-
-			</tbody>
-		</table>
-	</div>
-</div>
 
 <script type="text/javascript">
 //<![CDATA[

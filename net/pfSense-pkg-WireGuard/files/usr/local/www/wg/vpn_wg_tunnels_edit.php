@@ -186,8 +186,6 @@ if ($_POST) {
 
 }
 
-$s = fn($x) => $x;
-
 // Looks like we are editing an existing tunnel
 if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
 
@@ -209,6 +207,8 @@ if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
 // Save the MTU settings prior to re(saving)
 $pconfig['mtu'] = get_interface_mtu($pconfig['name']);
 
+$s = fn($x) => $x;
+
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext("Edit"));
@@ -218,7 +218,7 @@ $tab_array = array();
 $tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
 $tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
 $tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
-$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
+$tab_array[] = array("[{$s(gettext('Status'))}]", false, "/wg/status_wireguard.php");
 
 include("head.inc");
 

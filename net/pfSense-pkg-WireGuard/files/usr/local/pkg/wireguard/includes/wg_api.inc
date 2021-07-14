@@ -625,6 +625,42 @@ function wg_interface_status($if_name) {
 
 }
 
+function wg_netstat_get_routes($family, $resolve_names = false) {
+	global $wgg;
+
+	$ret_table = array();
+
+	$resolve = $resolve_names ? ' -n' : null;
+
+	exec("{$wgg['netstat']} -rW{$resolve} --libxo=json", $res, $ret_code);
+
+	if ($ret_code == 0) {
+	
+		// LibXo can sometimes output across multiple lines...
+		$res = json_decode(implode($res), true);
+	
+		$tables = $res['statistics']['route-information']['route-table']['rt-family'];
+	
+		foreach ($tables as ['address-family' => $family, 'rt-entry' => $entries]) {
+	
+			$tmp_entries = array();
+
+			foreach ($entries as $entry) {
+
+				$tmp_entries[] = $entry;
+
+			}
+
+			$ret_table[$family] = $tmp_entries;
+	
+		}
+	
+	}
+
+	return $ret_table;
+
+}
+
 function wg_ifconfig_get_flags($if_name) {
 	global $wgg;
 
