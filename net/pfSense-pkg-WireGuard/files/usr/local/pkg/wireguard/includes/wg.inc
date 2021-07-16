@@ -439,7 +439,7 @@ function wg_do_settings_post($post) {
 	
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
-	$pconfig['hide_peers']			= empty($post['hide_peers']) ? 'yes' : $post['hide_peers'];
+	$pconfig['hide_peers']			= empty($post['hide_peers']) ? 'no' : $post['hide_peers'];
 
 	$input_errors = wg_validate_settings_post($pconfig);
 
