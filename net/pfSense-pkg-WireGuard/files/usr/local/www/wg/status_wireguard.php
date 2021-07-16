@@ -249,7 +249,7 @@ endif;
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
-	var peershidden = true;
+	var peershidden = <?=json_encode(wg_status_peers_hidden())?>;
 
 	// Toggle peer visibility
 	$('#showpeers').click(function () {
