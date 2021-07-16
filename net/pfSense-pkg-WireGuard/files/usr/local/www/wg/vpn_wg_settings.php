@@ -222,8 +222,8 @@ $section->addInput(new Form_Checkbox(
 	'Hide Peers',
 	gettext('Enable'),
 	$pconfig['hide_peers'] == 'yes'
-))->setHelp("<span class=\"text-danger\">Note: </span>
-	     With 'Hide Peers' enabled (default), all peers for all tunnels will be hidden on Status page load.");
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("With 'Hide Peers' enabled (default), all peers for all tunnels will be hidden on Status page load."))}");
 
 $form->add($section);
 
