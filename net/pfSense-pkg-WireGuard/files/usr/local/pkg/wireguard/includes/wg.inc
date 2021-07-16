@@ -34,6 +34,34 @@ require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
 
+function wg_apply_tunnels_common()
+
+	$ret_code = 0;
+
+	if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
+
+		if (wg_is_service_running()) {
+
+			$tunnels_to_apply = wg_apply_list_get('tunnels');
+
+			$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
+
+			$ret_code |= $sync_status['ret_code'];
+
+		}
+
+		if ($ret_code == 0) {
+
+			clear_subsystem_dirty($wgg['subsystems']['wg']);
+
+		}
+
+	}
+
+	return $ret_code;
+
+}
+
 /*
  * This toggles a given tunnel based on index
  */

@@ -45,27 +45,7 @@ if ($_POST) {
 
 	if (isset($_POST['apply'])) {
 
-		$ret_code = 0;
-
-		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
-
-			if (wg_is_service_running()) {
-
-				$tunnels_to_apply = wg_apply_list_get('tunnels');
-
-				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
-
-				$ret_code |= $sync_status['ret_code'];
-
-			}
-
-			if ($ret_code == 0) {
-
-				clear_subsystem_dirty($wgg['subsystems']['wg']);
-
-			}
-
-		}
+		$ret_code = wg_apply_tunnels_common();
 
 	}
 
@@ -138,8 +118,8 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
 				<tr class="peer-entries">
-					<td colspan="9">
-						<table class="table table-hover table-condensed">
+					<td colspan="9" class="contains-table">
+						<table class="table table-hover table-striped table-condensed">
 							<thead>
 								<th><?=gettext('Peer')?></th>
 								<th><?=gettext('Latest Handshake')?></th>

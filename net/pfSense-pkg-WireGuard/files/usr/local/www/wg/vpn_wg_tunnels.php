@@ -45,79 +45,61 @@ if ($_POST) {
 
 	if (isset($_POST['apply'])) {
 
-		$ret_code = 0;
-
-		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
-
-			if (wg_is_service_running()) {
-
-				$tunnels_to_apply = wg_apply_list_get('tunnels');
-
-				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
-
-				$ret_code |= $sync_status['ret_code'];
-
-			}
-
-			if ($ret_code == 0) {
-
-				clear_subsystem_dirty($wgg['subsystems']['wg']);
-
-			}
-
-		}
+		$ret_code = wg_apply_tunnels_common();
 
 	}
 
-	if (isset($_POST['tun'])) {
+	if (isset($_POST['act'])) {
 
-		$tun_name = $_POST['tun'];
+		if (isset($_POST['tun'])) {
 
-		switch ($_POST['act']) {
+			$tun_name = $_POST['tun'];
 
-			case 'download':
+			switch ($_POST['act']) {
 
-				wg_download_tunnel($tun_name, '/wg/vpn_wg_tunnels.php');
+				case 'download':
 
-				exit();
+					wg_download_tunnel($tun_name, '/wg/vpn_wg_tunnels.php');
 
-				break;
+					exit();
 
-			case 'toggle':
-				
-				$res = wg_toggle_tunnel($tun_name);
-				
-				break;
+					break;
 
-			case 'delete':
+				case 'toggle':
+					
+					$res = wg_toggle_tunnel($tun_name);
+					
+					break;
 
-				$res = wg_delete_tunnel($tun_name);
+				case 'delete':
 
-				break;
+					$res = wg_delete_tunnel($tun_name);
 
-			default:
+					break;
 
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_tunnels.php');
+				default:
 
-				break;
+					// Shouldn't be here, so bail out.
+					header('Location: /wg/vpn_wg_tunnels.php');
 
-		}
-
-		$input_errors = $res['input_errors'];
-
-		if (empty($input_errors)) {
-
-			if (wg_is_service_running() && $res['changes']) {
-
-				mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-				// Add tunnel to the list to apply
-				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+					break;
 
 			}
 
-		}
+			$input_errors = $res['input_errors'];
+
+			if (empty($input_errors)) {
+
+				if (wg_is_service_running() && $res['changes']) {
+
+					mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+					// Add tunnel to the list to apply
+					wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+				}
+
+			}
 
 	}
 
@@ -202,7 +184,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 <?php
 			if (count($peers) > 0):
 ?>
-						<td colspan="6">
+						<td colspan="6" class="contains-table">
 							<table class="table table-hover">
 								<thead>
 									<tr>
@@ -210,6 +192,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 										<th><?=gettext("Public key")?></th>
 										<th><?=gettext("Allowed IPs")?></th>
 										<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
+										<th><?=gettext('Peer Actions')?></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -222,6 +205,11 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 										<td><?=wg_generate_peer_allowedips_popup_link($peer_idx)?></td>
 										<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
+										<td style="cursor: pointer;">
+											<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
+											<?=wg_generate_toggle_icon_link(($peer['enabled'] == 'yes'), 'peer', "?act=toggle&peer={$peer_idx}")?>
+											<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}"?>" usepost></a>
+										</td>
 									</tr>
 <?php
 				endforeach;
@@ -229,6 +217,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 								</tbody>
 							</table>
 						</td>
+						<td>&nbsp;</td>
 <?php
 			else:
 ?>

@@ -47,14 +47,20 @@ if (isset($_REQUEST['tun'])) {
 
 }
 
-if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
+if (isset($_REQUEST['peer']) 
+    && is_numericint($_REQUEST['peer'])) {
 
 	$peer_idx = $_REQUEST['peer'];
 
 }
 
-// All form save logic is in wireguard/wg.inc
 if ($_POST) {
+
+	if (isset($_POST['apply'])) {
+
+		$ret_code = wg_apply_tunnels_common();
+
+	}
 
 	switch ($_POST['act']) {
 
@@ -134,11 +140,20 @@ include("head.inc");
 
 wg_print_service_warning();
 
+if (isset($_POST['apply'])) {
+
+	print_apply_result_box($ret_code);
+
+}
+
+wg_print_config_apply_box();
+
 if (!empty($input_errors)) {
 
 	print_input_errors($input_errors);
 
 }
+
 
 wg_tab_array_common('peers');
 
