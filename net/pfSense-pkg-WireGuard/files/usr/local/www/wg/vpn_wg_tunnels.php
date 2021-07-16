@@ -130,12 +130,6 @@ $shortcut_section = "wireguard";
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
 $pglinks = array("", "@self", "@self");
 
-$tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
-$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
-$tab_array[] = array("[{$s(gettext('Status'))}]", false, "/wg/status_wireguard.php");
-
 include("head.inc");
 
 wg_print_service_warning();
@@ -154,7 +148,7 @@ if (!empty($input_errors)) {
 
 }
 
-display_top_tabs($tab_array);
+wg_tab_array_common('tunnels');
 
 ?>
 
@@ -264,6 +258,10 @@ endif;
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
 			<?=gettext("Show Peers")?>
+		</a>
+		<a href="vpn_wg_tunnels_import.php" class="btn btn-primary btn-sm">
+			<i class="fa fa-upload icon-embed-btn"></i>
+			<?=gettext("Import Tunnel")?>
 		</a>
 		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>

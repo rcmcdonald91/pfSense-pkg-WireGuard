@@ -27,6 +27,31 @@ require_once('util.inc');
 require_once('wireguard/includes/wg.inc');
 require_once('wireguard/includes/wg_globals.inc');
 
+function wg_tab_array_common($current_page) {
+
+	$tab_array = array();
+
+	$tab_array[] = array(gettext('Tunnels'), ($current_page == 'tunnels'), '/wg/vpn_wg_tunnels.php');
+	$tab_array[] = array(gettext('Peers'), ($current_page == 'peers'), '/wg/vpn_wg_peers.php');
+	$tab_array[] = array(gettext('Settings'), ($current_page == 'settings'), '/wg/vpn_wg_settings.php');
+	$tab_array[] = array(gettext('Status'), ($current_page == 'status'), '/wg/status_wireguard.php');
+
+	display_top_tabs($tab_array);
+
+}
+
+function wg_tab_array_status($current_page) {
+
+	$tab_array = array();
+
+	$tab_array[] = array(gettext('Overview'), ($current_page == 'overview'), '/wg/status_wireguard.php');
+	$tab_array[] = array(gettext('Routes'), ($current_page == 'routes'), '/wg/status_wireguard_routes.php');
+	$tab_array[] = array(gettext('Package'), ($current_page == 'package'), '/wg/status_wireguard_package.php');
+
+	display_top_tabs($tab_array, false, 'tabs');
+
+}
+
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;
 

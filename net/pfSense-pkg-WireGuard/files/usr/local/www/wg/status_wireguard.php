@@ -78,12 +78,6 @@ $shortcut_section = "wireguard";
 $pgtitle = array(gettext("Status"), gettext("WireGuard"));
 $pglinks = array("", "@self");
 
-$tab_array = array();
-$tab_array[] = array(gettext("WireGuard"), true, '/wg/status_wireguard.php');
-$tab_array[] = array(gettext("Routes"), false, '/wg/status_wireguard_routes.php');
-$tab_array[] = array(gettext("Package"), false, '/wg/status_wireguard_package.php');
-$tab_array[] = array("[{$s(gettext('Configuration'))}]", false, '/wg/vpn_wg_tunnels.php');
-
 include("head.inc");
 
 wg_print_service_warning();
@@ -96,7 +90,9 @@ if (isset($_POST['apply'])) {
 
 wg_print_config_apply_box();
 
-display_top_tabs($tab_array);
+wg_tab_array_common('status');
+
+wg_tab_array_status('overview');
 
 $a_devices = wg_get_status();
 

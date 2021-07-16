@@ -693,7 +693,7 @@ function wg_pkg_info() {
 
 	$ret_array = array();
 
-	$fields = array('name'=> '%n', 'version' => '%v', 'comment' => '%c');
+	$fields = array('name'=> '%n', 'version' => '%v', 'source' => '%R', 'comment' => '%c');
 
 	$return_keys = array_values(array_flip($fields));
 

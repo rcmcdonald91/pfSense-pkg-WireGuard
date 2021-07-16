@@ -78,12 +78,6 @@ $shortcut_section = "wireguard";
 $pgtitle = array(gettext("Status"), gettext("WireGuard"));
 $pglinks = array("", "@self");
 
-$tab_array = array();
-$tab_array[] = array(gettext("WireGuard"), false, '/wg/status_wireguard.php');
-$tab_array[] = array(gettext("Routes"), false, '/wg/status_wireguard_routes.php');
-$tab_array[] = array(gettext("Package"), true, '/wg/status_wireguard_package.php');
-$tab_array[] = array("[{$s(gettext('Configuration'))}]", false, '/wg/vpn_wg_tunnels.php');
-
 include("head.inc");
 
 wg_print_service_warning();
@@ -96,7 +90,9 @@ if (isset($_POST['apply'])) {
 
 wg_print_config_apply_box();
 
-display_top_tabs($tab_array);
+wg_tab_array_common('status');
+
+wg_tab_array_status('package');
 
 ?>
 
@@ -110,18 +106,19 @@ display_top_tabs($tab_array);
 				<tr>
 					<th><?=gettext('Name')?></th>
 					<th><?=gettext('Version')?></th>
+					<th><?=gettext('Package Source')?></th>
     					<th><?=gettext('Comment')?></th>
 				</tr>
 			</thead>
 			<tbody>
 <?php
-			foreach (wg_pkg_info() as ['name' => $name, 'version' => $version, 'comment' => $comment]):
+			foreach (wg_pkg_info() as ['name' => $name, 'version' => $version, 'source' => $source, 'comment' => $comment]):
 ?>
     				<tr>
 					<td><?=htmlspecialchars($name)?></td>
 					<td><?=htmlspecialchars($version)?></td>
+					<td><?=htmlspecialchars($source)?></td>
 					<td><?=htmlspecialchars($comment)?></td>
-
 				</tr>
 <?php
 			endforeach;

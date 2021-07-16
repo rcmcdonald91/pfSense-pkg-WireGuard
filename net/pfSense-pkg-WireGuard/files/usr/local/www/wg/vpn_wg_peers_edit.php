@@ -130,12 +130,6 @@ $shortcut_section = "wireguard";
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), gettext("Edit"));
 $pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_peers.php", "@self");
 
-$tab_array = array();
-$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
-$tab_array[] = array(gettext("Peers"), true, "/wg/vpn_wg_peers.php");
-$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
-$tab_array[] = array("[{$s(gettext('Status'))}]", false, "/wg/status_wireguard.php");
-
 include("head.inc");
 
 wg_print_service_warning();
@@ -146,7 +140,7 @@ if (!empty($input_errors)) {
 
 }
 
-display_top_tabs($tab_array);
+wg_tab_array_common('peers');
 
 $form = new Form(false);
 

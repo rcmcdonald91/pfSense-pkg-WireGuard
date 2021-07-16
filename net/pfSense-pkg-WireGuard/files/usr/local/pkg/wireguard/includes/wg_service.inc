@@ -3,6 +3,7 @@
  * wg_service.inc
  *
  * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * All rights reserved.
  *
@@ -131,6 +132,7 @@ function wg_service_cli_restart($serialize = true) {
 		if ($ret_code <> 0) {
 
 			return $ret_code;
+
 		}
 
 	}
@@ -175,10 +177,7 @@ function wg_service_cli_stop($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		wg_service_parse_errors($ret_code, $serialize);
-
-		// Terminate early...
-		return $ret_code;
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
@@ -187,7 +186,7 @@ function wg_service_cli_stop($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		wg_service_parse_errors($ret_code, $serialize);
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
@@ -235,9 +234,7 @@ function wg_service_cli_start($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_DISABLED;
 
-		wg_service_parse_errors($ret_code, $serialize);
-
-		return $ret_code;
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
@@ -245,9 +242,7 @@ function wg_service_cli_start($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_RUNNING;
 
-		wg_service_parse_errors($ret_code, $serialize);
-
-		return $ret_code;
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
@@ -255,9 +250,7 @@ function wg_service_cli_start($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_START;
 
-		wg_service_parse_errors($ret_code, $serialize);
-
-		return $ret_code;
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
@@ -305,15 +298,11 @@ function wg_service_cli_start($serialize = true) {
 
 		wg_destroy_tunnels();
 
-		wg_service_parse_errors($ret_code, $serialize);
-
-		return $ret_code;
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	} elseif ($newpid) {
 
-		wg_service_parse_errors($ret_code, $serialize);
-
-		return $ret_code;
+		return wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
@@ -391,8 +380,6 @@ function wg_restart_extra_services() {
 // Main WireGuard service loop
 function wg_service_daemon() {
 	global $wgg;
-
-	$esa = fn($s) => escapeshellarg($s);
 
 	// Re-register the service environment
 	wg_register_service_env(true);
@@ -552,7 +539,7 @@ function wg_service_parse_errors($ret_code, $serialize_output = true, $extras = 
 
 	}
 
-	return;
+	return $ret_code;
 
 }
 
