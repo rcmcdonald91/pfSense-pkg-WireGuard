@@ -219,7 +219,7 @@ $section->addInput($input = new Form_Select(
 
 $section->addInput(new Form_Checkbox(
 	'hide_peers',
-	'Hide Peers',
+	gettext('Hide Peers'),
 	gettext('Enable'),
 	$pconfig['hide_peers'] == 'yes'
 ))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
