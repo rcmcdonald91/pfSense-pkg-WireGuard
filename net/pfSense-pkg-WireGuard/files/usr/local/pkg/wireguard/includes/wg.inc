@@ -34,7 +34,8 @@ require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
 
-function wg_apply_tunnels_common()
+function wg_apply_tunnels_common() {
+	global $wgg;
 
 	$ret_code = 0;
 
