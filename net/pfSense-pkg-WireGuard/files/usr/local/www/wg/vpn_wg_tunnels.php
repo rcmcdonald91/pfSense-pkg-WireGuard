@@ -41,82 +41,21 @@ global $wgg;
 
 wg_globals();
 
-if ($_POST) {
-
-	if (isset($_POST['apply'])) {
-
-		$ret_code = wg_apply_tunnels_common();
-
-	}
-
-	if (isset($_POST['act'])) {
-
-		if (isset($_POST['tun'])) {
-
-			$tun_name = $_POST['tun'];
-
-			switch ($_POST['act']) {
-
-				case 'download':
-
-					wg_download_tunnel($tun_name, '/wg/vpn_wg_tunnels.php');
-
-					exit();
-
-					break;
-
-				case 'toggle':
-					
-					$res = wg_toggle_tunnel($tun_name);
-					
-					break;
-
-				case 'delete':
-
-					$res = wg_delete_tunnel($tun_name);
-
-					break;
-
-				default:
-
-					// Shouldn't be here, so bail out.
-					header('Location: /wg/vpn_wg_tunnels.php');
-
-					break;
-
-			}
-
-			$input_errors = $res['input_errors'];
-
-			if (empty($input_errors)) {
-
-				if (wg_is_service_running() && $res['changes']) {
-
-					mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-					// Add tunnel to the list to apply
-					wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-				}
-
-			}
-
-	}
-
-}
+// This is the main entry into the post switchboard for this page.
+['input_errors' => $input_errors, 'is_apply' => $is_apply, 'ret_code' => $ret_code] = wg_tunnels_post_handler($_POST);
 
 $s = fn($x) => $x;
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"));
-$pglinks = array("", "@self", "@self");
+$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Tunnels'));
+$pglinks = array('', '@self', '@self');
 
-include("head.inc");
+include('head.inc');
 
 wg_print_service_warning();
 
-if (isset($_POST['apply'])) {
+if ($is_apply) {
 
 	print_apply_result_box($ret_code);
 
@@ -142,13 +81,13 @@ wg_tab_array_common('tunnels');
 				<thead>
 					<tr>
 						<th class="peer-entries"></th>
-						<th><?=gettext("Name")?></th>
-						<th><?=gettext("Description")?></th>
-						<th><?=gettext("Public Key")?></th>
-						<th><?=gettext("Address / Assignment")?></th>
-						<th><?=gettext("Listen Port")?></th>
-						<th><?=gettext("Peers")?></th>
-						<th><?=gettext("Actions")?></th>
+						<th><?=gettext('Name')?></th>
+						<th><?=gettext('Description')?></th>
+						<th><?=gettext('Public Key')?></th>
+						<th><?=gettext('Address / Assignment')?></th>
+						<th><?=gettext('Listen Port')?></th>
+						<th><?=gettext('Peers')?></th>
+						<th><?=gettext('Actions')?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -180,27 +119,26 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 					</tr>
 
 					<tr class="peer-entries peerbg_color">
-						<td><?=gettext("Peers")?></td>
+						<td><?=gettext('Peers')?></td>
 <?php
 			if (count($peers) > 0):
 ?>
 						<td colspan="6" class="contains-table">
-							<table class="table table-hover">
+							<table class="table table-hover table-striped table-condensed">
 								<thead>
 									<tr>
-										<th><?=gettext("Description")?></th>
-										<th><?=gettext("Public key")?></th>
-										<th><?=gettext("Allowed IPs")?></th>
+										<th><?=gettext('Description')?></th>
+										<th><?=gettext('Public key')?></th>
+										<th><?=gettext('Allowed IPs')?></th>
 										<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
 										<th><?=gettext('Peer Actions')?></th>
 									</tr>
 								</thead>
 								<tbody>
-
 <?php
 				foreach ($peers as [$peer_idx, $peer, $is_new]):
 ?>
-									<tr>
+									<tr class="<?=wg_peer_status_class($peer)?>">
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
 										<td><?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?></td>
 										<td><?=wg_generate_peer_allowedips_popup_link($peer_idx)?></td>
@@ -221,7 +159,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 <?php
 			else:
 ?>
-						<td colspan="6"><?=gettext("No peers have been configured")?></td>
+						<td colspan="6"><?=gettext('No peers have been configured')?></td>
 <?php
 			endif;
 ?>
@@ -246,15 +184,11 @@ endif;
 	<nav class="action-buttons">
 		<a href="#" class="btn btn-info btn-sm" id="showpeers">
 			<i class="fa fa-info icon-embed-btn"></i>
-			<?=gettext("Show Peers")?>
-		</a>
-		<a href="vpn_wg_tunnels_import.php" class="btn btn-primary btn-sm">
-			<i class="fa fa-upload icon-embed-btn"></i>
-			<?=gettext("Import Tunnel")?>
+			<?=gettext('Show Peers')?>
 		</a>
 		<a href="vpn_wg_tunnels_edit.php" class="btn btn-success btn-sm">
 			<i class="fa fa-plus icon-embed-btn"></i>
-			<?=gettext("Add Tunnel")?>
+			<?=gettext('Add Tunnel')?>
 		</a>
 	</nav>
 </form>

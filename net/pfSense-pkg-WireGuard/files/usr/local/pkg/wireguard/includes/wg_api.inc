@@ -555,6 +555,9 @@ function wg_get_running_ifs() {
 function wg_get_configured_ifs() {
 	global $wgg;
 
+	// Make sure we have the latest info...
+	wg_globals();
+
 	return array_map(fn($x) => $x['name'], (array) $wgg['tunnels']);
 
 }

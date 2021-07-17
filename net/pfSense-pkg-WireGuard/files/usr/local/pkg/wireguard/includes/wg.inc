@@ -34,6 +34,429 @@ require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
 
+function wg_peers_edit_post_handler($post) {
+	global $wgg;
+
+	$input_errors = array();
+
+	$is_apply = false;
+
+	$pconfig = array();
+
+	$ret_code = 0;
+
+	if (isset($post['apply'])) {
+
+		$is_apply = true;
+
+		$ret_code = wg_apply_tunnels_common();
+
+	} elseif (isset($post['act'])) {
+
+		switch ($post['act']) {
+
+			case 'save':
+
+				$res = wg_do_peer_post($post);
+		
+				$input_errors = $res['input_errors'];
+	
+				$pconfig = $res['pconfig'];
+	
+				if (empty($input_errors)) {
+
+					if (wg_is_service_running() && $res['changes']) {
+
+						// Everything looks good so far, so mark the subsystem dirty
+						mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+						// Add tunnel to the list to apply
+						wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+					}
+
+					// Save was successful
+					header('Location: /wg/vpn_wg_peers.php');
+		
+				}
+			
+				break;
+
+			case 'genpsk':
+
+				// Process ajax call requesting new pre-shared key
+				print(wg_gen_psk());
+
+				exit;
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_peers.php');
+
+				break;
+
+		}
+
+	}
+
+	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code);
+
+}
+
+function wg_peers_post_handler($post) {
+	global $wgg;
+
+	$input_errors = array();
+
+	$is_apply = false;
+
+	$ret_code = 0;
+
+	if (isset($post['apply'])) {
+
+		$is_apply = true;
+
+		$ret_code = wg_apply_tunnels_common();
+
+	} elseif (isset($post['act'])) {
+
+		switch ($post['act']) {
+
+			case 'toggle':
+
+				if (isset($post['peer'])) {
+
+					$res = wg_toggle_peer($post['peer']);
+
+					break;
+				
+				}
+
+				break;
+
+			case 'delete':
+				
+				if (isset($post['peer'])) {
+
+					$res = wg_delete_peer($post['peer']);
+
+					break;
+				
+				}
+
+				break;
+
+			default:
+				
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_peers.php');
+
+				break;
+				
+		}
+
+		$input_errors = $res['input_errors'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $res['changes']) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+			}
+
+		}
+
+	}
+
+	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'ret_code' => $ret_code);
+
+}
+
+function wg_settings_post_handler($post) {
+	global $wgg;
+
+	$input_errors = array();
+
+	$is_apply = false;
+
+	$pconfig = array();
+
+	$ret_code = 0;
+
+	$save_success = false;
+
+	// Handle the configuration apply button
+	if (isset($_POST['apply'])) {
+
+		$is_apply = true;
+
+		$ret_code = wg_apply_tunnels_common();
+
+	// Handle any actions
+	} elseif (isset($_POST['act'])) {
+
+		switch ($_POST['act']) {
+
+			case 'save':
+
+				$res = wg_do_settings_post($_POST);
+
+				$input_errors = $res['input_errors'];
+
+				$pconfig = $res['pconfig'];
+
+				if (empty($input_errors) && $res['changes']) {
+
+					wg_toggle_wireguard();
+
+					$save_success = true;
+
+				}
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_settings.php');
+
+				break;
+
+		}
+
+	}
+
+	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code, 'save_success' => $save_success);
+
+}
+
+function wg_tunnels_edit_post_handler($post) {
+	global $wgg;
+
+	$input_errors = array();
+
+	$is_apply = false;
+
+	$pconfig = array();
+
+	$ret_code = 0;
+
+	// Assume we want to go home...
+	$go_home = true;
+
+	// Handle the configuration apply button
+	if (isset($post['apply'])) {
+
+		$is_apply = true;
+
+		$ret_code = wg_apply_tunnels_common();
+
+	// Handle any actions
+	} elseif (isset($post['act'])) {
+
+		switch ($post['act']) {
+
+			case 'save':
+
+				$res = wg_do_tunnel_post($post);
+			
+				$input_errors = $res['input_errors'];
+		
+				$pconfig = $res['pconfig'];
+
+				break;
+
+			case 'genkeys':
+
+				// Process ajax call requesting new key pair
+				print(wg_gen_keypair(true));
+
+				exit;
+
+				break;
+
+			case 'genpubkey':
+
+				// Process ajax call calculating the public key from a private key
+				print(wg_gen_publickey($post['privatekey'], true));
+
+				exit;
+
+				break;
+
+			case 'toggle':
+
+				if (isset($post['peer'])) {
+
+					$res = wg_toggle_peer($post['peer']);
+
+					// Stay on current page...
+					$go_home = false;
+
+					break;
+
+				}
+
+				break;
+
+			case 'delete':
+
+				if (isset($post['peer'])) {
+
+					$res = wg_delete_peer($post['peer']);
+
+					// Stay on current page...
+					$go_home = false;
+
+					break;
+
+				}
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+				break;
+
+		}
+				
+		$input_errors = $res['input_errors'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $res['changes']) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+			}
+			
+			if ($go_home) {
+
+				// Good save, redirect back...
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+			}
+
+		}
+
+	}
+
+	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code);
+
+}
+
+function wg_tunnels_post_handler($post) {
+	global $wgg;
+
+	$input_errors = array();
+
+	$is_apply = false;
+
+	$ret_code = 0;
+
+	// Handle the configuration apply button
+	if (isset($post['apply'])) {
+
+		$is_apply = true;
+
+		$ret_code = wg_apply_tunnels_common();
+
+	// Handle any actions
+	} elseif (isset($post['act'])) {
+
+		switch ($post['act']) {
+
+			case 'download':
+
+				if (isset($post['tun'])) {
+
+					wg_download_tunnel($post['tun'], '/wg/vpn_wg_tunnels.php');
+
+					exit();
+
+				}
+
+				break;
+
+			case 'toggle':
+
+				if (isset($post['tun'])) {
+
+					$res = wg_toggle_tunnel($post['tun']);
+
+					break;
+
+				} elseif (isset($post['peer'])) {
+
+					$res = wg_toggle_peer($post['peer']);
+	
+					break;
+
+				}
+
+				break;
+					
+			case 'delete':
+
+				if (isset($post['tun'])) {
+
+					$res = wg_delete_tunnel($post['tun']);
+
+					break;
+
+				} elseif (isset($post['peer'])) {
+
+					$res = wg_delete_peer($post['peer']);
+	
+					break;
+
+				}
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+				break;
+
+		}
+
+		$input_errors = $res['input_errors'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $res['changes']) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+			}
+
+		}
+
+	}
+
+	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'ret_code' => $ret_code);
+
+}
+
 function wg_apply_tunnels_common() {
 	global $wgg;
 
@@ -763,17 +1186,18 @@ function wg_apply_list_add($list, $entries) {
 function wg_destroy_rogue_tunnels(&$cmds = null) {
 	global $wgg;
 
+	// Make sure we have the latest info
+	wg_globals();
+
 	// Assume this will be successful
 	$res = true;
 
-	$running_ifs = wg_get_running_ifs();
+	// Tunnels created by something besides pfSense...
+	$rogue_tunnels = array_diff(wg_get_running_ifs(), wg_get_configured_ifs());
 
-	$config_ifs = wg_get_configured_ifs();
+	foreach ((array) $rogue_tunnels as $tunnel) {
 
-	$rogue_tunnels = array_diff($running_ifs, $config_ifs);
-
-	foreach ($rogue_tunnels as $tunnel) {
-
+		// Destroy them...
 		$res &= wg_ifconfig_if_destroy($tunnel, $cmds);
 
 	}

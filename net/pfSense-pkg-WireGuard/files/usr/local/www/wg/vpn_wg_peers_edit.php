@@ -41,12 +41,6 @@ $pconfig = array();
 
 wg_globals();
 
-if (isset($_REQUEST['tun'])) {
-
-	$tun_name = $_REQUEST['tun'];
-
-}
-
 if (isset($_REQUEST['peer']) 
     && is_numericint($_REQUEST['peer'])) {
 
@@ -54,67 +48,19 @@ if (isset($_REQUEST['peer'])
 
 }
 
-if ($_POST) {
+['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_peers_edit_post_handler($_POST);
 
-	if (isset($_POST['apply'])) {
+if (isset($_REQUEST['peer'])) {
 
-		$ret_code = wg_apply_tunnels_common();
+	// Save this for later...
+	$peer_idx = $_REQUEST['peer'];
 
-	}
+	if (is_array($wgg['peers'][$peer_idx])) {
 
-	switch ($_POST['act']) {
-
-		case 'save':
-
-			$res = wg_do_peer_post($_POST);
-		
-			$input_errors = $res['input_errors'];
-	
-			$pconfig = $res['pconfig'];
-	
-			if (empty($input_errors)) {
-
-				if (wg_is_service_running() && $res['changes']) {
-
-					// Everything looks good so far, so mark the subsystem dirty
-					mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-					// Add tunnel to the list to apply
-					wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-				}
-
-				// Save was successful
-				header('Location: /wg/vpn_wg_peers.php');
-	
-			}
-			
-			break;
-
-		case 'genpsk':
-
-			// Process ajax call requesting new pre-shared key
-			print(wg_gen_psk());
-
-			exit;
-
-			break;
-
-		default:
-
-			// Shouldn't be here, so bail out.
-			header('Location: /wg/vpn_wg_peers.php');
-
-			break;
+		// Looks like we are editing an existing peer
+		$pconfig = &$wgg['peers'][$peer_idx];
 
 	}
-
-}
-
-if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
-
-	// Looks like we are editing an existing peer
-	$pconfig = &$wgg['peers'][$peer_idx];
 
 } else {
 
@@ -122,7 +68,7 @@ if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
 	$pconfig['enabled'] = 'yes';
 
 	// Automatically choose a tunnel based on the request 
-	$pconfig['tun'] = $tun_name;
+	$pconfig['tun'] = isset($_REQUEST['tun']) ? $_REQUEST['tun'] : null;
 
 	// Default to a dynamic tunnel, so hide the endpoint form group
 	$is_dynamic = true;

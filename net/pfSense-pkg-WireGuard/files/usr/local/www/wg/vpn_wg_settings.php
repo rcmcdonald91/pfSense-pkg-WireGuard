@@ -37,50 +37,8 @@ require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
-$save_success = false;
-
-if ($_POST) {
-
-	if (isset($_POST['apply'])) {
-
-		$ret_code = wg_apply_tunnels_common();
-
-	}
-
-	if (isset($_POST['act'])) {
-
-		switch ($_POST['act']) {
-
-			case 'save':
-
-				$res = wg_do_settings_post($_POST);
-
-				$input_errors = $res['input_errors'];
-
-				$pconfig = $res['pconfig'];
-
-				if (empty($input_errors) && $res['changes']) {
-
-					wg_toggle_wireguard();
-
-					$save_success = true;
-
-				}
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_settings.php');
-
-				break;
-
-		}
-
-	}
-
-}
+// This is the main entry into the post switchboard for this page.
+['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code, 'save_success' => $save_success] = wg_settings_post_handler($_POST);
 
 // Just to make sure defaults are properly assigned if anything is missing
 wg_defaults_install();
@@ -105,7 +63,7 @@ if ($save_success) {
 	
 }
 
-if (isset($_POST['apply'])) {
+if ($is_apply) {
 
 	print_apply_result_box($ret_code);
 

@@ -44,157 +44,44 @@ $pconfig = array();
 // Always assume we are creating a new tunnel
 $is_new = true;
 
-if (isset($_REQUEST['tun'])) {
-
-	$tun = $_REQUEST['tun'];
-
-	$tun_idx = wg_tunnel_get_array_idx($_REQUEST['tun']);
-
-}
-
-if ($_POST) {
-
-	if (isset($_POST['apply'])) {
-
-		$ret_code = wg_apply_tunnels_common();
-
-	}
-
-	if (isset($_POST['act'])) {
-
-		switch ($_POST['act']) {
-
-			case 'save':
-
-				$res = wg_do_tunnel_post($_POST);
-			
-				$input_errors = $res['input_errors'];
-		
-				$pconfig = $res['pconfig'];
-		
-				if (empty($input_errors)) {
-
-					if (wg_is_service_running() && $res['changes']) {
-
-						// Everything looks good so far, so mark the subsystem dirty
-						mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-						// Add tunnel to the list to apply
-						wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-					}
-		
-					// Save was successful
-					header('Location: /wg/vpn_wg_tunnels.php');
-		
-				}
-
-				break;
-
-			case 'genkeys':
-
-				// Process ajax call requesting new key pair
-				print(wg_gen_keypair(true));
-
-				exit;
-
-				break;
-
-			case 'genpubkey':
-
-				// Process ajax call calculating the public key from a private key
-				print(wg_gen_publickey($_POST['privatekey'], true));
-
-				exit;
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_tunnels.php');
-
-				break;
-
-		}
-
-	}
-
-	if (isset($_POST['peer'])) {
-
-		$peer_idx = $_POST['peer'];
-
-		switch ($_POST['act']) {
-
-			case 'toggle':
-
-				$res = wg_toggle_peer($peer_idx);
-
-				break;
-
-			case 'delete':
-				
-				$res = wg_delete_peer($peer_idx);
-
-				break;
-
-			default:
-				
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_tunnels.php');
-
-				break;
-				
-		}
-
-		$input_errors = $res['input_errors'];
-
-		if (empty($input_errors)) {
-
-			if (wg_is_service_running() && $res['changes']) {
-
-				mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-				// Add tunnel to the list to apply
-				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-			}
-
-		}
-
-	}
-
-}
+// This is the main entry into the post switchboard for this page.
+['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_tunnels_edit_post_handler($_POST);
 
 // Looks like we are editing an existing tunnel
-if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
+if (isset($REQUEST['tun'])) {
+	
+	// Save this for later...
+	$tun = $_REQUEST['tun'];
 
-	$pconfig = &$wgg['tunnels'][$tun_idx];
+	$tun_idx = wg_tunnel_get_array_idx($tun);
 
-	// Supress warning and allow peers to be added via the 'Add Peer' link
-	$is_new = false;
+	if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
+
+		$pconfig = &$wgg['tunnels'][$tun_idx];
+
+		// Supress warning and allow peers to be added via the 'Add Peer' link
+		$is_new = false;
+
+	}
 
 // Looks like we are creating a new tunnel
 } else {
 
-	// Default to enabled
-	$pconfig['enabled'] = 'yes';
+	// New tunnel defaults
+	$pconfig['enabled']	= 'yes';
 
-	$pconfig['name'] = next_wg_if();
+	$pconfig['name'] 	= next_wg_if();
 
 }
 
-// Save the MTU settings prior to re(saving)
-$pconfig['mtu'] = get_interface_mtu($pconfig['name']);
-
 $s = fn($x) => $x;
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext("Edit"));
-$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "@self");
+$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Tunnels'), gettext('Edit'));
+$pglinks = array('', '/wg/vpn_wg_tunnels.php', '/wg/vpn_wg_tunnels.php', '@self');
 
-include("head.inc");
+include('head.inc');
 
 wg_print_service_warning();
 

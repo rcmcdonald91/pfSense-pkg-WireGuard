@@ -39,59 +39,8 @@ global $wgg;
 
 wg_globals();
 
-if ($_POST) {
-
-	if (isset($_POST['apply'])) {
-
-		$ret_code = wg_apply_tunnels_common();
-
-	}
-
-	if (isset($_POST['peer'])) {
-
-		$peer_idx = $_POST['peer'];
-
-		switch ($_POST['act']) {
-
-			case 'toggle':
-
-				$res = wg_toggle_peer($peer_idx);
-
-				break;
-
-			case 'delete':
-				
-				$res = wg_delete_peer($peer_idx);
-
-				break;
-
-			default:
-				
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_peers.php');
-
-				break;
-				
-		}
-
-		$input_errors = $res['input_errors'];
-
-		if (empty($input_errors)) {
-
-			if (wg_is_service_running() && $res['changes']) {
-
-				mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-				// Add tunnel to the list to apply
-				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-			}
-
-		}
-
-	}
-
-}
+// This is the main entry into the post switchboard for this page.
+['input_errors' => $input_errors, 'is_apply' => $is_apply, 'ret_code' => $ret_code] = wg_peers_post_handler($_POST);
 
 $s = fn($x) => $x;
 
@@ -104,7 +53,7 @@ include('head.inc');
 
 wg_print_service_warning();
 
-if (isset($_POST['apply'])) {
+if ($is_apply) {
 
 	print_apply_result_box($ret_code);
 

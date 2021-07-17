@@ -41,15 +41,8 @@ global $wgg;
 
 wg_globals();
 
-if ($_POST) {
-
-	if (isset($_POST['apply'])) {
-
-		$ret_code = wg_apply_tunnels_common();
-
-	}
-
-}
+// This is the main entry into the post switchboard for this page.
+['is_apply' => $is_apply, 'ret_code' => $ret_code] = wg_status_post_handler($_POST);
 
 $s = fn($x) => $x;
 
@@ -62,7 +55,7 @@ include("head.inc");
 
 wg_print_service_warning();
 
-if (isset($_POST['apply'])) {
+if ($is_apply) {
 
 	print_apply_result_box($ret_code);
 
