@@ -34,6 +34,25 @@ require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
 
+function wg_status_post_handler($post) {
+	global $wgg;
+
+	$is_apply = false;
+
+	$ret_code = 0;
+
+	if (isset($post['apply'])) {
+
+		$is_apply = true;
+
+		$ret_code = wg_apply_tunnels_common();
+
+	}
+
+	return array('is_apply' => $is_apply, 'ret_code' => $ret_code);
+
+}
+
 function wg_peers_edit_post_handler($post) {
 	global $wgg;
 
