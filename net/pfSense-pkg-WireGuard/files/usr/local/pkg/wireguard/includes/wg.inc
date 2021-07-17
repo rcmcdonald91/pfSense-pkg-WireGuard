@@ -212,20 +212,20 @@ function wg_settings_post_handler($post) {
 	$save_success = false;
 
 	// Handle the configuration apply button
-	if (isset($_POST['apply'])) {
+	if (isset($post['apply'])) {
 
 		$is_apply = true;
 
 		$ret_code = wg_apply_tunnels_common();
 
 	// Handle any actions
-	} elseif (isset($_POST['act'])) {
+	} elseif (isset($post['act'])) {
 
-		switch ($_POST['act']) {
+		switch ($post['act']) {
 
 			case 'save':
 
-				$res = wg_do_settings_post($_POST);
+				$res = wg_do_settings_post($post);
 
 				$input_errors = $res['input_errors'];
 
