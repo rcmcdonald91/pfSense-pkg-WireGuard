@@ -41,6 +41,7 @@ function wg_status_post_handler($post) {
 
 	$ret_code = 0;
 
+	// Handle the configuration apply button
 	if (isset($post['apply'])) {
 
 		$is_apply = true;
@@ -64,15 +65,17 @@ function wg_peers_edit_post_handler($post) {
 
 	$ret_code = 0;
 
+	// Handle the configuration apply button
 	if (isset($post['apply'])) {
 
 		$is_apply = true;
 
 		$ret_code = wg_apply_tunnels_common();
 
+	// Handle any actions
 	} elseif (isset($post['act'])) {
 
-		switch ($post['act']) {
+		switch (strtolower($post['act'])) {
 
 			case 'save':
 
@@ -134,15 +137,17 @@ function wg_peers_post_handler($post) {
 
 	$ret_code = 0;
 
+	// Handle the configuration apply button
 	if (isset($post['apply'])) {
 
 		$is_apply = true;
 
 		$ret_code = wg_apply_tunnels_common();
 
+	// Handle any actions
 	} elseif (isset($post['act'])) {
 
-		switch ($post['act']) {
+		switch (strtolower($post['act'])) {
 
 			case 'toggle':
 
@@ -221,7 +226,7 @@ function wg_settings_post_handler($post) {
 	// Handle any actions
 	} elseif (isset($post['act'])) {
 
-		switch ($post['act']) {
+		switch (strtolower($post['act'])) {
 
 			case 'save':
 
@@ -280,7 +285,7 @@ function wg_tunnels_edit_post_handler($post) {
 	// Handle any actions
 	} elseif (isset($post['act'])) {
 
-		switch ($post['act']) {
+		switch (strtolower($post['act'])) {
 
 			case 'save':
 
@@ -396,7 +401,7 @@ function wg_tunnels_post_handler($post) {
 	// Handle any actions
 	} elseif (isset($post['act'])) {
 
-		switch ($post['act']) {
+		switch (strtolower($post['act'])) {
 
 			case 'download':
 
@@ -487,15 +492,9 @@ function wg_apply_tunnels_common() {
 
 			$tunnels_to_apply = wg_apply_list_get('tunnels');
 
-			$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
+			$sync_status = wg_tunnel_sync($tunnels_to_apply);
 
 			$ret_code |= $sync_status['ret_code'];
-
-		}
-
-		if ($ret_code == 0) {
-
-			clear_subsystem_dirty($wgg['subsystems']['wg']);
 
 		}
 
@@ -506,7 +505,7 @@ function wg_apply_tunnels_common() {
 }
 
 /*
- * This toggles a given tunnel based on index
+ * This toggles a given tunnel based on name
  */
 function wg_toggle_tunnel($tunnel_name) {
 	global $wgg;
@@ -1227,9 +1226,8 @@ function wg_destroy_rogue_tunnels(&$cmds = null) {
 
 /*
  * This builds, rebuilds, or destroys tunnel interfaces
- * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpoints = true, $json = false) {
+function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoints = true, $clean_subsystem_on_sucess = true, $json = false) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -1256,11 +1254,11 @@ function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpo
 			$ret_code |= $tun_sync_status['ret_code'];
 
 			// Collect the return from each individual tunnel
-			$tunnels[] = array(
-					'name' 		=> $tun_sync_status['config']['name'],
-					'ret_code' 	=> $tun_sync_status['ret_code'], 
-					'errors' 	=> $tun_sync_status['errors'],
-					'config' 	=> $tun_sync_status['config']);
+			$tunnels[]	= array(
+						'name'		=> $tun_sync_status['config']['name'],
+						'ret_code'	=> $tun_sync_status['ret_code'], 
+						'errors'	=> $tun_sync_status['errors'],
+						'config'	=> $tun_sync_status['config']);
 
 			// We need to destroy any rogue peers too...
 			wg_destroy_rogue_peers($tunnel_name);
@@ -1285,6 +1283,12 @@ function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpo
 
 			wg_resolve_endpoints();
 			
+		}
+
+		if ($clean_subsystem_on_sucess && ($ret_code == 0)) {
+
+			clear_subsystem_dirty($wgg['subsystems']['wg']);
+
 		}
 
 	}
@@ -1334,14 +1338,14 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 	$parsed_cmds = wg_parse_cmds_array($cmds);
 
 	// Build the return array
-	$res = array(
-		'ret_code'	=> $parsed_cmds['ret_code'], 
-		'errors'	=> $parsed_cmds['errors'], 
-		'cmds'		=> $parsed_cmds['cmds'],
-		'config'	=> $tunnel);
+	$res 	= array(
+			'ret_code'	=> $parsed_cmds['ret_code'], 
+			'errors'	=> $parsed_cmds['errors'], 
+			'cmds'		=> $parsed_cmds['cmds'],
+			'config'	=> $tunnel);
 
 	return $json ? json_encode($res) : $res;
-
+		
 }
 
 /*

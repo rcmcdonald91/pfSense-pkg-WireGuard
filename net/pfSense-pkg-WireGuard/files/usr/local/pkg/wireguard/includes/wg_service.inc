@@ -271,7 +271,7 @@ function wg_service_cli_start($serialize = true) {
 	$ifs_to_build = wg_get_configured_ifs();
 
 	// Now build them...
-	$sync_status = wg_tunnel_sync($ifs_to_build, false, false);
+	$sync_status = wg_tunnel_sync($ifs_to_build, false);
 
 	if ($sync_status['ret_code'] <> 0 ) {
 
