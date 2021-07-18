@@ -48,7 +48,7 @@ $is_new = true;
 ['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_tunnels_edit_post_handler($_POST);
 
 // Looks like we are editing an existing tunnel
-if (isset($REQUEST['tun'])) {
+if (isset($_REQUEST['tun'])) {
 	
 	// Save this for later...
 	$tun = $_REQUEST['tun'];
