@@ -465,7 +465,7 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 	if (file_exists($conf_path)
 	    && wg_is_valid_tunnel($if_name, true)) {
 
-		$cmd = "{$wgg['wg']} syncconf {$s(escapeshellarg($if_name))} {$s(escapeshellarg($conf_path))}";
+		$cmd = "{$wgg['wg']} syncconf {$s(escapeshellarg($if_name))} {$s(escapeshellarg($conf_path))} 2>&1";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_SYNC);
 

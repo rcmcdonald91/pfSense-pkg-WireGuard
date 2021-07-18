@@ -1258,6 +1258,7 @@ function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoi
 						'name'		=> $tun_sync_status['config']['name'],
 						'ret_code'	=> $tun_sync_status['ret_code'], 
 						'errors'	=> $tun_sync_status['errors'],
+						'cmds'		=> $tun_sync_status['cmds'],
 						'config'	=> $tun_sync_status['config']);
 
 			// We need to destroy any rogue peers too...
