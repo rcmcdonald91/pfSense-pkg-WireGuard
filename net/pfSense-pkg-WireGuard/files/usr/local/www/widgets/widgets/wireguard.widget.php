@@ -28,7 +28,6 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/includes/wg.inc');
 require_once('wireguard/includes/wg_guiconfig.inc');
-require_once('wireguard/includes/wg_service.inc');
 
 // Widget includes
 require_once('/usr/local/www/widgets/include/wireguard.inc');
