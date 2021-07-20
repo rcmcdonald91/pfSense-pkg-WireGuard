@@ -518,6 +518,10 @@ function wg_apply_tunnels_common() {
 
 			$ret_code |= $sync_status['ret_code'];
 
+		} else {
+
+			clear_subsystem_dirty($wgg['subsystems']['wg']);
+
 		}
 
 	}

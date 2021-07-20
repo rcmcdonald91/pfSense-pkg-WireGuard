@@ -248,11 +248,13 @@ function wg_service_cli_start($serialize = true) {
 
 		wg_destroy_tunnels();
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		// Pass through the sync status as extra bits to serialize while we still can...
+		return wg_service_parse_errors($ret_code, $serialize, array('sync_status' => $sync_status));
 
 	} elseif ($newpid) {
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		// Pass through the sync status as extra bits to serialize while we still can...
+		return wg_service_parse_errors($ret_code, $serialize, array('sync_status' => $sync_status));
 
 	}
 
