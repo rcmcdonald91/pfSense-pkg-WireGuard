@@ -46,12 +46,17 @@ wg_globals();
 
 $s = fn($x) => $x;
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("Status"), gettext("WireGuard"));
-$pglinks = array("", "@self");
+$pgtitle = array(gettext('Status'), gettext('WireGuard'), gettext('Overview'));
+$pglinks = array('', '@self', '@self');
 
-include("head.inc");
+$tab_array = array();
+$tab_array[] = array(gettext('Overview'), true, '/wg/status_wireguard.php');
+$tab_array[] = array(gettext('Routes'), false, '/wg/status_wireguard_routes.php');
+$tab_array[] = array(gettext('Package'), false, '/wg/status_wireguard_package.php');
+
+include('head.inc');
 
 wg_print_service_warning();
 
@@ -63,9 +68,7 @@ if ($is_apply) {
 
 wg_print_config_apply_box();
 
-wg_tab_array_common('status');
-
-wg_tab_array_status('overview');
+display_top_tabs($tab_array);
 
 $a_devices = wg_get_status();
 
@@ -178,6 +181,8 @@ endif;
 		</table>
     	</div>
 </div>
+
+<?php wg_print_configuration_hint() ?>
 
 <nav class="action-buttons">
 	<a href="#" class="btn btn-info btn-sm" id="showpeers">

@@ -27,23 +27,78 @@ require_once('util.inc');
 require_once('wireguard/includes/wg.inc');
 require_once('wireguard/includes/wg_globals.inc');
 
-function wg_tab_array_common($current_page) {
+function wg_print_configuration_hint() {
 
-	$tab_array = array();
+	$class = !is_wg_enabled() ? 'infoblock blockopen' : 'infoblock';
 
-	$tab_array[] = array(gettext('Tunnels'), ($current_page == 'tunnels'), '/wg/vpn_wg_tunnels.php');
-	$tab_array[] = array(gettext('Peers'), ($current_page == 'peers'), '/wg/vpn_wg_peers.php');
-	$tab_array[] = array(gettext('Settings'), ($current_page == 'settings'), '/wg/vpn_wg_settings.php');
-	$tab_array[] = array(gettext('Status'), ($current_page == 'status'), '/wg/status_wireguard.php');
+	print("<div class=\"{$class}\">");
 
-	display_top_tabs($tab_array);
+	print_info_box(sprintf(gettext('WireGuard can be configured %1$shere%2$s.'), '<a href="/wg/vpn_wg_tunnels.php">', '</a>'), 'info', false);
+
+	print("</div>");
+
+}
+
+function wg_print_status_hint() {
+
+	$class = wg_is_service_running() ? 'infoblock blockopen' : 'infoblock';
+
+	print("<div class=\"{$class}\">");
+
+	print_info_box(sprintf(gettext('WireGuard status can be checked %1$shere%2$s.'), '<a href="/wg/status_wireguard.php">', '</a>'), 'info', false);
+
+	print("</div>");
+
+}
+
+function wg_compose_routes_body($family = null, $resolve_names = false) {
+	global $wgg;
+
+	$s = fn($x) => $x;
+
+	$routes = wg_netstat_get_routes($family, $wgg['if_prefix'], $resolve_names);
+
+	if (count($routes) > 0) {
+		
+		foreach ($routes as $route) {
+
+			if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($route['interface-name'])) {
+
+				$data_html .=	<<<"ROW"
+						<tr>
+							<td>{$s(htmlspecialchars($route['destination']))}</td>
+							<td><a href="/wg/vpn_wg_tunnels_edit.php?tun={$s(htmlspecialchars($route['interface-name']))}">{$s(htmlspecialchars($route['interface-name']))}</a></td>
+							<td>{$s(htmlspecialchars($tunnel['descr']))}</td>
+							<td>{$s(htmlspecialchars($route['gateway']))}</td>
+							<td>{$s(htmlspecialchars($route['flags']))}</td>
+							<td>{$s(htmlspecialchars($route['use']))}</td>
+							<td>{$s(htmlspecialchars($route['mtu']))}</td>
+						</tr>
+
+						ROW;
+
+			}
+
+		}
+
+		return $data_html;
+
+	}
+
+	$data_html =	<<<"ROW"
+			<tr>
+				<td colspan="7">{$s(sprint_info_box(gettext('No WireGuard routes have been configured.'), 'warning', null))}</td>
+			</tr>
+
+			ROW;
+	
+	return $data_html;
 
 }
 
 function wg_tab_array_status($current_page) {
 
 	$tab_array = array();
-
 	$tab_array[] = array(gettext('Overview'), ($current_page == 'overview'), '/wg/status_wireguard.php');
 	$tab_array[] = array(gettext('Routes'), ($current_page == 'routes'), '/wg/status_wireguard_routes.php');
 	$tab_array[] = array(gettext('Package'), ($current_page == 'package'), '/wg/status_wireguard_package.php');

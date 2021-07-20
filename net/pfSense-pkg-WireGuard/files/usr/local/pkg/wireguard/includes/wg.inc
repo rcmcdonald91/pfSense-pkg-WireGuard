@@ -48,6 +48,29 @@ function wg_status_post_handler($post) {
 
 		$ret_code = wg_apply_tunnels_common();
 
+	} elseif (isset($post['act'])) {
+
+		switch (strtolower($post['act'])) {
+
+			case 'getroutes':
+
+				print(wg_compose_routes_body($post['family'], false));
+
+				exit();
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/status_wireguard.php');
+
+				break;
+
+				
+
+		}
+
 	}
 
 	return array('is_apply' => $is_apply, 'ret_code' => $ret_code);

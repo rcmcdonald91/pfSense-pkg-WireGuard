@@ -648,39 +648,50 @@ function wg_interface_status($if_name) {
 
 }
 
-function wg_netstat_get_routes($family, $resolve_names = false) {
+function wg_netstat_get_routes($family = null, $if_prefix = null, $resolve_names = false, $json = false) {
 	global $wgg;
+
+	$s = fn($x) => $x;
+
+	$family_convo = array('Internet' => 'inet', 'Internet6' => 'inet6');
 
 	$ret_table = array();
 
-	$resolve = $resolve_names ? ' -n' : null;
+	$resolve = $resolve_names ? null : ' -n';
 
-	exec("{$wgg['netstat']} -rW{$resolve} --libxo=json", $res, $ret_code);
+	$family = is_null($family) ? null : " -f {$s(escapeshellarg($family))}";
+
+	exec("{$wgg['netstat']} -rW{$resolve}{$family} --libxo=json", $res, $ret_code);
 
 	if ($ret_code == 0) {
 	
-		// LibXo can sometimes output across multiple lines...
+		// Ref: https://github.com/Juniper/libxo/issues/74
 		$res = json_decode(implode($res), true);
 	
 		$tables = $res['statistics']['route-information']['route-table']['rt-family'];
 	
 		foreach ($tables as ['address-family' => $family, 'rt-entry' => $entries]) {
-	
-			$tmp_entries = array();
 
+			$family = str_replace(array_keys($family_convo), array_values($family_convo), $family);
+	
 			foreach ($entries as $entry) {
 
-				$tmp_entries[] = $entry;
+				$entry['family'] = $family;
+
+				// Filter interface-names by prefix
+				if (strncmp($entry['interface-name'], $if_prefix, strlen($if_prefix)) === 0) {
+
+					$ret_table[] = $entry;
+
+				}
 
 			}
 
-			$ret_table[$family] = $tmp_entries;
-	
 		}
 	
 	}
 
-	return $ret_table;
+	return ($json ? json_encode($ret_table) : $ret_table);
 
 }
 

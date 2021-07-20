@@ -46,12 +46,17 @@ wg_globals();
 
 $s = fn($x) => $x;
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("Status"), gettext("WireGuard"));
-$pglinks = array("", "@self");
+$pgtitle = array(gettext('Status'), gettext('WireGuard'), gettext('Package'));
+$pglinks = array('', '/wg/status_wireguard.php', '@self');
 
-include("head.inc");
+$tab_array = array();
+$tab_array[] = array(gettext('Overview'), false, '/wg/status_wireguard.php');
+$tab_array[] = array(gettext('Routes'), false, '/wg/status_wireguard_routes.php');
+$tab_array[] = array(gettext('Package'), true, '/wg/status_wireguard_package.php');
+
+include('head.inc');
 
 wg_print_service_warning();
 
@@ -63,9 +68,7 @@ if ($is_apply) {
 
 wg_print_config_apply_box();
 
-wg_tab_array_common('status');
-
-wg_tab_array_status('package');
+display_top_tabs($tab_array);
 
 ?>
 
@@ -103,6 +106,9 @@ wg_tab_array_status('package');
 </div>
 
 <?php
+
+wg_print_configuration_hint();
+
 include('wireguard/includes/wg_foot.inc');
 include('foot.inc');
 ?>

@@ -77,12 +77,17 @@ if (isset($_REQUEST['peer'])) {
 
 $s = fn($x) => $x;
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), gettext("Edit"));
-$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_peers.php", "@self");
+$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Peers'), gettext('Edit'));
+$pglinks = array('', '/wg/vpn_wg_tunnels.php', '/wg/vpn_wg_peers.php', '@self');
 
-include("head.inc");
+$tab_array = array();
+$tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
+$tab_array[] = array(gettext('Peers'), true, '/wg/vpn_wg_peers.php');
+$tab_array[] = array(gettext('Settings'), false, '/wg/vpn_wg_settings.php');
+
+include('head.inc');
 
 wg_print_service_warning();
 
@@ -100,12 +105,11 @@ if (!empty($input_errors)) {
 
 }
 
-
-wg_tab_array_common('peers');
+display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section('Peer Configuration');
+$section = new Form_Section(gettext('Peer Configuration'));
 
 $form->addGlobal(new Form_Input(
 	'index',
@@ -123,14 +127,14 @@ $section->addInput(new Form_Checkbox(
 
 $section->addInput($input = new Form_Select(
 	'tun',
-	'Tunnel',
+	gettext('Tunnel'),
 	$pconfig['tun'],
 	wg_get_tun_list()
 ))->setHelp("WireGuard tunnel for this peer. (<a href='vpn_wg_tunnels_edit.php'>Create a New Tunnel</a>)");
 
 $section->addInput(new Form_Input(
 	'descr',
-	'Description',
+	gettext('Description'),
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
@@ -138,7 +142,7 @@ $section->addInput(new Form_Input(
 
 $section->addInput(new Form_Checkbox(
 	'dynamic',
-	'Dynamic Endpoint',
+	gettext('Dynamic Endpoint'),
 	gettext('Dynamic'),
 	empty($pconfig['endpoint']) || $is_dynamic
 ))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to assign an endpoint address and port for this peer.');
@@ -150,7 +154,7 @@ $group->addClass("endpoint");
 
 $group->add(new Form_Input(
 	'endpoint',
-	'Endpoint',
+	gettext('Endpoint'),
 	'text',
 	$pconfig['endpoint']
 ))->addClass('trim')
@@ -160,7 +164,7 @@ $group->add(new Form_Input(
 
 $group->add(new Form_Input(
 	'port',
-	'Endpoint Port',
+	gettext('Endpoint Port'),
 	'text',
 	$pconfig['port']
 ))->addClass('trim')
@@ -172,7 +176,7 @@ $section->add($group);
 
 $section->addInput(new Form_Input(
 	'persistentkeepalive',
-	'Keep Alive',
+	gettext('Keep Alive'),
 	'text',
 	$pconfig['persistentkeepalive'],
 	['placeholder' => 'Keep Alive']
@@ -193,7 +197,7 @@ $group = new Form_Group('Pre-shared Key');
 
 $group->add(new Form_Input(
 	'presharedkey',
-	'Pre-shared Key',
+	gettext('Pre-shared Key'),
 	wg_secret_input_type(),
 	$pconfig['presharedkey']
 ))->addClass('trim')
@@ -201,7 +205,7 @@ $group->add(new Form_Input(
 
 $group->add(new Form_Button(
 	'genpsk',
-	'Generate',
+	gettext('Generate'),
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
@@ -233,7 +237,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
-		'Allowed Subnet or Host',
+		gettext('Allowed Subnet or Host'),
 		$item['address'],
 		'BOTH'
 	))->addClass('trim')
@@ -243,7 +247,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group->add(new Form_Input(
 		"address_descr{$counter}",
-		'Description',
+		gettext('Description'),
 		'text',
 		$item['descr']
 	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
@@ -251,7 +255,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
-		'Delete',
+		gettext('Delete'),
 		null,
 		'fa-trash'
 	))->addClass('btn-warning btn-sm');
@@ -262,7 +266,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 $section->addInput(new Form_Button(
 	'addrow',
-	'Add Allowed IP',
+	gettext('Add Allowed IP'),
 	null,
 	'fa-plus'
 ))->addClass('btn-success btn-sm addbtn');
@@ -287,7 +291,13 @@ print($form);
 	</button>
 </nav>
 
-<?php $genkeywarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key."); ?>
+<?php 
+
+wg_print_status_hint();
+
+$genkeywarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key."); 
+
+?>
 
 <script type="text/javascript">
 //<![CDATA[

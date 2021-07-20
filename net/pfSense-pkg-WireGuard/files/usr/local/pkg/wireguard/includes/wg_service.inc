@@ -34,7 +34,7 @@ require_once('wireguard/includes/wg.inc');
 
 global $wgg;
 
-if (isset($argv[1])) {
+if (wg_is_cli()) {
 
 	$ret_code = 0;
 
@@ -44,55 +44,62 @@ if (isset($argv[1])) {
 
 	pcntl_async_signals(true);
 
-	if (!wg_is_cli()) {
+	if (($argc > 1) && !empty($argv[1])) {
 
-		// Bail out if we aren't in the CLI...
-		die("FATAL: This script can only be started through the CLI.\n");
+		if (PHP_BINARY != $wgg['php_wg']) {
 
-	}
+			// Bail out if we aren't running under under the correct executable...
+			die("FATAL: This script can only be executed by {$wgg['php_wg']}.\n");
 
-	if (PHP_BINARY != $wgg['php_wg']) {
+		}
 
-		// Bail out if we aren't running under under the correct executable...
-		die("FATAL: This script can only be executed by {$wgg['php_wg']}.\n");
+		// Should we serialize the return output?
+		$serialize = (isset($argv[2]) && strtolower($argv[2]) == 'serialize');
 
-	}
-
-	// Should we serialize the return output?
-	$serialize = (isset($argv[2]) && strtolower($argv[2]) == 'serialize');
-
-	switch (strtolower($argv[1])) {
-		
-		case 'start':
-
-			$ret_code = wg_service_cli_start($serialize);
+		switch (strtolower($argv[1])) {
 			
-			break;
+			case 'start':
 
-		case 'stop':
-	
-			$ret_code = wg_service_cli_stop($serialize);
+				$ret_code = wg_service_cli_start($serialize);
+				
+				break;
 
-			break;
+			case 'stop':
+		
+				$ret_code = wg_service_cli_stop($serialize);
 
-		case 'restart':
+				break;
 
-			$ret_code = wg_service_cli_restart($serialize);
+			case 'restart':
 
-			break;
+				$ret_code = wg_service_cli_restart($serialize);
 
-		default:
+				break;
 
-			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP|RESTART} [SERIALIZE]");
+			default:
 
-			$ret_code = 1;
+				wg_print_usage_instructions();
 
-			break;
+				$ret_code = 1;
+
+				break;
+
+		}
+
+	} else {
+
+		wg_print_usage_instructions();
 
 	}
 
-	// We are done...
 	exit($ret_code);
+
+}
+
+function wg_print_usage_instructions() {
+	global $wgg;
+
+	fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP|RESTART} [SERIALIZE]\n");
 
 }
 

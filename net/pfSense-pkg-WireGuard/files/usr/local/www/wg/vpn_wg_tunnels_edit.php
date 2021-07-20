@@ -81,11 +81,16 @@ $shortcut_section = 'wireguard';
 $pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Tunnels'), gettext('Edit'));
 $pglinks = array('', '/wg/vpn_wg_tunnels.php', '/wg/vpn_wg_tunnels.php', '@self');
 
+$tab_array = array();
+$tab_array[] = array(gettext('Tunnels'), true, '/wg/vpn_wg_tunnels.php');
+$tab_array[] = array(gettext('Peers'), false, '/wg/vpn_wg_peers.php');
+$tab_array[] = array(gettext('Settings'), false, '/wg/vpn_wg_settings.php');
+
 include('head.inc');
 
 wg_print_service_warning();
 
-if (isset($_POST['apply'])) {
+if ($is_apply) {
 
 	print_apply_result_box($ret_code);
 
@@ -99,11 +104,11 @@ if (!empty($input_errors)) {
 
 }
 
-wg_tab_array_common('tunnels');
+display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section("Tunnel Configuration ({$pconfig['name']})");
+$section = new Form_Section(sprintf(gettext('Tunnel Configuration (%s)'), $pconfig['name']));
 
 $form->addGlobal(new Form_Input(
 	'index',
@@ -142,11 +147,11 @@ $section->addInput($tun_enable);
 
 $section->addInput(new Form_Input(
 	'descr',
-	'Description',
+	gettext('Description'),
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
-))->setHelp('Description for administrative reference (not parsed).');
+))->setHelp(gettext('Description for administrative reference (not parsed).'));
 
 $section->addInput(new Form_Input(
 	'listenport',
@@ -188,7 +193,7 @@ $section->add($group);
 
 $form->add($section);
 
-$section = new Form_Section("Interface Configuration ({$pconfig['name']})");
+$section = new Form_Section(sprintf(gettext('Interface Configuration (%s)'), $pconfig['name']));
 
 $section->setAttribute('id', 'addresses');
 
@@ -313,7 +318,7 @@ print($form);
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=gettext('Peer Configuration')?></h2>
+		<h2 class="panel-title"><?=sprintf(gettext('Peer Configuration (%s)'), $pconfig['name'])?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
 		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
@@ -392,7 +397,13 @@ endif;
 	</button>
 </nav>
 
-<?php $genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
+<?php 
+
+wg_print_status_hint();
+
+$genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); 
+
+?>
 
 <script type="text/javascript">
 //<![CDATA[

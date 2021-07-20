@@ -53,6 +53,11 @@ $shortcut_section = 'wireguard';
 $pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Settings'));
 $pglinks = array('', '/wg/vpn_wg_tunnels.php', '@self');
 
+$tab_array = array();
+$tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
+$tab_array[] = array(gettext('Peers'), false, '/wg/vpn_wg_peers.php');
+$tab_array[] = array(gettext('Settings'), true, '/wg/vpn_wg_settings.php');
+
 include('head.inc');
 
 wg_print_service_warning();
@@ -77,7 +82,7 @@ if (!empty($input_errors)) {
 	
 }
 
-wg_tab_array_common('settings');
+display_top_tabs($tab_array);
 
 $form = new Form(false);
 
@@ -180,6 +185,8 @@ print($form);
 		<?=gettext('Save')?>
 	</button>
 </nav>
+
+<?php wg_print_status_hint(); ?>
 
 <script type="text/javascript">
 //<![CDATA[

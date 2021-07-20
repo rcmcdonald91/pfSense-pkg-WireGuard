@@ -46,12 +46,17 @@ wg_globals();
 
 $s = fn($x) => $x;
 
-$shortcut_section = "wireguard";
+$shortcut_section = 'wireguard';
 
-$pgtitle = array(gettext("Status"), gettext("WireGuard"));
-$pglinks = array("", "@self");
+$pgtitle = array(gettext('Status'), gettext('WireGuard'), gettext('Routes'));
+$pglinks = array('', '/wg/status_wireguard.php', '@self');
 
-include("head.inc");
+$tab_array = array();
+$tab_array[] = array(gettext('Overview'), false, '/wg/status_wireguard.php');
+$tab_array[] = array(gettext('Routes'), true, '/wg/status_wireguard_routes.php');
+$tab_array[] = array(gettext('Package'), false, '/wg/status_wireguard_package.php');
+
+include('head.inc');
 
 wg_print_service_warning();
 
@@ -63,11 +68,101 @@ if ($is_apply) {
 
 wg_print_config_apply_box();
 
-wg_tab_array_common('status');
-
-wg_tab_array_status('routes');
+display_top_tabs($tab_array);
 
 ?>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title"><?=gettext("IPv4 Routes")?></h2>
+	</div>
+	<div class="table-responsive panel-body">
+		<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" data-sortable>
+			<thead>
+				<th><?=gettext('Destination')?></th>
+				<th><?=gettext('Interface')?></th>
+				<th><?=gettext('Description')?></th>
+				<th><?=gettext('Gateway')?></th>
+				<th><?=gettext('Flags')?></th>
+				<th><?=gettext('Use')?></th>
+				<th><?=gettext('MTU')?></th>
+			</thead>
+			<tbody id="v4routes">
+				<tr>
+					<td colspan="7">
+						<?=print_info_box("<i class=\"fa fa-gear fa-spin\"></i>&nbsp;&nbsp;{$s(gettext('Collecting WireGuard route information.'))}", 'warning', null)?>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title"><?=gettext("IPv6 Routes")?></h2>
+	</div>
+	<div class="table-responsive panel-body">
+		<table class="table table-hover table-striped table-condensed sortable-theme-bootstrap" data-sortable>
+			<thead>
+				<th><?=gettext('Destination')?></th>
+				<th><?=gettext('Interface')?></th>
+				<th><?=gettext('Description')?></th>
+				<th><?=gettext('Gateway')?></th>
+				<th><?=gettext('Flags')?></th>
+				<th><?=gettext('Use')?></th>
+				<th><?=gettext('MTU')?></th>
+			</thead>
+			<tbody id="v6routes">
+				<tr>
+					<td colspan="7">
+						<?=print_info_box("<i class=\"fa fa-gear fa-spin\"></i>&nbsp;&nbsp;{$s(gettext('Collecting WireGuard route information.'))}", 'warning', null)?>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<?php wg_print_configuration_hint(); ?>
+
+<script type="text/javascript">
+//<![CDATA[
+events.push(function(){
+
+	function updateRoutes(family, section) {
+
+		ajaxRequest = $.ajax(
+			{
+				url: '/wg/status_wireguard_routes.php',
+				type: 'post',
+				data: {
+					act: 'getroutes',
+					family: family
+				},
+			success: function(response, textStatus, jqXHR) {
+				$(section).html(response);
+			}
+		});
+
+	}
+
+	function updateAllRoutes() {
+		updateRoutes('inet', '#v4routes');
+		updateRoutes('inet6', '#v6routes');
+	}
+
+	setInterval(function() {
+
+		updateAllRoutes();
+
+	}, 5000);
+
+	updateAllRoutes();
+
+});
+//]]>
+</script>
 
 <?php
 include('wireguard/includes/wg_foot.inc');
