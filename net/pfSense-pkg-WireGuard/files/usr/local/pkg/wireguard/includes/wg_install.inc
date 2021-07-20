@@ -28,9 +28,7 @@ require_once('unbound.inc');
 require_once('util.inc');
 
 // WireGuard includes
-require_once('wireguard/includes/wg_api.inc');
-require_once('wireguard/includes/wg_globals.inc');
-require_once('wireguard/includes/wg_service.inc');
+require_once('wireguard/includes/wg.inc');
 
 /*
  * This is the main install hook

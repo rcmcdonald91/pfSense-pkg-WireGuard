@@ -25,7 +25,6 @@ require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/includes/wg.inc');
-require_once('wireguard/includes/wg_globals.inc');
 
 function wg_print_configuration_hint() {
 

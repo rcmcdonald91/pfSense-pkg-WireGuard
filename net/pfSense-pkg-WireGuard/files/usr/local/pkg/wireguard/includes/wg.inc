@@ -29,7 +29,6 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/includes/wg_api.inc');
 require_once('wireguard/includes/wg_install.inc');
-require_once('wireguard/includes/wg_service.inc');
 require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
@@ -1619,6 +1618,135 @@ function wg_download_tunnel($tunnel_name, $failure_redirect) {
 
 	// If something goes wrong, bail out to the failure redirect location
 	header("Location: {$failure_redirect}");
+
+}
+
+// Checks if the service is running
+function wg_is_service_running() {
+	global $wgg;
+
+	if (!($h_lock = @fopen($wgg['pid_path'], 'r')) || !file_exists($wgg['pid_path'])) {
+
+		return false;
+
+	}
+
+	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, $wouldblock);
+
+	if ($not_running) {
+	
+		flock($h_lock, LOCK_UN);
+
+	}
+
+	$pid = fgets($h_lock);
+	
+	fclose($h_lock);
+
+	// Another trick to test if a process is running
+	$sig_test = posix_kill($pid, 0);
+
+	return (!$not_running || $wouldblock || $sig_test);
+
+}
+
+// Check if we are in CLI or not
+function wg_is_cli() {
+
+	return (PHP_SAPI == 'cli');
+
+}
+
+// This is where we restart any extra services
+function wg_restart_extra_services() {
+
+	if (!platform_booting()) {
+
+		// dpinger
+		setup_gateways_monitor();
+
+		// unbound
+		services_unbound_configure();
+
+		// TODO: This is where we will add facilities for users to pick what services to restart
+
+	}
+
+	// This is currently just a best effort attempt...
+	return 0;
+
+}
+
+// This is a wrapper for safely calling from the web frontend
+function wg_service_fpm_start() {
+	global $wgg;
+
+	$exec_output = $unserialize_output = $ret_output = array();
+
+	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
+	exec("{$wgg['wg_daemon']} start serialize", $exec_output, $ret_code);
+
+	// Catch unserialization results before returning
+	if ($unserialize_output = unserialize($exec_output[0])) {
+
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
+
+	}
+
+	// Consumers expect an array...
+	return $ret_output;
+
+}
+
+// This is a wrapper for safely calling from web frontend
+function wg_service_fpm_stop() {
+	global $wgg;
+
+	$exec_output = $unserialize_output = $ret_output = array();
+
+	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} stop serialize", $exec_output, $ret_code);
+
+	if ($unserialize_output = unserialize($exec_output[0])) {
+
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
+
+	}
+
+	// Consumers expect an array...
+	return $ret_output;
+
+}
+
+// This is a wrapper for safely calling from web frontend
+function wg_service_fpm_restart() {
+	global $wgg;
+
+	$exec_output = $unserialize_output = $ret_output = array();
+
+	// Invokes service restart with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} restart serialize", $exec_output, $ret_code);
+
+	if ($unserialize_output = unserialize($exec_output[0])) {
+
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
+
+	}
+
+	// Consumers expect an array...
+	return $ret_output;
 
 }
 
