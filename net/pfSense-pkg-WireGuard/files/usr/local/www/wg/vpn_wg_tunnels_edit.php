@@ -40,35 +40,19 @@ wg_globals();
 
 $pconfig = array();
 
-// Always assume we are creating a new tunnel
-$is_new = true;
-
 // This is the main entry into the post switchboard for this page.
 ['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_tunnels_edit_post_handler($_POST);
 
-// Looks like we are editing an existing tunnel
-if (isset($_REQUEST['tun'])) {
-	
-	// Save this for later...
-	$tun = $_REQUEST['tun'];
-
-	$tun_idx = wg_tunnel_get_array_idx($tun);
-
-	if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
-
-		$pconfig = &$wgg['tunnels'][$tun_idx];
-
-		// Supress warning and allow peers to be added via the 'Add Peer' link
-		$is_new = false;
-
-	}
-
-// Looks like we are creating a new tunnel
-} else {
+// Are we editing an existing tunnel?
+if (!([$tun_idx, $pconfig, $is_new] = wg_tunnel_get_config_by_name($_REQUEST['tun']))) {
 
 	// New tunnel defaults
+	$is_new 		= true;
+
+	// Default to enabled
 	$pconfig['enabled']	= 'yes';
 
+	// Get the next available interface name
 	$pconfig['name'] 	= next_wg_if();
 
 }
@@ -298,13 +282,6 @@ $form->addGlobal(new Form_Input(
 ));
 
 $form->addGlobal(new Form_Input(
-	'is_new',
-	'',
-	'hidden',
-	$is_new
-));
-
-$form->addGlobal(new Form_Input(
 	'act',
 	'',
 	'hidden',
@@ -347,8 +324,8 @@ print($form);
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
-						<?=wg_generate_toggle_icon_link(($peer['enabled'] == 'yes'), 'peer', "?act=toggle&peer={$peer_idx}&tun={$tun}")?>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}&tun={$tun}"?>" usepost></a>
+						<?=wg_generate_toggle_icon_link(($peer['enabled'] == 'yes'), 'peer', "?act=toggle&peer={$peer_idx}&tun={$pconfig['name']}")?>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}&tun={$pconfig['name']}"?>" usepost></a>
 					</td>
 				</tr>
 
@@ -379,6 +356,10 @@ if ($is_new):
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext('Add Peer')?>
 	</button>
+	<button class="btn btn-danger btn-sm" title="<?=gettext('Delete Tunnel')?>" disabled>
+		<i class="fa fa-trash icon-embed-btn"></i>
+		<?=gettext('Delete Tunnel')?>
+	</button>
 <?php
 // Now we show the actual links once the tunnel is actually saved
 else:
@@ -386,6 +367,10 @@ else:
 	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext('Add Peer')?>
+	</a>
+	<a id="tunneldelete" class="btn btn-danger btn-sm no-confirm">
+		<i class="fa fa-trash icon-embed-btn"></i>
+		<?=gettext('Delete Tunnel')?>
 	</a>
 <?php
 endif;
@@ -401,6 +386,8 @@ endif;
 wg_print_status_hint();
 
 $genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); 
+
+$deleteTunnelWarning = gettext("Delete Tunnel? Click 'ok' to delete tunnel.");
 
 ?>
 
@@ -475,6 +462,12 @@ events.push(function() {
 	// Save the form
 	$('#saveform').click(function(event) {
 		$(form).submit();
+	});
+
+	$('#tunneldelete').click(function() {
+		if (confirm(<?=json_encode($deleteTunnelWarning)?>)) {
+			postSubmit({act: 'delete', tun: <?=json_encode($pconfig['name'])?>}, '/wg/vpn_wg_tunnels.php');
+		}
 	});
 
 });

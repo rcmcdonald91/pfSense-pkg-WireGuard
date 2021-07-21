@@ -106,16 +106,27 @@ if (($argc > 1) && !empty($argv[1])) {
 function wg_print_usage_instructions() {
 	global $wgg;
 
+	$s = fn($x) => $x;
+
 	foreach (array(
-		"Usage:\n",
-		"    {$wgg['wg_daemon']} {ACTION} [OPTIONS]\n\n",
-		"Actions:\n",
-		"    START\tStart the WireGuard service\n",
-		"    STOP\tStop the WireGuard service\n",
-		"    RESTART\tRestart the WireGuard service\n\n",
-		"Options:\n",
-		"    SERIALIZE\tSerialize the output\n"
-	) as $line) { fwrite(STDOUT, $line); }
+
+		"{$s(gettext('Usage:'))}",
+
+		"    {$wgg['wg_daemon']} {{$s(gettext('Action'))}} [{$s(gettext('Options'))}]\n",
+
+		"{$s(gettext('Action'))}:",
+
+		"    START\t{$s(gettext('Start the WireGuard service'))}",
+
+		"    STOP\t{$s(gettext('Stop the WireGuard service'))}",
+
+		"    RESTART\t{$s(gettext('Restart the WireGuard service'))}\n",
+
+		"{$s(gettext('Options'))}:",
+
+		"    SERIALIZE\t{$s(gettext('Serialize the output'))}"
+
+	) as $line) { fwrite(STDOUT, "{$line}\n"); }
 
 }
 
@@ -180,6 +191,8 @@ function wg_service_cli_start($serialize = true) {
 	
 	$ret_code = 0;
 
+	// Time to perform some pre-flight checks...
+	
 	if (!wg_is_service_enabled()) {
 
 		$ret_code |= WG_ERROR_SVC_DISABLED;

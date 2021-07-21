@@ -1253,7 +1253,7 @@ function wg_destroy_rogue_tunnels(&$cmds = null) {
 /*
  * This builds, rebuilds, or destroys tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoints = true, $clean_subsystem_on_sucess = true, $json = false) {
+function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoints = true, $clean_subsystem_on_success = true, $json = false) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -1312,7 +1312,7 @@ function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoi
 			
 		}
 
-		if ($clean_subsystem_on_sucess && ($ret_code == 0)) {
+		if ($clean_subsystem_on_success && ($ret_code == 0)) {
 
 			clear_subsystem_dirty($wgg['subsystems']['wg']);
 

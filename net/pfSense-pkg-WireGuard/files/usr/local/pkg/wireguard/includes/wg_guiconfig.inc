@@ -95,17 +95,6 @@ function wg_compose_routes_body($family = null, $resolve_names = false) {
 
 }
 
-function wg_tab_array_status($current_page) {
-
-	$tab_array = array();
-	$tab_array[] = array(gettext('Overview'), ($current_page == 'overview'), '/wg/status_wireguard.php');
-	$tab_array[] = array(gettext('Routes'), ($current_page == 'routes'), '/wg/status_wireguard_routes.php');
-	$tab_array[] = array(gettext('Package'), ($current_page == 'package'), '/wg/status_wireguard_package.php');
-
-	display_top_tabs($tab_array, false, 'tabs');
-
-}
-
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;
 

@@ -172,13 +172,13 @@ function array_set_value(array &$array, $parents, $value) {
 
 	foreach ((array) $parents as $parent) {
 
-	if (isset($ref) && !is_array($ref)) {
+		if (isset($ref) && !is_array($ref)) {
 
-		$ref = array();
+			$ref = array();
 
-	}
+		}
 
-	$ref = &$ref[$parent];
+		$ref = &$ref[$parent];
 
 	}
 
@@ -258,16 +258,21 @@ function wg_globals() {
 
 	// An array of configuration paths we need
 	$conf_paths 	= array(
-				'config' => array_merge($wgg['xml_path'], array('config', 0)),
-				'tunnels' => array_merge($wgg['xml_path'], array('tunnels', 'item')),
-				'peers' => array_merge($wgg['xml_path'], array('peers', 'item')));
-
+				'config'	=> ['config', '0'],
+				'tunnels'	=> ['tunnels', 'item'],
+				'peers'		=> ['peers', 'item']
+			);
 
 	// Need to initialize these config paths as arrays and then assign by reference to $wgg
 	foreach ($conf_paths as $key => $path) {
 
+		// Construct the full path relative to the xml_path base
+		$path = array_merge($wgg['xml_path'], $path);
+
+		// Make sure its initialized
 		wg_init_config_arr($config, $path);
 
+		// Assign by reference to $wgg for future use
 		$wgg[$key] = &array_get_value($config, $path);
 
 	}

@@ -40,37 +40,23 @@ $pconfig = array();
 
 wg_globals();
 
-if (isset($_REQUEST['peer']) 
-    && is_numericint($_REQUEST['peer'])) {
-
-	$peer_idx = $_REQUEST['peer'];
-
-}
-
+// This is the main entry into the post switchboard for this page.
 ['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_peers_edit_post_handler($_POST);
 
-if (isset($_REQUEST['peer'])) {
+// Are we editing an existing peer?
+if (!([$peer_idx, $pconfig, $is_new] = wg_peer_get_config($_REQUEST['peer'], false))) {
 
-	// Save this for later...
-	$peer_idx = $_REQUEST['peer'];
-
-	if (is_array($wgg['peers'][$peer_idx])) {
-
-		// Looks like we are editing an existing peer
-		$pconfig = &$wgg['peers'][$peer_idx];
-
-	}
-
-} else {
+	// New peer defaults
+	$is_new 		= true;
 
 	// Default to enabled
-	$pconfig['enabled'] = 'yes';
+	$pconfig['enabled']	= 'yes';
 
 	// Automatically choose a tunnel based on the request 
-	$pconfig['tun'] = isset($_REQUEST['tun']) ? $_REQUEST['tun'] : null;
+	$pconfig['tun'] 	= isset($_REQUEST['tun']) ? $_REQUEST['tun'] : null;
 
 	// Default to a dynamic tunnel, so hide the endpoint form group
-	$is_dynamic = true;
+	$is_dynamic 		= true;
 
 }
 
@@ -284,6 +270,24 @@ print($form);
 ?>
 
 <nav class="action-buttons">
+<?php
+// We cheat here and show disabled buttons for a better user experience
+if ($is_new):
+?>
+	<button class="btn btn-danger btn-sm" title="<?=gettext('Delete Peer')?>" disabled>
+		<i class="fa fa-trash icon-embed-btn"></i>
+		<?=gettext('Delete Peer')?>
+	</button>
+<?php
+else:
+?>
+	<a id="peerdelete" class="btn btn-danger btn-sm no-confirm">
+		<i class="fa fa-trash icon-embed-btn"></i>
+		<?=gettext('Delete Peer')?>
+	</a>
+<?php
+endif;
+?>
 	<button type="submit" id="saveform" name="saveform" class="btn btn-primary btn-sm" value="save" title="<?=gettext('Save Peer')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save Peer")?>
@@ -294,7 +298,9 @@ print($form);
 
 wg_print_status_hint();
 
-$genkeywarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key."); 
+$genKeyWarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key.");
+
+$deletePeerWarning = gettext("Delete Peer? Click 'ok' to delete peer.");
 
 ?>
 
@@ -307,7 +313,7 @@ events.push(function() {
 
 	wgRegTrimHandler();
 
-	$('#copypsk').click(function () {
+	$('#copypsk').click(function(event) {
 
 		var $this = $(this);
 
@@ -334,7 +340,7 @@ events.push(function() {
 
 	// Request a new pre-shared key
 	$('#genpsk').click(function(event) {
-		if ($('#presharedkey').val().length == 0 || confirm(<?=json_encode($genkeywarning)?>)) {
+		if ($('#presharedkey').val().length == 0 || confirm(<?=json_encode($genKeyWarning)?>)) {
 			ajaxRequest = $.ajax({
 				url: "/wg/vpn_wg_peers_edit.php",
 				type: "post",
@@ -348,14 +354,20 @@ events.push(function() {
 		}
 	});
 
+	$('#peerdelete').click(function(event) {
+		if (confirm(<?=json_encode($deletePeerWarning)?>)) {
+			postSubmit({act: 'delete', peer: <?=json_encode($peer_idx)?>}, '/wg/vpn_wg_peers.php');
+		}
+	});
+
 	// Save the form
-	$('#saveform').click(function () {
+	$('#saveform').click(function(event) {
 
 		$(form).submit();
 
 	});
 
-	$('#dynamic').click(function () {
+	$('#dynamic').click(function(event) {
 
 		updateDynamicSection(this.checked);
 
