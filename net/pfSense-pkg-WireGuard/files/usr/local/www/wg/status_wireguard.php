@@ -31,7 +31,6 @@
 
 // pfSense includes
 require_once('guiconfig.inc');
-require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/includes/wg.inc');

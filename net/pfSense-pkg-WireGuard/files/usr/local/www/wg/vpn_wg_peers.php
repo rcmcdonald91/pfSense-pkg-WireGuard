@@ -28,7 +28,6 @@
 ##|-PRIV
 
 // pfSense includes
-require_once('functions.inc');
 require_once('guiconfig.inc');
 
 // WireGuard includes
@@ -75,7 +74,6 @@ if (!empty($input_errors)) {
 display_top_tabs($tab_array);
 
 ?>
-
 
 <div class="panel panel-default">
 	<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Peers')?></h2></div>
