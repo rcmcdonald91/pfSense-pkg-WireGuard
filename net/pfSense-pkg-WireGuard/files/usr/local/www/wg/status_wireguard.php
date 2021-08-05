@@ -3,7 +3,6 @@
  * status_wireguard.php
  *
  * part of pfSense (https://www.pfsense.org)
- * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * Copyright (c) 2021 Vajonam
  * Copyright (c) 2020 Ascrod
@@ -31,6 +30,7 @@
 
 // pfSense includes
 require_once('guiconfig.inc');
+require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/includes/wg.inc');
@@ -40,26 +40,52 @@ global $wgg;
 
 wg_globals();
 
-// This is the main entry into the post switchboard for this page.
-['is_apply' => $is_apply, 'ret_code' => $ret_code] = wg_status_post_handler($_POST);
+if ($_POST) {
 
-$s = fn($x) => $x;
+	if (isset($_POST['apply'])) {
 
-$shortcut_section = 'wireguard';
+		$ret_code = 0;
 
-$pgtitle = array(gettext('Status'), gettext('WireGuard'), gettext('Overview'));
-$pglinks = array('', '@self', '@self');
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
+
+			if (wg_is_service_running()) {
+
+				$tunnels_to_apply = wg_apply_list_get('tunnels');
+
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
+
+				$ret_code |= $sync_status['ret_code'];
+
+			}
+
+			if ($ret_code == 0) {
+
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
+
+			}
+
+		}
+
+	}
+
+}
+
+$shortcut_section = "wireguard";
+
+$pgtitle = array(gettext("Status"), gettext("WireGuard"));
+$pglinks = array("", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext('Overview'), true, '/wg/status_wireguard.php');
-$tab_array[] = array(gettext('Routes'), false, '/wg/status_wireguard_routes.php');
-$tab_array[] = array(gettext('Package'), false, '/wg/status_wireguard_package.php');
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
+$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
+$tab_array[] = array(gettext("Status"), true, "/wg/status_wireguard.php");
 
-include('head.inc');
+include("head.inc");
 
 wg_print_service_warning();
 
-if ($is_apply) {
+if (isset($_POST['apply'])) {
 
 	print_apply_result_box($ret_code);
 
@@ -113,8 +139,8 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
 				<tr class="peer-entries">
-					<td colspan="9" class="contains-table">
-						<table class="table table-hover table-striped table-condensed">
+					<td colspan="9">
+						<table class="table table-hover table-condensed">
 							<thead>
 								<th><?=gettext('Peer')?></th>
 								<th><?=gettext('Latest Handshake')?></th>
@@ -181,14 +207,44 @@ endif;
     	</div>
 </div>
 
-<?php wg_print_configuration_hint() ?>
-
 <nav class="action-buttons">
 	<a href="#" class="btn btn-info btn-sm" id="showpeers">
 		<i class="fa fa-info icon-embed-btn"></i>
 		<?=gettext("Show Peers")?>
 	</a>
 </nav>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title"><?=gettext('Package Versions')?></h2>
+	</div>
+	<div class="table-responsive panel-body">
+		<table class="table table-hover table-striped table-condensed">
+			<thead>
+				<tr>
+					<th><?=gettext('Name')?></th>
+					<th><?=gettext('Version')?></th>
+    					<th><?=gettext('Comment')?></th>
+				</tr>
+			</thead>
+			<tbody>
+<?php
+			foreach (wg_pkg_info() as ['name' => $name, 'version' => $version, 'comment' => $comment]):
+?>
+    				<tr>
+					<td><?=htmlspecialchars($name)?></td>
+					<td><?=htmlspecialchars($version)?></td>
+					<td><?=htmlspecialchars($comment)?></td>
+
+				</tr>
+<?php
+			endforeach;
+?>
+
+			</tbody>
+		</table>
+	</div>
+</div>
 
 <script type="text/javascript">
 //<![CDATA[

@@ -28,6 +28,7 @@
 ##|-PRIV
 
 // pfSense includes
+require_once('functions.inc');
 require_once('guiconfig.inc');
 
 // WireGuard includes
@@ -40,49 +41,102 @@ $pconfig = array();
 
 wg_globals();
 
-// This is the main entry into the post switchboard for this page.
-['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_peers_edit_post_handler($_POST);
+if (isset($_REQUEST['tun'])) {
 
-// Are we editing an existing peer?
-if (!([$peer_idx, $pconfig, $is_new] = wg_peer_get_config($_REQUEST['peer'], false))) {
+	$tun_name = $_REQUEST['tun'];
 
-	// New peer defaults
-	$is_new 		= true;
+}
+
+if (isset($_REQUEST['peer']) && is_numericint($_REQUEST['peer'])) {
+
+	$peer_idx = $_REQUEST['peer'];
+
+}
+
+// All form save logic is in wireguard/wg.inc
+if ($_POST) {
+
+	switch ($_POST['act']) {
+
+		case 'save':
+
+			$res = wg_do_peer_post($_POST);
+		
+			$input_errors = $res['input_errors'];
+	
+			$pconfig = $res['pconfig'];
+	
+			if (empty($input_errors)) {
+
+				if (wg_is_service_running() && $res['changes']) {
+
+					// Everything looks good so far, so mark the subsystem dirty
+					mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+					// Add tunnel to the list to apply
+					wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+				}
+
+				// Save was successful
+				header('Location: /wg/vpn_wg_peers.php');
+	
+			}
+			
+			break;
+
+		case 'genpsk':
+
+			// Process ajax call requesting new pre-shared key
+			print(wg_gen_psk());
+
+			exit;
+
+			break;
+
+		default:
+
+			// Shouldn't be here, so bail out.
+			header('Location: /wg/vpn_wg_peers.php');
+
+			break;
+
+	}
+
+}
+
+if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
+
+	// Looks like we are editing an existing peer
+	$pconfig = &$wgg['peers'][$peer_idx];
+
+} else {
 
 	// Default to enabled
-	$pconfig['enabled']	= 'yes';
+	$pconfig['enabled'] = 'yes';
 
 	// Automatically choose a tunnel based on the request 
-	$pconfig['tun'] 	= isset($_REQUEST['tun']) ? $_REQUEST['tun'] : null;
+	$pconfig['tun'] = $tun_name;
 
 	// Default to a dynamic tunnel, so hide the endpoint form group
-	$is_dynamic 		= true;
+	$is_dynamic = true;
 
 }
 
-$s = fn($x) => $x;
+$shortcut_section = "wireguard";
 
-$shortcut_section = 'wireguard';
-
-$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Peers'), gettext('Edit'));
-$pglinks = array('', '/wg/vpn_wg_tunnels.php', '/wg/vpn_wg_peers.php', '@self');
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), gettext("Edit"));
+$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_peers.php", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
-$tab_array[] = array(gettext('Peers'), true, '/wg/vpn_wg_peers.php');
-$tab_array[] = array(gettext('Settings'), false, '/wg/vpn_wg_settings.php');
+$tab_array[] = array(gettext("Tunnels"), false, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Peers"), true, "/wg/vpn_wg_peers.php");
+$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
+$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
-include('head.inc');
+include("head.inc");
 
 wg_print_service_warning();
-
-if (isset($_POST['apply'])) {
-
-	print_apply_result_box($ret_code);
-
-}
-
-wg_print_config_apply_box();
 
 if (!empty($input_errors)) {
 
@@ -94,7 +148,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section(gettext('Peer Configuration'));
+$section = new Form_Section('Peer Configuration');
 
 $form->addGlobal(new Form_Input(
 	'index',
@@ -112,14 +166,14 @@ $section->addInput(new Form_Checkbox(
 
 $section->addInput($input = new Form_Select(
 	'tun',
-	gettext('Tunnel'),
+	'Tunnel',
 	$pconfig['tun'],
 	wg_get_tun_list()
 ))->setHelp("WireGuard tunnel for this peer. (<a href='vpn_wg_tunnels_edit.php'>Create a New Tunnel</a>)");
 
 $section->addInput(new Form_Input(
 	'descr',
-	gettext('Description'),
+	'Description',
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
@@ -127,7 +181,7 @@ $section->addInput(new Form_Input(
 
 $section->addInput(new Form_Checkbox(
 	'dynamic',
-	gettext('Dynamic Endpoint'),
+	'Dynamic Endpoint',
 	gettext('Dynamic'),
 	empty($pconfig['endpoint']) || $is_dynamic
 ))->setHelp('<span class="text-danger">Note: </span>Uncheck this option to assign an endpoint address and port for this peer.');
@@ -139,7 +193,7 @@ $group->addClass("endpoint");
 
 $group->add(new Form_Input(
 	'endpoint',
-	gettext('Endpoint'),
+	'Endpoint',
 	'text',
 	$pconfig['endpoint']
 ))->addClass('trim')
@@ -149,7 +203,7 @@ $group->add(new Form_Input(
 
 $group->add(new Form_Input(
 	'port',
-	gettext('Endpoint Port'),
+	'Endpoint Port',
 	'text',
 	$pconfig['port']
 ))->addClass('trim')
@@ -161,7 +215,7 @@ $section->add($group);
 
 $section->addInput(new Form_Input(
 	'persistentkeepalive',
-	gettext('Keep Alive'),
+	'Keep Alive',
 	'text',
 	$pconfig['persistentkeepalive'],
 	['placeholder' => 'Keep Alive']
@@ -182,7 +236,7 @@ $group = new Form_Group('Pre-shared Key');
 
 $group->add(new Form_Input(
 	'presharedkey',
-	gettext('Pre-shared Key'),
+	'Pre-shared Key',
 	wg_secret_input_type(),
 	$pconfig['presharedkey']
 ))->addClass('trim')
@@ -190,7 +244,7 @@ $group->add(new Form_Input(
 
 $group->add(new Form_Button(
 	'genpsk',
-	gettext('Generate'),
+	'Generate',
 	null,
 	'fa-key'
 ))->addClass('btn-primary btn-sm')
@@ -201,6 +255,11 @@ $section->add($group);
 $form->add($section);
 
 $section = new Form_Section('Address Configuration');
+
+$section->addInput(new Form_StaticText(
+	gettext('Hint'),
+	gettext('Allowed IP entries here will be transformed into proper subnet start boundaries prior to validating and saving.')
+));
 
 // Init the addresses array if necessary
 if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['row'])) {
@@ -222,7 +281,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group->add(new Form_IpAddress(
 		"address{$counter}",
-		gettext('Allowed Subnet or Host'),
+		'Allowed Subnet or Host',
 		$item['address'],
 		'BOTH'
 	))->addClass('trim')
@@ -232,7 +291,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group->add(new Form_Input(
 		"address_descr{$counter}",
-		gettext('Description'),
+		'Description',
 		'text',
 		$item['descr']
 	))->setHelp($counter == $last ? 'Description for administrative reference (not parsed).' : '')
@@ -240,7 +299,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 	$group->add(new Form_Button(
 		"deleterow{$counter}",
-		gettext('Delete'),
+		'Delete',
 		null,
 		'fa-trash'
 	))->addClass('btn-warning btn-sm');
@@ -251,7 +310,7 @@ foreach ($pconfig['allowedips']['row'] as $counter => $item) {
 
 $section->addInput(new Form_Button(
 	'addrow',
-	gettext('Add Allowed IP'),
+	'Add Allowed IP',
 	null,
 	'fa-plus'
 ))->addClass('btn-success btn-sm addbtn');
@@ -270,39 +329,13 @@ print($form);
 ?>
 
 <nav class="action-buttons">
-<?php
-// We cheat here and show disabled buttons for a better user experience
-if ($is_new):
-?>
-	<button class="btn btn-danger btn-sm" title="<?=gettext('Delete Peer')?>" disabled>
-		<i class="fa fa-trash icon-embed-btn"></i>
-		<?=gettext('Delete Peer')?>
-	</button>
-<?php
-else:
-?>
-	<a id="peerdelete" class="btn btn-danger btn-sm no-confirm">
-		<i class="fa fa-trash icon-embed-btn"></i>
-		<?=gettext('Delete Peer')?>
-	</a>
-<?php
-endif;
-?>
 	<button type="submit" id="saveform" name="saveform" class="btn btn-primary btn-sm" value="save" title="<?=gettext('Save Peer')?>">
 		<i class="fa fa-save icon-embed-btn"></i>
 		<?=gettext("Save Peer")?>
 	</button>
 </nav>
 
-<?php 
-
-wg_print_status_hint();
-
-$genKeyWarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key.");
-
-$deletePeerWarning = gettext("Delete Peer? Click 'ok' to delete peer.");
-
-?>
+<?php $genkeywarning = gettext("Overwrite pre-shared key? Click 'ok' to overwrite key."); ?>
 
 <script type="text/javascript">
 //<![CDATA[
@@ -313,7 +346,7 @@ events.push(function() {
 
 	wgRegTrimHandler();
 
-	$('#copypsk').click(function(event) {
+	$('#copypsk').click(function () {
 
 		var $this = $(this);
 
@@ -340,7 +373,7 @@ events.push(function() {
 
 	// Request a new pre-shared key
 	$('#genpsk').click(function(event) {
-		if ($('#presharedkey').val().length == 0 || confirm(<?=json_encode($genKeyWarning)?>)) {
+		if ($('#presharedkey').val().length == 0 || confirm(<?=json_encode($genkeywarning)?>)) {
 			ajaxRequest = $.ajax({
 				url: "/wg/vpn_wg_peers_edit.php",
 				type: "post",
@@ -354,20 +387,14 @@ events.push(function() {
 		}
 	});
 
-	$('#peerdelete').click(function(event) {
-		if (confirm(<?=json_encode($deletePeerWarning)?>)) {
-			postSubmit({act: 'delete', peer: <?=json_encode($peer_idx)?>}, '/wg/vpn_wg_peers.php');
-		}
-	});
-
 	// Save the form
-	$('#saveform').click(function(event) {
+	$('#saveform').click(function () {
 
 		$(form).submit();
 
 	});
 
-	$('#dynamic').click(function(event) {
+	$('#dynamic').click(function () {
 
 		updateDynamicSection(this.checked);
 

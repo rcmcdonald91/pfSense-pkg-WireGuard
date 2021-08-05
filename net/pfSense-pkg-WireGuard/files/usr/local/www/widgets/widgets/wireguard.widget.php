@@ -3,6 +3,7 @@
  * wireguard.widget.php
  *
  * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * Copyright (c) 2021 Vajonam
  * Copyright (c) 2020 Ascrod
@@ -36,7 +37,7 @@ global $wgg;
 
 wg_globals();
 
-$widgetkey 			= (isset($_POST['widgetkey'])) ? $_POST['widgetkey'] : $widgetkey;
+$widgetkey			= (isset($_POST['widgetkey'])) ? $_POST['widgetkey'] : $widgetkey;
 
 $widget_config			= $user_settings['widgets'][$widgetkey];
 
@@ -87,16 +88,16 @@ if (isset($_POST['save'])) {
 	</div>
 </div>
 
-<div id="widget-<?=$widgetkey?>_panel-footer" class="panel-footer collapse">
+<div id="widget-<?=htmlspecialchars($widgetkey)?>_panel-footer" class="panel-footer collapse">
 
 	<form action="/widgets/widgets/<?=$widgetconfig['basename']?>.widget.php" method="post" class="form-horizontal">
 		<input type="hidden" name="widgetkey" value="<?=htmlspecialchars($widgetkey)?>" />
 		<input type="hidden" name="save" value="save" />
 
 		<div class="form-group">
-			<label for="<?=$widgetkey?>_refresh_interval" class="col-sm-4 control-label"><?=gettext('Refresh Interval')?></label>
+			<label for="<?=htmlspecialchars($widgetkey)?>_refresh_interval" class="col-sm-4 control-label"><?=gettext('Refresh Interval')?></label>
 			<div class="col-sm-8">
-				<input type="number" id="<?=$widgetkey?>_refresh_interval" name="<?=$widgetkey?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="<?=$wgg['default_widget_refresh_interval']?>" min="0" max="10" class="form-control" />
+				<input type="number" id="<?=htmlspecialchars($widgetkey)?>_refresh_interval" name="<?=htmlspecialchars($widgetkey)?>_refresh_interval" value="<?=htmlspecialchars($wireguard_refresh_interval)?>" placeholder="<?=$wgg['default_widget_refresh_interval']?>" min="0" max="10" class="form-control" />
 				<span class="help-block">
 					<?=gettext('Widget refresh interval (in ticks).')?>
 					<br />
@@ -107,11 +108,11 @@ if (isset($_POST['save'])) {
 		</div>
 
 		<div class="form-group">
-			<label for="<?=$widgetkey?>_activity_threshold" class="col-sm-4 control-label">
+			<label for="<?=htmlspecialchars($widgetkey)?>_activity_threshold" class="col-sm-4 control-label">
 				<span><?=gettext('Activity Threshold')?></span>
 			</label>
 			<div class="col-sm-8">
-				<input type="number" id="<?=$widgetkey?>_activity_threshold" name="<?=$widgetkey?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" placeholder="<?=$wgg['default_widget_activity_threshold']?>" min="0" class="form-control" />
+				<input type="number" id="<?=htmlspecialchars($widgetkey)?>_activity_threshold" name="<?=htmlspecialchars($widgetkey)?>_activity_threshold" value="<?=htmlspecialchars($wireguard_activity_threshold)?>" placeholder="<?=$wgg['default_widget_activity_threshold']?>" min="0" class="form-control" />
 				<span class="help-block">
 					<?=gettext('Peer activity threshold (in seconds).')?>
 					<br />

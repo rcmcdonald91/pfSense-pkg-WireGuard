@@ -3,7 +3,6 @@
  * wg_service.inc
  *
  * part of pfSense (https://www.pfsense.org)
- * Copyright (c) 2021 Rubicon Communications, LLC (Netgate)
  * Copyright (c) 2021 R. Christian McDonald (https://github.com/theonemcdonald)
  * All rights reserved.
  *
@@ -34,33 +33,32 @@ require_once('wireguard/includes/wg.inc');
 
 global $wgg;
 
-$ret_code = 0;
+if (isset($argv[1])) {
 
-// This script only makes sense in the context of the CLI...
-if (!wg_is_cli()) {
+	$ret_code = 0;
 
-	die("FATAL: This script can only be started through the CLI.\n");
+	ignore_user_abort(true);
 
-}
+	set_time_limit(0);
 
-// This script should only be executed by the linked/renamed PHP binary...
-if (PHP_BINARY != $wgg['php_wg']) {
+	pcntl_async_signals(true);
 
-	die("FATAL: This script can only be executed by {$wgg['php_wg']}.\n");
+	if (!wg_is_cli()) {
 
-}
+		// Bail out if we aren't in the CLI...
+		die("FATAL: This script can only be started through the CLI.\n");
 
-// Now we can proceed...
-ignore_user_abort(true);
+	}
 
-set_time_limit(0);
+	if (PHP_BINARY != $wgg['php_wg']) {
 
-pcntl_async_signals(true);
+		// Bail out if we aren't running under under the correct executable...
+		die("FATAL: This script can only be executed by {$wgg['php_wg']}.\n");
 
-if (($argc > 1) && !empty($argv[1])) {
+	}
 
 	// Should we serialize the return output?
-	$serialize = (isset($argv[2]) && (strtolower($argv[2]) == 'serialize'));
+	$serialize = (isset($argv[2]) && strtolower($argv[2]) == 'serialize');
 
 	switch (strtolower($argv[1])) {
 		
@@ -84,49 +82,40 @@ if (($argc > 1) && !empty($argv[1])) {
 
 		default:
 
-			// Something isn't quite right...
-			$ret_code = 1;
+			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP|RESTART} [SERIALIZE]");
 
-			wg_print_usage_instructions();
+			$ret_code = 1;
 
 			break;
 
 	}
 
-	exit($ret_code);
-
-} else {
-
-	wg_print_usage_instructions();
-
+	// We are done...
 	exit($ret_code);
 
 }
 
-function wg_print_usage_instructions() {
+// This is a wrapper for safely calling from web frontend
+function wg_service_fpm_restart() {
 	global $wgg;
 
-	$s = fn($x) => $x;
+	$exec_output = $unserialize_output = $ret_output = array();
 
-	foreach (array(
+	// Invokes service restart with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} restart serialize", $exec_output, $ret_code);
 
-		"{$s(gettext('Usage:'))}",
+	if ($unserialize_output = unserialize($exec_output[0])) {
 
-		"    {$wgg['wg_daemon']} {{$s(gettext('Action'))}} [{$s(gettext('Options'))}]\n",
+		if (is_array($unserialize_output)) {
 
-		"{$s(gettext('Action'))}:",
+			$ret_output = $unserialize_output;
 
-		"    START\t{$s(gettext('Start the WireGuard service'))}",
+		}
 
-		"    STOP\t{$s(gettext('Stop the WireGuard service'))}",
+	}
 
-		"    RESTART\t{$s(gettext('Restart the WireGuard service'))}\n",
-
-		"{$s(gettext('Options'))}:",
-
-		"    SERIALIZE\t{$s(gettext('Serialize the output'))}"
-
-	) as $line) { fwrite(STDOUT, "{$line}\n"); }
+	// Consumers expect an array...
+	return $ret_output;
 
 }
 
@@ -142,7 +131,6 @@ function wg_service_cli_restart($serialize = true) {
 		if ($ret_code <> 0) {
 
 			return $ret_code;
-
 		}
 
 	}
@@ -150,6 +138,30 @@ function wg_service_cli_restart($serialize = true) {
 	$ret_code = wg_service_cli_start($serialize);
 
 	return $ret_code;
+
+}
+
+// This is a wrapper for safely calling from web frontend
+function wg_service_fpm_stop() {
+	global $wgg;
+
+	$exec_output = $unserialize_output = $ret_output = array();
+
+	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
+	exec("{$wgg['wg_daemon']} stop serialize", $exec_output, $ret_code);
+
+	if ($unserialize_output = unserialize($exec_output[0])) {
+
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
+
+	}
+
+	// Consumers expect an array...
+	return $ret_output;
 
 }
 
@@ -163,7 +175,10 @@ function wg_service_cli_stop($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		wg_service_parse_errors($ret_code, $serialize);
+
+		// Terminate early...
+		return $ret_code;
 
 	}
 
@@ -172,11 +187,36 @@ function wg_service_cli_stop($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_STOP;
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		wg_service_parse_errors($ret_code, $serialize);
 
 	}
 
 	return $ret_code;
+
+}
+
+// This is a wrapper for safely calling from the web frontend
+function wg_service_fpm_start() {
+	global $wgg;
+
+	$exec_output = $unserialize_output = $ret_output = array();
+
+	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
+	exec("{$wgg['wg_daemon']} start serialize", $exec_output, $ret_code);
+
+	// Catch unserialization results before returning
+	if ($unserialize_output = unserialize($exec_output[0])) {
+
+		if (is_array($unserialize_output)) {
+
+			$ret_output = $unserialize_output;
+
+		}
+
+	}
+
+	// Consumers expect an array...
+	return $ret_output;
 
 }
 
@@ -191,13 +231,13 @@ function wg_service_cli_start($serialize = true) {
 	
 	$ret_code = 0;
 
-	// Time to perform some pre-flight checks...
-	
 	if (!wg_is_service_enabled()) {
 
 		$ret_code |= WG_ERROR_SVC_DISABLED;
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		wg_service_parse_errors($ret_code, $serialize);
+
+		return $ret_code;
 
 	}
 
@@ -205,7 +245,9 @@ function wg_service_cli_start($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_RUNNING;
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		wg_service_parse_errors($ret_code, $serialize);
+
+		return $ret_code;
 
 	}
 
@@ -213,7 +255,9 @@ function wg_service_cli_start($serialize = true) {
 
 		$ret_code |= WG_ERROR_SVC_START;
 
-		return wg_service_parse_errors($ret_code, $serialize);
+		wg_service_parse_errors($ret_code, $serialize);
+
+		return $ret_code;
 
 	}
 
@@ -234,7 +278,7 @@ function wg_service_cli_start($serialize = true) {
 	$ifs_to_build = wg_get_configured_ifs();
 
 	// Now build them...
-	$sync_status = wg_tunnel_sync($ifs_to_build, false);
+	$sync_status = wg_tunnel_sync($ifs_to_build, false, false);
 
 	if ($sync_status['ret_code'] <> 0 ) {
 
@@ -261,13 +305,15 @@ function wg_service_cli_start($serialize = true) {
 
 		wg_destroy_tunnels();
 
-		// Pass through the sync status as extra bits to serialize while we still can...
-		return wg_service_parse_errors($ret_code, $serialize, array('sync_status' => $sync_status));
+		wg_service_parse_errors($ret_code, $serialize);
+
+		return $ret_code;
 
 	} elseif ($newpid) {
 
-		// Pass through the sync status as extra bits to serialize while we still can...
-		return wg_service_parse_errors($ret_code, $serialize, array('sync_status' => $sync_status));
+		wg_service_parse_errors($ret_code, $serialize);
+
+		return $ret_code;
 
 	}
 
@@ -322,9 +368,31 @@ function wg_service_cli_start($serialize = true) {
 
 }
 
+// This is where we restart any extra services
+function wg_restart_extra_services() {
+
+	if (!platform_booting()) {
+
+		// dpinger
+		setup_gateways_monitor();
+
+		// unbound
+		services_unbound_configure();
+
+		// TODO: This is where we will add facilities for users to pick what services to restart
+
+	}
+
+	// This is currently just a best effort attempt...
+	return 0;
+
+}
+
 // Main WireGuard service loop
 function wg_service_daemon() {
 	global $wgg;
+
+	$esa = fn($s) => escapeshellarg($s);
 
 	// Re-register the service environment
 	wg_register_service_env(true);
@@ -355,9 +423,6 @@ function wg_service_daemon() {
 			$last_update_time = wg_resolve_endpoints();
 
 		}
-
-		// Keep running state consistent...
-		wg_destroy_rogue_tunnels();
 
 		// Wait a bit before trying again
 		sleep(1);
@@ -484,7 +549,43 @@ function wg_service_parse_errors($ret_code, $serialize_output = true, $extras = 
 
 	}
 
-	return $ret_code;
+	return;
+
+}
+
+// Check if we are in CLI or not
+function wg_is_cli() {
+
+	return (PHP_SAPI == 'cli');
+
+}
+
+// Checks if the service is running
+function wg_is_service_running() {
+	global $wgg;
+
+	if (!($h_lock = @fopen($wgg['pid_path'], 'r')) || !file_exists($wgg['pid_path'])) {
+
+		return false;
+
+	}
+
+	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, $wouldblock);
+
+	if ($not_running) {
+	
+		flock($h_lock, LOCK_UN);
+
+	}
+
+	$pid = fgets($h_lock);
+	
+	fclose($h_lock);
+
+	// Another trick to test if a process is running
+	$sig_test = posix_kill($pid, 0);
+
+	return (!$not_running || $wouldblock || $sig_test);
 
 }
 

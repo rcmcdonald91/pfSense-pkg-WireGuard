@@ -25,75 +25,7 @@ require_once('util.inc');
 
 // WireGuard includes
 require_once('wireguard/includes/wg.inc');
-
-function wg_print_configuration_hint() {
-
-	$class = !is_wg_enabled() ? 'infoblock blockopen' : 'infoblock';
-
-	print("<div class=\"{$class}\">");
-
-	print_info_box(sprintf(gettext('WireGuard can be configured %1$shere%2$s.'), '<a href="/wg/vpn_wg_tunnels.php">', '</a>'), 'info', false);
-
-	print("</div>");
-
-}
-
-function wg_print_status_hint() {
-
-	$class = wg_is_service_running() ? 'infoblock blockopen' : 'infoblock';
-
-	print("<div class=\"{$class}\">");
-
-	print_info_box(sprintf(gettext('WireGuard status can be checked %1$shere%2$s.'), '<a href="/wg/status_wireguard.php">', '</a>'), 'info', false);
-
-	print("</div>");
-
-}
-
-function wg_compose_routes_body($family = null, $resolve_names = false) {
-	global $wgg;
-
-	$s = fn($x) => $x;
-
-	$routes = wg_netstat_get_routes($family, $wgg['if_prefix'], $resolve_names);
-
-	if (count($routes) > 0) {
-		
-		foreach ($routes as $route) {
-
-			if ([$tun_idx, $tunnel, $is_new] = wg_tunnel_get_config_by_name($route['interface-name'])) {
-
-				$data_html .=	<<<"ROW"
-						<tr>
-							<td>{$s(htmlspecialchars($route['destination']))}</td>
-							<td><a href="/wg/vpn_wg_tunnels_edit.php?tun={$s(htmlspecialchars($route['interface-name']))}">{$s(htmlspecialchars($route['interface-name']))}</a></td>
-							<td>{$s(htmlspecialchars($tunnel['descr']))}</td>
-							<td>{$s(htmlspecialchars($route['gateway']))}</td>
-							<td>{$s(htmlspecialchars($route['flags']))}</td>
-							<td>{$s(htmlspecialchars($route['use']))}</td>
-							<td>{$s(htmlspecialchars($route['mtu']))}</td>
-						</tr>
-
-						ROW;
-
-			}
-
-		}
-
-		return $data_html;
-
-	}
-
-	$data_html =	<<<"ROW"
-			<tr>
-				<td colspan="7">{$s(sprint_info_box(gettext('No WireGuard routes have been configured.'), 'warning', null))}</td>
-			</tr>
-
-			ROW;
-	
-	return $data_html;
-
-}
+require_once('wireguard/includes/wg_globals.inc');
 
 function wg_print_service_warning($only_with_tunnels = true) {
 	global $wgg;

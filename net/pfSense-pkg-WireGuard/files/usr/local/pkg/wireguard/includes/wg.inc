@@ -29,509 +29,13 @@ require_once('util.inc');
 // WireGuard includes
 require_once('wireguard/includes/wg_api.inc');
 require_once('wireguard/includes/wg_install.inc');
+require_once('wireguard/includes/wg_service.inc');
 require_once('wireguard/includes/wg_validate.inc');
 
 global $wgg;
 
-function wg_status_post_handler($post) {
-	global $wgg;
-
-	$is_apply = false;
-
-	$ret_code = 0;
-
-	// Handle the configuration apply button
-	if (isset($post['apply'])) {
-
-		$is_apply = true;
-
-		$ret_code = wg_apply_tunnels_common();
-
-	} elseif (isset($post['act'])) {
-
-		switch (strtolower($post['act'])) {
-
-			case 'getroutes':
-
-				print(wg_compose_routes_body($post['family'], false));
-
-				exit();
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/status_wireguard.php');
-
-				break;
-
-				
-
-		}
-
-	}
-
-	return array('is_apply' => $is_apply, 'ret_code' => $ret_code);
-
-}
-
-function wg_peers_edit_post_handler($post) {
-	global $wgg;
-
-	$input_errors = array();
-
-	$is_apply = false;
-
-	$pconfig = array();
-
-	$ret_code = 0;
-
-	// Handle the configuration apply button
-	if (isset($post['apply'])) {
-
-		$is_apply = true;
-
-		$ret_code = wg_apply_tunnels_common();
-
-	// Handle any actions
-	} elseif (isset($post['act'])) {
-
-		switch (strtolower($post['act'])) {
-
-			case 'save':
-
-				$res = wg_do_peer_post($post);
-		
-				$input_errors = $res['input_errors'];
-	
-				$pconfig = $res['pconfig'];
-	
-				if (empty($input_errors)) {
-
-					if (wg_is_service_running() && $res['changes']) {
-
-						// Everything looks good so far, so mark the subsystem dirty
-						mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-						// Add tunnel to the list to apply
-						wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-					}
-
-					// Save was successful
-					header('Location: /wg/vpn_wg_peers.php');
-		
-				}
-			
-				break;
-
-			case 'genpsk':
-
-				// Process ajax call requesting new pre-shared key
-				print(wg_gen_psk());
-
-				exit;
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_peers.php');
-
-				break;
-
-		}
-
-	}
-
-	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code);
-
-}
-
-function wg_peers_post_handler($post) {
-	global $wgg;
-
-	$input_errors = array();
-
-	$is_apply = false;
-
-	$ret_code = 0;
-
-	// Handle the configuration apply button
-	if (isset($post['apply'])) {
-
-		$is_apply = true;
-
-		$ret_code = wg_apply_tunnels_common();
-
-	// Handle any actions
-	} elseif (isset($post['act'])) {
-
-		switch (strtolower($post['act'])) {
-
-			case 'toggle':
-
-				if (isset($post['peer'])) {
-
-					$res = wg_toggle_peer($post['peer']);
-
-					break;
-				
-				}
-
-				break;
-
-			case 'delete':
-				
-				if (isset($post['peer'])) {
-
-					$res = wg_delete_peer($post['peer']);
-
-					break;
-				
-				}
-
-				break;
-
-			default:
-				
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_peers.php');
-
-				break;
-				
-		}
-
-		$input_errors = $res['input_errors'];
-
-		if (empty($input_errors)) {
-
-			if (wg_is_service_running() && $res['changes']) {
-
-				mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-				// Add tunnel to the list to apply
-				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-			}
-
-		}
-
-	}
-
-	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'ret_code' => $ret_code);
-
-}
-
-function wg_settings_post_handler($post) {
-	global $wgg;
-
-	$input_errors = array();
-
-	$is_apply = false;
-
-	$pconfig = array();
-
-	$ret_code = 0;
-
-	$save_success = false;
-
-	// Handle the configuration apply button
-	if (isset($post['apply'])) {
-
-		$is_apply = true;
-
-		$ret_code = wg_apply_tunnels_common();
-
-	// Handle any actions
-	} elseif (isset($post['act'])) {
-
-		switch (strtolower($post['act'])) {
-
-			case 'save':
-
-				$res = wg_do_settings_post($post);
-
-				$input_errors = $res['input_errors'];
-
-				$pconfig = $res['pconfig'];
-
-				if (empty($input_errors) && $res['changes']) {
-
-					wg_toggle_wireguard();
-
-					$save_success = true;
-
-				}
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_settings.php');
-
-				break;
-
-		}
-
-	}
-
-	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code, 'save_success' => $save_success);
-
-}
-
-function wg_tunnels_edit_post_handler($post) {
-	global $wgg;
-
-	$input_errors = array();
-
-	$is_apply = false;
-
-	$pconfig = array();
-
-	$ret_code = 0;
-
-	// Assume we want to go home...
-	$go_home = true;
-
-	// Handle the configuration apply button
-	if (isset($post['apply'])) {
-
-		$is_apply = true;
-
-		$ret_code = wg_apply_tunnels_common();
-
-	// Handle any actions
-	} elseif (isset($post['act'])) {
-
-		switch (strtolower($post['act'])) {
-
-			case 'save':
-
-				$res = wg_do_tunnel_post($post);
-			
-				$input_errors = $res['input_errors'];
-		
-				$pconfig = $res['pconfig'];
-
-				break;
-
-			case 'genkeys':
-
-				// Process ajax call requesting new key pair
-				print(wg_gen_keypair(true));
-
-				exit;
-
-				break;
-
-			case 'genpubkey':
-
-				// Process ajax call calculating the public key from a private key
-				print(wg_gen_publickey($post['privatekey'], true));
-
-				exit;
-
-				break;
-
-			case 'toggle':
-
-				if (isset($post['peer'])) {
-
-					$res = wg_toggle_peer($post['peer']);
-
-					// Stay on current page...
-					$go_home = false;
-
-					break;
-
-				}
-
-				break;
-
-			case 'delete':
-
-				if (isset($post['peer'])) {
-
-					$res = wg_delete_peer($post['peer']);
-
-					// Stay on current page...
-					$go_home = false;
-
-					break;
-
-				}
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_tunnels.php');
-
-				break;
-
-		}
-				
-		$input_errors = $res['input_errors'];
-
-		if (empty($input_errors)) {
-
-			if (wg_is_service_running() && $res['changes']) {
-
-				mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-				// Add tunnel to the list to apply
-				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-			}
-			
-			if ($go_home) {
-
-				// Good save, redirect back...
-				header('Location: /wg/vpn_wg_tunnels.php');
-
-			}
-
-		}
-
-	}
-
-	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code);
-
-}
-
-function wg_tunnels_post_handler($post) {
-	global $wgg;
-
-	$input_errors = array();
-
-	$is_apply = false;
-
-	$ret_code = 0;
-
-	// Handle the configuration apply button
-	if (isset($post['apply'])) {
-
-		$is_apply = true;
-
-		$ret_code = wg_apply_tunnels_common();
-
-	// Handle any actions
-	} elseif (isset($post['act'])) {
-
-		switch (strtolower($post['act'])) {
-
-			case 'download':
-
-				if (isset($post['tun'])) {
-
-					wg_download_tunnel($post['tun'], '/wg/vpn_wg_tunnels.php');
-
-					exit();
-
-				}
-
-				break;
-
-			case 'toggle':
-
-				if (isset($post['tun'])) {
-
-					$res = wg_toggle_tunnel($post['tun']);
-
-					break;
-
-				} elseif (isset($post['peer'])) {
-
-					$res = wg_toggle_peer($post['peer']);
-	
-					break;
-
-				}
-
-				break;
-					
-			case 'delete':
-
-				if (isset($post['tun'])) {
-
-					$res = wg_delete_tunnel($post['tun']);
-
-					break;
-
-				} elseif (isset($post['peer'])) {
-
-					$res = wg_delete_peer($post['peer']);
-	
-					break;
-
-				}
-
-				break;
-
-			default:
-
-				// Shouldn't be here, so bail out.
-				header('Location: /wg/vpn_wg_tunnels.php');
-
-				break;
-
-		}
-
-		$input_errors = $res['input_errors'];
-
-		if (empty($input_errors)) {
-
-			if (wg_is_service_running() && $res['changes']) {
-
-				mark_subsystem_dirty($wgg['subsystems']['wg']);
-
-				// Add tunnel to the list to apply
-				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
-			}
-
-		}
-
-	}
-
-	return array('input_errors' => $input_errors, 'is_apply' => $is_apply, 'ret_code' => $ret_code);
-
-}
-
-function wg_apply_tunnels_common() {
-	global $wgg;
-
-	$ret_code = 0;
-
-	if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
-
-		if (wg_is_service_running()) {
-
-			$tunnels_to_apply = wg_apply_list_get('tunnels');
-
-			$sync_status = wg_tunnel_sync($tunnels_to_apply);
-
-			$ret_code |= $sync_status['ret_code'];
-
-		} else {
-
-			clear_subsystem_dirty($wgg['subsystems']['wg']);
-
-		}
-
-	}
-
-	return $ret_code;
-
-}
-
 /*
- * This toggles a given tunnel based on name
+ * This toggles a given tunnel based on index
  */
 function wg_toggle_tunnel($tunnel_name) {
 	global $wgg;
@@ -789,6 +293,9 @@ function wg_peer_allowedips($post) {
 		$row['address'] = trim($row['address']);
 
 		if (!empty($row['address'])) {
+
+			// Transform entries into proper subnet start boundaries
+			$row['address'] = gen_subnet($row['address'], $row['address_subnet']);
 
 			$ret_array[] 	= array(
 						'address'	=> $row['address'], 
@@ -1230,18 +737,17 @@ function wg_apply_list_add($list, $entries) {
 function wg_destroy_rogue_tunnels(&$cmds = null) {
 	global $wgg;
 
-	// Make sure we have the latest info
-	wg_globals();
-
 	// Assume this will be successful
 	$res = true;
 
-	// Tunnels created by something besides pfSense...
-	$rogue_tunnels = array_diff(wg_get_running_ifs(), wg_get_configured_ifs());
+	$running_ifs = wg_get_running_ifs();
 
-	foreach ((array) $rogue_tunnels as $tunnel) {
+	$config_ifs = wg_get_configured_ifs();
 
-		// Destroy them...
+	$rogue_tunnels = array_diff($running_ifs, $config_ifs);
+
+	foreach ($rogue_tunnels as $tunnel) {
+
 		$res &= wg_ifconfig_if_destroy($tunnel, $cmds);
 
 	}
@@ -1252,8 +758,9 @@ function wg_destroy_rogue_tunnels(&$cmds = null) {
 
 /*
  * This builds, rebuilds, or destroys tunnel interfaces
+ * If $tunnel_names is null, this will apply to all configured tunnel interfaces
  */
-function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoints = true, $clean_subsystem_on_success = true, $json = false) {
+function wg_tunnel_sync($tunnel_names, $restart_services = false, $resolve_endpoints = true, $json = false) {
 	global $wgg;
 
 	// Fetch and build the latest info
@@ -1280,12 +787,11 @@ function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoi
 			$ret_code |= $tun_sync_status['ret_code'];
 
 			// Collect the return from each individual tunnel
-			$tunnels[]	= array(
-						'name'		=> $tun_sync_status['config']['name'],
-						'ret_code'	=> $tun_sync_status['ret_code'], 
-						'errors'	=> $tun_sync_status['errors'],
-						'cmds'		=> $tun_sync_status['cmds'],
-						'config'	=> $tun_sync_status['config']);
+			$tunnels[] = array(
+					'name' 		=> $tun_sync_status['config']['name'],
+					'ret_code' 	=> $tun_sync_status['ret_code'], 
+					'errors' 	=> $tun_sync_status['errors'],
+					'config' 	=> $tun_sync_status['config']);
 
 			// We need to destroy any rogue peers too...
 			wg_destroy_rogue_peers($tunnel_name);
@@ -1310,12 +816,6 @@ function wg_tunnel_sync($tunnel_names, $restart_services = true, $resolve_endpoi
 
 			wg_resolve_endpoints();
 			
-		}
-
-		if ($clean_subsystem_on_success && ($ret_code == 0)) {
-
-			clear_subsystem_dirty($wgg['subsystems']['wg']);
-
 		}
 
 	}
@@ -1365,14 +865,14 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
 	$parsed_cmds = wg_parse_cmds_array($cmds);
 
 	// Build the return array
-	$res 	= array(
-			'ret_code'	=> $parsed_cmds['ret_code'], 
-			'errors'	=> $parsed_cmds['errors'], 
-			'cmds'		=> $parsed_cmds['cmds'],
-			'config'	=> $tunnel);
+	$res = array(
+		'ret_code'	=> $parsed_cmds['ret_code'], 
+		'errors'	=> $parsed_cmds['errors'], 
+		'cmds'		=> $parsed_cmds['cmds'],
+		'config'	=> $tunnel);
 
 	return $json ? json_encode($res) : $res;
-		
+
 }
 
 /*
@@ -1622,135 +1122,6 @@ function wg_download_tunnel($tunnel_name, $failure_redirect) {
 
 	// If something goes wrong, bail out to the failure redirect location
 	header("Location: {$failure_redirect}");
-
-}
-
-// Checks if the service is running
-function wg_is_service_running() {
-	global $wgg;
-
-	if (!($h_lock = @fopen($wgg['pid_path'], 'r')) || !file_exists($wgg['pid_path'])) {
-
-		return false;
-
-	}
-
-	$not_running = flock($h_lock, LOCK_EX | LOCK_NB, $wouldblock);
-
-	if ($not_running) {
-	
-		flock($h_lock, LOCK_UN);
-
-	}
-
-	$pid = fgets($h_lock);
-	
-	fclose($h_lock);
-
-	// Another trick to test if a process is running
-	$sig_test = posix_kill($pid, 0);
-
-	return (!$not_running || $wouldblock || $sig_test);
-
-}
-
-// Check if we are in CLI or not
-function wg_is_cli() {
-
-	return (PHP_SAPI == 'cli');
-
-}
-
-// This is where we restart any extra services
-function wg_restart_extra_services() {
-
-	if (!platform_booting()) {
-
-		// dpinger
-		setup_gateways_monitor();
-
-		// unbound
-		services_unbound_configure();
-
-		// TODO: This is where we will add facilities for users to pick what services to restart
-
-	}
-
-	// This is currently just a best effort attempt...
-	return 0;
-
-}
-
-// This is a wrapper for safely calling from the web frontend
-function wg_service_fpm_start() {
-	global $wgg;
-
-	$exec_output = $unserialize_output = $ret_output = array();
-
-	// Invokes service start with serialization flag so we can cleanly report back to the web frontend
-	exec("{$wgg['wg_daemon']} start serialize", $exec_output, $ret_code);
-
-	// Catch unserialization results before returning
-	if ($unserialize_output = unserialize($exec_output[0])) {
-
-		if (is_array($unserialize_output)) {
-
-			$ret_output = $unserialize_output;
-
-		}
-
-	}
-
-	// Consumers expect an array...
-	return $ret_output;
-
-}
-
-// This is a wrapper for safely calling from web frontend
-function wg_service_fpm_stop() {
-	global $wgg;
-
-	$exec_output = $unserialize_output = $ret_output = array();
-
-	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} stop serialize", $exec_output, $ret_code);
-
-	if ($unserialize_output = unserialize($exec_output[0])) {
-
-		if (is_array($unserialize_output)) {
-
-			$ret_output = $unserialize_output;
-
-		}
-
-	}
-
-	// Consumers expect an array...
-	return $ret_output;
-
-}
-
-// This is a wrapper for safely calling from web frontend
-function wg_service_fpm_restart() {
-	global $wgg;
-
-	$exec_output = $unserialize_output = $ret_output = array();
-
-	// Invokes service restart with serialization flag so we can cleanly report back to the web frontend.
-	exec("{$wgg['wg_daemon']} restart serialize", $exec_output, $ret_code);
-
-	if ($unserialize_output = unserialize($exec_output[0])) {
-
-		if (is_array($unserialize_output)) {
-
-			$ret_output = $unserialize_output;
-
-		}
-
-	}
-
-	// Consumers expect an array...
-	return $ret_output;
 
 }
 

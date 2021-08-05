@@ -28,6 +28,7 @@
 ##|-PRIV
 
 // pfSense includes
+require_once('functions.inc');
 require_once('guiconfig.inc');
 
 // WireGuard includes
@@ -40,40 +41,190 @@ wg_globals();
 
 $pconfig = array();
 
-// This is the main entry into the post switchboard for this page.
-['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code] = wg_tunnels_edit_post_handler($_POST);
+// Always assume we are creating a new tunnel
+$is_new = true;
 
-// Are we editing an existing tunnel?
-if (!([$tun_idx, $pconfig, $is_new] = wg_tunnel_get_config_by_name($_REQUEST['tun']))) {
+if (isset($_REQUEST['tun'])) {
 
-	// New tunnel defaults
-	$is_new 		= true;
+	$tun = $_REQUEST['tun'];
 
-	// Default to enabled
-	$pconfig['enabled']	= 'yes';
+	$tun_idx = wg_tunnel_get_array_idx($_REQUEST['tun']);
 
-	// Get the next available interface name
-	$pconfig['name'] 	= next_wg_if();
+}
+
+if ($_POST) {
+
+	if (isset($_POST['apply'])) {
+
+		$ret_code = 0;
+
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
+
+			if (wg_is_service_running()) {
+
+				$tunnels_to_apply = wg_apply_list_get('tunnels');
+
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
+
+				$ret_code |= $sync_status['ret_code'];
+
+			}
+
+			if ($ret_code == 0) {
+
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
+
+			}
+
+		}
+
+	}
+
+	if (isset($_POST['act'])) {
+
+		switch ($_POST['act']) {
+
+			case 'save':
+
+				$res = wg_do_tunnel_post($_POST);
+			
+				$input_errors = $res['input_errors'];
+		
+				$pconfig = $res['pconfig'];
+		
+				if (empty($input_errors)) {
+
+					if (wg_is_service_running() && $res['changes']) {
+
+						// Everything looks good so far, so mark the subsystem dirty
+						mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+						// Add tunnel to the list to apply
+						wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+					}
+		
+					// Save was successful
+					header('Location: /wg/vpn_wg_tunnels.php');
+		
+				}
+
+				break;
+
+			case 'genkeys':
+
+				// Process ajax call requesting new key pair
+				print(wg_gen_keypair(true));
+
+				exit;
+
+				break;
+
+			case 'genpubkey':
+
+				// Process ajax call calculating the public key from a private key
+				print(wg_gen_publickey($_POST['privatekey'], true));
+
+				exit;
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+				break;
+
+		}
+
+	}
+
+	if (isset($_POST['peer'])) {
+
+		$peer_idx = $_POST['peer'];
+
+		switch ($_POST['act']) {
+
+			case 'toggle':
+
+				$res = wg_toggle_peer($peer_idx);
+
+				break;
+
+			case 'delete':
+				
+				$res = wg_delete_peer($peer_idx);
+
+				break;
+
+			default:
+				
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_tunnels.php');
+
+				break;
+				
+		}
+
+		$input_errors = $res['input_errors'];
+
+		if (empty($input_errors)) {
+
+			if (wg_is_service_running() && $res['changes']) {
+
+				mark_subsystem_dirty($wgg['subsystems']['wg']);
+
+				// Add tunnel to the list to apply
+				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
+
+			}
+
+		}
+
+	}
 
 }
 
 $s = fn($x) => $x;
 
-$shortcut_section = 'wireguard';
+// Looks like we are editing an existing tunnel
+if (isset($tun_idx) && is_array($wgg['tunnels'][$tun_idx])) {
 
-$pgtitle = array(gettext('VPN'), gettext('WireGuard'), gettext('Tunnels'), gettext('Edit'));
-$pglinks = array('', '/wg/vpn_wg_tunnels.php', '/wg/vpn_wg_tunnels.php', '@self');
+	$pconfig = &$wgg['tunnels'][$tun_idx];
+
+	// Supress warning and allow peers to be added via the 'Add Peer' link
+	$is_new = false;
+
+// Looks like we are creating a new tunnel
+} else {
+
+	// Default to enabled
+	$pconfig['enabled'] = 'yes';
+
+	$pconfig['name'] = next_wg_if();
+
+}
+
+// Save the MTU settings prior to re(saving)
+$pconfig['mtu'] = get_interface_mtu($pconfig['name']);
+
+$shortcut_section = "wireguard";
+
+$pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Tunnels"), gettext("Edit"));
+$pglinks = array("", "/wg/vpn_wg_tunnels.php", "/wg/vpn_wg_tunnels.php", "@self");
 
 $tab_array = array();
-$tab_array[] = array(gettext('Tunnels'), true, '/wg/vpn_wg_tunnels.php');
-$tab_array[] = array(gettext('Peers'), false, '/wg/vpn_wg_peers.php');
-$tab_array[] = array(gettext('Settings'), false, '/wg/vpn_wg_settings.php');
+$tab_array[] = array(gettext("Tunnels"), true, "/wg/vpn_wg_tunnels.php");
+$tab_array[] = array(gettext("Peers"), false, "/wg/vpn_wg_peers.php");
+$tab_array[] = array(gettext("Settings"), false, "/wg/vpn_wg_settings.php");
+$tab_array[] = array(gettext("Status"), false, "/wg/status_wireguard.php");
 
-include('head.inc');
+include("head.inc");
 
 wg_print_service_warning();
 
-if ($is_apply) {
+if (isset($_POST['apply'])) {
 
 	print_apply_result_box($ret_code);
 
@@ -91,7 +242,7 @@ display_top_tabs($tab_array);
 
 $form = new Form(false);
 
-$section = new Form_Section(sprintf(gettext('Tunnel Configuration (%s)'), $pconfig['name']));
+$section = new Form_Section("Tunnel Configuration ({$pconfig['name']})");
 
 $form->addGlobal(new Form_Input(
 	'index',
@@ -130,11 +281,11 @@ $section->addInput($tun_enable);
 
 $section->addInput(new Form_Input(
 	'descr',
-	gettext('Description'),
+	'Description',
 	'text',
 	$pconfig['descr'],
 	['placeholder' => 'Description']
-))->setHelp(gettext('Description for administrative reference (not parsed).'));
+))->setHelp('Description for administrative reference (not parsed).');
 
 $section->addInput(new Form_Input(
 	'listenport',
@@ -176,7 +327,7 @@ $section->add($group);
 
 $form->add($section);
 
-$section = new Form_Section(sprintf(gettext('Interface Configuration (%s)'), $pconfig['name']));
+$section = new Form_Section("Interface Configuration ({$pconfig['name']})");
 
 $section->setAttribute('id', 'addresses');
 
@@ -184,12 +335,12 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>Interface Assignments</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='/interfaces_assign.php'>Interface Assignments</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$wgg['ifgroupentry']['ifname']}'>WireGuard Interface Group</a>"
+		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='/firewall_rules.php?if={$wgg['ifgroupentry']['ifname']}'>WireGuard Interface Group</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
@@ -257,17 +408,17 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
 	$section->addInput(new Form_StaticText(
 		'Assignment',
-		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces_assign.php'>{$s(htmlspecialchars($wg_pfsense_if['descr']))} ({$s(htmlspecialchars($wg_pfsense_if['name']))})</a>"
+		"<i class='fa fa-sitemap' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='/interfaces_assign.php'>{$s(htmlspecialchars($wg_pfsense_if['descr']))} ({$s(htmlspecialchars($wg_pfsense_if['name']))})</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Interface',
-		"<i class='fa fa-ethernet' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../interfaces.php?if={$s(htmlspecialchars($wg_pfsense_if['name']))}'>{$s(gettext('Interface Configuration'))}</a>"
+		"<i class='fa fa-ethernet' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='/interfaces.php?if={$s(htmlspecialchars($wg_pfsense_if['name']))}'>{$s(gettext('Interface Configuration'))}</a>"
 	));
 
 	$section->addInput(new Form_StaticText(
 		'Firewall Rules',
-		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='../../firewall_rules.php?if={$s(htmlspecialchars($wg_pfsense_if['name']))}'>{$s(gettext('Firewall Configuration'))}</a>"
+		"<i class='fa fa-shield-alt' style='vertical-align: middle;'></i><a style='padding-left: 3px' href='/firewall_rules.php?if={$s(htmlspecialchars($wg_pfsense_if['name']))}'>{$s(gettext('Firewall Configuration'))}</a>"
 	));
 
 }
@@ -279,6 +430,13 @@ $form->addGlobal(new Form_Input(
 	'',
 	'hidden',
 	$pconfig['mtu']
+));
+
+$form->addGlobal(new Form_Input(
+	'is_new',
+	'',
+	'hidden',
+	$is_new
 ));
 
 $form->addGlobal(new Form_Input(
@@ -294,7 +452,7 @@ print($form);
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title"><?=sprintf(gettext('Peer Configuration (%s)'), $pconfig['name'])?></h2>
+		<h2 class="panel-title"><?=gettext('Peer Configuration')?></h2>
 	</div>
 	<div id="mainarea" class="table-responsive panel-body">
 		<table id="peertable" class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
@@ -324,8 +482,8 @@ print($form);
 					<td><?=htmlspecialchars(wg_format_endpoint(false, $peer))?></td>
 					<td style="cursor: pointer;">
 						<a class="fa fa-pencil" title="<?=gettext('Edit Peer')?>" href="<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>"></a>
-						<?=wg_generate_toggle_icon_link(($peer['enabled'] == 'yes'), 'peer', "?act=toggle&peer={$peer_idx}&tun={$pconfig['name']}")?>
-						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}&tun={$pconfig['name']}"?>" usepost></a>
+						<?=wg_generate_toggle_icon_link(($peer['enabled'] == 'yes'), 'peer', "?act=toggle&peer={$peer_idx}&tun={$tun}")?>
+						<a class="fa fa-trash text-danger" title="<?=gettext('Delete Peer')?>" href="<?="?act=delete&peer={$peer_idx}&tun={$tun}"?>" usepost></a>
 					</td>
 				</tr>
 
@@ -356,10 +514,6 @@ if ($is_new):
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext('Add Peer')?>
 	</button>
-	<button class="btn btn-danger btn-sm" title="<?=gettext('Delete Tunnel')?>" disabled>
-		<i class="fa fa-trash icon-embed-btn"></i>
-		<?=gettext('Delete Tunnel')?>
-	</button>
 <?php
 // Now we show the actual links once the tunnel is actually saved
 else:
@@ -367,10 +521,6 @@ else:
 	<a href="<?="vpn_wg_peers_edit.php?tun={$pconfig['name']}"?>" class="btn btn-success btn-sm">
 		<i class="fa fa-plus icon-embed-btn"></i>
 		<?=gettext('Add Peer')?>
-	</a>
-	<a id="tunneldelete" class="btn btn-danger btn-sm no-confirm">
-		<i class="fa fa-trash icon-embed-btn"></i>
-		<?=gettext('Delete Tunnel')?>
 	</a>
 <?php
 endif;
@@ -381,15 +531,7 @@ endif;
 	</button>
 </nav>
 
-<?php 
-
-wg_print_status_hint();
-
-$genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); 
-
-$deleteTunnelWarning = gettext("Delete Tunnel? Click 'ok' to delete tunnel.");
-
-?>
+<?php $genKeyWarning = gettext("Overwrite key pair? Click 'ok' to overwrite keys."); ?>
 
 <script type="text/javascript">
 //<![CDATA[
@@ -462,12 +604,6 @@ events.push(function() {
 	// Save the form
 	$('#saveform').click(function(event) {
 		$(form).submit();
-	});
-
-	$('#tunneldelete').click(function() {
-		if (confirm(<?=json_encode($deleteTunnelWarning)?>)) {
-			postSubmit({act: 'delete', tun: <?=json_encode($pconfig['name'])?>}, '/wg/vpn_wg_tunnels.php');
-		}
 	});
 
 });

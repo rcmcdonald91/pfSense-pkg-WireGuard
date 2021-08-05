@@ -13,8 +13,6 @@ www/widgets/include/wireguard.inc
 www/widgets/widgets/wireguard.widget.php
 www/wg/js/WireGuardHelpers.js
 www/wg/status_wireguard.php
-www/wg/status_wireguard_routes.php
-www/wg/status_wireguard_package.php
 www/wg/vpn_wg_peers.php
 www/wg/vpn_wg_peers_edit.php
 www/wg/vpn_wg_settings.php
@@ -23,3 +21,4 @@ www/wg/vpn_wg_tunnels_edit.php
 /etc/inc/priv/wireguard.priv.inc
 %%DATADIR%%/info.xml
 @dir /etc/inc/priv
+@dir /etc/inc

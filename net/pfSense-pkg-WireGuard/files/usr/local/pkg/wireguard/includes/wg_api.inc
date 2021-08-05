@@ -75,9 +75,9 @@ function wg_get_running_config($extras = false, $json = false) {
 
 				}
 
-				// Gets some extra information about tunnels not returned by `wg show all dump`
 				if ($extras) {
 
+					// Gets some extra information about tunnels not returned by `wg show all dump`
 					$tunnel_if_stats		= pfSense_get_interface_stats($current_device);
 
 					$tmp_tunnel['status']		= wg_interface_status($current_device) ? 'up' : 'down';
@@ -112,7 +112,6 @@ function wg_get_running_config($extras = false, $json = false) {
 
 				}
 
-				// Gets some extra information about peers not returned by `wg show all dump`
 				if ($extras) {
 
 					[$peer_idx, $tmp_peer['config'], $is_new] = wg_peer_get_config_by_name($last_device, $tmp_peer['public_key']);
@@ -129,26 +128,6 @@ function wg_get_running_config($extras = false, $json = false) {
 	}
 
 	return ($json ? json_encode($ret_config) : $ret_config);
-
-}
-
-/*
- * Returns a tunnel's config array index by tunnel name
- */
-function wg_tunnel_get_array_idx($tunnel_name) {
-	global $wgg;
-
-	foreach ((array) $wgg['tunnels'] as $tun_idx => $tunnel) {
-
-		if ($tunnel['name'] == $tunnel_name) {
-
-			return $tun_idx;
-
-		}
-
-	}
-
-	return -1;
 
 }
 
@@ -257,7 +236,8 @@ function wg_kld_loadunload($load = true, &$cmds = null) {
 
 	$error = $load ? WG_ERROR_KLD_LOAD : WG_ERROR_KLD_UNLOAD;
 
-	if (($load && !is_module_loaded($kmod)) || (!$load && is_module_loaded($kmod))) {
+	if (($load && !is_module_loaded($kmod))
+	    || (!$load && is_module_loaded($kmod))) {
 
 		$cmd = "{$kldbin} {$s(escapeshellarg($kmod))} 2>&1";
 
@@ -275,8 +255,8 @@ function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 	global $wgg;
 
 	$s = fn($x) => $x;
-
-	$state = $up ? 'up' : 'down';
+	
+	$state = fn($up) => $up ? 'up' : 'down';
 
 	$ret_code = 0;
 
@@ -286,7 +266,7 @@ function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 		// Are we trying to down-an-up or up-a-down? Anything else is wrong in this context...
 		if ((!wg_interface_status($if_name) && $up) || (wg_interface_status($if_name) && !$up)) {
 
-			$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($state))} 2>&1";
+			$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($state($up)))} 2>&1";
 
 			$error = $up ? WG_ERROR_IF_UP : WG_ERROR_IF_DOWN;
 
@@ -399,7 +379,7 @@ function wg_get_pfsense_interface_info($tunnel_name) {
  */
 function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = null) {
 
-	// We only want to run this on running peers...
+	// We only want to run this in running peers...
 	if (in_array($public_key, wg_tunnel_get_peers_running_keys($tunnel_name))) {
 
 		return wg_peer_set_config($tunnel_name, $public_key, 'endpoint', $endpoint, WG_ERROR_PEER_ENDPOINT, $cmds);
@@ -413,7 +393,7 @@ function wg_peer_set_endpoint($tunnel_name, $public_key, $endpoint, &$cmds = nul
  */
 function wg_peer_set_remove($tunnel_name, $public_key, &$cmds = null) {
 
-	// We only want to run this on running peers...
+	// We only want to run this in running peers...
 	if (in_array($public_key, wg_tunnel_get_peers_running_keys($tunnel_name))) {
 
 		return wg_peer_set_config($tunnel_name, $public_key, 'remove', null, WG_ERROR_PEER_REMOVE, $cmds);
@@ -465,7 +445,7 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 	if (file_exists($conf_path)
 	    && wg_is_valid_tunnel($if_name, true)) {
 
-		$cmd = "{$wgg['wg']} syncconf {$s(escapeshellarg($if_name))} {$s(escapeshellarg($conf_path))} 2>&1";
+		$cmd = "{$wgg['wg']} syncconf {$s(escapeshellarg($if_name))} {$s(escapeshellarg($conf_path))}";
 
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_SYNC);
 
@@ -575,9 +555,6 @@ function wg_get_running_ifs() {
 function wg_get_configured_ifs() {
 	global $wgg;
 
-	// Make sure we have the latest info...
-	wg_globals();
-
 	return array_map(fn($x) => $x['name'], (array) $wgg['tunnels']);
 
 }
@@ -648,53 +625,6 @@ function wg_interface_status($if_name) {
 
 }
 
-function wg_netstat_get_routes($family = null, $if_prefix = null, $resolve_names = false, $json = false) {
-	global $wgg;
-
-	$s = fn($x) => $x;
-
-	$family_convo = array('Internet' => 'inet', 'Internet6' => 'inet6');
-
-	$ret_table = array();
-
-	$resolve = $resolve_names ? null : ' -n';
-
-	$family = is_null($family) ? null : " -f {$s(escapeshellarg($family))}";
-
-	exec("{$wgg['netstat']} -rW{$resolve}{$family} --libxo=json", $res, $ret_code);
-
-	if ($ret_code == 0) {
-	
-		// Ref: https://github.com/Juniper/libxo/issues/74
-		$res = json_decode(implode($res), true);
-	
-		$tables = $res['statistics']['route-information']['route-table']['rt-family'];
-	
-		foreach ($tables as ['address-family' => $family, 'rt-entry' => $entries]) {
-
-			$family = str_replace(array_keys($family_convo), array_values($family_convo), $family);
-	
-			foreach ($entries as $entry) {
-
-				$entry['family'] = $family;
-
-				// Filter interface-names by prefix
-				if (strncmp($entry['interface-name'], $if_prefix, strlen($if_prefix)) === 0) {
-
-					$ret_table[] = $entry;
-
-				}
-
-			}
-
-		}
-	
-	}
-
-	return ($json ? json_encode($ret_table) : $ret_table);
-
-}
-
 function wg_ifconfig_get_flags($if_name) {
 	global $wgg;
 
@@ -727,7 +657,7 @@ function wg_pkg_info() {
 
 	$ret_array = array();
 
-	$fields = array('name'=> '%n', 'version' => '%v', 'source' => '%R', 'comment' => '%c');
+	$fields = array('name'=> '%n', 'version' => '%v', 'comment' => '%c');
 
 	$return_keys = array_values(array_flip($fields));
 
@@ -910,6 +840,24 @@ function next_wg_port() {
 
 }
 
+// Wrapper to return just the xml array index
+function wg_tunnel_get_array_idx($tunnel_name) {
+	global $wgg;
+
+	foreach ((array) $wgg['tunnels'] as $tun_idx => $tunnel) {
+
+		if ($tunnel['name'] == $tunnel_name) {
+
+			return $tun_idx;
+
+		}
+
+	}
+
+	return -1;
+
+}
+
 // Return the next available WireGuard interface
 function next_wg_if() {
 	global $wgg;
@@ -966,6 +914,7 @@ function wg_peer_is_valid($tunnel_name, $public_key, $running_state = false) {
 	return in_array($public_key, ($running_state ? wg_tunnel_get_peers_running_keys($tunnel_name) : wg_tunnel_get_peers_config_keys($tunnel_name)));
 
 }
+
 
 /*
  * Check if a given WireGuard tunnel is valid

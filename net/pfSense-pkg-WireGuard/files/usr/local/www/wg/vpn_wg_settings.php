@@ -28,6 +28,7 @@
 ##|-PRIV
 
 // pfSense includes
+require_once('functions.inc');
 require_once('guiconfig.inc');
 
 // WireGuard includes
@@ -36,16 +37,78 @@ require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
-// This is the main entry into the post switchboard for this page.
-['input_errors' => $input_errors, 'is_apply' => $is_apply, 'pconfig' => $pconfig, 'ret_code' => $ret_code, 'save_success' => $save_success] = wg_settings_post_handler($_POST);
+$save_success = false;
+
+if ($_POST) {
+
+	if (isset($_POST['apply'])) {
+
+		$ret_code = 0;
+
+		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
+
+			if (wg_is_service_running()) {
+
+				$tunnels_to_apply = wg_apply_list_get('tunnels');
+
+				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
+
+				$ret_code |= $sync_status['ret_code'];
+
+			}
+
+			if ($ret_code == 0) {
+
+				clear_subsystem_dirty($wgg['subsystems']['wg']);
+
+			}
+
+		}
+
+	}
+
+	if (isset($_POST['act'])) {
+
+		switch ($_POST['act']) {
+
+			case 'save':
+
+				$res = wg_do_settings_post($_POST);
+
+				$input_errors = $res['input_errors'];
+
+				$pconfig = $res['pconfig'];
+
+				if (empty($input_errors) && $res['changes']) {
+
+					wg_toggle_wireguard();
+
+					$save_success = true;
+
+				}
+
+				break;
+
+			default:
+
+				// Shouldn't be here, so bail out.
+				header('Location: /wg/vpn_wg_settings.php');
+
+				break;
+
+		}
+
+	}
+
+}
+
+$s = fn($x) => $x;
 
 // Just to make sure defaults are properly assigned if anything is missing
 wg_defaults_install();
 
 // Grab current configuration from the XML
 $pconfig = $wgg['config'];
-
-$s = fn($x) => $x;
 
 $shortcut_section = 'wireguard';
 
@@ -56,6 +119,7 @@ $tab_array = array();
 $tab_array[] = array(gettext('Tunnels'), false, '/wg/vpn_wg_tunnels.php');
 $tab_array[] = array(gettext('Peers'), false, '/wg/vpn_wg_peers.php');
 $tab_array[] = array(gettext('Settings'), true, '/wg/vpn_wg_settings.php');
+$tab_array[] = array(gettext('Status'), false, '/wg/status_wireguard.php');
 
 include('head.inc');
 
@@ -67,7 +131,7 @@ if ($save_success) {
 	
 }
 
-if ($is_apply) {
+if (isset($_POST['apply'])) {
 
 	print_apply_result_box($ret_code);
 
@@ -139,7 +203,7 @@ $group->add(new Form_Checkbox(
 	gettext('Track System Resolve Interval'),
 	($pconfig['resolve_interval_track'] == 'yes')
 ))->setHelp("{$s(gettext("Tracks the system 'Aliases Hostnames Resolve Interval' setting."))}<br />
-	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> See System / Advanced / <a href=\"..\..\system_advanced_firewall.php\">Firewall & NAT</a>");
+	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> See System &gt; Advanced &gt; <a href=\"/system_advanced_firewall.php\">Firewall &amp; NAT</a>");
 
 $section->add($group);
 
@@ -184,8 +248,6 @@ print($form);
 		<?=gettext('Save')?>
 	</button>
 </nav>
-
-<?php wg_print_status_hint(); ?>
 
 <script type="text/javascript">
 //<![CDATA[

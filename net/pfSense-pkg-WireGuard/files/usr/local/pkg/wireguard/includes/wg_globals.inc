@@ -56,7 +56,6 @@ $wgg = array(
 	'pkg'			=> '/usr/sbin/pkg',
 	'kldload'		=> '/sbin/kldload',
 	'kldunload'		=> '/sbin/kldunload',
-	'netstat'		=> '/usr/bin/netstat',
 	'php'			=> '/usr/local/bin/php',
 	'php_wg'		=> '/usr/local/bin/php_wg',
 	'wg_pkg_root'		=> '/usr/local/pkg/wireguard',
@@ -172,13 +171,13 @@ function array_set_value(array &$array, $parents, $value) {
 
 	foreach ((array) $parents as $parent) {
 
-		if (isset($ref) && !is_array($ref)) {
+	if (isset($ref) && !is_array($ref)) {
 
-			$ref = array();
+		$ref = array();
 
-		}
+	}
 
-		$ref = &$ref[$parent];
+	$ref = &$ref[$parent];
 
 	}
 
@@ -258,21 +257,16 @@ function wg_globals() {
 
 	// An array of configuration paths we need
 	$conf_paths 	= array(
-				'config'	=> ['config', '0'],
-				'tunnels'	=> ['tunnels', 'item'],
-				'peers'		=> ['peers', 'item']
-			);
+				'config' => array_merge($wgg['xml_path'], array('config', 0)),
+				'tunnels' => array_merge($wgg['xml_path'], array('tunnels', 'item')),
+				'peers' => array_merge($wgg['xml_path'], array('peers', 'item')));
+
 
 	// Need to initialize these config paths as arrays and then assign by reference to $wgg
 	foreach ($conf_paths as $key => $path) {
 
-		// Construct the full path relative to the xml_path base
-		$path = array_merge($wgg['xml_path'], $path);
-
-		// Make sure its initialized
 		wg_init_config_arr($config, $path);
 
-		// Assign by reference to $wgg for future use
 		$wgg[$key] = &array_get_value($config, $path);
 
 	}
