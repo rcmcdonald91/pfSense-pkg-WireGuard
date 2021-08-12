@@ -95,31 +95,40 @@ function wg_generate_peer_config($peer_idx) {
 
 		$wc = new wgconfig();
 
-		if (isset($peer['endpoint'])) {
+		// if (isset($peer['endpoint'])) {
 
-			$subnet_mask = is_ipaddrv4($peer['endpoint']) ? "32" : "128";
+		// 	$subnet_mask = is_ipaddrv4($peer['endpoint']) ? "32" : "128";
 
-			$wc->set_interface_attr('Address', "{$peer['endpoint']}/{$subnet_mask}");
+		// 	$wc->set_interface_attr('Address', "{$peer['endpoint']}/{$subnet_mask}");
 
-			$wc->set_interface_attr('ListenPort', $peer['port']);
+		// 	$wc->set_interface_attr('ListenPort', $peer['port']);
 
-		}
+		// }
 
 		$wc->set_interface_attr('PrivateKey', $peer['publickey']);
 
 		// TODO: Add DNS configuration for Tunnel / Peer level (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
 		// $wc->set_interface_attr('DNS', $peer['dns']);
 
-		// TODO: Add MTU configuration for Tunnel / Peer level, or, get it from assigned interface? (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
-		// $wc->set_interface_attr('MTU', 1420);
-
 		$tunnel = wg_tunnel_get_config_by_name($peer['tun'])[1];
+		//exit(var_dump($tunnel));
 		$tunnel_public_key = wg_gen_publickey($tunnel['privatekey'])['pubkey'];
 
+		// TODO: Add MTU configuration for Tunnel / Peer level, or, get it from assigned interface? (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
+		$wc->set_interface_attr('MTU', $tunnel['mtu']);
+
+		// Add the tunnels public key
 		$wc->add_peer($tunnel_public_key, "Peer: {$tunnel['descr']}");
 
-		// TODO: Endpoint storage (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
-                // $wc->set_peer_attr($tunnel_public_key, 'Endpoint', ":{$tunnel['listenport']}");
+		// Add the custom address of this tunnel if set
+		if (!empty($tunnel['addresses']['row'])) {
+
+			// TODO: Only get one?
+			// TODO: Endpoint storage (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
+			$tunnel_address = $tunnel['addresses']['row'][0]['address'] . ":" . $tunnel['listenport'];
+			$wc->set_peer_attr($tunnel_public_key, 'Endpoint', $tunnel_address);
+
+		}
 
 		if (!empty($peer['presharedkey'])) {
 
@@ -127,12 +136,16 @@ function wg_generate_peer_config($peer_idx) {
 
 		}
 
-		// Process AllowedIPs
+		// Process AllowedIPs into Addresses
+		$addresses = '';
                 foreach ((array) $peer['allowedips']['row'] as $ip) {
 
-                        $wc->add_peer_attr($tunnel_public_key, 'AllowedIPs', "{$ip['address']}/{$ip['mask']}");
+			$addresses .= "{$ip['address']}/{$ip['mask']},";
 
                 }
+
+		$addresses = rtrim($addresses, ",");
+		$wc->set_interface_attr('Address', $addresses);
 
                 // Process PersistentKeepalive
                 $keepalive = $peer['persistentkeepalive'];
@@ -140,6 +153,8 @@ function wg_generate_peer_config($peer_idx) {
                 $keepalive = (!empty($keepalive) && is_numericint($keepalive)) ? $keepalive : '0';
 
                 $wc->set_peer_attr($tunnel_public_key, 'PersistentKeepalive', $keepalive);
+
+		$wc->set_peer_attr($tunnel_public_key, 'AllowedIPs', '0.0.0.0/0,::/0');
 
 		return $wc->get_conf_string();
 	}
