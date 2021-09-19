@@ -295,7 +295,7 @@ if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['ro
 
 	// Default if we don't set it above
 	if (empty($pconfig['allowedips']['row'])) {
-		wg_init_config_arr($pconfig, array('allowedips', 'row', $rows));
+		wg_init_config_arr($pconfig, array('allowedips', 'row', 0));
 
 		// Hack to ensure empty lists default to /128 mask
 		$pconfig['allowedips']['row'][0]['mask'] = '128';
