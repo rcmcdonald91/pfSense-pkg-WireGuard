@@ -163,7 +163,7 @@ display_top_tabs($tab_array);
 			<table class="table table-hover table-striped table-condensed">
 				<thead>
 					<tr>
-						<th class="peer-entries"></th>
+						<th style="display: none;" class="peer-entries"></th>
 						<th><?=gettext("Name")?></th>
 						<th><?=gettext("Description")?></th>
 						<th><?=gettext("Public Key")?></th>
@@ -182,10 +182,10 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 			$peers = wg_tunnel_get_peers_config($tunnel['name']);
 ?>
 					<tr ondblclick="document.location='vpn_wg_tunnels_edit.php?tun=<?=$tunnel['name']?>';" class="<?=wg_tunnel_status_class($tunnel)?>">
-						<td class="peer-entries"><?=gettext('Interface')?></td>
+						<td style="display: none;" class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td class="pubkey" title="<?=htmlspecialchars($tunnel['publickey'])?>">
+						<td style="cursor: pointer;" class="pubkey" title="<?=htmlspecialchars($tunnel['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?>
 						</td>
 						<td><?=wg_generate_tunnel_address_popover_link($tunnel['name'])?></td>
@@ -201,7 +201,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 						</td>
 					</tr>
 
-					<tr class="peer-entries peerbg_color">
+					<tr style="display: none;" class="peer-entries peerbg_color">
 						<td><?=gettext("Peers")?></td>
 <?php
 			if (count($peers) > 0):
@@ -277,8 +277,6 @@ events.push(function() {
 	var peershidden = true;
 
 	var keyshidden = true;
-
-	hideClass('peer-entries', peershidden);
 
 	// Toggle peer visibility
 	$('#showpeers').click(function () {

@@ -169,7 +169,7 @@ if (is_array($wgg['peers']) && count($wgg['peers']) > 0):
 ?>
 					<tr ondblclick="document.location='<?="vpn_wg_peers_edit.php?peer={$peer_idx}"?>';" class="<?=wg_peer_status_class($peer)?>">
 						<td><?=htmlspecialchars(wg_truncate_pretty($peer['descr'], 16))?></td>
-						<td class="pubkey" title="<?=htmlspecialchars($peer['publickey'])?>">
+						<td style="cursor: pointer;" class="pubkey" title="<?=htmlspecialchars($peer['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($peer['publickey'], 16))?>
 						</td>
 						<td><?=htmlspecialchars($peer['tun'])?></td>

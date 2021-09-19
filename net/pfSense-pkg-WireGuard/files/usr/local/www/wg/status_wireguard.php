@@ -138,7 +138,7 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
-				<tr class="peer-entries">
+				<tr style="display: none;" class="peer-entries">
 					<td colspan="9">
 						<table class="table table-hover table-condensed">
 							<thead>
@@ -250,8 +250,6 @@ endif;
 //<![CDATA[
 events.push(function() {
 	var peershidden = true;
-
-	hideClass('peer-entries', peershidden);
 
 	// Toggle peer visibility
 	$('#showpeers').click(function () {
