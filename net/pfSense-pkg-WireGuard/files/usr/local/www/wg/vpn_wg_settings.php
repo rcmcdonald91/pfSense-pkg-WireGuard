@@ -243,7 +243,7 @@ $section->addInput(new Form_Checkbox(
     	gettext('Enable'),
     	$pconfig['suggest_next_approved_ip'] == 'yes'
 ))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
-		{$s(gettext("With 'Suggest Next Approvied IP' enabled, when creating a new Peer for a Tunnel it will pre-populate the Allowed IP with the next available IP address."))}");
+		{$s(gettext("With 'Suggest Next Approved IP' enabled, when creating a new Peer for a Tunnel it will pre-populate the Allowed IP with the next available IP address."))}");
 
 $form->add($section);
 
