@@ -927,6 +927,84 @@ function wg_tunnel_get_peers_config_keys($tunnel_name) {
 	return $keys;
 }
 
+/**
+ * Return the suggested next allowed IP for the next peer
+ */
+function wg_get_tunnel_next_allowed_ip($tunnel_name) {
+
+	$peers = wg_tunnel_get_peers_config($tunnel_name);
+	$tun_interface_addresses = pfSense_getall_interface_addresses($tunnel_name);
+
+	$interface_ipv4 = null;
+	$interface_ipv4_subnet = null;     // Lower interface IP for network, suggested must be >
+
+	$interface_ipv6 = null;
+
+	$highest_ipv4 = null;
+	$highest_ipv6 = null;
+
+	if (!empty($tun_interface_addresses)) {
+		// Looping interface IPs will cause last IPvX address to be the one we consider
+		foreach($tun_interface_addresses as $tia) {
+			$address = explode('/', $tia);
+
+			if (is_ipaddrv4($address[0])) {
+				$interface_ipv4 = ip2long($address[0]);
+				$interface_ipv4_mask = (int) $address[1];
+
+				$interface_ipv4_range = pow(2, (32 - $interface_ipv4_mask)) - 1;
+				$mask = long2ip(~$interface_ipv4_range);
+
+				$interface_ipv4_subnet = $interface_ipv4 & ip2long($mask);
+			} else {
+				$interface_ipv6 = $address[0];
+				$interface_ipv6_mask = $address[1];
+			}
+		}
+	}
+
+	$peer_ipv4_addresses = [];
+	$peer_ipv6_addresses = [];
+
+	// We have peers, so loop them, find the highest, plus one (if we have space)
+	foreach ($peers as $peer) {
+		foreach ($peer[1]['allowedips']['row'] as $peer_ip) {
+			if ($peer_ip['mask'] == '32') {
+				$peer_ipv4_addresses[] = ip2long($peer_ip['address']);
+			} else if ($peer_ip['mask'] == '128') {
+				$peer_ipv6_addresses[] = $peer_ip['address'];
+			}
+		}
+	}
+
+	// Loop over IPv4 addresses until we hit one not in use
+	if ($interface_ipv4 !== null) {
+		for ($possible_address = $interface_ipv4_subnet+1; $possible_address < ($interface_ipv4_subnet + ($interface_ipv4_range - 1)); $possible_address++) {
+			// Skip if this address is the same as the interface (could be first, could be last)
+			if ($possible_address == $interface_ipv4) {
+				continue;
+			}
+
+			// Skip if this address is taken by a peer
+			if (in_array($possible_address, $peer_ipv4_addresses)) {
+				continue;
+			}
+
+			// Now we have the first available peer address in the range
+			$highest_ipv4 = $possible_address;
+			break;
+		}
+	}
+
+	// Convert from long representation of IPv4 to string
+	if ($highest_ipv4 !== null) {
+		$highest_ipv4 = long2ip($highest_ipv4);
+	}
+
+	return [$highest_ipv4, $highest_ipv6];
+
+}
+
 /* 
  * Return WireGuard tunnel networks for a given address family
  */
