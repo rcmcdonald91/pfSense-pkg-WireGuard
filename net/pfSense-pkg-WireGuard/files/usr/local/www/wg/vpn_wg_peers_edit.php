@@ -268,7 +268,7 @@ if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['ro
 	$user_wants_suggestion = isset($wgg['config']['suggest_next_approved_ip']) && $wgg['config']['suggest_next_approved_ip'] == 'yes';
 
 	// Suggest the next available IP address (if applicable)
-	if ($user_wants_suggestion && !empty($pconfig['tun']) && is_wg_tunnel_assigned($pconfig['tun'])) {
+	if ($user_wants_suggestion && !empty($pconfig['tun']) && $pconfig['tun'] != 'unassigned') {
 		$suggested_next_ips = wg_get_tunnel_next_allowed_ip($pconfig['tun']);
 
 		if (!empty($suggested_next_ips)) {
