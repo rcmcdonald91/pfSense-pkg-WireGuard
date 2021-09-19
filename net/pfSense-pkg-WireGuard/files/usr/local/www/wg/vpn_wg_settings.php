@@ -237,6 +237,14 @@ $section->addInput(new Form_Checkbox(
 ))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
 		{$s(gettext("With 'Hide Peers' enabled (default), all peers for all tunnels will initially be hidden on the status page."))}");
 		
+$section->addInput(new Form_Checkbox(
+	'suggest_next_approved_ip',
+	gettext('Suggest Next Approved IP'),
+    	gettext('Enable'),
+    	$pconfig['suggest_next_approved_ip'] == 'yes'
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("With 'Suggest Next Approvied IP' enabled, when creating a new Peer for a Tunnel it will pre-populate the Allowed IP with the next available IP address."))}");
+
 $form->add($section);
 
 $form->addGlobal(new Form_Input(

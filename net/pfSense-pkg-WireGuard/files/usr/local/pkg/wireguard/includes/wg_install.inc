@@ -162,6 +162,8 @@ function wg_defaults_install() {
 
 	$wgg['config']['hide_peers'] 			= isset($wgg['config']['hide_peers']) ? $wgg['config']['hide_peers'] : 'yes';
 	
+	$wgg['config']['suggest_next_approved_ip']	= isset($wgg['config']['suggest_next_approved_ip']) ? $wgg['config']['suggest_next_approved_ip'] : 'yes';
+	
 	wg_write_config('Applied package default settings as necessary.', false);
 }
 
