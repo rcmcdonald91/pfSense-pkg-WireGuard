@@ -439,7 +439,7 @@ function wg_do_settings_post($post) {
 	
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 	
-	$pconfig['suggest_next_approved_ip']		= empty($post['suggest_next_approved_ip']) ? 'no' : $post['suggest_next_approved_ip'];
+	$pconfig['suggest_next_approved_ip']	= empty($post['suggest_next_approved_ip']) ? 'no' : $post['suggest_next_approved_ip'];
 
 	$pconfig['hide_peers']			= empty($post['hide_peers']) ? 'no' : $post['hide_peers'];
 

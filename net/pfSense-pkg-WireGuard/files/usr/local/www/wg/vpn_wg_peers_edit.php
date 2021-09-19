@@ -279,7 +279,7 @@ if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['ro
 				wg_init_config_arr($pconfig, array('allowedips', 'row', $rows));
 				$pconfig['allowedips']['row'][$rows]['address'] = $ipv4_address;
 				$pconfig['allowedips']['row'][$rows]['mask'] = '32';
-				$pconfig['allowedips']['row'][$rows]['descr'] = 'Suggested next available IPv4';
+				$pconfig['allowedips']['row'][$rows]['descr'] = gettext('Suggested next available IPv4');
 				$rows++;
 			}
 
@@ -288,7 +288,7 @@ if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['ro
 				wg_init_config_arr($pconfig, array('allowedips', 'row', $rows));
 				$pconfig['allowedips']['row'][$rows]['address'] = $ipv6_address;
 				$pconfig['allowedips']['row'][$rows]['mask'] = '128';
-				$pconfig['allowedips']['row'][$rows]['descr'] = 'Suggested next available IPv6';
+				$pconfig['allowedips']['row'][$rows]['descr'] = gettext('Suggested next available IPv6');
 			}
 		}
 	}
