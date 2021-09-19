@@ -928,20 +928,43 @@ function wg_tunnel_get_peers_config_keys($tunnel_name) {
 }
 
 /**
+ * Helper function used in wg_get_tunnel_next_allowed_ip below.
+ * Source: https://stackoverflow.com/a/16551680
+ */
+function _increment_ip($ip, $increment) {
+	$addr = inet_pton ( $ip );
+
+	for ( $i = strlen ( $addr ) - 1; $increment > 0 && $i >= 0; --$i ) {
+		$val = ord($addr[$i]) + $increment;
+		$increment = $val / 256;
+		$addr[$i] = chr($val % 256);
+	}
+
+	return inet_ntop ( $addr );
+}
+
+/**
  * Return the suggested next allowed IP for the next peer
  */
 function wg_get_tunnel_next_allowed_ip($tunnel_name) {
 
 	$peers = wg_tunnel_get_peers_config($tunnel_name);
-	$tun_interface_addresses = pfSense_getall_interface_addresses($tunnel_name);
+
+	// pfSense interface addresses for assigned tunnels
+	if (is_wg_tunnel_assigned($tunnel_name)) {
+		$interface = wg_get_pfsense_interface_info($tunnel_name)['descr'];
+		$tun_interface_addresses = pfSense_getall_interface_addresses($interface);
+		exit(var_dump($interface, $tun_interface_addresses));
+	} else {	
+		$tun_interface_addresses = pfSense_getall_interface_addresses($tunnel_name);
+	}
 
 	$interface_ipv4 = null;
 	$interface_ipv4_subnet = null;     // Lower interface IP for network, suggested must be >
 
 	$interface_ipv6 = null;
 
-	$highest_ipv4 = null;
-	$highest_ipv6 = null;
+	var_dump($tun_interface_addresses, wg_get_pfsense_interface_info($tunnel_name));
 
 	if (!empty($tun_interface_addresses)) {
 		// Looping interface IPs will cause last IPvX address to be the one we consider
@@ -949,16 +972,17 @@ function wg_get_tunnel_next_allowed_ip($tunnel_name) {
 			$address = explode('/', $tia);
 
 			if (is_ipaddrv4($address[0])) {
-				$interface_ipv4 = ip2long($address[0]);
+				$interface_ipv4 = $address[0];
 				$interface_ipv4_mask = (int) $address[1];
 
 				$interface_ipv4_range = pow(2, (32 - $interface_ipv4_mask)) - 1;
 				$mask = long2ip(~$interface_ipv4_range);
 
-				$interface_ipv4_subnet = $interface_ipv4 & ip2long($mask);
+				$interface_ipv4_subnet = long2ip( ip2long($interface_ipv4) & ip2long($mask) );
 			} else {
 				$interface_ipv6 = $address[0];
-				$interface_ipv6_mask = $address[1];
+				$interface_ipv6_mask = (int) $address[1];
+				$interface_ipv6_range = pow(2, (128 - $interface_ipv6_mask)) - 1;
 			}
 		}
 	}
@@ -966,42 +990,49 @@ function wg_get_tunnel_next_allowed_ip($tunnel_name) {
 	$peer_ipv4_addresses = [];
 	$peer_ipv6_addresses = [];
 
-	// We have peers, so loop them, find the highest, plus one (if we have space)
+	// We have peers, so loop them all and store their IPs so we can check for existence
 	foreach ($peers as $peer) {
 		foreach ($peer[1]['allowedips']['row'] as $peer_ip) {
 			if ($peer_ip['mask'] == '32') {
-				$peer_ipv4_addresses[] = ip2long($peer_ip['address']);
+				$peer_ipv4_addresses[] = $peer_ip['address'];
 			} else if ($peer_ip['mask'] == '128') {
 				$peer_ipv6_addresses[] = $peer_ip['address'];
 			}
 		}
 	}
 
+	$suggested_ipv4 = null;
+	$suggested_ipv6 = null;
+
 	// Loop over IPv4 addresses until we hit one not in use
 	if ($interface_ipv4 !== null) {
-		for ($possible_address = $interface_ipv4_subnet+1; $possible_address < ($interface_ipv4_subnet + ($interface_ipv4_range - 1)); $possible_address++) {
-			// Skip if this address is the same as the interface (could be first, could be last)
-			if ($possible_address == $interface_ipv4) {
-				continue;
-			}
+		$suggested_ipv4 = _increment_ip($interface_ipv4_subnet, 1);
 
-			// Skip if this address is taken by a peer
-			if (in_array($possible_address, $peer_ipv4_addresses)) {
-				continue;
-			}
+		// Check if first IPv4 address is taken by interface, skip if is
+		if ($suggested_ipv4 == $interface_ipv4) {
+			$suggested_ipv4 = _increment_ip($suggested_ipv4, 1);
+		}
 
-			// Now we have the first available peer address in the range
-			$highest_ipv4 = $possible_address;
-			break;
+		// Now increment until we find the first unused IPv4 address
+		$i = 1;
+		while (in_array($suggested_ipv4, $peer_ipv4_addresses) && $i < ($interface_ipv4_range - 1)) {
+			$suggested_ipv4 = _increment_ip($suggested_ipv4, 1);
+			$i++;
 		}
 	}
 
-	// Convert from long representation of IPv4 to string
-	if ($highest_ipv4 !== null) {
-		$highest_ipv4 = long2ip($highest_ipv4);
+	// Loop over IPv6 addresses until we hit one not in use
+	if ($interface_ipv6 !== null) {
+		$suggested_ipv6 = _increment_ip($interface_ipv6, 1);
+
+		$i = 1;
+		while (in_array($suggested_ipv6, $peer_ipv6_addresses) && $i < ($interface_ipv6_range - 1)) {
+			$suggested_ipv6 = _increment_ip($suggested_ipv6, 1);
+			$i++;
+		}
 	}
 
-	return [$highest_ipv4, $highest_ipv6];
+	return [$suggested_ipv4, $suggested_ipv6];
 
 }
 
