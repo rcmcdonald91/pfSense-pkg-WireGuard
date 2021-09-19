@@ -948,44 +948,61 @@ function _increment_ip($ip, $increment) {
  */
 function wg_get_tunnel_next_allowed_ip($tunnel_name) {
 
-	$peers = wg_tunnel_get_peers_config($tunnel_name);
+	$interface_ipv4 = null;
+	$interface_ipv4_mask = null;
+
+	$interface_ipv6 = null;
+	$interface_ipv6_mask = null;
 
 	// pfSense interface addresses for assigned tunnels
 	if (is_wg_tunnel_assigned($tunnel_name)) {
-		$interface = wg_get_pfsense_interface_info($tunnel_name)['descr'];
-		$tun_interface_addresses = pfSense_getall_interface_addresses($interface);
-		exit(var_dump($interface, $tun_interface_addresses));
-	} else {	
+
+		$interface = wg_get_pfsense_interface_info($tunnel_name)['name'];
+		$if_details = get_interface_info($interface);
+
+		if (!empty($if_details['ipaddr'])) {
+			$interface_ipv4 = $if_details['ipaddr'];
+			// ipv4 subnet is actually full 255.255.255.0, not 24 or example
+			$long = ip2long($if_details['subnet']);
+			$base = ip2long('255.255.255.255');
+			$interface_ipv4_mask = 32 - log(($long ^ $base)+1, 2);
+		}
+
+		if (!empty($if_details['ipaddrv6'])) {
+			$interface_ipv6 = $if_details['ipaddrv6'];
+			$interface_ipv6_mask = (int) $if_details['subnetv6'];
+		}
+
+	} else {
+
 		$tun_interface_addresses = pfSense_getall_interface_addresses($tunnel_name);
-	}
 
-	$interface_ipv4 = null;
-	$interface_ipv4_subnet = null;     // Lower interface IP for network, suggested must be >
+		if (!empty($tun_interface_addresses)) {
+			// Looping interface IPs will cause last IPvX address to be the one we consider
+			foreach($tun_interface_addresses as $tia) {
+				$address = explode('/', $tia);
 
-	$interface_ipv6 = null;
-
-	var_dump($tun_interface_addresses, wg_get_pfsense_interface_info($tunnel_name));
-
-	if (!empty($tun_interface_addresses)) {
-		// Looping interface IPs will cause last IPvX address to be the one we consider
-		foreach($tun_interface_addresses as $tia) {
-			$address = explode('/', $tia);
-
-			if (is_ipaddrv4($address[0])) {
-				$interface_ipv4 = $address[0];
-				$interface_ipv4_mask = (int) $address[1];
-
-				$interface_ipv4_range = pow(2, (32 - $interface_ipv4_mask)) - 1;
-				$mask = long2ip(~$interface_ipv4_range);
-
-				$interface_ipv4_subnet = long2ip( ip2long($interface_ipv4) & ip2long($mask) );
-			} else {
-				$interface_ipv6 = $address[0];
-				$interface_ipv6_mask = (int) $address[1];
-				$interface_ipv6_range = pow(2, (128 - $interface_ipv6_mask)) - 1;
+				if (is_ipaddrv4($address[0])) {
+					$interface_ipv4 = $address[0];
+					$interface_ipv4_mask = (int) $address[1];
+				} else {
+					$interface_ipv6 = $address[0];
+					$interface_ipv6_mask = (int) $address[1];
+				}
 			}
 		}
+
 	}
+
+	$interface_ipv4_subnet = null;
+
+	if ($interface_ipv4 !== null) {
+		$interface_ipv4_range = pow(2, (32 - $interface_ipv4_mask)) - 1;
+		$mask = long2ip(~$interface_ipv4_range);
+		$interface_ipv4_subnet = long2ip( ip2long($interface_ipv4) & ip2long($mask) );
+	}
+
+	$peers = wg_tunnel_get_peers_config($tunnel_name);
 
 	$peer_ipv4_addresses = [];
 	$peer_ipv6_addresses = [];
@@ -1005,7 +1022,7 @@ function wg_get_tunnel_next_allowed_ip($tunnel_name) {
 	$suggested_ipv6 = null;
 
 	// Loop over IPv4 addresses until we hit one not in use
-	if ($interface_ipv4 !== null) {
+	if ($interface_ipv4_subnet !== null) {
 		$suggested_ipv4 = _increment_ip($interface_ipv4_subnet, 1);
 
 		// Check if first IPv4 address is taken by interface, skip if is
@@ -1024,6 +1041,8 @@ function wg_get_tunnel_next_allowed_ip($tunnel_name) {
 	// Loop over IPv6 addresses until we hit one not in use
 	if ($interface_ipv6 !== null) {
 		$suggested_ipv6 = _increment_ip($interface_ipv6, 1);
+
+		$interface_ipv6_range = pow(2, (128 - $interface_ipv6_mask)) - 1;
 
 		$i = 1;
 		while (in_array($suggested_ipv6, $peer_ipv6_addresses) && $i < ($interface_ipv6_range - 1)) {

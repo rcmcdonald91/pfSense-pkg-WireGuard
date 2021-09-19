@@ -265,8 +265,6 @@ $section->addInput(new Form_StaticText(
 // Init the addresses array if necessary
 if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['row'])) {
 
-	wg_init_config_arr($pconfig, array('allowedips', 'row', 0));
-
 	$user_wants_suggestion = isset($wgg['config']['suggest_next_approved_ip']) && $wgg['config']['suggest_next_approved_ip'] == 'yes';
 
 	// Suggest the next available IP address (if applicable)
@@ -274,22 +272,24 @@ if (!is_array($pconfig['allowedips']['row']) || empty($pconfig['allowedips']['ro
 		$suggested_next_ips = wg_get_tunnel_next_allowed_ip($pconfig['tun']);
 
 		if (!empty($suggested_next_ips)) {
-			$ipv4_address = $suggested_next_ips[0];
+			$rows = 0;
 
+			$ipv4_address = $suggested_next_ips[0];
 			if ($ipv4_address !== null) {
-				$pconfig['allowedips']['row'][0]['address'] = $ipv4_address;
-				$pconfig['allowedips']['row'][0]['mask'] = '32';
-				$pconfig['allowedips']['row'][0]['descr'] = 'Suggested next available IPv4';
+				wg_init_config_arr($pconfig, array('allowedips', 'row', $rows));
+				$pconfig['allowedips']['row'][$rows]['address'] = $ipv4_address;
+				$pconfig['allowedips']['row'][$rows]['mask'] = '32';
+				$pconfig['allowedips']['row'][$rows]['descr'] = 'Suggested next available IPv4';
+				$rows++;
 			}
 
 			$ipv6_address = $suggested_next_ips[1];
 
 			if ($ipv6_address !== null) {
-				wg_init_config_arr($pconfig, array('allowedips', 'row', 1));
-
-				$pconfig['allowedips']['row'][1]['address'] = $ipv6_address;
-				$pconfig['allowedips']['row'][1]['mask'] = '128';
-				$pconfig['allowedips']['row'][1]['descr'] = 'Suggested next available IPv6';
+				wg_init_config_arr($pconfig, array('allowedips', 'row', $rows));
+				$pconfig['allowedips']['row'][$rows]['address'] = $ipv6_address;
+				$pconfig['allowedips']['row'][$rows]['mask'] = '128';
+				$pconfig['allowedips']['row'][$rows]['descr'] = 'Suggested next available IPv6';
 			}
 		}
 	}
