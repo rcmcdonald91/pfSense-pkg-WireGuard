@@ -185,7 +185,7 @@ if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
 						<td style="display: none;" class="peer-entries"><?=gettext('Interface')?></td>
 						<td><?=htmlspecialchars($tunnel['name'])?></td>
 						<td><?=htmlspecialchars($tunnel['descr'])?></td>
-						<td style="cursor: pointer;" class="pubkey" title="Click to copy: <?=htmlspecialchars($tunnel['publickey'])?>">
+						<td style="cursor: pointer;" class="pubkey" title="<?=htmlspecialchars($tunnel['publickey'])?>">
 							<?=htmlspecialchars(wg_truncate_pretty($tunnel['publickey'], 16))?>
 						</td>
 						<td><?=wg_generate_tunnel_address_popover_link($tunnel['name'])?></td>
