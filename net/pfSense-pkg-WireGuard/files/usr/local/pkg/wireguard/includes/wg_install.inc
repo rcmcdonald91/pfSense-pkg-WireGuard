@@ -159,6 +159,10 @@ function wg_defaults_install() {
 	$wgg['config']['interface_group']		= isset($wgg['config']['interface_group']) ? $wgg['config']['interface_group'] : 'all';
 	
 	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
+
+	$wgg['config']['config_export_endpoint']	= isset($wgg['config']['config_export_endpoint']) ? $wgg['config']['config_export_endpoint'] : '';
+
+	$wgg['config']['config_export_dns']		= isset($wgg['config']['config_export_dns']) ? $wgg['config']['config_export_dns'] : '';
 	
 	wg_write_config('Applied package default settings as necessary.', false);
 }

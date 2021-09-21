@@ -425,6 +425,26 @@ if (!is_wg_tunnel_assigned($pconfig['name'])) {
 
 $form->add($section);
 
+$section = new Form_Section(gettext('Config Export Settings'));
+
+$section->addInput(new Form_Input(
+	'config_export_endpoint',
+	gettext('Endpoint'),
+	'text',
+    	$pconfig['config_export_endpoint'],
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("Overrides global 'Config Export Endpoint' for any peer config exported for this tunnel"))}");
+
+$section->addInput(new Form_Input(
+	'config_export_dns',
+	gettext('DNS'),
+	'text',
+    	$pconfig['config_export_dns'],
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("Overrides global 'Config Export DNS' for any peer config exported for this tunnel"))}");
+
+$form->add($section);
+
 $form->addGlobal(new Form_Input(
 	'mtu',
 	'',

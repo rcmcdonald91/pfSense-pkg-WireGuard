@@ -107,10 +107,21 @@ function wg_generate_peer_config($peer_idx) {
 
 		$wc->set_interface_attr('PrivateKey', $peer['publickey']);
 
-		// TODO: Add DNS configuration for Tunnel / Peer level (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
-		// $wc->set_interface_attr('DNS', $peer['dns']);
+		// TODO: Check if peer config specifies a DNS value, over the tunnel value, over the global default
+		if (!empty($wgg['config']['config_export_dns'])) {
+
+			$wc->set_interface_attr('DNS', $wgg['config']['config_export_dns']);
+
+		}
 
 		$tunnel = wg_tunnel_get_config_by_name($peer['tun'])[1];
+
+		if (!empty($tunnel['config_export_dns'])) {
+
+			$wc->set_interface_attr('DNS', $tunnel['config_export_dns']);
+
+		}
+
 		//exit(var_dump($tunnel));
 		$tunnel_public_key = wg_gen_publickey($tunnel['privatekey'])['pubkey'];
 
@@ -120,13 +131,34 @@ function wg_generate_peer_config($peer_idx) {
 		// Add the tunnels public key
 		$wc->add_peer($tunnel_public_key, "Peer: {$tunnel['descr']}");
 
+		$endpoint_host = '';
+
+		// TODO: Ordering of the addres getting, tunnel address < global endpoint < tunnel endpoint (extra)?
 		// Add the custom address of this tunnel if set
 		if (!empty($tunnel['addresses']['row'])) {
 
-			// TODO: Only get one?
-			// TODO: Endpoint storage (https://github.com/theonemcdonald/pfSense-pkg-WireGuard/issues/7#issuecomment-869165227)
-			$tunnel_address = $tunnel['addresses']['row'][0]['address'] . ":" . $tunnel['listenport'];
-			$wc->set_peer_attr($tunnel_public_key, 'Endpoint', $tunnel_address);
+			$endpoint_host = $tunnel['addresses']['row'][0]['address'];
+
+		}
+
+		// Global Setting
+		if (!empty($wgg['config']['config_export_endpoint'])) {
+
+			$endpoint_host = $wgg['config']['config_export_endpoint'];
+
+		}
+
+		// Tunnel Setting
+		if (!empty($tunnel['config_export_endpoint'])) {
+
+			$endpoint_host = $tunnel['config_export_endpoint'];
+
+		}
+
+		if (!empty($endpoint_host)) {
+
+			$full_endpoint_host = $endpoint_host . ":" . $tunnel['listenport'];
+			$wc->set_peer_attr($tunnel_public_key, 'Endpoint', $full_endpoint_host);
 
 		}
 
@@ -521,6 +553,10 @@ function wg_do_settings_post($post) {
 	
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
+	$pconfig['config_export_endpoint']	= empty($post['config_export_endpoint']) ? '' : $post['config_export_endpoint'];
+
+	$pconfig['config_export_dns']		= empty($post['config_export_dns']) ? '' : $post['config_export_dns'];
+
 	$input_errors = wg_validate_settings_post($pconfig);
 
 	if (empty($input_errors)) {
@@ -643,6 +679,10 @@ function wg_do_tunnel_post($post) {
 	$pconfig['mtu']			= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
 
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
+
+	$pconfig['config_export_endpoint'] = $post['config_export_endpoint'];
+
+	$pconfig['config_export_dns']	= $post['config_export_dns'];
 
 	$input_errors			= wg_validate_tunnel_post($pconfig, $tun_idx);
 

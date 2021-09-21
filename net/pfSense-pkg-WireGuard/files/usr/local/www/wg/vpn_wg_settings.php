@@ -231,6 +231,26 @@ $section->addInput(new Form_Checkbox(
 
 $form->add($section);
 
+$section = new Form_Section(gettext('Config Export Settings'));
+
+$section->addInput(new Form_Input(
+	'config_export_endpoint',
+	gettext('Endpoint'),
+	'text',
+    	$pconfig['config_export_endpoint'],
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("Used as the fallback 'Endpoint' representing this pfSense used for QR Code exports"))}");
+
+$section->addInput(new Form_Input(
+	'config_export_dns',
+	gettext('DNS'),
+	'text',
+    	$pconfig['config_export_dns'],
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("Used as the fallback 'DNS' address for all QR Code exports"))}");
+
+$form->add($section);
+
 $form->addGlobal(new Form_Input(
 	'act',
 	'',

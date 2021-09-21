@@ -147,6 +147,30 @@ function wg_validate_tunnel_post($pconfig, $idx_from_post) {
 		}
 	}
 
+	// Check config export endpoint
+	if (!empty($pconfig['config_export_endpoint']) && !filter_var($pconfig['config_export_endpoint'], FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+		$input_errors[] = gettext('Invalid config export endpoint value, must either be empty or hostname / IP');
+	}
+
+	// Check config export DNS
+	if (!empty($pconfig['config_export_dns'])) {
+		// Sanity check the raw value is IP like values
+		if (!preg_match_all("/[0-9.,a-fA-F:]/", $pconfig['config_export_dns'])) {
+			$input_errors[] = gettext('Invalid config export DNS value, must be comma seperated IP addresses');
+		} else {
+			// Now parse the CSV and validate each chunk are actually valid IPs
+			$dns_chunks = explode(',', $pconfig['config_export_dns'], 10);
+
+			foreach($dns_chunks as $dns_chunk) {
+				if (!filter_var($dns_chunk, FILTER_VALIDATE_IP)) {
+					// Not valid so bounce
+					$input_errors[] = gettext('Invalid config export DNS value, one of the comma seperated values is invalid');
+					break;
+				}
+			}
+		}
+	}
+
 	// Consumers expect an array
 	return $input_errors;
 }
