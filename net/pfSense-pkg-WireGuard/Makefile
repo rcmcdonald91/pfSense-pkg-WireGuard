@@ -13,6 +13,8 @@ LICENSE=	APACHE20
 RUN_DEPENDS=	wireguard-kmod>0:net/wireguard-kmod \
 		wireguard-tools-lite>0:net/wireguard-tools@lite
 
+BUILD_DEPENDS=	php74-composer2>0:devel/php-composer2
+
 NO_BUILD=	yes
 NO_MTREE=	yes
 
