@@ -574,6 +574,103 @@ function wg_pkg_info() {
 	return $ret_array;
 }
 
+// Generate private key
+function wg_gen_keypair($json = false) {
+	global $wgg;
+
+	$privkey = exec("{$wgg['wg']} genkey");
+
+	return wg_gen_publickey($privkey, $json);
+}
+
+// Compose the public key from a provided private key
+function wg_gen_publickey($privkey, $json = false) {
+	global $wgg;
+
+	$s = fn($x) => $x;
+
+	$was_clamped = wg_is_key_clamped($privkey);
+
+	$privkey_clamped = wg_clamp_key($privkey);
+
+	$pubkey = exec("echo {$s(escapeshellarg($privkey))} | {$wgg['wg']} pubkey");
+
+	$res = array('privkey' => $privkey, 'privkey_clamped' => $privkey_clamped, 'pubkey' => $pubkey, 'was_clamped' => $was_clamped);
+
+	return $json ? json_encode($res) : $res;
+}
+
+/*
+ * Reference0: https://lists.zx2c4.com/pipermail/wireguard/2021-June/006787.html
+ * Reference1: https://git.zx2c4.com/wireguard-freebsd/tree/src/crypto.h#n100
+ * 
+ * Even though any 256-bit bitstring generated from a csprng is a fine private key,
+ * the kernel clamps private keys according to the transformation implemented here.
+ * Some WireGuard key generators aren't properly pre-clamping generated keys and this
+ * can cause confusion for some users who might stumble across local .conf files 
+ * and wg(8) output and see 'different' private keys, even though these keys result in
+ * the same public key.
+ * 
+ * The way WireGuard is implemented, you can technically have two valid private keys,
+ * one that is pre-clamped and one that is not, that can both result in the same public key.
+ * 
+ * These routines detect if the key is clamped or not, so we can at least include a note
+ * in the .conf file so users who stumble onto them during troubleshooting won't freak out.
+ * 
+ * These routines might also become useful in the future for logging facilities.
+ * 
+ * Private keys and pre-shared Keys must undergo this transformaton.
+ * 
+ */
+function wg_clamp_key($key) {
+	if (wg_is_valid_key($key)) {
+		$decoded_key = base64_decode($key);
+
+		$key_bytes = array_slice(unpack("C*", "\0{$decoded_key}"), 1);
+
+		$key_bytes[0] &= 248;
+
+		$key_bytes[31] = ($key_bytes[31] & 127) | 64;
+
+		$decoded_clamped_key = pack("C*", ...$key_bytes);
+
+		return base64_encode($decoded_clamped_key);
+	}
+
+	return null;
+}
+
+/*
+ * Checks if a given $key is clamped
+ */
+function wg_is_key_clamped($key) {
+	if (wg_is_valid_key($key)) {
+		return ($key == wg_clamp_key($key));
+	}
+
+	return true;
+}
+
+/*
+ * Reference0: https://lists.zx2c4.com/pipermail/wireguard/2020-December/006222.html
+ * 
+ * Checks if a given private, public, or pre-shared key is valid
+ */
+function wg_is_valid_key($key) {
+	return preg_match('/^[A-Za-z0-9+\/]{42}[A|E|I|M|Q|U|Y|c|g|k|o|s|w|4|8|0]=$/', $key);
+}
+
+/*
+ * Generate a pre-shared key
+ */
+function wg_gen_psk() {
+	global $wgg;
+
+	$psk = exec("{$wgg['wg']} genpsk");
+
+	return $psk;
+}
+
 /*
  * Return the next available WireGuard port
  */
