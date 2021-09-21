@@ -123,6 +123,8 @@ if (isset($peer_idx) && is_array($wgg['peers'][$peer_idx])) {
 
 }
 
+$s = fn($x) => $x;
+
 $shortcut_section = "wireguard";
 
 $pgtitle = array(gettext("VPN"), gettext("WireGuard"), gettext("Peers"), gettext("Edit"));
@@ -314,6 +316,26 @@ $section->addInput(new Form_Button(
 	null,
 	'fa-plus'
 ))->addClass('btn-success btn-sm addbtn');
+
+$form->add($section);
+
+$section = new Form_Section(gettext('Config Export Settings'));
+
+$section->addInput(new Form_Input(
+	'config_export_endpoint',
+	gettext('Endpoint'),
+	'text',
+    	$pconfig['config_export_endpoint'],
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("Overrides both global and tunnel 'Config Export Endpoint' value for config export"))}");
+
+$section->addInput(new Form_Input(
+	'config_export_dns',
+	gettext('DNS'),
+	'text',
+    	$pconfig['config_export_dns'],
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("Overrides both global and tunnel 'Config Export DNS' value for config export"))}");
 
 $form->add($section);
 

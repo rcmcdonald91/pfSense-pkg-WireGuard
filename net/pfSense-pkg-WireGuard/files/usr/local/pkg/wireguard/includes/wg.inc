@@ -107,7 +107,7 @@ function wg_generate_peer_config($peer_idx) {
 
 		$wc->set_interface_attr('PrivateKey', $peer['publickey']);
 
-		// TODO: Check if peer config specifies a DNS value, over the tunnel value, over the global default
+		// Global Setting
 		if (!empty($wgg['config']['config_export_dns'])) {
 
 			$wc->set_interface_attr('DNS', $wgg['config']['config_export_dns']);
@@ -116,9 +116,17 @@ function wg_generate_peer_config($peer_idx) {
 
 		$tunnel = wg_tunnel_get_config_by_name($peer['tun'])[1];
 
+		// Tunnel Setting - Overrides global
 		if (!empty($tunnel['config_export_dns'])) {
 
 			$wc->set_interface_attr('DNS', $tunnel['config_export_dns']);
+
+		}
+
+		// Peer Setting - Overrides tunnel and global
+		if (!empty($peer['config_export_dns'])) {
+
+			$wc->set_interface_attr('DNS', $peer['config_export_dns']);
 
 		}
 
@@ -148,10 +156,17 @@ function wg_generate_peer_config($peer_idx) {
 
 		}
 
-		// Tunnel Setting
+		// Tunnel Setting - Overrides global
 		if (!empty($tunnel['config_export_endpoint'])) {
 
 			$endpoint_host = $tunnel['config_export_endpoint'];
+
+		}
+
+		// Peer Setting - Overrides tunnel and global
+		if (!empty($peer['config_export_endpoint'])) {
+
+			$endpoint_host = $peer['config_export_endpoint'];
 
 		}
 
@@ -610,6 +625,10 @@ function wg_do_peer_post($post) {
 	$pconfig['presharedkey']	= $post['presharedkey'];
 
 	$pconfig['allowedips']['row'] 	= wg_peer_allowedips($post);
+
+	$pconfig['config_export_endpoint'] = $post['config_export_endpoint'];
+
+	$pconfig['config_export_dns']	= $post['config_export_dns'];
 
 	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
 	if (isset($post['dynamic']) && $post['dynamic'] == 'yes') {
