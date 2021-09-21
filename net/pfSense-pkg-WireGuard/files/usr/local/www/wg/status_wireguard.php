@@ -99,6 +99,10 @@ $a_devices = wg_get_status();
 
 ?>
 
+<?php if (wg_status_peers_hidden()) { ?>
+<style> tr.peer-entries { display: none; } </style>
+<?php } ?>
+
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
@@ -138,7 +142,7 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
-				<tr style="display: none;" class="peer-entries">
+				<tr class="peer-entries">
 					<td colspan="9">
 						<table class="table table-hover table-condensed">
 							<thead>
