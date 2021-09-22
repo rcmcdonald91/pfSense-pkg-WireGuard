@@ -1,5 +1,6 @@
 PORTNAME=	pfSense-pkg-WireGuard
 PORTVERSION=	0.1.5
+PORTREVISION=	1
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -29,6 +30,7 @@ do-install:
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/classes
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/includes
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/vendor
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/widgets/include
@@ -67,8 +69,16 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
 
+	(composer install --no-interaction --no-progress)
+
+	(cd ${FILESDIR}${PREFIX}/pkg/wireguard/vendor \
+		&& ${COPYTREE_SHARE} . ${STAGEDIR}${PREFIX}/pkg/wireguard/vendor)
+
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/wireguard.xml
+
+pre-clean:
+	@${RM} -r ${FILESDIR}${PREFIX}/pkg/wireguard/vendor
 
 .include <bsd.port.mk>
