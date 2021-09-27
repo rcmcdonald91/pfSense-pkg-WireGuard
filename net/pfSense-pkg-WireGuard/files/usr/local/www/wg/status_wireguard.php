@@ -99,6 +99,10 @@ $a_devices = wg_get_status();
 
 ?>
 
+<?php if (wg_status_peers_hidden()) { ?>
+<style> tr.peer-entries { display: none; } </style>
+<?php } ?>
+
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>

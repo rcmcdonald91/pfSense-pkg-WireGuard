@@ -217,6 +217,14 @@ $section->addInput($input = new Form_Select(
 ))->setHelp("{$s(gettext('Configures which WireGuard tunnels are members of the WireGuard interface group.'))}<br />
 	     <span class=\"text-danger\">{$s(gettext('Note:'))} </span> {$s(sprintf(gettext("Group firewall rules are evaluated before interface firewall rules. Default is '%s.'"), $interface_group_list['all']))}");
 
+$section->addInput(new Form_Checkbox(
+	'hide_peers',
+	gettext('Hide Peers'),
+	gettext('Enable'),
+	$pconfig['hide_peers'] == 'yes'
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("With 'Hide Peers' enabled (default), all peers for all tunnels will be hidden on Status page load."))}");
+
 $form->add($section);
 
 $section = new Form_Section(gettext('User Interface Settings'));
