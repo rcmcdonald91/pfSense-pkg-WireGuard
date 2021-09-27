@@ -20,7 +20,6 @@
  */
 
 // pfSense includes
-require_once('guiconfig.inc');
 require_once('util.inc');
 
 // WireGuard includes
@@ -226,16 +225,7 @@ function wg_status_peers_hidden() {
 
 	wg_globals();
 
-	$hidden = true;
-
-	if (isset($wgg['config']['hide_peers'])) {
-
-		$hidden = $wgg['config']['hide_peers'] == 'yes';
-
-	}
-
-	return $hidden;
-
+	return ($wgg['config']['hide_peers'] === 'yes');
 }
 
 function wg_tunnel_status_class($tunnel = null) {

@@ -99,10 +99,6 @@ $a_devices = wg_get_status();
 
 ?>
 
-<?php if (wg_status_peers_hidden()) { ?>
-<style> tr.peer-entries { display: none; } </style>
-<?php } ?>
-
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
@@ -244,10 +240,12 @@ endif;
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
+	var initialState = <?=json_encode(wg_status_peers_hidden())?>;
+
 	$('.tree').treegrid({
 		expanderExpandedClass: 'fa fa fa-chevron-down',
 		expanderCollapsedClass: 'fa fa fa-chevron-right',
-		initialState: 'collapsed'
+		initialState: (initialState ? 'collapsed' : 'expanded')
 	});
 });
 //]]>
