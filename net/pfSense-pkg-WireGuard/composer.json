@@ -1,0 +1,18 @@
+{
+	"name": "pfsense/pfsense-pkg-wireguard",
+	"autoload": {
+		"psr-4": {
+			"pfSense\\Packages\\WireGuard\\": "/usr/local/pkg/wireguard/"
+		}
+	},
+	"config": {
+		"vendor-dir": "files/usr/local/pkg/wireguard/vendor",
+		"optimize-autoloader": true
+	},
+	"require": {
+		"symfony/process": "^5.3",
+		"monolog/monolog": "^2.3",
+		"darsyn/ip": "^4.0",
+		"s1lentium/iptools": "^1.1"
+	}
+}

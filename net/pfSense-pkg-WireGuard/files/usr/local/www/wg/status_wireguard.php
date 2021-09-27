@@ -108,13 +108,13 @@ $a_devices = wg_get_status();
 		<h2 class="panel-title"><?=gettext('WireGuard Status')?></h2>
 	</div>
 	<div class="table-responsive panel-body">
-		<table class="table table-hover table-striped table-condensed" style="overflow-x: visible;">
+		<table class="table table-hover table-striped table-condensed tree" style="overflow-x: visible;">
 			<thead>
 				<th><?=gettext('Tunnel')?></th>
 				<th><?=gettext('Description')?></th>
 				<th><?=gettext('Peers')?></th>
 				<th><?=gettext('Public Key')?></th>
-				<th><?=gettext('Address / Assignment')?></th>
+				<th><?=gettext('Address')?> / <?=gettext('Assignment')?></th>
 				<th><?=gettext('MTU')?></th>
 				<th><?=gettext('Listen Port')?></th>
 				<th><?=gettext('RX')?></th>
@@ -123,10 +123,9 @@ $a_devices = wg_get_status();
 			<tbody>
 <?php
 if (!empty($a_devices)):
-
 	foreach ($a_devices as $device_name => $device):
 ?>
-				<tr class="tunnel-entry">
+				<tr class="<?="treegrid-{$device_name}"?>">
 					<td>
 						<?=wg_interface_status_icon($device['status'])?>
 						<a href="vpn_wg_tunnels_edit.php?tun=<?=htmlspecialchars($device_name)?>"><?=htmlspecialchars($device_name)?></a>
@@ -142,14 +141,15 @@ if (!empty($a_devices)):
 					<td><?=htmlspecialchars(format_bytes($device['transfer_rx']))?></td>
 					<td><?=htmlspecialchars(format_bytes($device['transfer_tx']))?></td>
 				</tr>
-				<tr class="peer-entries">
-					<td colspan="9">
+				<tr class="<?="treegrid-parent-{$device_name}"?>">
+					<td style="font-weight: bold;"><?=gettext('Peers')?></td>
+					<td colspan="8" class="contains-table">
 						<table class="table table-hover table-condensed">
 							<thead>
-								<th><?=gettext('Peer')?></th>
+								<th><?=gettext('Description')?></th>
 								<th><?=gettext('Latest Handshake')?></th>
 								<th><?=gettext('Public Key')?></th>
-								<th><?=htmlspecialchars(wg_format_endpoint(true))?></th>
+								<th><?=gettext('Endpoint')?></th>
 								<th><?=gettext('Allowed IPs')?></th>
 								<th><?=gettext('RX')?></th>
 								<th><?=gettext('TX')?></th>
@@ -157,7 +157,6 @@ if (!empty($a_devices)):
 							<tbody>
 <?php
 		if (count($device['peers']) > 0):
-
 			foreach($device['peers'] as $peer):
 ?>
 								<tr>
@@ -191,7 +190,6 @@ if (!empty($a_devices)):
 				</tr>
 <?php
 	endforeach;
-
 elseif (empty($wgg['tunnels'])):
 ?>
 				<tr>
@@ -210,13 +208,6 @@ endif;
 		</table>
     	</div>
 </div>
-
-<nav class="action-buttons">
-	<a href="#" class="btn btn-info btn-sm" id="showpeers">
-		<i class="fa fa-info icon-embed-btn"></i>
-		<?=gettext("Show Peers")?>
-	</a>
-</nav>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -253,18 +244,11 @@ endif;
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
-	var peershidden = <?=json_encode(wg_status_peers_hidden())?>;
-
-	// Toggle peer visibility
-	$('#showpeers').click(function () {
-		peershidden = !peershidden;
-		hideClass('peer-entries', peershidden);
+	$('.tree').treegrid({
+		expanderExpandedClass: 'fa fa fa-chevron-down',
+		expanderCollapsedClass: 'fa fa fa-chevron-right',
+		initialState: 'collapsed'
 	});
-
-	$('.tunnel-entry').click(function () {
-		$(this).next().toggle();
-	});
-
 });
 //]]>
 </script>
