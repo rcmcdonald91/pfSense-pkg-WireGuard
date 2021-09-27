@@ -229,6 +229,14 @@ $section->addInput(new Form_Checkbox(
 ))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
 		{$s(gettext("With 'Hide Secrets' enabled, all secrets (private and pre-shared keys) are hidden in the user interface."))}");
 
+$section->addInput(new Form_Checkbox(
+	'hide_peers',
+	gettext('Hide Peers'),
+	gettext('Enable'),
+	$pconfig['hide_peers'] == 'yes'
+))->setHelp("<span class=\"text-danger\">{$s(gettext('Note:'))} </span>
+		{$s(gettext("With 'Hide Peers' enabled (default), all peers for all tunnels will initially be hidden on the status page."))}");
+		
 $form->add($section);
 
 $form->addGlobal(new Form_Input(

@@ -240,10 +240,12 @@ endif;
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
+	var initialState = <?=json_encode(wg_status_peers_hidden())?>;
+
 	$('.tree').treegrid({
 		expanderExpandedClass: 'fa fa fa-chevron-down',
 		expanderCollapsedClass: 'fa fa fa-chevron-right',
-		initialState: 'collapsed'
+		initialState: (initialState ? 'collapsed' : 'expanded')
 	});
 });
 //]]>
