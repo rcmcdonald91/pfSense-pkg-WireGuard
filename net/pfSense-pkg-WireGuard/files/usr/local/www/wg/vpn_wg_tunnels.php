@@ -156,6 +156,8 @@ display_top_tabs($tab_array);
 
 ?>
 
+<style> tr[class^='treegrid-parent-'] { display: none; } </style>
+
 <form name="mainform" method="post">
 	<div class="panel panel-default">
 		<div class="panel-heading"><h2 class="panel-title"><?=gettext('WireGuard Tunnels')?></h2></div>
