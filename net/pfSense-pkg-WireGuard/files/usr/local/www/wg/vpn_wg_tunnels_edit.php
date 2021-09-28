@@ -292,7 +292,7 @@ $section->addInput(new Form_Input(
 	'*Listen Port',
 	'text',
 	$pconfig['listenport'],
-	['placeholder' => next_wg_port()]
+	['placeholder' => next_wg_port(), 'autocomplete' => 'new-password']
 ))->addClass('trim')
   ->setHelp('Port used by this tunnel to communicate with peers.');
 
@@ -302,7 +302,8 @@ $group->add(new Form_Input(
 	'privatekey',
 	'Private Key',
 	wg_secret_input_type(),
-	$pconfig['privatekey']
+	$pconfig['privatekey'],
+	['autocomplete' => 'new-password']
 ))->addClass('trim')
   ->setHelp('Private key for this tunnel. (Required)');
 

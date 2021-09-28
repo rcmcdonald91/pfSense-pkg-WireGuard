@@ -230,7 +230,7 @@ $section->addInput(new Form_Input(
 	'*Public Key',
 	'text',
 	$pconfig['publickey'],
-	['placeholder' => 'Public Key']
+	['placeholder' => 'Public Key', 'autocomplete' => 'new-password']
 ))->addClass('trim')
   ->setHelp('WireGuard public key for this peer.');
 
@@ -240,7 +240,8 @@ $group->add(new Form_Input(
 	'presharedkey',
 	'Pre-shared Key',
 	wg_secret_input_type(),
-	$pconfig['presharedkey']
+	$pconfig['presharedkey'],
+	['autocomplete' => 'new-password']
 ))->addClass('trim')
   ->setHelp('Optional pre-shared key for this tunnel. (<a id="copypsk" style="cursor: pointer;" data-success-text="Copied" data-timeout="3000">Copy</a>)');
 

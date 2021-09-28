@@ -160,6 +160,8 @@ function wg_defaults_install() {
 	
 	$wgg['config']['hide_secrets'] 			= isset($wgg['config']['hide_secrets']) ? $wgg['config']['hide_secrets'] : 'yes';
 
+	$wgg['config']['hide_peers'] 			= isset($wgg['config']['hide_peers']) ? $wgg['config']['hide_peers'] : 'yes';
+
 	$wgg['config']['config_export_endpoint']	= isset($wgg['config']['config_export_endpoint']) ? $wgg['config']['config_export_endpoint'] : '';
 
 	$wgg['config']['config_export_dns']		= isset($wgg['config']['config_export_dns']) ? $wgg['config']['config_export_dns'] : '';

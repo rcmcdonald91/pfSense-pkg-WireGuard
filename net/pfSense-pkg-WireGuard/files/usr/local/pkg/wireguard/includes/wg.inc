@@ -568,6 +568,8 @@ function wg_do_settings_post($post) {
 	
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
 
+	$pconfig['hide_peers']			= empty($post['hide_peers']) ? 'no' : $post['hide_peers'];
+
 	$pconfig['config_export_endpoint']	= empty($post['config_export_endpoint']) ? '' : $post['config_export_endpoint'];
 
 	$pconfig['config_export_dns']		= empty($post['config_export_dns']) ? '' : $post['config_export_dns'];
