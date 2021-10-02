@@ -760,7 +760,7 @@ function wg_peer_is_default_route($peer) {
 	// TODO: Unassigned tunnel check?
 
 	if (!empty($peer['allowedips']['row']) && is_array($peer['allowedips']['row'])) {
-	        foreach ((array) $peer['allowedips']['row'] as $row) {
+		foreach ((array) $peer['allowedips']['row'] as $row) {
 			# Only interested in default routes using masks of /0
 			if ($row['mask'] != '0') {
 				continue;
@@ -890,7 +890,7 @@ function wg_tunnel_has_default_route_peer($tunnel_name, $ignore_peer_idx) {
 	$default_ipv6 = false;
 
 	foreach (wg_tunnel_get_peers_config($tunnel_name) as [$peer_idx, $peer, $is_new]) {
-                if ($peer_idx != $ignore_peer_idx) {
+		if ($peer_idx != $ignore_peer_idx) {
 			[$peer_default_ipv4, $peer_default_ipv6] = wg_peer_is_default_route($peer);
 
 			if ($peer_default_ipv4) {
@@ -900,13 +900,13 @@ function wg_tunnel_has_default_route_peer($tunnel_name, $ignore_peer_idx) {
 			if ($peer_default_ipv6) {
 				$default_ipv6 = true;
 			}
-                }
+		}
 
 		# Check if we can stop early
 		if ($default_ipv4 && $default_ipv6) {
 			break;
 		}
-        }
+	}
 
 	return [$default_ipv4, $default_ipv6];
 }
