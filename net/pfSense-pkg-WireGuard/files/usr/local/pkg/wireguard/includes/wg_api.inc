@@ -751,6 +751,39 @@ function wg_peer_is_enabled($tunnel, $public_key) {
 }
 
 /*
+ * Check if the given peer has any allowed ips indicating it's the default route it's tunnel
+ */
+function wg_peer_is_default_route($peer) {
+	$default_ipv4 = false;
+	$default_ipv6 = false;
+
+	// TODO: Unassigned tunnel check?
+
+	if (!empty($peer['allowedips']['row']) && is_array($peer['allowedips']['row'])) {
+	        foreach ((array) $peer['allowedips']['row'] as $row) {
+			# Only interested in default routes using masks of /0
+			if ($row['mask'] != '0') {
+				continue;
+			}
+
+			if (is_ipaddrv4($row['address']) && $row['address'] == '0.0.0.0') {
+				$default_ipv4 = true;
+			# TODO: Check for compressed IPv6 addresses? Could it be bypassed with 0::/0, or 0:0000:0::/0 etc
+			} else if (is_ipaddrv6($row['address']) && $row['address'] == '::') {
+				$default_ipv6 = true;
+			}
+
+			# Check if we can break out early
+			if ($default_ipv4 && $default_ipv6) {
+				break;
+			}
+		}
+	}
+
+	return [$default_ipv4, $default_ipv6];
+}
+
+/*
  * Check if a given WireGuard peer is valid
  */
 function wg_peer_is_valid($tunnel_name, $public_key, $running_state = false) {
@@ -847,6 +880,35 @@ function wg_tunnel_get_config($tun_idx, $return_empty = false) {
 	wg_init_config_arr($tunnel, array('addresses', 'row'));
 
 	return ($valid || $return_empty) ? array($tun_idx, $tunnel, $is_new) : false;
+}
+
+/*
+ * Return bools indicating if the tunnel referenced has any peers with default IPv4 or IPv6 routes
+ */
+function wg_tunnel_has_default_route_peer($tunnel_name, $ignore_peer_idx) {
+	$default_ipv4 = false;
+	$default_ipv6 = false;
+
+	foreach (wg_tunnel_get_peers_config($tunnel_name) as [$peer_idx, $peer, $is_new]) {
+                if ($peer_idx != $ignore_peer_idx) {
+			[$peer_default_ipv4, $peer_default_ipv6] = wg_peer_is_default_route($peer);
+
+			if ($peer_default_ipv4) {
+				$default_ipv4 = true;
+			}
+
+			if ($peer_default_ipv6) {
+				$default_ipv6 = true;
+			}
+                }
+
+		# Check if we can stop early
+		if ($default_ipv4 && $default_ipv6) {
+			break;
+		}
+        }
+
+	return [$default_ipv4, $default_ipv6];
 }
 
 function wg_peer_get_config($peer_idx, $return_empty = false) {
