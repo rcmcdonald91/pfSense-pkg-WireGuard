@@ -549,9 +549,15 @@ events.push(function() {
 
 		var originalText = $this.text();
 
-		// The 'modern' way...
-		navigator.clipboard.writeText($('#publickey').val());
-		
+		try {
+			// The 'modern' way...
+			navigator.clipboard.writeText($('#publickey').val());
+		} catch {
+			console.warn("Failed to copy text using navigator.clipboard, falling back to commands");
+			$('#publickey').select();
+			document.execCommand("copy");
+		}
+
 		$this.text($this.attr('data-success-text'));
 
 		setTimeout(function() {
