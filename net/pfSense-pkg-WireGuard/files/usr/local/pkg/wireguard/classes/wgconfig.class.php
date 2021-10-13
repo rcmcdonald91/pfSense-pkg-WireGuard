@@ -390,9 +390,17 @@ class wgconfig {
 
 		$line_found = false;
 
+		$value_is_valid = !empty($value);
+
+		// Keepalive can have a valid value of "0" (disabled) which empty() above will mark as false.
+		// So mark it as valid for this case
+		if ($attr == "PersistentKeepalive" && $value == "0") {
+			$value_is_valid = true;
+		}
+
 		// Check if the section is valid and if the desired attribute value is valid...
 		if (([self::SECTION_FIRSTLINE => $section_firstline, self::SECTION_LASTLINE => $section_lastline] = $this->_get_section_range($key))
-		    && (!empty($value))) {
+		    && ($value_is_valid)) {
 
 			foreach (range($section_firstline + 1, $section_lastline + 1) as $i) {
 
