@@ -207,12 +207,24 @@ function wg_validate_peer_post($pconfig, $posted_peer_idx) {
 		$input_errors[] = "The pre-shared key ({$pconfig['presharedkey']}) is not a valid WireGuard pre-shared key.";
 	}
 
+	// We don't want duplicate default routes, but re-saving is okay...
+	[$ipv4_default_route_exists, $ipv6_default_route_exists] = wg_tunnel_has_default_route_peer($pconfig['tun'], $posted_peer_idx);
+
 	// Check allowed ips
 	if (!empty($pconfig['allowedips']['row']) && is_array($pconfig['allowedips']['row'])) {
 		foreach ((array) $pconfig['allowedips']['row'] as $row) {
 			$row['address'] = trim($row['address']);
 
 			$tmp_subnet = "{$row['address']}/{$row['mask']}";
+
+			if ($tmp_subnet == '0.0.0.0/0' && $ipv4_default_route_exists) {
+				$input_errors[] = "Tunnel can only have one default IPv4 route";
+			}
+
+			# TODO: Concern over IPv6 compression bypassing
+			if ($tmp_subnet == '::/0' && $ipv6_default_route_exists) {
+				$input_errors[] = "Tunnel can only have one default IPv6 route";
+			}
 
 			if (!empty($row['address']) && !is_subnet($tmp_subnet)) {
 				$input_errors[] = "Address {$tmp_subnet} is not a valid IPv4 or IPv6 CIDR subnet address.";
