@@ -213,7 +213,28 @@ events.push(function() {
 
 	$('.pubkey').click(function () {
 
-		navigator.clipboard.writeText($(this).attr('title'));
+		var publicKey = $(this).attr('title');
+
+		try {
+			// The 'modern' way...
+			navigator.clipboard.writeText(publicKey);
+		} catch {
+			console.warn("Failed to copy text using navigator.clipboard, falling back to commands");
+
+			// Convert the TD contents to an input with pub key
+			var pubKeyInput = $('<input/>', {val: publicKey});
+			var oldText = $(this).text();
+
+			// Add to DOM
+			$(this).html(pubKeyInput);
+
+			// copy
+			pubKeyInput.select();
+			document.execCommand("copy");
+
+			// revert back to just text
+			$(this).html(oldText);
+		}
 
 	});
 
