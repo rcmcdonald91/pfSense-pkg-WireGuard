@@ -175,8 +175,15 @@ function wg_validate_peer_post($pconfig, $posted_peer_idx) {
 	// Check persistent keep alive
 	$keepalive = $pconfig['persistentkeepalive'];
 
-	if (!empty($keepalive) && !is_numericint($keepalive)) {
-		$input_errors[] = "Invalid keep alive interval ({$keepalive}).";
+	// If user provided something, validate it. Empty is a valid option.
+	if (!empty($keepalive)) {
+		// Generic is it a number check
+		if (!is_numericint($keepalive)) {
+			$input_errors[] = "Invalid keep alive interval ({$keepalive}).";
+		// Valid range check on a number for a 16 bit integer
+		} else if (intval($keepalive) < 0 || intval($keepalive) > 65535) {
+			$input_errors[] = "Keep alive interval must be in range 0-65535 ({$keepalive}).";
+		}
 	}
 
 	// Check public key
