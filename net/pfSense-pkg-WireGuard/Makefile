@@ -1,6 +1,5 @@
 PORTNAME=	pfSense-pkg-WireGuard
-PORTVERSION=	0.1.5
-PORTREVISION=	1
+PORTVERSION=	0.1.6
 CATEGORIES=	net
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -14,15 +13,11 @@ LICENSE=	APACHE20
 RUN_DEPENDS=	wireguard-kmod>0:net/wireguard-kmod \
 		wireguard-tools-lite>0:net/wireguard-tools@lite
 
-BUILD_DEPENDS=	php74-composer2>0:devel/php-composer2
-
 NO_BUILD=	yes
 NO_MTREE=	yes
 
 SUB_FILES=	pkg-install pkg-deinstall
 SUB_LIST=	PORTNAME=${PORTNAME}
-
-PKG_ROOT=	/pkg/wireguard
 
 do-extract:
 	${MKDIR} ${WRKSRC}
@@ -30,9 +25,8 @@ do-extract:
 do-install:
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 
-	${MKDIR} ${STAGEDIR}${PREFIX}${PKG_ROOT}/classes
-	${MKDIR} ${STAGEDIR}${PREFIX}${PKG_ROOT}/includes
-	${MKDIR} ${STAGEDIR}${PREFIX}${PKG_ROOT}/vendor
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/classes
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/wireguard/includes
 
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/widgets/include
@@ -47,11 +41,11 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/*.xml \
 		${STAGEDIR}${PREFIX}/pkg
 
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}${PKG_ROOT}/classes/*.class.php \
-		${STAGEDIR}${PREFIX}${PKG_ROOT}/classes
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/classes/*.class.php \
+		${STAGEDIR}${PREFIX}/pkg/wireguard/classes
 
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}${PKG_ROOT}/includes/*.inc \
-		${STAGEDIR}${PREFIX}${PKG_ROOT}/includes
+	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/wireguard/includes/*.inc \
+		${STAGEDIR}${PREFIX}/pkg/wireguard/includes
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/*.inc \
 		${STAGEDIR}${PREFIX}/www/shortcuts
@@ -71,16 +65,8 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
 
-	(composer install --no-interaction --no-progress)
-
-	(cd ${FILESDIR}${PREFIX}${PKG_ROOT}/vendor \
-		&& ${COPYTREE_SHARE} . ${STAGEDIR}${PREFIX}${PKG_ROOT}/vendor)
-
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/wireguard.xml
-
-pre-clean:
-	@${RM} -r ${FILESDIR}${PREFIX}${PKG_ROOT}/vendor
 
 .include <bsd.port.mk>
