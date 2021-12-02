@@ -121,7 +121,7 @@ function wg_service_fpm_stop() {
 
 	$exec_output = $unserialize_output = $ret_output = array();
 
-	// Invokes service stop with serialization flag so we can cleanly report back to the web frontend.
+	// Invokes service stop with serialization flag, so we can cleanly report back to the web frontend.
 	exec("{$wgg['wg_daemon']} stop serialize", $exec_output, $ret_code);
 
 	if ($unserialize_output = unserialize($exec_output[0])) {
@@ -152,9 +152,11 @@ function wg_service_cli_stop($serialize = true) {
 	// Need to wait here for just a second...
 	if (killbypid($wgg['pid_path'], 1) <> 0) {
 		$ret_code |= WG_ERROR_SVC_STOP;
-
 		wg_service_parse_errors($ret_code, $serialize);
 	}
+
+	// Dpinger doesn't like when interfaces are yanked out from underneath it.
+	setup_gateways_monitor();
 
 	return $ret_code;
 }
@@ -302,19 +304,18 @@ function wg_service_cli_start($serialize = true) {
 }
 
 // This is where we restart any extra services
-function wg_restart_extra_services() {
-	if (!platform_booting()) {
-		// dpinger
-		setup_gateways_monitor();
-
-		// unbound
-		services_unbound_configure();
-
-		// TODO: This is where we will add facilities for users to pick what services to restart
+function wg_restart_extra_services($force = false) {
+	if (platform_booting() && !$force) {
+		return;
 	}
 
-	// This is currently just a best effort attempt...
-	return 0;
+	// dpinger
+	setup_gateways_monitor();
+
+	// unbound
+	services_unbound_configure();
+
+	// TODO: This is where we will add facilities for users to pick what services to restart
 }
 
 // Main WireGuard service loop

@@ -55,53 +55,58 @@ function wg_get_running_config($extras = false, $json = false) {
 
 	exec("{$wgg['wg']} show all dump", $cmd_output_rows, $ret_code);
 
-	if ($ret_code == 0) {
-		foreach ($cmd_output_rows as $row) {
-			$tmp_tunnel = $tmp_peer = array();
+	// Guard check
+	if ($ret_code !== 0) {
+		return ($json ? json_encode($ret_config) : $ret_config);
+	}
 
-			$a_device = explode("\t", $row);
+	foreach ($cmd_output_rows as $row) {
+		$tmp_tunnel = $tmp_peer = array();
 
-			$current_device = $a_device[0];
+		$a_device = explode("\t", $row);
 
-			if (strcmp($current_device, $last_device)) {
-				foreach ($tunnel_output_keys as $key_index => $key) {
-					$tmp_tunnel[$key] = $a_device[$key_index + 1];
-				}
+		$current_device = $a_device[0];
 
-				if ($extras) {
-					// Gets some extra information about tunnels not returned by `wg show all dump`
-					$tunnel_if_stats		= pfSense_get_interface_stats($current_device);
-
-					$tmp_tunnel['status']		= wg_interface_status($current_device) ? 'up' : 'down';
-					$tmp_tunnel['transfer_rx']	= $tunnel_if_stats['inbytes'];
-					$tmp_tunnel['transfer_tx']	= $tunnel_if_stats['outbytes'];
-					$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
-					$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
-					$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
-
-					[$tun_idx, $tmp_tunnel['config'], $is_new] = wg_tunnel_get_config_by_name($current_device);
-				}
-
-				// Add the tunnel to the array
-				$ret_config[$current_device] = $tmp_tunnel;
-
-				// Now provision an empty peer array
-				$ret_config[$current_device]['peers'] = array();
-
-				$last_device = $a_device[0];
-			} else {
-				foreach ($peer_output_keys as $key_index => $key) {
-					$tmp_peer[$key] = $a_device[$key_index + 1];
-				}
-
-				if ($extras) {
-					[$peer_idx, $tmp_peer['config'], $is_new] = wg_peer_get_config_by_name($last_device, $tmp_peer['public_key']);
-				}
-
-				// Add the peer to the array
-				$ret_config[$last_device]['peers'][$a_device[1]] = $tmp_peer;
+		if (strcmp($current_device, $last_device)) {
+			foreach ($tunnel_output_keys as $key_index => $key) {
+				$tmp_tunnel[$key] = $a_device[$key_index + 1];
 			}
+
+			if ($extras) {
+				// Gets some extra information about tunnels not returned by `wg show all dump`
+				$tunnel_if_stats		= pfSense_get_interface_stats($current_device);
+
+				$tmp_tunnel['status']		= wg_interface_status($current_device) ? 'up' : 'down';
+				$tmp_tunnel['transfer_rx']	= $tunnel_if_stats['inbytes'];
+				$tmp_tunnel['transfer_tx']	= $tunnel_if_stats['outbytes'];
+				$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
+				$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
+				$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
+
+				[$tun_idx, $tmp_tunnel['config'], $is_new] = wg_tunnel_get_config_by_name($current_device);
+			}
+
+			// Add the tunnel to the array
+			$ret_config[$current_device] = $tmp_tunnel;
+
+			// Now provision an empty peer array
+			$ret_config[$current_device]['peers'] = array();
+
+			$last_device = $a_device[0];
+
+			continue;
 		}
+
+		foreach ($peer_output_keys as $key_index => $key) {
+			$tmp_peer[$key] = $a_device[$key_index + 1];
+		}
+
+		if ($extras) {
+			[$peer_idx, $tmp_peer['config'], $is_new] = wg_peer_get_config_by_name($last_device, $tmp_peer['public_key']);
+		}
+
+		// Add the peer to the array
+		$ret_config[$last_device]['peers'][$a_device[1]] = $tmp_peer;
 	}
 
 	return ($json ? json_encode($ret_config) : $ret_config);
