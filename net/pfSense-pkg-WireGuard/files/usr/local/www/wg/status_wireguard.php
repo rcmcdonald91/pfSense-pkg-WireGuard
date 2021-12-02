@@ -38,36 +38,25 @@ require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
+// Initialize $wgg state
 wg_globals();
 
 if ($_POST) {
-
 	if (isset($_POST['apply'])) {
-
 		$ret_code = 0;
 
 		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
-
 			if (wg_is_service_running()) {
-
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
-
 				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
-
 				$ret_code |= $sync_status['ret_code'];
-
 			}
 
 			if ($ret_code == 0) {
-
 				clear_subsystem_dirty($wgg['subsystems']['wg']);
-
 			}
-
 		}
-
 	}
-
 }
 
 $shortcut_section = "wireguard";
@@ -86,9 +75,7 @@ include("head.inc");
 wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
-
 	print_apply_result_box($ret_code);
-
 }
 
 wg_print_config_apply_box();
@@ -97,11 +84,12 @@ display_top_tabs($tab_array);
 
 $a_devices = wg_get_status();
 
+$peers_hidden = wg_status_peers_hidden();
 ?>
 
-<?php if (wg_status_peers_hidden()) { ?>
+<?php if ($peers_hidden): ?>
 <style> tr[class^='treegrid-parent-'] { display: none; } </style>
-<?php } ?>
+<?php endif; ?>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -244,12 +232,10 @@ endif;
 <script type="text/javascript">
 //<![CDATA[
 events.push(function() {
-	var initialState = <?=json_encode(wg_status_peers_hidden())?>;
-
 	$('.tree').treegrid({
 		expanderExpandedClass: 'fa fa fa-chevron-down',
 		expanderCollapsedClass: 'fa fa fa-chevron-right',
-		initialState: (initialState ? 'collapsed' : 'expanded')
+		initialState: (<?=json_encode($peers_hidden)?> ? 'collapsed' : 'expanded')
 	});
 });
 //]]>

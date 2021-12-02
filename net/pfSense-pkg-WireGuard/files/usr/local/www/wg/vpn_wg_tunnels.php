@@ -39,88 +39,61 @@ require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
+// Initialize $wgg state
 wg_globals();
 
+$pconfig = [];
+
 if ($_POST) {
-
 	if (isset($_POST['apply'])) {
-
 		$ret_code = 0;
 
 		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
-
 			if (wg_is_service_running()) {
-
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
-
 				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
-
 				$ret_code |= $sync_status['ret_code'];
-
 			}
 
 			if ($ret_code == 0) {
-
 				clear_subsystem_dirty($wgg['subsystems']['wg']);
-
 			}
-
 		}
-
 	}
 
 	if (isset($_POST['tun'])) {
-
 		$tun_name = $_POST['tun'];
-
 		switch ($_POST['act']) {
-
 			case 'download':
-
 				wg_download_tunnel($tun_name, '/wg/vpn_wg_tunnels.php');
-
 				exit();
-
 				break;
 
 			case 'toggle':
-				
 				$res = wg_toggle_tunnel($tun_name);
-				
 				break;
 
 			case 'delete':
-
 				$res = wg_delete_tunnel($tun_name);
-
 				break;
 
 			default:
-
 				// Shouldn't be here, so bail out.
 				header('Location: /wg/vpn_wg_tunnels.php');
-
 				break;
-
 		}
 
 		$input_errors = $res['input_errors'];
 
 		if (empty($input_errors)) {
-
 			if (wg_is_service_running() && $res['changes']) {
-
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 				// Add tunnel to the list to apply
 				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
 			}
-
 		}
-
 	}
-
 }
 
 $shortcut_section = 'wireguard';
@@ -139,17 +112,13 @@ include('head.inc');
 wg_print_service_warning();
 
 if (isset($_POST['apply'])) {
-
 	print_apply_result_box($ret_code);
-
 }
 
 wg_print_config_apply_box();
 
 if (!empty($input_errors)) {
-
 	print_input_errors($input_errors);
-
 }
 
 display_top_tabs($tab_array);
@@ -177,9 +146,7 @@ display_top_tabs($tab_array);
 				<tbody>
 <?php
 if (is_array($wgg['tunnels']) && count($wgg['tunnels']) > 0):
-
 		foreach ($wgg['tunnels'] as $tunnel):
-
 			$peers = wg_tunnel_get_peers_config($tunnel['name']);
 ?>
 					<tr class="<?="treegrid-{$tunnel['name']}"?> <?=wg_tunnel_status_class($tunnel)?>">
@@ -267,9 +234,7 @@ endif;
 //<![CDATA[
 events.push(function() {
 	$('.pubkey').click(function () {
-
 		var publicKey = $(this).attr('title');
-
 		try {
 			// The 'modern' way...
 			navigator.clipboard.writeText(publicKey);
@@ -283,14 +248,13 @@ events.push(function() {
 			// Add to DOM
 			$(this).html(pubKeyInput);
 
-			// copy
+			// Copy
 			pubKeyInput.select();
 			document.execCommand("copy");
 
-			// revert back to just text
+			// Revert back to just text
 			$(this).html(oldText);
 		}
-
 	});
 
 	$('.tree').treegrid({

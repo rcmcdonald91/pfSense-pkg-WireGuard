@@ -73,15 +73,10 @@ function wg_get_running_config($extras = false, $json = false) {
 					$tunnel_if_stats		= pfSense_get_interface_stats($current_device);
 
 					$tmp_tunnel['status']		= wg_interface_status($current_device) ? 'up' : 'down';
-
 					$tmp_tunnel['transfer_rx']	= $tunnel_if_stats['inbytes'];
-
 					$tmp_tunnel['transfer_tx']	= $tunnel_if_stats['outbytes'];
-
 					$tmp_tunnel['inpkts']		= $tunnel_if_stats['inpkts'];
-
 					$tmp_tunnel['outpkts']		= $tunnel_if_stats['outpkts'];
-
 					$tmp_tunnel['mtu']		= $tunnel_if_stats['mtu'];
 
 					[$tun_idx, $tmp_tunnel['config'], $is_new] = wg_tunnel_get_config_by_name($current_device);
@@ -151,9 +146,7 @@ function wg_ifconfig_if_address_adddel($if_name, $masked_address, $add = true, &
 	if (wg_is_valid_tunnel($if_name, true)
 	    && ($family = wg_get_address_family($masked_address))) {
 		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($family))} {$s(escapeshellarg($masked_address))} {$s(escapeshellarg($action))} 2>&1";
-
 		$cmds[] = $res = wg_exec($cmd, 'interface', $error);
-
 		$ret_code = $res['ret_code'];
 	}
 
@@ -175,9 +168,7 @@ function wg_interface_in_group($if_name, $group = null) {
 
 	if (wg_is_valid_tunnel($if_name, true)) {
 		$cmd = "{$wgg['ifconfig']} -g {$s(escapeshellarg($group))} 2>&1";
-
 		exec($cmd, $ifs, $ret_code);
-
 		$res = ($ret_code <> 0) ? $res : in_array($if_name, $ifs);
 	}
 
@@ -201,9 +192,7 @@ function wg_kld_loadunload($load = true, &$cmds = null) {
 	if (($load && !is_module_loaded($kmod))
 	    || (!$load && is_module_loaded($kmod))) {
 		$cmd = "{$kldbin} {$s(escapeshellarg($kmod))} 2>&1";
-
 		$cmds[] = $res = wg_exec($cmd, 'kld', $error);
-
 		$ret_code = $res['ret_code'];
 	}
 
@@ -224,11 +213,8 @@ function wg_ifconfig_if_updown($if_name, $up = true, &$cmds = null) {
 		// Are we trying to down-an-up or up-a-down? Anything else is wrong in this context...
 		if ((!wg_interface_status($if_name) && $up) || (wg_interface_status($if_name) && !$up)) {
 			$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($state($up)))} 2>&1";
-
 			$error = $up ? WG_ERROR_IF_UP : WG_ERROR_IF_DOWN;
-
 			$cmds[] = $res = wg_exec($cmd, 'interface', $error);
-
 			$ret_code = $res['ret_code'];
 		}
 	}
@@ -272,6 +258,7 @@ function wg_interface_update_addresses($if_name, &$cmds = null) {
 			foreach ($addresses_to_add as $address) {
 				$res &= wg_ifconfig_if_address_adddel($tunnel['name'], $address, true, $cmds);
 			}
+
 		// Need to let pfSense handle the assigned interfaces
 		} elseif (is_wg_tunnel_assigned($tunnel['name'])) {
 			if ($pfsense_if_name = wg_get_pfsense_interface_info($tunnel['name'])) {
@@ -299,7 +286,6 @@ function wg_get_pfsense_interface_info($tunnel_name) {
 		$tmp_name = $iflist[$tunnel_name];
 
 		$ret_array['name'] 	= $tmp_name;
-
 		$ret_array['descr']	= $ifdescr[$tmp_name];
 
 		return $ret_array;
@@ -345,9 +331,7 @@ function wg_peer_set_config($tunnel_name, $public_key, $key = null, $value = nul
 
 	if (wg_is_valid_tunnel($tunnel_name, true)) {
 		$cmd = "{$wgg['wg']} set {$s(escapeshellarg($tunnel_name))} peer {$s(escapeshellarg($public_key))}{$key}{$value} 2>&1";
-
 		$cmds[] = $res = wg_exec($cmd, 'peer', $error_flag);
-
 		$ret_code = $res['ret_code'];
 	}
 
@@ -369,9 +353,7 @@ function wg_wg_if_sync($if_name, &$cmds = null) {
 	if (file_exists($conf_path)
 	    && wg_is_valid_tunnel($if_name, true)) {
 		$cmd = "{$wgg['wg']} syncconf {$s(escapeshellarg($if_name))} {$s(escapeshellarg($conf_path))}";
-
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_SYNC);
-
 		$ret_code = $res['ret_code'];
 	}
 
@@ -390,9 +372,7 @@ function wg_ifconfig_if_create($if_name, &$cmds = null) {
 
 	if (!wg_is_valid_tunnel($if_name, true)) {
 		$cmd = "{$wgg['ifconfig']} wg create name {$s(escapeshellarg($if_name))} 2>&1";
-
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_CREATE);
-
 		$ret_code = $res['ret_code'];
 	}
 
@@ -439,9 +419,7 @@ function wg_ifconfig_if_destroy($if_name, &$cmds = null) {
 
 	if (wg_is_valid_tunnel($if_name, true)) {
 		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} destroy 2>&1";
-
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_DESTROY);
-
 		$ret_code = $res['ret_code'];
 	}
 
@@ -477,9 +455,7 @@ function wg_ifconfig_if_group_addremove($if_name, $group, $remove = false, &$cmd
 	if (in_array($if_name, pfSense_interface_listget())
 	    && ((!wg_interface_in_group($if_name, $group) && !$remove) || (wg_interface_in_group($if_name, $group) && $remove))) {
 		$cmd = "{$wgg['ifconfig']} {$s(escapeshellarg($if_name))} {$s(escapeshellarg($action))} {$s(escapeshellarg($group))} 2>&1";
-
 		$cmds[] = $res = wg_exec($cmd, 'interface', WG_ERROR_IF_GROUP);
-
 		$ret_code = ($res['ret_code']);	
 	}
 
@@ -623,21 +599,17 @@ function wg_gen_publickey($privkey, $json = false) {
  * 
  */
 function wg_clamp_key($key) {
-	if (wg_is_valid_key($key)) {
-		$decoded_key = base64_decode($key);
+        if (!wg_is_valid_key($key)) {
+                return null;
+        }
 
-		$key_bytes = array_slice(unpack("C*", "\0{$decoded_key}"), 1);
+        $decoded_key = base64_decode($key);
+        $key_bytes = array_slice(unpack("C*", "\0{$decoded_key}"), 1);
+        $key_bytes[0] &= 248;
+        $key_bytes[31] = ($key_bytes[31] & 127) | 64;
+        $decoded_clamped_key = pack("C*", ...$key_bytes);
 
-		$key_bytes[0] &= 248;
-
-		$key_bytes[31] = ($key_bytes[31] & 127) | 64;
-
-		$decoded_clamped_key = pack("C*", ...$key_bytes);
-
-		return base64_encode($decoded_clamped_key);
-	}
-
-	return null;
+        return base64_encode($decoded_clamped_key);
 }
 
 /*
@@ -686,7 +658,6 @@ function next_wg_port() {
 		foreach ((array) $wgg['tunnels'] as $tunnel) {
 			if ($tunnel['listenport'] == $idx) {
 				$found = true;
-
 				break;
 			}
 		}

@@ -217,12 +217,13 @@ function wg_validate_peer_post($pconfig, $posted_peer_idx) {
 
 			$tmp_subnet = "{$row['address']}/{$row['mask']}";
 
-			if ($tmp_subnet == '0.0.0.0/0' && $ipv4_default_route_exists) {
+			# TODO: This still needs some more thought, disabling this check for now.
+			if ($tmp_subnet == '0.0.0.0/0' && $ipv4_default_route_exists && false) {
 				$input_errors[] = "Tunnel can only have one default IPv4 route";
 			}
 
-			# TODO: Concern over IPv6 compression bypassing
-			if ($tmp_subnet == '::/0' && $ipv6_default_route_exists) {
+			# TODO: Concern over IPv6 compression bypassing, see above.
+			if ($tmp_subnet == '::/0' && $ipv6_default_route_exists && false) {
 				$input_errors[] = "Tunnel can only have one default IPv6 route";
 			}
 

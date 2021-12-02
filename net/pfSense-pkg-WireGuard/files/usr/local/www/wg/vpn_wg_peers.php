@@ -37,80 +37,55 @@ require_once('wireguard/includes/wg_guiconfig.inc');
 
 global $wgg;
 
+// Initialize $wgg state
 wg_globals();
 
 if ($_POST) {
-
 	if (isset($_POST['apply'])) {
-
 		$ret_code = 0;
 
 		if (is_subsystem_dirty($wgg['subsystems']['wg'])) {
-
 			if (wg_is_service_running()) {
-
 				$tunnels_to_apply = wg_apply_list_get('tunnels');
-
 				$sync_status = wg_tunnel_sync($tunnels_to_apply, true, true);
-
 				$ret_code |= $sync_status['ret_code'];
-
 			}
 
 			if ($ret_code == 0) {
-
 				clear_subsystem_dirty($wgg['subsystems']['wg']);
-
 			}
-
 		}
-
 	}
 
 	if (isset($_POST['peer'])) {
-
 		$peer_idx = $_POST['peer'];
 
 		switch ($_POST['act']) {
-
 			case 'toggle':
-
 				$res = wg_toggle_peer($peer_idx);
-
 				break;
 
 			case 'delete':
-				
 				$res = wg_delete_peer($peer_idx);
-
 				break;
 
 			default:
-				
 				// Shouldn't be here, so bail out.
 				header('Location: /wg/vpn_wg_peers.php');
-
 				break;
-				
 		}
 
 		$input_errors = $res['input_errors'];
 
 		if (empty($input_errors)) {
-
 			if (wg_is_service_running() && $res['changes']) {
-
 				mark_subsystem_dirty($wgg['subsystems']['wg']);
 
 				// Add tunnel to the list to apply
 				wg_apply_list_add('tunnels', $res['tuns_to_sync']);
-
 			}
-
 		}
-
 	}
-
 }
 
 $shortcut_section = 'wireguard';

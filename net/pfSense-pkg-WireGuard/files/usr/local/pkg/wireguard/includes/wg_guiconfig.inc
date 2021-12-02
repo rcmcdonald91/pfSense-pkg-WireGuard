@@ -57,7 +57,6 @@ function wg_format_endpoint($header = true, $peer = null, $endpoint_key = 'endpo
 
 	if (!is_null($peer)) {
 		if (!empty($peer[$endpoint_key])) {
-
 			return "{$peer[$endpoint_key]}:{$peer[$port_key]}";
 		} else {
 			return gettext('Dynamic');
@@ -135,9 +134,7 @@ function wg_handshake_status_icon($latest_handshake = '@0', $tunnel_status = 'up
 	foreach ($a_thresholds as $threshold => $value) {
 		if ($diff_time_seconds >= $threshold) {
 			$ret_class = $value['class'];
-
 			$ret_title = $value['title'];
-
 			break;
 		}
 	}

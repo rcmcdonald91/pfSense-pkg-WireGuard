@@ -58,21 +58,19 @@ if (isset($argv[1])) {
 	switch (strtolower($argv[1])) {
 		case 'start':
 			$ret_code = wg_service_cli_start($serialize);
-			
 			break;
+
 		case 'stop':
 			$ret_code = wg_service_cli_stop($serialize);
-
 			break;
+
 		case 'restart':
 			$ret_code = wg_service_cli_restart($serialize);
-
 			break;
+
 		default:
 			fwrite(STDOUT, "Usage: {$wgg['wg_daemon']} {START|STOP|RESTART} [SERIALIZE]");
-
 			$ret_code = 1;
-
 			break;
 	}
 
@@ -91,7 +89,6 @@ function wg_service_fpm_restart() {
 
 	if ($unserialize_output = unserialize($exec_output[0])) {
 		if (is_array($unserialize_output)) {
-
 			$ret_output = $unserialize_output;
 		}
 	}
@@ -129,7 +126,6 @@ function wg_service_fpm_stop() {
 
 	if ($unserialize_output = unserialize($exec_output[0])) {
 		if (is_array($unserialize_output)) {
-
 			$ret_output = $unserialize_output;
 		}
 	}
@@ -416,8 +412,8 @@ function wg_daemon_sig_handler($signo) {
 
 			// We are done...
 			exit(0);
-
 			break;
+
 		default:
 			break;
 	}
@@ -455,7 +451,7 @@ function wg_service_parse_errors($ret_code, $serialize_output = true, $extras = 
 
 // Check if we are in CLI or not
 function wg_is_cli() {
-	return (PHP_SAPI == 'cli');
+	return (PHP_SAPI === 'cli');
 }
 
 // Checks if the service is running

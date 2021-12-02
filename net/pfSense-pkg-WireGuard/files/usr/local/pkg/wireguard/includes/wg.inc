@@ -428,17 +428,11 @@ function wg_do_settings_post($post) {
 	$pconfig = $old_config = $wgg['config'];
 
 	$pconfig['enable']			= (!empty($post['enable']) && $post['enable'] == 'yes') ? 'on' : 'off';
-
 	$pconfig['keep_conf'] 			= empty($post['keep_conf']) ? 'no' : $post['keep_conf'];
-
 	$pconfig['resolve_interval']		= empty($post['resolve_interval']) && ($post['resolve_interval'] !== '0') ? $wgg['default_resolve_interval'] : $post['resolve_interval'];
-
 	$pconfig['resolve_interval_track']	= empty($post['resolve_interval_track']) ? 'no' : $post['resolve_interval_track'];
-
 	$pconfig['interface_group']		= empty($post['interface_group']) ? 'all' : $post['interface_group'];
-	
 	$pconfig['hide_secrets']		= empty($post['hide_secrets']) ? 'no' : $post['hide_secrets'];
-
 	$pconfig['hide_peers']			= empty($post['hide_peers']) ? 'no' : $post['hide_peers'];
 
 	$input_errors = wg_validate_settings_post($pconfig);
@@ -478,21 +472,13 @@ function wg_do_peer_post($post) {
 	$old_pconfig = $pconfig;
 
 	$pconfig['enabled'] 		= empty($post['enabled']) ? 'no' : $post['enabled'];
-
 	$pconfig['tun'] 		= $post['tun'];
-
 	$pconfig['descr'] 		= $post['descr'];
-
 	$pconfig['endpoint'] 		= $post['endpoint'];
-
 	$pconfig['port'] 		= empty($post['port']) ? $wgg['default_port'] : $post['port'];
-
 	$pconfig['persistentkeepalive']	= $post['persistentkeepalive'];
-
 	$pconfig['publickey'] 		= $post['publickey'];
-	
 	$pconfig['presharedkey']	= $post['presharedkey'];
-
 	$pconfig['allowedips']['row'] 	= wg_peer_allowedips($post);
 
 	// Looks like we have a dynamic endpoint, so clear endpoint or port variables before saving
@@ -519,7 +505,6 @@ function wg_do_peer_post($post) {
 		foreach (array($pconfig['tun'], $old_pconfig['tun']) as $tun) {
 			if (wg_is_valid_tunnel($tun)) {
 				$changes = ($pconfig != $old_pconfig) || $is_new;
-
 				$tuns_to_sync[] = $tun;
 			}
 		}
@@ -549,19 +534,12 @@ function wg_do_tunnel_post($post) {
 	$key = wg_gen_publickey($post['privatekey']);
 
 	$pconfig['name']		= empty($pconfig['name']) ? next_wg_if() : $pconfig['name'];
-
 	$pconfig['enabled']		= empty($post['enabled']) ? 'no' : $post['enabled'];
-
 	$pconfig['descr']		= $post['descr'];
-
 	$pconfig['listenport']		= empty($post['listenport']) ? next_wg_port() : $post['listenport'];
-
 	$pconfig['privatekey']		= $key['privkey'];
-
 	$pconfig['publickey']		= $key['pubkey'];
-
 	$pconfig['mtu']			= empty($post['mtu']) ? $wgg['default_mtu'] : $post['mtu'];
-
 	$pconfig['addresses']['row'] 	= wg_tunnel_addresses($post);
 
 	$input_errors			= wg_validate_tunnel_post($pconfig, $tun_idx);
@@ -759,7 +737,6 @@ function wg_tunnel_sync_by_name($tunnel_name, $json = false) {
  * Parses an array of $cmds
  */
 function wg_parse_cmds_array($cmds) {
-
 	$ret_code = 0;
 	
 	$errors = array();
