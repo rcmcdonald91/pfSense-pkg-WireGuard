@@ -155,8 +155,8 @@ function wg_service_cli_stop($serialize = true) {
 		wg_service_parse_errors($ret_code, $serialize);
 	}
 
-	// Dpinger doesn't like when interfaces are yanked out from underneath it.
-	setup_gateways_monitor();
+    // Disable any WireGuard gateways configured on the system.
+    wg_gateways_set_enable(false);
 
 	return $ret_code;
 }
@@ -189,7 +189,7 @@ function wg_service_cli_start($serialize = true) {
 
 	// Set the process name
 	cli_set_process_title('WireGuard service');
-	
+
 	$ret_code = 0;
 
 	if (!wg_is_service_enabled()) {
@@ -223,7 +223,7 @@ function wg_service_cli_start($serialize = true) {
 		// Output during booting must be to STDERR for some reason
 		fwrite(STDERR, gettext('Configuring WireGuard tunnels...'));
 
-		// Supresses ifconfig spew 
+		// Supresses ifconfig spew
 		mute_kernel_msgs();
 	}
 
@@ -293,6 +293,9 @@ function wg_service_cli_start($serialize = true) {
 		// We shouldn't be here...
 		return 0;
 	} else {
+        // Now we can enable any WireGuard gateways
+        wg_gateways_set_enable(true);
+
 		// Now we restart any additional services
 		$ret_code = wg_restart_extra_services();
 
@@ -306,7 +309,7 @@ function wg_service_cli_start($serialize = true) {
 // This is where we restart any extra services
 function wg_restart_extra_services($force = false) {
 	if (platform_booting() && !$force) {
-		return;
+		return false;
 	}
 
 	// dpinger
@@ -316,6 +319,8 @@ function wg_restart_extra_services($force = false) {
 	services_unbound_configure();
 
 	// TODO: This is where we will add facilities for users to pick what services to restart
+
+	return true;
 }
 
 // Main WireGuard service loop
@@ -342,7 +347,7 @@ function wg_service_daemon() {
 		if (!is_module_loaded($wgg['kmod'])) {
 			break;
 		}
-		
+
 		// Check if we should reresolve hostnames
 		if (wg_should_reresolve_endpoints($last_update_time)) {
 			// Reresolve endpoint hostnames again
@@ -379,21 +384,15 @@ function wg_register_service_env($close_fdio = false) {
 
 	if ($h_lock = fopen($wgg['pid_path'], 'a+')) {
 		flock($h_lock, LOCK_EX);
-
 		ftruncate($h_lock, 0);
-
 		fseek($h_lock, 0, 0);
-
 		fwrite($h_lock, getmypid());
-
 		fflush($h_lock);
 	}
 
 	if ($close_fdio) {
 		fclose(STDIN);
-
 		fclose(STDOUT);
-
 		fclose(STDERR);
 	}
 }
@@ -470,7 +469,7 @@ function wg_is_service_running() {
 	}
 
 	$pid = fgets($h_lock);
-	
+
 	fclose($h_lock);
 
 	// Another trick to test if a process is running

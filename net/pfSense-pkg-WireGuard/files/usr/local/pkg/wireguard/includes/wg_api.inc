@@ -23,6 +23,8 @@
 
 // pfSense includes
 require_once('config.inc');
+require_once('filter.inc');
+require_once('gwlb.inc');
 require_once('interfaces.inc');
 require_once('util.inc');
 require_once('services.inc');
@@ -431,6 +433,35 @@ function wg_ifconfig_if_destroy($if_name, &$cmds = null) {
 	return ($ret_code == 0);
 }
 
+function wg_gateways_set_enable($enable = true) {
+    $gws = return_gateways_array(true);
+
+    // Assume nothing will be done
+    $changes = false;
+
+    foreach ($gws as $gwname => $gw) {
+        if (in_array($gw['interface'], wg_get_configured_ifs())) {
+            gateway_set_enabled($gwname, $enable);
+            $changes = true;
+        }
+    }
+
+    // Guard check
+    if (!$changes) {
+        return;
+    }
+
+    $action = $enable ? 'Enabled' : 'Disabled';
+
+    wg_write_config("{$action} all WireGuard gateways.", false);
+
+    // Now we need to reconfigure the packet filter rules
+    filter_configure();
+
+    // and now restart dpinger
+    setup_gateways_monitor();
+}
+
 /*
  * Returns an array of running WireGuard tunnel interfaces per wg(8)
  */
@@ -483,7 +514,8 @@ function wg_interface_update_groups($if_name, &$cmds = null) {
 		$res &= wg_ifconfig_if_group_addremove($if_name, 'wg', false, $cmds);
 
 		if (isset($wgg['config']['interface_group'])
-		    && (($wgg['config']['interface_group'] == 'none') || (($wgg['config']['interface_group'] == 'unassigned') && is_wg_tunnel_assigned($if_name)))) {
+		    && (($wgg['config']['interface_group'] == 'none') || (($wgg['config']['interface_group'] == 'unassigned')
+            && is_wg_tunnel_assigned($if_name)))) {
 			// We don't want to add the tunnel to the WireGuard group...
 			return $res;
 		}
