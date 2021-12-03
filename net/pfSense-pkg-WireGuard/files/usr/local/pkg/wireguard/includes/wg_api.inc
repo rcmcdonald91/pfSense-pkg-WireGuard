@@ -455,11 +455,11 @@ function wg_gateways_set_enable($enable = true) {
 
     wg_write_config("{$action} all WireGuard gateways.", false);
 
-    // Now we need to reconfigure the packet filter rules
-    filter_configure();
-
     // and now restart dpinger
     setup_gateways_monitor();
+
+    // Now we need to reconfigure the packet filter rules
+    filter_configure();
 }
 
 /*
