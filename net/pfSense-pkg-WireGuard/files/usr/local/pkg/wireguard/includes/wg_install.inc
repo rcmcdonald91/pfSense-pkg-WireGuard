@@ -40,8 +40,6 @@ function wg_install() {
 
 	$g['wireguard_installing'] = true;
 
-	update_status("\n  Upgrading any existing WireGuard XML configuration...");
-
 	update_status("done.\n  Installing WireGuard early shell commands...");
 
 	// Installs the WireGuard earlyshellcmds
@@ -117,12 +115,7 @@ function wg_deinstall() {
 	// Stop and remove the WireGuard service
 	wg_service_deinstall(true);
 
-	update_status("done.\n  Disabling any WireGuard gateways...");
-
-    // Disables any WireGuard gateways as these interfaces are now gone
-    wg_gateways_set_enable(false);
-
-    update_status("done.\n");
+	update_status("done.\n");
 }
 
 function wg_delete_temp_files() {

@@ -433,7 +433,7 @@ function wg_ifconfig_if_destroy($if_name, &$cmds = null) {
 	return ($ret_code == 0);
 }
 
-function wg_gateways_set_enable($enable = true) {
+function wg_gateways_set_enable($enable = true, $filter_configure = true) {
     $gws = return_gateways_array(true);
 
     // Assume nothing will be done
@@ -455,11 +455,9 @@ function wg_gateways_set_enable($enable = true) {
 
     wg_write_config("{$action} all WireGuard gateways.", false);
 
-    // and now restart dpinger
-    setup_gateways_monitor();
-
-    // Now we need to reconfigure the packet filter rules
-    filter_configure();
+    if ($filter_configure) {
+        filter_configure();
+    }
 }
 
 /*

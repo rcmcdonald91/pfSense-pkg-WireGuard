@@ -158,6 +158,9 @@ function wg_service_cli_stop($serialize = true) {
     // Disable any WireGuard gateways configured on the system.
     wg_gateways_set_enable(false);
 
+    // Now we restart any additional services
+    $ret_code |= wg_restart_extra_services();
+
 	return $ret_code;
 }
 
