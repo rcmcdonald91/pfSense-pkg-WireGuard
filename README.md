@@ -49,4 +49,6 @@ https://docs.netgate.com/pfsense/en/latest/vpn/wireguard/index.html
 
 ## Recognition
 
+\*** This project is sponsored by [Rubicon Communications LLC (d.b.a Netgate)](https:/www.netgate.com/)
+
 \*** "WireGuard" and the "WireGuard" logo are registered trademarks of Jason A. Donenfeld.
